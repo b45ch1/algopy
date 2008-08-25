@@ -1,0 +1,8 @@
+double x0 = 2.000000;
+double dx0 = 1.000000;
+double x1 = 3.000000;
+double dx1 = 0.000000;
+double x2 = 6.000000;
+double dx2 = 3.000000;
+x2 = x0 * x1;
+dx2 = dx0 * x1 + x0 * dx1;
