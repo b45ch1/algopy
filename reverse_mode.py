@@ -4,47 +4,88 @@ from pylab import *
 from numpy import *
 
 class CGraph:
-	variableVertexCount = 0
-	functionVertexCount = 0
-	vertexNumberCount = 0
-	edgeNumberCount = 0
+	vertexCount = 0
+	edgeCount = 0
 	vertexList = []
 	edgeList = []
 
-	def __str__(self):
-		return 'vertices:\n' + str(CGraph.vertexList) +'\nedges:\n'+ str(CGraph.edgeList)
-
 	class Vertex:
-		def __init__(self, vertex_type):
-			if vertex_type == 'v':
-				self.type = 'v'
-				self.vid = CGraph.variableVertexCount
-				CGraph.variableVertexCount +=1
+		def __init__(self, x, vertex_type='id'):
+			if vertex_type == 'id':
+				self.type = 'id'
+				self.x = x
+				self.xbar = 0
 			elif vertex_type == 'add':
 				self.type = 'add'
-				self.fid = CGraph.functionVertexCount
-				CGraph.variableVertexCount +=1
+				self.x = x
+				self.xbar = 0
 			elif vertex_type == 'mul':
 				self.type = 'mul'
-				self.fid = CGraph.functionVertexCount
-				CGraph.variableVertexCount +=1
+				self.x = x
+				self.xbar = 0
 			else:
-				raise NotImplementedError('vertex_type must be either \'v\' or \'f\' ')
+				raise NotImplementedError('vertex_type must be either \'v\' or \'mul\' or  \'add\'')
 
-			self.id = CGraph.vertexNumberCount
-			CGraph.vertexNumberCount += 1
+			self.id = CGraph.vertexCount
+			CGraph.vertexCount += 1
+			CGraph.vertexList.append(self)
 
+		def __add__(self,rhs):
+			retval = CGraph.Vertex([self.eval(), rhs.eval()], vertex_type='add')
+			CGraph.Edge(self,retval,0)
+			CGraph.Edge(rhs,retval,1)
+			return retval
+
+		def __mul__(self,rhs):
+			retval = CGraph.Vertex([self.eval(), rhs.eval()], vertex_type='mul')
+			CGraph.Edge(self,retval,0)
+			CGraph.Edge(rhs,retval,1)
+			return retval
+
+		def eval(self):
+			if self.type == 'id':
+				return self.x
+			elif self.type == 'add':
+				return self.x[0] + self.x[1]
+			elif self.type == 'mul':
+				return self.x[0] * self.x[1]
 
 		def __str__(self):
 			return 'v%s'%(str(self.id))
-
 		def __repr__(self):
 			return self.__str__()
 
+	
+	def __str__(self):
+		return 'vertices:\n' + str(CGraph.vertexList) +'\nedges:\n'+ str(CGraph.edgeList)
+
+	def reverse_sweep(self):
+		for e in CGraph.edgeList[-1::-1]:
+			s = e.source
+			t = e.target
+			a = e.target_arg
+
+			if t.type == 'add':
+				s.xbar += t.xbar
+
+			if t.type == 'mul':
+				s.xbar += t.xbar*t.x[int(a==0)]
+
+			print 't.type=',t.type
+			print '%s->%s'%(s,t)
+			print 's.xbar = %s->t.xbar%s'%(s.xbar,t.xbar)
+
+			
+
+
 	class Edge:
-		def __init__(self,source, target):
+		def __init__(self,source, target, target_arg):
+			"""Edge connects two vertices. Basically an arrow from Vertex source to Vertex target.
+			target_arg specifies to which argument the edge belongs to. E.g. multiplication needs two arguments.
+			In the reverse mode we need to know which edge contributed to which argument."""
 			self.source = source
 			self.target = target
+			self.target_arg = target_arg
 			CGraph.edgeList.append(self)
 			
 		def __str__(self):
@@ -52,56 +93,19 @@ class CGraph:
 		def __repr__(self):
 			return self.__str__()
 
-class adouble:
-	def __init__(self,x, dx = 0):
-		self.x = x
-		self.dx = dx
-		self.vertex = CGraph.Vertex(vertex_type='v')
-		CGraph.vertexList.append(self.vertex)
-		
 
-	def __add__(self,rhs):
-		retval = adouble(self.x + rhs.x, self.dx + rhs.dx)
-		
-		f = CGraph.Vertex(vertex_type='add')
-		CGraph.Edge(f,retval.vertex)
-		
-		CGraph.vertexList.append(f)
-		e1 = CGraph.Edge(self.vertex,f)
-		e2 = CGraph.Edge(rhs.vertex,f)
+# build graph
+a = CGraph.Vertex(2)
+b = CGraph.Vertex(3)
+c = a + b * a
 
-		return retval
-
-	def __mul__(self,rhs):
-		retval = adouble(self.x * rhs.x, self.dx * rhs.x + self.x * rhs.dx)
-		
-		f = CGraph.Vertex(vertex_type='mul')
-		CGraph.Edge(f,retval.vertex)
-		
-		CGraph.vertexList.append(f)
-		e1 = CGraph.Edge(self.vertex,f)
-		e2 = CGraph.Edge(rhs.vertex,f)
-
-		return retval
-
-# tape operations
-ax = adouble(1.,1.)
-ay = adouble(2.)
-az = ax*ay + ax*ay + ay
-
-# show result of the forward evaluation
-print 'd/dx ( 2 * x * y) = ', az.dx
-
-# reverse evaluation
-CGraph.edgeList[-1].target.xbar = 1.
-for e in CGraph.edgeList[-1::-1]:
-	if e.target.type == 'add':
-		e.source.xbar = e.target.xbar
-	elif e.target.type == 'mul':
-		e.source.xbar = e.target.xbar
+# reverse mode
+c.xbar = 1.
+CGraph().reverse_sweep()
+print a.xbar
+print b.xbar
 
 
-##print graph
 #print CGraph()
 
 #from pygraphviz import *
@@ -132,7 +136,7 @@ for e in CGraph.edgeList[-1::-1]:
 		#s.attr['height']='0.3'
 		#s.attr['fontcolor']='#ffffff'
 
-	#elif vtype == 'v':
+	#elif vtype == 'id':
 		#s.attr['fillcolor']="#FFFF00"
 		#s.attr['shape']='circle'
 		#s.attr['label']= 'v_%d'%e.source.id
