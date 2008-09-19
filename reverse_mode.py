@@ -97,7 +97,9 @@ class CGraph:
 # build graph
 a = CGraph.Vertex(2)
 b = CGraph.Vertex(3)
-c = a + b * a
+c = CGraph.Vertex(4)
+for i in range(10):
+	c = (a + b ) * c
 
 # reverse mode
 c.xbar = 1.
@@ -108,45 +110,70 @@ print b.xbar
 
 #print CGraph()
 
-#from pygraphviz import *
+from pygraphviz import *
 
-#A = AGraph()
-#A.node_attr['style']='filled'
-#A.node_attr['shape']='circle'
-#A.node_attr['fixedsize']='true'
-#A.node_attr['fontcolor']='#000000'
+A = AGraph()
+A.node_attr['style']='filled'
+A.node_attr['shape']='circle'
+A.node_attr['fixedsize']='true'
+A.node_attr['fontcolor']='#000000'
 
-#for e in CGraph.edgeList:
-	#A.add_edge(e.source.id, e.target.id)
-	#s = A.get_node(e.source.id)
-	#vtype = e.source.type
-	#if vtype == 'add':
-			#s.attr['fillcolor']="#000000"
-			#s.attr['shape']='rect'
-			#s.attr['label']='+'
-			#s.attr['width']='0.3'
-			#s.attr['height']='0.3'
-			#s.attr['fontcolor']='#ffffff'
+for e in CGraph.edgeList:
+	A.add_edge(e.source.id, e.target.id)
+	s = A.get_node(e.source.id)
+	vtype = e.source.type
+	if vtype == 'add':
+			s.attr['fillcolor']="#000000"
+			s.attr['shape']='rect'
+			s.attr['label']='+'
+			s.attr['width']='0.3'
+			s.attr['height']='0.3'
+			s.attr['fontcolor']='#ffffff'
 
-	#elif vtype == 'mul':
-		#s.attr['fillcolor']="#000000"
-		#s.attr['shape']='rect'
-		#s.attr['label']='*'
-		#s.attr['width']='0.3'
-		#s.attr['height']='0.3'
-		#s.attr['fontcolor']='#ffffff'
+	elif vtype == 'mul':
+		s.attr['fillcolor']="#000000"
+		s.attr['shape']='rect'
+		s.attr['label']='*'
+		s.attr['width']='0.3'
+		s.attr['height']='0.3'
+		s.attr['fontcolor']='#ffffff'
 
-	#elif vtype == 'id':
-		#s.attr['fillcolor']="#FFFF00"
-		#s.attr['shape']='circle'
-		#s.attr['label']= 'v_%d'%e.source.id
-		#s.attr['width']='0.3'
-		#s.attr['height']='0.3'
+	elif vtype == 'id':
+		s.attr['fillcolor']="#FFFF00"
+		s.attr['shape']='circle'
+		s.attr['label']= 'v_%d'%e.source.id
+		s.attr['width']='0.3'
+		s.attr['height']='0.3'
+
+	t = A.get_node(e.target.id)
+	vtype = e.target.type
+	if vtype == 'add':
+			t.attr['fillcolor']="#000000"
+			t.attr['shape']='rect'
+			t.attr['label']='+'
+			t.attr['width']='0.3'
+			t.attr['height']='0.3'
+			t.attr['fontcolor']='#ffffff'
+
+	elif vtype == 'mul':
+		t.attr['fillcolor']="#000000"
+		t.attr['shape']='rect'
+		t.attr['label']='*'
+		t.attr['width']='0.3'
+		t.attr['height']='0.3'
+		t.attr['fontcolor']='#ffffff'
+
+	elif vtype == 'id':
+		t.attr['fillcolor']="#FFFF00"
+		t.attr['shape']='circle'
+		t.attr['label']= 'v_%d'%e.target.id
+		t.attr['width']='0.3'
+		t.attr['height']='0.3'
 
 #print A.string() # print to screen
 
-#A.write("computational_graph.dot")
-#import os
-#os.system("dot  computational_graph.dot -Tsvg -o computational_graph.svg")
-#os.system("dot  computational_graph.dot -Tpng -o computational_graph.png")
+A.write("computational_graph.dot")
+import os
+os.system("dot  computational_graph.dot -Tsvg -o computational_graph.svg")
+os.system("dot  computational_graph.dot -Tpng -o computational_graph.png")
 
