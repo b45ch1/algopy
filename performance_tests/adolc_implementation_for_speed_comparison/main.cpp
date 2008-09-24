@@ -1,21 +1,28 @@
 #include "adolc/adolc.h"
+#include <vector>
 #include <sys/time.h>
+
+
 struct timeval tv;
 int mtime(void){
 	gettimeofday(&tv,NULL);  
 	return (int)(tv.tv_sec*1000 + (tv.tv_usec / 1000));
-} 
+}
 
-// template<class Tdouble>
-// Tdouble speelpenning(Tdouble *x,int N){
-// 	Tdouble tmp = 1.;
-// 	for(int n = 0; n != N; ++n){
-// 		tmp *=x[n];
-// 	}
-// 	return tmp;
-// }
+
+template<class Tdouble>
+Tdouble f(Tdouble *x,int N){
+	Tdouble tmp = 1.;
+	for(int n = 0; n != N; ++n){
+		tmp *=x[n];
+	}
+	return tmp;
+}
 
 int main( int argc, char *argv ){
+	vector<int> Ns(10);
+	
+	
 	const int N = 100;
 	const int P = N*(N+1)/2;
 	const int D = 3;
