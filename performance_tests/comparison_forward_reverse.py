@@ -11,7 +11,7 @@ import reverse_mode as rm
 import adolc
 
 
-Ns = [2**i for i in range(10)]
+Ns = [2**i for i in range(11)]
 function_eval_times = []
 forward_eval_times = []
 tape_rev_eval_times = []
@@ -24,11 +24,14 @@ adolc_gradient_times = []
 
 for N in Ns:
 	print N
-	A = 2.3*numpy.eye(N)
+	#A = 2.3*numpy.eye(N)
 	x = numpy.ones(N)
 
+	#def f(x):
+		#return numpy.dot(x, numpy.dot(A,x))
+
 	def f(x):
-		return numpy.dot(x, numpy.dot(A,x))
+		return numpy.sum(x*x)
 
 
 	## normal function evaluation
@@ -78,7 +81,7 @@ for N in Ns:
 	
 	## PyADOLC gradient
 	start_time = time()
-	adolc.gradient(0,x)
+	adolc_g = adolc.gradient(0,x)
 	end_time = time()
 	adolc_gradient_times.append(end_time-start_time)
 
@@ -86,7 +89,7 @@ for N in Ns:
 	### check that both derivatives give the same result
 	#print 'difference between forward and reverse gradient computation', numpy.linalg.norm(g_forward - g_reverse)
 	#print 'difference between forward and reverse gradient2 computation', numpy.linalg.norm(g_forward - g_reverse2)
-
+	#print 'difference between Algopy and PyAdolc', numpy.linalg.norm(adolc_g - g_reverse2)
 
 
 
@@ -102,6 +105,7 @@ adolc_gradient_plot  = pylab.loglog(Ns,adolc_gradient_times, 'bd')
 
 pylab.xlabel('number of independent variables N []')
 pylab.ylabel('runtime t [sec]')
+pylab.grid()
 
 pylab.legend((function_plot,forward_plot,taperev_plot,tape_plot,rev_plot,adolc_tape_plot,adolc_gradient_plot), ('function','forward', 'tape+rev', 'tape', 'rev','adolc tape', 'adolc gradient'), loc=2)
 pylab.savefig('runtime_comparison.eps')
