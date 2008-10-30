@@ -107,6 +107,9 @@ class Mtc:
 	def shape(self):
 		return numpy.shape(self.X)
 
+	def transpose(self):
+		return Mtc(self.X.transpose(), self.Xdot.transpose())
+
 	def set_zero(self):
 		self.X[:] = 0.
 		self.Xdot[:] = 0.
@@ -206,8 +209,13 @@ class Function:
 			self.type = 'dot'
 		elif function_type == 'trace':
 			self.type = 'trace'
+		elif function_type == 'inv':
+			self.type = 'inv'
+		elif function_type == 'trans':
+			self.type = 'trans'
+		
 		else:
-			raise NotImplementedError('function_type must be either \'v\' or \'mul\' or  \'add\'')
+			raise NotImplementedError('function_type "%s" is unknown, please add to Function.__init__'%function_type)
 
 		self.args = args
 		self.x = self.eval()
@@ -273,8 +281,16 @@ class Function:
 	def trace(self):
 		return Function([self], function_type='trace')
 
+	def inv(self):
+		return Function([self], function_type='inv')
+	
 	def shape(self):
 		return numpy.shape(self.x.X)
+
+	def transpose(self):
+		return Function([self], function_type='trans')
+
+
 	# ----------------------------		
 
 	# forward and reverse evaluation
@@ -298,6 +314,12 @@ class Function:
 		elif self.type == 'trace':
 			return self.args[0].x.trace()
 
+		elif self.type == 'inv':
+			return self.args[0].x.inv()
+
+		elif self.type == 'trans':
+			return self.args[0].x.transpose()
+		
 		else:
 			raise Exception('Unknown function "%s". Please add rule to Mtc.eval()'%self.type)
 
@@ -320,7 +342,12 @@ class Function:
 		elif self.type == 'trace':
 			N = self.args[0].x.shape()[0]
 			self.args[0].xbar += Mtc( self.xbar.X[0,0]*numpy.eye(N),  self.xbar.Xdot[0,0]*numpy.eye(N))
-			
+
+		elif self.type == 'inv':
+			self.args[0].xbar += self.x.dot(self.xbar.dot(self.x))
+
+		elif self.type == 'trans':
+			self.args[0].xbar += self.xbar.transpose()
 
 		elif self.type == 'com':
 			Rb,Cb = shape(self.args)
@@ -406,11 +433,39 @@ class CGraph:
 		for f in self.functionList[::-1]:
 			f.reval()
 
-	def plot(self):
+	def plot(self, filename = None, method = None):
+		"""
+		accepted filenames, e.g.:
+		filename = 
+		'myfolder/mypic.png'
+		'mypic.svg'
+		etc.
+
+		accepted methods
+		method = 'dot'
+		method = 'circo'
+		''
+		"""
+
 		import pygraphviz
 		import os
-		
-		A = pygraphviz.agraph.AGraph(directed=True)
+
+		# checking filename and converting appropriately
+		if filename == None:
+			filename = 'computational_graph.png'
+
+		if method != 'dot' and method != 'circo':
+			method = 'dot'
+		name, extension = filename.split('.')
+		if extension != 'png' and extension != 'svg':
+			print 'Only *.png or *.svg are supported formats!'
+			print 'Using *.png now'
+			extension = 'png'
+
+		print 'name=',name, 'extension=', extension
+
+		# setting the style for the nodes
+		A = pygraphviz.agraph.AGraph(directed=True, strict = False)
 		A.node_attr['fillcolor']="#000000"
 		A.node_attr['shape']='rect'
 		A.node_attr['width']='0.5'
@@ -430,32 +485,41 @@ class CGraph:
 				#e.attr['color']='green'
 				#e.attr['label']='a'
 
+		# applying the style for the nodes
 		for nf,f in enumerate(self.functionList):
 			s = A.get_node(nf)
 			vtype = f.type
 
 			if vtype == 'add':
 				s.attr['label']='+%d'%nf
+				
 			elif vtype == 'mul':
 				s.attr['label']='*%d'%nf
+				
 			elif vtype == 'var':
 				s.attr['fillcolor']="#FFFF00"
 				s.attr['shape']='circle'
 				s.attr['label']= 'v_%d'%nf
 				s.attr['fontcolor']='#000000'
+				
 			elif vtype == 'dot':
 				s.attr['label']='dot%d'%nf
+				
 			elif vtype == 'com':
 				s.attr['label']='com%d'%nf
 				
 			elif vtype == 'trace':
-				s.attr['label']='trace%d'%nf
-				
-		print A.string() # print to screen
+				s.attr['label']='tr%d'%nf
 
-		A.write("trash/computational_graph.dot")
-		os.system("dot  trash/computational_graph.dot -Tsvg -o trash/computational_graph.svg")
-		os.system("dot  trash/computational_graph.dot -Tpng -o trash/computational_graph.png")
+			elif vtype == 'inv':
+				s.attr['label']='inv%d'%nf
+
+			elif vtype == 'trans':
+				s.attr['label']='T%d'%nf
+		#print A.string() # print to screen
+
+		A.write('%s.dot'%name)
+		os.system('%s  %s.dot -T%s -o %s.%s'%(method, name, extension, name, extension))
 
 
 if __name__ == "__main__":
