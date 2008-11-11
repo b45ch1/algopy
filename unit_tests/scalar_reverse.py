@@ -7,14 +7,26 @@ import numpy.linalg
 from reverse_mode import *
 
 
+
+#############################################################
+#   TESTING CLASS TC
+#############################################################
+
 # TESTING ALL FUNCTIONS FOR BASIC FUNCTIONALITY
 
 # testing the __init_function
 def test_constructor_single_direction_list_as_input():
+	inputlist = [3.]
+	a = Tc(inputlist)
+	assert a.t0 == 3.
+	assert numpy.prod(a.tc[:] == numpy.array([inputlist[1:]]).T)
+	
 	inputlist = [3.,1.,2.]
 	a = Tc(inputlist)
 	assert a.t0 == 3.
 	assert numpy.prod(a.tc[:] == numpy.array([inputlist[1:]]).T)
+
+
 
 def test_constructor_single_direction_array_as_input():
 	inputarray = numpy.array([3.,1.,2.])
@@ -23,10 +35,12 @@ def test_constructor_single_direction_array_as_input():
 	assert numpy.prod(a.tc[:] == array([inputarray[1:]]).T)
 
 def test_constructor_single_direction_variable_input_length():
-	return
-	a = Tc(3.,1.,2.)
+	a = Tc(3.)
 	assert a.t0 == 3.
-	assert numpy.prod(a.tc[:] == numpy.array([[1.,2.]]).T)
+	assert numpy.prod(a.tc[:] == numpy.array([[]]).T)
+
+	# Todo: variable inputlength!
+	assert True
 
 
 # incremental operators
@@ -42,6 +56,23 @@ def test_incremental_addition_single_direction_Tc_Tc_same_order():
 	a += b
 	assert a.t0 == 1.
 	assert numpy.prod(a.tc == (inputarray3[1:] + inputarray2[1:]))
+
+def test_incremental_addition_single_direction_Tc_Tc_different_order():
+	D = 4
+	E = 7
+	G = min(D,E)
+	inputarray1 = numpy.array([[1.* i for i in range(D)]]).T
+	inputarray2 = numpy.array([[1. +  i for i in range(E)]]).T
+	inputarray3 = inputarray1.copy() #need to copy since Tc constructor does not copy the memory
+
+	a = Tc(inputarray1)
+	b = Tc(inputarray2)
+
+	a += b
+	assert a.t0 == 1.
+	assert numpy.prod(a.tc[:G-1] == (inputarray3[1:G] + inputarray2[1:G]))
+	assert numpy.prod(a.tc[G-1:] == inputarray2[G:])
+
 
 def test_incremental_addition_multiple_directions_Tc_Tc_same_order():
 	D = 4
@@ -75,6 +106,20 @@ def test_incremental_multiplication_single_direction_Tc_Tc_same_order():
 	assert a.tc[0] == ( inputarray3[0,0] * inputarray2[1,0] + inputarray3[1,0] * inputarray2[0,0] )
 	assert a.tc[1] == ( inputarray3[0,0] * inputarray2[2,0]
 	                  + inputarray3[1,0] * inputarray2[1,0]
+					  + inputarray3[2,0] * inputarray2[0,0]  )
+					  
+def test_incremental_multiplication_single_direction_Tc_Tc_different_order():
+	inputarray1 = numpy.array([[0.,1.,2.]]).T
+	inputarray2 = numpy.array([[7.,11.]]).T
+	inputarray3 = inputarray1.copy() #need to copy since Tc constructor does not copy the memory
+
+	a = Tc(inputarray1)
+	b = Tc(inputarray2)
+
+	a *= b
+	assert a.t0 == 0.
+	assert a.tc[0] == ( inputarray3[0,0] * inputarray2[1,0] + inputarray3[1,0] * inputarray2[0,0] )
+	assert a.tc[1] == ( inputarray3[1,0] * inputarray2[1,0]
 					  + inputarray3[2,0] * inputarray2[0,0]  )
 
 def test_incremental_multiplication_multiple_directions_Tc_Tc_same_order():
@@ -116,10 +161,26 @@ def test_incremental_division_single_direction_Tc_Tc_same_order():
 	b = Tc(inputarray2)
 
 	a /= b
-
+	print 'a.tc=\n',a.tc
+	print 'a.tc true=\n', '[',( 1./inputarray2[0,0] *( inputarray3[1,0] - a.t0 * inputarray2[1,0] )),',',( 1./inputarray2[0,0] *( inputarray3[2,0] - a.t0 * inputarray2[2,0] - a.tc[0] * inputarray2[1,0] )), ']'
 	assert a.t0 == inputarray3[0,0]/inputarray2[0,0]
-	assert a.tc[0] == ( 1./inputarray2[0,0] *( inputarray3[1,0] - a.t0 * inputarray2[1,0] ))
-	assert a.tc[1] == ( 1./inputarray2[0,0] *( inputarray3[2,0] - a.t0 * inputarray2[2,0] - a.tc[0] * inputarray2[1,0] ))
+	assert abs(a.tc[0] - ( 1./inputarray2[0,0] *( inputarray3[1,0] - a.t0 * inputarray2[1,0] )))<10**(-8)
+	assert abs(a.tc[1] - ( 1./inputarray2[0,0] *( inputarray3[2,0] - a.t0 * inputarray2[2,0] - a.tc[0] * inputarray2[1,0] )))<10**(-8)
+
+def test_incremental_division_single_direction_Tc_Tc_different_order():
+	inputarray1 = numpy.array([[1.,1.,2.]]).T
+	inputarray2 = numpy.array([[7.,11.]]).T
+	inputarray3 = inputarray1.copy() #need to copy since Tc constructor does not copy the memory
+
+	a = Tc(inputarray1)
+	b = Tc(inputarray2)
+
+	a /= b
+	print 'a.tc=\n',a.tc
+	print 'a.tc true=\n', '[',( 1./inputarray2[0,0] *( inputarray3[1,0] - a.t0 * inputarray2[1,0] )),',',( 1./inputarray2[0,0] *( inputarray3[2,0] - a.tc[0] * inputarray2[1,0] )), ']'
+	assert a.t0 == inputarray3[0,0]/inputarray2[0,0]
+	assert abs(a.tc[0] - ( 1./inputarray2[0,0] *( inputarray3[1,0] - a.t0 * inputarray2[1,0] )))<10**(-8)
+	assert abs(a.tc[1] - ( 1./inputarray2[0,0] *( inputarray3[2,0] -  a.tc[0] * inputarray2[1,0] )))<10**(-8)
 
 # binary operators
 def test_operators_single_direction_Tc_Tc_same_order():
@@ -158,3 +219,171 @@ def test_addition_single_direction_Tc_Tc_different_order():
 	assert c.t0 == a.t0 + b.t0
 	assert numpy.prod(c.tc[:G] == (a.tc[:G] + b.tc[:G]))
 	assert numpy.prod(c.tc[G:] == (b.tc[G:]))
+
+#############################################################
+#   TESTING CLASS Function AND CGraph
+#############################################################
+
+def test_plotting_simple_cgraph():
+	cg = CGraph()
+	x = Function(Tc([11.,1.]))
+	y = Function(Tc([13.,1.]))
+	z = Function(Tc([13.,1.]))
+	f = (x * y) + z*(x+y*(x*z))
+	cg.independentFunctionList = [x,y]
+	cg.dependentFunctionList = [z]
+	cg.plot('trash/cg_example.png',method='circo')
+	# no assert, this is only a functionality test,
+
+def test_forward_mode():
+	# first compute correct result by Taylor propagation
+	x = Tc([11.,1.])
+	y = Tc([13.,2.])
+	z = Tc([13.,3.])
+	f_tc = (x * y) + z*(x+y*(x*z))
+
+	cg = CGraph()
+	x = Function(Tc([11.]))
+	y = Function(Tc([13.,1.]))
+	z = Function(Tc([13.,1.,3,5,23]))
+	f = (x * y) + z*(x+y*(x*z))
+	cg.independentFunctionList = [x,y,z]
+	cg.dependentFunctionList = [f]
+	cg.forward([Tc([11.,1.]), Tc([13.,2.]), Tc([13.,3.])])
+
+	print f
+	print f_tc
+	assert f.x.t0 == f_tc.t0
+	assert f.x.tc[0] == f_tc.tc[0]
+
+def test_reverse_mode_first_order():
+	import sympy
+	x,y,z = sympy.symbols('x','y','z')
+	fs = (x * y) + z*(x+y*(x*z))
+	gsx = fs.diff(x)
+	gsy = fs.diff(y)
+	gsz = fs.diff(z)
+	dfdx = lambda x,y,z: eval(gsx.__str__())
+	dfdy = lambda x,y,z: eval(gsy.__str__())
+	dfdz = lambda x,y,z: eval(gsz.__str__())
+
+	cg = CGraph()
+	x = Function(Tc([11.]))
+	y = Function(Tc([13.]))
+	z = Function(Tc([17.]))
+	f = (x * y) + z*(x+y*(x*z))
+	cg.independentFunctionList = [x,y,z]
+	cg.dependentFunctionList = [f]
+	cg.reverse([Tc([1.])])
+	#print f
+	#print x
+	#print y
+	#print z
+
+	print 'x.xbar.t0=',x.xbar.t0
+	print 'dfdx(11.,13.,17.)', dfdx(11.,13.,17.)
+	assert x.xbar.t0 == dfdx(11.,13.,17.)
+	assert y.xbar.t0 == dfdy(11.,13.,17.)
+	assert z.xbar.t0 == dfdz(11.,13.,17.)
+
+
+def test_reverse_mode_second_order():
+	"""computing first column of the Hessian"""
+	import sympy
+	x = sympy.symbols('x')
+	fs = x*x
+	gsxx = fs.diff(x).diff(x)
+	
+	d2fdxdx = lambda x,y,z: eval(gsxx.__str__())
+
+	cg = CGraph()
+	x = Function(Tc([11.,1.]))
+	f = x*x
+	cg.independentFunctionList = [x]
+	cg.dependentFunctionList = [f]
+	cg.reverse([Tc(1.)])
+
+	print cg
+
+
+	print 'x.xbar.tc[0,0]=',x.xbar.tc[0,0]
+	print 'd2fdxdx(11.,13.,17.)=',d2fdxdx(11.,13.,17.)
+
+	assert x.xbar.tc[0,0] == d2fdxdx(11.,13.,17.)
+
+
+
+def test_reverse_mode_second_order_two_variables():
+	"""computing first column of the Hessian"""
+	import sympy
+	x,y = sympy.symbols('x','y')
+	fs =  y*(y*x)
+	gsxx = fs.diff(x).diff(x)
+	gsxy = fs.diff(x).diff(y)
+	
+	d2fdxdx = lambda x,y: eval(gsxx.__str__())
+	d2fdxdy = lambda x,y: eval(gsxy.__str__())
+
+
+	cg = CGraph()
+	x = Function(Tc([11.,1.]))
+	y = Function(Tc([13.]))
+	f = y*x*y
+	cg.independentFunctionList = [x,y]
+	cg.dependentFunctionList = [f]
+
+	print cg
+	cg.reverse([Tc(1.)])
+
+	print cg
+
+
+	print 'x.xbar.tc[0,0]=',x.xbar.tc[0,0]
+	print 'd2fdxdx(11.,13.,17.)=',d2fdxdx(11.,13.)
+
+	print 'y.xbar.tc[0,0]=',y.xbar.tc[0,0]
+	print 'd2fdxdy(11.,13.,17.)',d2fdxdy(11.,13.)
+
+	assert x.xbar.tc[0,0] == d2fdxdx(11.,13.)
+	assert y.xbar.tc[0,0] == d2fdxdy(11.,13.)
+
+
+def test_reverse_mode_second_order_three_variables():
+	"""computing first column of the Hessian"""
+	import sympy
+	x,y,z = sympy.symbols('x','y','z')
+	fs = (x * y) + z*(x+y*(x*z))
+	gsxx = fs.diff(x).diff(x)
+	gsxy = fs.diff(x).diff(y)
+	gsxz = fs.diff(x).diff(z)
+	
+	d2fdxdx = lambda x,y,z: eval(gsxx.__str__())
+	d2fdxdy = lambda x,y,z: eval(gsxy.__str__())
+	d2fdxdz = lambda x,y,z: eval(gsxz.__str__())
+
+	cg = CGraph()
+	x = Function(Tc([11.,1.]))
+	y = Function(Tc([13.]))
+	z = Function(Tc([17.]))
+	f = (x * y) + z*(x+y*(x*z))
+	cg.independentFunctionList = [x,y,z]
+	cg.dependentFunctionList = [f]
+
+	print cg
+	cg.reverse([Tc(1.)])
+	print cg
+
+
+	print 'x.xbar.tc[0,0]=',x.xbar.tc[0,0]
+	print 'd2fdxdx(11.,13.,17.)=',d2fdxdx(11.,13.,17.)
+
+	print 'y.xbar.tc[0,0]=',y.xbar.tc[0,0]
+	print 'd2fdxdy(11.,13.,17.)',d2fdxdy(11.,13.,17.)
+
+	print 'z.xbar.tc[0,0]=',z.xbar.tc[0,0]
+	print 'd2fdxdz(11.,13.,17.)',d2fdxdz(11.,13.,17.)
+
+	assert x.xbar.tc[0,0] == d2fdxdx(11.,13.,17.)
+	assert y.xbar.tc[0,0] == d2fdxdy(11.,13.,17.)
+	assert z.xbar.tc[0,0] == d2fdxdz(11.,13.,17.)
+

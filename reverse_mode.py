@@ -24,9 +24,15 @@ class Tc:
 	
 	def __init__(self,in_t0,tc=None):
 		if tc == None: # case x0 = [t0,t1,t2,...,tD]
-			if ndim(in_t0) == 1:
+			if ndim(in_t0) == 0:
+				self.t0 = in_t0
+				self.tc = array([[0.]])
+			elif ndim(in_t0) == 1:
 				self.t0 = in_t0[0]
-				self.tc = asarray([in_t0[1:]]).T
+				if size(in_t0) == 1:
+					self.tc = array([[0.]])
+				else:
+					self.tc = asarray([in_t0[1:]]).T
 			elif ndim(in_t0) == 2: # case x0 = [[t0],[t1],[t2],[tD]]
 				self.t0 = in_t0[0,0]
 				self.tc = asarray(in_t0[1:])
@@ -62,71 +68,54 @@ class Tc:
 		self.tc[:] = 0
 		return self
 
-	def __iadd__(self,rhs):
+	def resize_tc(self,rhs):
 		D,Ndir = shape(self.tc)
 		E,Ndir2 = shape(rhs.tc)
 		assert Ndir == Ndir2
-
 		if D<E:
 			# need to reshape self.tc now
 			self.tc = numpy.resize(self.tc,(E,Ndir))
 			self.tc[D:] = 0.
+		return (D,E,Ndir)
 
+	def __iadd__(self,rhs):
+		(D,E,Ndir) = self.resize_tc(rhs)
 		self.t0 += rhs.t0
 		self.tc[:E] += rhs.tc[:E]
 		return self
 
 	def __isub__(self,rhs):
-		D,Ndir = shape(self.tc)
-		E,Ndir2 = shape(rhs.tc)
-		assert Ndir == Ndir2
-
-		if D<E:
-			# need to reshape self.tc now
-			self.tc = numpy.resize(self.tc,(E,Ndir))
-			self.tc[D:] = 0.
-
+		(D,E,Ndir) = self.resize_tc(rhs)
 		self.t0 -= rhs.t0
 		self.tc[:E] -= rhs.tc[:E]
 		return self
 	
 	def __imul__(self,rhs):
-		D,Ndir = shape(self.tc)
-		E,Ndir2 = shape(rhs.tc)
-		G = min(D,E)
-		assert Ndir == Ndir2
+		(D,E,Ndir) = self.resize_tc(rhs)
 
-		if D<E:
-			# need to reshape self.tc now
-			self.tc = numpy.resize(self.tc,(E,Ndir))
-			self.tc[D:] = 0.
-
-		def middle_taylor_series(d):
+		def middle_taylor_series(d,E):
+			"""in the case when rhs is of order E<d we have to sum over less elements"""
+			e = max(0,d-E)
 			if d>0:
-				return 	npy.sum(self.tc[:d] * rhs.tc[d-1::-1], axis = 0)
+				return 	npy.sum(self.tc[e:d] * rhs.tc[d-1-e::-1], axis = 0)
 			return 0
 
 		for d in range(D-1,-1,-1):
 			self.tc[d] *= rhs.t0
-			self.tc[d] += middle_taylor_series(d)
-			self.tc[d] += self.t0*rhs.tc[d]
+			self.tc[d] += middle_taylor_series(d,E)
+			if d<E:
+				self.tc[d] += self.t0*rhs.tc[d]
 		self.t0 *= rhs.t0
 		return self
 
 	def __idiv__(self,rhs):
-		D,Ndir = shape(self.tc)
-		E,Ndir2 = shape(rhs.tc)
-		G = min(D,E)
-		assert Ndir == Ndir2
-
-		if D<E:
-			# need to reshape self.tc now
-			self.tc = numpy.resize(self.tc,(E,Ndir))
-			self.tc[D:] = 0.
-
+		(D,E,Ndir) = self.resize_tc(rhs)
 		self.t0 /= rhs.t0
 		for d in range(D):
-			self.tc[d] -= (sum([self.tc[j]*rhs.tc[d-j-1] for j in range(d)]) + self.t0 * rhs.tc[d])
+			e = max(0,d-E)
+			self.tc[d] -= sum([self.tc[j]*rhs.tc[d-j-1] for j in range(e,d)])
+			if d<E:
+				self.tc[d] -=  self.t0 * rhs.tc[d]
 			self.tc[d] /= rhs.t0
 		return self
 
@@ -159,13 +148,12 @@ class Tc:
 	def __rmul__(self, val):
 		return self*val
 
-	#def __rdiv__(self, val):
-		#raise NotImplementedError("__rdiv__")
+	def __rdiv__(self, val):
+		raise NotImplementedError("__rdiv__")
 
 
 	def __str__(self):
 		return 'Tc(%s,%s)'%(str(self.t0),str(self.tc))
-
 
 def zeros(D,Ndir):
 	return Tc(0.,numpy.zeros((D,Ndir)))
@@ -245,6 +233,7 @@ class Function:
 		elif self.type == 'mul':
 			self.args[0].xbar += self.xbar * self.args[1].x
 			self.args[1].xbar += self.xbar * self.args[0].x
+
 
 
 class CGraph:
