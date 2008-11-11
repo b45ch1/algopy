@@ -57,6 +57,14 @@ def test_incremental_addition_single_direction_Tc_Tc_same_order():
 	assert a.t0 == 1.
 	assert numpy.prod(a.tc == (inputarray3[1:] + inputarray2[1:]))
 
+def test_incremental_addition_with_constant():
+	D = 4
+	inputarray1 = numpy.array([[1.* i for i in range(D)]]).T
+	a = Tc(inputarray1)
+	a += 2.
+	assert a.t0 == 2.
+	assert numpy.prod(a.tc == inputarray1[1:])
+	
 def test_incremental_addition_single_direction_Tc_Tc_different_order():
 	D = 4
 	E = 7
@@ -446,12 +454,12 @@ def test_vector_forward_inner_product_hessian():
 
 	cg.reverse([Tc(1.)])
 
-
 	print 'x[0].xbar.tc=',x[0].xbar.tc
 	print 'x[1].xbar.tc=',x[1].xbar.tc
 	print 'A=',A
 
-	
-
 	assert numpy.prod(x[0].xbar.tc[:,0] == A[:,0])
 	assert numpy.prod(x[1].xbar.tc[:,0] == A[:,1])
+
+	cg.plot('trash/inner_product.png',method='circo')
+

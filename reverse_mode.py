@@ -69,6 +69,9 @@ class Tc:
 		return self
 
 	def resize_tc(self,rhs):
+		if not isinstance(rhs,Tc):
+			rhs = Tc(rhs)
+			#raise NotImplementedError("Operations between Tc and constants not yet supported!")
 		D,Ndir = shape(self.tc)
 		E,Ndir2 = shape(rhs.tc)
 		assert Ndir == Ndir2
@@ -76,22 +79,23 @@ class Tc:
 			# need to reshape self.tc now
 			self.tc = numpy.resize(self.tc,(E,Ndir))
 			self.tc[D:] = 0.
-		return (D,E,Ndir)
+		return (rhs,D,E,Ndir)
+			
 
 	def __iadd__(self,rhs):
-		(D,E,Ndir) = self.resize_tc(rhs)
+		(rhs,D,E,Ndir) = self.resize_tc(rhs)
 		self.t0 += rhs.t0
 		self.tc[:E] += rhs.tc[:E]
 		return self
 
 	def __isub__(self,rhs):
-		(D,E,Ndir) = self.resize_tc(rhs)
+		(rhs,D,E,Ndir) = self.resize_tc(rhs)
 		self.t0 -= rhs.t0
 		self.tc[:E] -= rhs.tc[:E]
 		return self
 	
 	def __imul__(self,rhs):
-		(D,E,Ndir) = self.resize_tc(rhs)
+		(rhs,D,E,Ndir) = self.resize_tc(rhs)
 
 		def middle_taylor_series(d,E):
 			"""in the case when rhs is of order E<d we have to sum over less elements"""
@@ -109,7 +113,7 @@ class Tc:
 		return self
 
 	def __idiv__(self,rhs):
-		(D,E,Ndir) = self.resize_tc(rhs)
+		(rhs,D,E,Ndir) = self.resize_tc(rhs)
 		self.t0 /= rhs.t0
 		for d in range(D):
 			e = max(0,d-E)
@@ -168,6 +172,8 @@ class Function:
 	def __init__(self, args, function_type='var'):
 		if function_type == 'var':
 			self.type = 'var'
+		elif function_type == 'const':
+			self.type = 'const'
 		elif function_type == 'id':
 			self.type = 'id'
 		elif function_type == 'add':
@@ -187,8 +193,8 @@ class Function:
 
 	def as_function(self, in_x):
 		if not isinstance(in_x, Function):
-			fun = Function(self.x.copy().set_zero())
-			fun.x.t0 = in_x
+			x = Tc(in_x)
+			fun = Function(x, function_type='const')
 			return fun
 		return in_x
 		
@@ -220,6 +226,9 @@ class Function:
 	def eval(self):
 		if self.type == 'var':
 			return self.args
+
+		elif self.type == 'const':
+			return self.args
 		
 		elif self.type == 'add':
 			return self.args[0].x + self.args[1].x
@@ -227,10 +236,16 @@ class Function:
 		elif self.type == 'mul':
 			return self.args[0].x * self.args[1].x
 
+		else:
+			raise NotImplementedError('The operation "%s" is not supported. Please implement this case in Function.reval()!'%self.type)
+		
+
 	def reval(self):
 		if self.type == 'var':
 			pass
 
+		elif self.type == 'const':
+			pass
 
 		elif self.type == 'add':
 			self.args[0].xbar += self.xbar
@@ -239,6 +254,9 @@ class Function:
 		elif self.type == 'mul':
 			self.args[0].xbar += self.xbar * self.args[1].x
 			self.args[1].xbar += self.xbar * self.args[0].x
+
+		else:
+			raise NotImplementedError('The operation "%s" is not supported. Please implement this case in Function.reval()!'%self.type)
 
 
 
@@ -331,7 +349,7 @@ class CGraph:
 
 		# build graph
 		for f in self.functionList:
-			if f.type == 'var':
+			if f.type == 'var' or f.type=='const' or f.type=='id':
 				A.add_node(f.id)
 				continue
 			for a in numpy.ravel(f.args):
@@ -351,26 +369,23 @@ class CGraph:
 			elif vtype == 'mul':
 				s.attr['label']='*%d'%nf
 				
+			elif vtype == 'id':
+				s.attr['fillcolor']="#AAFF00"
+				s.attr['label']= 'id_%d'%nf
+				s.attr['fontcolor']='#000000'
+
 			elif vtype == 'var':
 				s.attr['fillcolor']="#FFFF00"
 				s.attr['shape']='circle'
 				s.attr['label']= 'v_%d'%nf
 				s.attr['fontcolor']='#000000'
-				
-			elif vtype == 'dot':
-				s.attr['label']='dot%d'%nf
-				
-			elif vtype == 'com':
-				s.attr['label']='com%d'%nf
-				
-			elif vtype == 'trace':
-				s.attr['label']='tr%d'%nf
 
-			elif vtype == 'inv':
-				s.attr['label']='inv%d'%nf
-
-			elif vtype == 'trans':
-				s.attr['label']='T%d'%nf
+			elif vtype == 'const':
+				s.attr['fillcolor']="#AA2300"
+				s.attr['shape']='circle'
+				s.attr['label']= 'const_%d'%nf
+				s.attr['fontcolor']='#000000'				
+				
 		#print A.string() # print to screen
 
 		A.write('%s.dot'%name)
