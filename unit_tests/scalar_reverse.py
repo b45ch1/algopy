@@ -92,6 +92,29 @@ def test_incremental_addition_multiple_directions_Tc_Tc_same_order():
 	assert a.t0 == 10.
 	assert numpy.prod(a.tc == (inputarray3[:] + inputarray2[:]))
 
+def test_incremental_substraction_multiple_directions_Tc_Tc_different_order():
+	D = 4
+	E = 7
+	G = min(D,E)
+	Ndir = 3
+	inputarray1 = numpy.array([[1.* i + D*j for i in range(D)] for j in range(Ndir) ]).T
+	inputarray2 = numpy.array([[1. +  i + D*j for i in range(E)] for j in range(Ndir)]).T
+	inputarray3 = inputarray1.copy() #need to copy since Tc constructor does not copy the memory
+
+	a = Tc(3.,inputarray1)
+	b = Tc(7.,inputarray2)
+
+	a -= b
+
+	print 'inputarray3=\n',inputarray3
+	print 'inputarray2=\n',inputarray2
+	print  'inputarray3[:G] - inputarray2[:G]=\n',inputarray3[:G] - inputarray2[:G]
+	print 'a.tc[G:]=\n',a.tc[G:]
+	print '-inputarray2[G:]=\n',-inputarray2[G:]
+	assert a.t0 == -4.
+	assert numpy.prod(a.tc[:G] == (inputarray3[:G] - inputarray2[:G]))
+	assert numpy.prod(a.tc[G:] == -inputarray2[G:])
+
 
 def test_incremental_multiplication_single_direction_Tc_Tc_same_order():
 	inputarray1 = numpy.array([[0.,1.,2.]]).T
@@ -387,3 +410,48 @@ def test_reverse_mode_second_order_three_variables():
 	assert y.xbar.tc[0,0] == d2fdxdy(11.,13.,17.)
 	assert z.xbar.tc[0,0] == d2fdxdz(11.,13.,17.)
 
+def test_inner_product_gradient():
+	import numpy
+	A = numpy.array([[11., 3.],[3.,17.]])
+	def fun(x):
+		return 0.5* numpy.dot(x, numpy.dot(A,x))
+	cg = CGraph()
+	x = numpy.array([Function(Tc(2.)), Function(Tc(7.))])
+	f = fun(x)
+	cg.independentFunctionList = x
+	cg.dependentFunctionList = [f]
+
+	cg.reverse([Tc(1.)])
+
+	y = numpy.dot(A,[2.,7.])
+
+	print 'x[0].xbar=',x[0].xbar
+	print 'x[1].xbar=',x[1].xbar
+	print 'y[0]=',y[0]
+	print 'y[1]=',y[1]
+
+	assert x[0].xbar.t0 == y[0]
+	assert x[1].xbar.t0 == y[1]
+	
+def test_vector_forward_inner_product_hessian():
+	import numpy
+	A = numpy.array([[11., 3.],[3.,17.]])
+	def fun(x):
+		return 0.5* numpy.dot(x, numpy.dot(A,x))
+	cg = CGraph()
+	x = numpy.array([Function(Tc(2.,[[1.],[0.]])), Function(Tc(7.,[[0.],[1.]]))])
+	f = fun(x)
+	cg.independentFunctionList = x
+	cg.dependentFunctionList = [f]
+
+	cg.reverse([Tc(1.)])
+
+
+	print 'x[0].xbar.tc=',x[0].xbar.tc
+	print 'x[1].xbar.tc=',x[1].xbar.tc
+	print 'A=',A
+
+	
+
+	assert numpy.prod(x[0].xbar.tc[:,0] == A[:,0])
+	assert numpy.prod(x[1].xbar.tc[:,0] == A[:,1])

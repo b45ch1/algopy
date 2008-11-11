@@ -151,6 +151,12 @@ class Tc:
 	def __rdiv__(self, val):
 		raise NotImplementedError("__rdiv__")
 
+	def __neg__(self):
+		retval = self.copy()
+		retval.t0 = -retval.t0
+		retval.tc = -retval.tc
+		return retval
+
 
 	def __str__(self):
 		return 'Tc(%s,%s)'%(str(self.t0),str(self.tc))
