@@ -11,8 +11,8 @@ from reverse_mode import *
 #############################################################
 #   TESTING CLASS TC
 #############################################################
-
 # TESTING ALL FUNCTIONS FOR BASIC FUNCTIONALITY
+
 
 # testing the __init_function
 def test_constructor_single_direction_list_as_input():
@@ -25,8 +25,6 @@ def test_constructor_single_direction_list_as_input():
 	a = Tc(inputlist)
 	assert a.t0 == 3.
 	assert numpy.prod(a.tc[:] == numpy.array([inputlist[1:]]).T)
-
-
 
 def test_constructor_single_direction_array_as_input():
 	inputarray = numpy.array([3.,1.,2.])
@@ -180,8 +178,6 @@ def test_incremental_multiplication_multiple_directions_Tc_Tc_same_order():
 					  + inputarray3[1,:] * inputarray2[0,:]
 					  + inputarray3[2,:] * 7.  )
 					  )
-					  
-
 
 def test_incremental_division_single_direction_Tc_Tc_same_order():
 	inputarray1 = numpy.array([[1.,1.,2.]]).T
@@ -213,21 +209,38 @@ def test_incremental_division_single_direction_Tc_Tc_different_order():
 	assert abs(a.tc[0] - ( 1./inputarray2[0,0] *( inputarray3[1,0] - a.t0 * inputarray2[1,0] )))<10**(-8)
 	assert abs(a.tc[1] - ( 1./inputarray2[0,0] *( inputarray3[2,0] -  a.tc[0] * inputarray2[1,0] )))<10**(-8)
 
+
+
+
+
+
+
+
+
 # binary operators
 def test_operators_single_direction_Tc_Tc_same_order():
 	D = 4
-	inputarray1 = numpy.array([1.* i for i in range(D)])
+	inputarray1 = numpy.array([1.* i+12 for i in range(D)])
 	inputarray2 = numpy.array([1. +  i for i in range(D)])
 	a = Tc(inputarray1)
 	b = Tc(inputarray2)
+
+	# functional test
 	c = a+b
 	c = a-b
 	c = a*b
-	print 'a=',a
-	print 'b=',b
-	print 'c=',c
-	# no assert, this is only a functionality test,
-	# correctness is tested in the incremental implementation
+	c = a/b
+
+	# identity test
+	c = a-a
+	assert c.t0 == 0
+	assert numpy.prod(c.tc == 0)
+
+	c = a/a
+	assert c.t0 == 1
+	assert numpy.prod(c.tc == 0)
+
+
 
 def test_addition_single_direction_Tc_Tc_different_order():
 	D = 4
@@ -250,6 +263,101 @@ def test_addition_single_direction_Tc_Tc_different_order():
 	assert c.t0 == a.t0 + b.t0
 	assert numpy.prod(c.tc[:G] == (a.tc[:G] + b.tc[:G]))
 	assert numpy.prod(c.tc[G:] == (b.tc[G:]))
+
+# unary operators
+
+def test_sqrt():
+	a = Tc(2.25)
+	b = sqrt(a)
+	print a,b
+	assert sqrt(a.t0) == b.t0
+
+	a = Tc([2.25,1.,0.])
+	b = sqrt(a)
+	print a,b
+
+	print 0.5*a.t0**(-0.5)
+	print -0.25*a.t0**(-1.5)/2.
+	
+	assert sqrt(a.t0) == b.t0
+	assert 0.5*a.t0**(-0.5) == b.tc[0,0]
+	assert abs(-0.25*a.t0**(-1.5) - 2*b.tc[1,0])<10**-3
+
+def test_integer_power():
+	a = Tc([2.25,1.,0.])
+	b = a**3
+	c = a*a*a
+	assert b.t0 == c.t0
+	assert prod(b.tc[:] == c.tc[:])
+
+
+def test_exponential():
+	a = Tc([2.25,1.,0.])
+	b = exp(a)
+	print b
+	assert b.t0 == exp(a.t0)
+	assert b.tc[0,0] == exp(a.t0)
+	assert 2*b.tc[1,0] == exp(a.t0)
+
+def test_logarithm():
+	a = Tc([23.,1.,0.])
+	b = log(a)
+
+	print b
+	assert b.t0 == log(a.t0)
+	assert b.tc[0,0] == 1./a.t0
+	assert 2*b.tc[1,0] == -1./(a.t0*a.t0)
+
+
+
+
+
+
+
+	
+	
+
+
+# conditional operators
+def test_lt_conditional():
+	a = Tc(1,[[1,2,3]])
+	b = Tc(1,[[1,2,3]])
+	c = Tc(2,[[1,2,3]])
+	d = Tc(-1,[[1,2,3]])
+
+	# < operator
+	assert not (a<b)
+	assert not (b<a)
+	assert not (a<d)
+	assert     (a<c)
+
+	# <= operator
+	assert     (a<=b)
+	assert     (b<=a)
+	assert     (a<=c)
+	assert not (a<=d)
+
+	# == operator
+	assert     (a==b)
+	assert not (a==c)
+	assert not (a==d)
+
+	# != operator
+	assert not (a!=b)
+	assert     (a!=c)
+	assert     (a!=d)
+
+	# >= operator
+	assert     (a>=b)
+	assert     (b>=a)
+	assert     (a>=d)
+	assert not (a>=c)
+
+	# > operator
+	assert not (a>b)
+	assert not (b>a)
+	assert     (a>d)
+	assert not (a>c)
 
 #############################################################
 #   TESTING CLASS Function AND CGraph
@@ -462,4 +570,85 @@ def test_vector_forward_inner_product_hessian():
 	assert numpy.prod(x[1].xbar.tc[:,0] == A[:,1])
 
 	cg.plot('trash/inner_product.png',method='circo')
+
+def test_conditionals():
+	def ge(a,b):
+		if a>=b:
+			return a*b
+		else:
+			return a/b
+
+	def gt(a,b):
+		if a>b:
+			return a*b
+		else:
+			return a/b
+
+	def le(a,b):
+		if a<=b:
+			return a*b
+		else:
+			return a/b
+
+	def lt(a,b):
+		if a<b:
+			return a*b
+		else:
+			return a/b
+		
+	def eq(a,b):
+		if a==b:
+			return a*b
+		else:
+			return a/b
+
+	def ne(a,b):
+		if a!=b:
+			return a*b
+		else:
+			return a/b
+	
+		
+	cg = CGraph()
+	a = Function(Tc([1,2,3]))
+	b = Function(Tc([34,2]))
+	c = Function(Tc([34,3]))
+
+	c = ge(a,b)
+	d = ge(b,a)
+	assert  c.x.t0 == 1./34
+	assert  d.x.t0 == 34
+
+	c = gt(a,b)
+	d = gt(b,a)
+	assert  c.x.t0 == 1./34
+	assert  d.x.t0 == 34
+
+
+	c = le(b,a)
+	d = le(a,b)
+	assert  c.x.t0 == 34
+	assert  d.x.t0 == 34
+
+	c = lt(b,a)
+	d = lt(a,b)
+	assert  c.x.t0 == 34
+	assert  d.x.t0 == 34	
+
+	c = eq(a,b)
+	d = eq(b,c)
+	assert  c.x.t0 == 1./34
+	assert  d.x.t0 == 34**2
+
+	c = ne(a,b)
+	d = ne(b,c)
+	assert  c.x.t0 == 34
+	assert  d.x.t0 == 1
+	
+
+
+
+
+
+	
 

@@ -140,25 +140,99 @@ class Tc:
 	
 	def __div__(self,rhs):
 		retval = self.copy()
-		retval /= rhs
+		retval.__idiv__(rhs)
 		return retval
 
-	def __radd__(self, val):
-		return self+val
+	def __radd__(self, lhs):
+		return self+lhs
 
-	def __rsub__(self, other):
-		return -self + other
+	def __rsub__(self, lhs):
+		return -self + lhs
 
-	def __rmul__(self, val):
-		return self*val
+	def __rmul__(self, lhs):
+		return self*lhs
 
-	def __rdiv__(self, val):
-		raise NotImplementedError("__rdiv__")
+	def __rdiv__(self, lhs):
+		lhs = Tc(lhs)
+		return lhs/self
+		
+		
 
 	def __neg__(self):
 		retval = self.copy()
 		retval.t0 = -retval.t0
 		retval.tc = -retval.tc
+		return retval
+
+	def __lt__(self,rhs):
+		if npy.isscalar(rhs):
+			return self.t0 < rhs
+		return self.t0 < rhs.t0
+
+	def __le__(self,rhs):
+		if npy.isscalar(rhs):
+			return self.t0 <= rhs
+		return self.t0 <= rhs.t0
+
+	def __eq__(self,rhs):
+		if npy.isscalar(rhs):
+			return self.t0 == rhs
+		return self.t0 == rhs.t0
+
+	def __ne__(self,rhs):
+		if npy.isscalar(rhs):
+			return self.t0 != rhs
+		return self.t0 != rhs.t0
+
+	def __ge__(self,rhs):
+		if npy.isscalar(rhs):
+			return self.t0 >= rhs
+		return self.t0 >= rhs.t0
+
+	def __gt__(self,rhs):
+		if npy.isscalar(rhs):
+			return self.t0 > rhs
+		return self.t0 > rhs.t0
+
+
+	def sqrt(self):
+		D,Ndir = shape(self.tc)
+		retval = self.copy()
+		retval.t0 = sqrt(self.t0)
+		for d in range(0,D):
+			retval.tc[d] = (self.tc[d] - sum( retval.tc[:d] * retval.tc[:d][::-1]))/(2.*retval.t0)
+
+		return retval
+
+	def __pow__(self, exponent):
+		"""Computes the power: x^n, where n must be an int"""
+		if isinstance(exponent, int):
+			tmp = 1
+			for i in range(exponent):
+				tmp=tmp*self
+			return tmp
+		else:
+			raise TypeError("Second argumnet must be an integer")
+
+	def exp(self):
+		D,Ndir = shape(self.tc)
+		retval = self.copy()
+
+		tmp = array([d+1. for d in range(D)]) 
+
+		retval.t0 = exp(self.t0)
+		for d in range(D):
+			retval.tc[d] = (sum(self.tc[:d]*tmp[:d]*retval.tc[:d][::-1]) + retval.t0 * (d+1) * self.tc[d])/(d+1.)
+		return retval
+
+	def log(self):
+		D,Ndir = shape(self.tc)
+		retval = self.copy()
+
+		tmp = array([d+1. for d in range(D)]) 
+		retval.t0 = log(self.t0)
+		for d in range(D):
+			retval.tc[d] = ( (d+1.)* self.tc[d] - sum(self.tc[:d][::-1]*tmp[:d]*retval.tc[:d]))/((d+1.)*self.t0)
 		return retval
 
 
@@ -180,6 +254,11 @@ class Function:
 			self.type = 'add'
 		elif function_type == 'mul':
 			self.type = 'mul'
+		elif function_type == 'div':
+			self.type = 'div'	
+		elif function_type == 'neg':
+			self.type = 'neg'
+
 		else:
 			raise NotImplementedError('function_type must be either \'v\' or \'mul\' or  \'add\'')
 
@@ -205,13 +284,57 @@ class Function:
 
 	def __mul__(self,rhs):
 		rhs = self.as_function(rhs)
-		return Function([self, rhs], function_type='mul')	
+		return Function([self, rhs], function_type='mul')
+
+	def __div__(self,rhs):
+		rhs = self.as_function(rhs)
+		return Function([self, rhs], function_type='div')	
 
 	def __radd__(self,lhs):
 		return self + lhs
 
 	def __rmul__(self,lhs):
 		return self * lhs
+
+
+	def __lt__(self,rhs):
+		if npy.isscalar(rhs):
+			return self.x.t0 < rhs
+		return self.x.t0 < rhs.x.t0
+
+	def __le__(self,rhs):
+		if npy.isscalar(rhs):
+			return self.x.t0 <= rhs
+		return self.x.t0 <= rhs.x.t0
+
+	def __eq__(self,rhs):
+		if npy.isscalar(rhs):
+			return self.x.t0 == rhs
+		return self.x.t0 == rhs.x.t0
+
+	def __ne__(self,rhs):
+		if npy.isscalar(rhs):
+			return self.x.t0 != rhs
+		return self.x.t0 != rhs.x.t0
+
+	def __ge__(self,rhs):
+		if npy.isscalar(rhs):
+			return self.x.t0 >= rhs
+		return self.x.t0 >= rhs.x.t0
+
+	def __gt__(self,rhs):
+		if npy.isscalar(rhs):
+			return self.x.t0 > rhs
+		return self.x.t0 > rhs.x.t0
+
+
+
+
+
+
+
+
+	
 	
 	def __str__(self):
 		try:
@@ -236,6 +359,9 @@ class Function:
 		elif self.type == 'mul':
 			return self.args[0].x * self.args[1].x
 
+		elif self.type == 'div':
+			return self.args[0].x.__div__(self.args[1].x)
+		
 		else:
 			raise NotImplementedError('The operation "%s" is not supported. Please implement this case in Function.reval()!'%self.type)
 		
@@ -255,6 +381,10 @@ class Function:
 			self.args[0].xbar += self.xbar * self.args[1].x
 			self.args[1].xbar += self.xbar * self.args[0].x
 
+		elif self.type == 'div':
+			self.args[0].xbar += self.xbar / self.args[1].x
+			self.args[1].xbar += self.xbar * self.args[0].x/(self.args[1].x * self.args[1].x)
+			
 		else:
 			raise NotImplementedError('The operation "%s" is not supported. Please implement this case in Function.reval()!'%self.type)
 
