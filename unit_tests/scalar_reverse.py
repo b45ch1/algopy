@@ -264,6 +264,21 @@ def test_addition_single_direction_Tc_Tc_different_order():
 	assert numpy.prod(c.tc[:G] == (a.tc[:G] + b.tc[:G]))
 	assert numpy.prod(c.tc[G:] == (b.tc[G:]))
 
+def test_division_single_direction_Tc_Tc_different_order():
+	a = Tc(1,[[0.]])
+	b = Tc(3.,[[5.],[7.]])
+
+	c = a/b
+
+	print  ' c.tc[0,0]=', c.tc[0,0]
+	print '-(a.t0/b.t0**2)*b.tc[0,0]=',-(a.t0/b.t0**2)*b.tc[0,0]
+	print 'c.tc[1,0]=',c.tc[1,0]
+	print '( - (a.t0/b.t0**2)*b.tc[1,0] + 2*(a.t0/b.t0**3)*b.tc[1,0]**2 )=',( - (a.t0/b.t0**2)*b.tc[1,0] + (a.t0/b.t0**3)*b.tc[0,0]**2 )
+	
+	assert c.t0 == a.t0 / b.t0
+	assert abs(c.tc[0,0]  + (a.t0/b.t0**2)*b.tc[0,0]) < 10**-6
+	assert abs(c.tc[1,0]  -( - (a.t0/b.t0**2)*b.tc[1,0] + (a.t0/b.t0**3)*b.tc[0,0]**2 )) < 10**-6
+
 # unary operators
 
 def test_sqrt():
@@ -321,8 +336,6 @@ def test_sin_and_cos():
 
 	assert 2*s.tc[1,0] == -sin(a.t0)
 	assert 2*c.tc[1,0] == -cos(a.t0)
-	
-
 
 
 # conditional operators
@@ -655,7 +668,51 @@ def test_conditionals():
 
 
 
+def test_graph__sqrt():
+	cg = CGraph()
+	x = Function(Tc([121.,1.,0.]))
+	f = sqrt(x)
+	#f = exp(cos(sin(x)+y)+x)
+	cg.independentFunctionList = [x]
+	cg.dependentFunctionList = [f]
+	cg.reverse([Tc(1)])
 
+	print 'x.x=\n',x.x
+	print 'x.xbar=\n',x.xbar
+	print 'x.bar.tc[0,0]=',x.xbar.tc[0,0]
+	print '0.25 * x.x.t0**(-1.5)=',0.25 * x.x.t0**(-1.5)
+
+	print '2* x.xbar.tc[1,0]=',2* x.xbar.tc[1,0]
+	print ' 3./8 * x.x.t0**-2.5=', 3./8 * x.x.t0**-2.5
+
+	print cg
+	
+	assert x.xbar.t0 == 0.5 / sqrt(x.x.t0)
+	assert abs(x.xbar.tc[0,0] + 0.25 * x.x.t0**(-1.5)) < 10**-6
+	assert abs( 2* x.xbar.tc[1,0] - 3./8 * x.x.t0**-2.5) < 10**-6
+
+
+def test_graph_sin():
+	cg = CGraph()
+	x = Function(Tc([1.,1.,0.]))
+	f = sin(x)
+	#f = exp(cos(sin(x)+y)+x)
+	cg.independentFunctionList = [x]
+	cg.dependentFunctionList = [f]
+	cg.reverse([Tc(1)])
+
+	print 'x.xbar.t0=',x.xbar.t0
+	print 'cos(x.x.t0)=',cos(x.x.t0)
+
+	print ' x.xbar.tc[0,0]=', x.xbar.tc[0,0]
+	print '-sin(x.x.t0)=',-sin(x.x.t0)
+
+	assert x.xbar.t0 == cos(x.x.t0)
+	assert x.xbar.tc[0,0] == -sin(x.x.t0)
+
+	assert 2*x.xbar.tc[1,0] == -cos(x.x.t0)
+	
+	
 
 	
 

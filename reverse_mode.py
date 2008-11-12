@@ -79,6 +79,7 @@ class Tc:
 			# need to reshape self.tc now
 			self.tc = numpy.resize(self.tc,(E,Ndir))
 			self.tc[D:] = 0.
+			D = E
 		return (rhs,D,E,Ndir)
 			
 
@@ -284,8 +285,10 @@ class Function:
 			self.type = 'mul'
 		elif function_type == 'div':
 			self.type = 'div'	
-		elif function_type == 'neg':
-			self.type = 'neg'
+		elif function_type == 'sqrt':
+			self.type = 'sqrt'
+		elif function_type == 'sin':
+			self.type = 'sin'
 
 		else:
 			raise NotImplementedError('function_type must be either \'v\' or \'mul\' or  \'add\'')
@@ -310,6 +313,10 @@ class Function:
 		rhs = self.as_function(rhs)
 		return Function([self, rhs], function_type='add')
 
+	def __sub__(self,rhs):
+		rhs = self.as_function(rhs)
+		return Function([self, rhs], function_type='sub')
+	
 	def __mul__(self,rhs):
 		rhs = self.as_function(rhs)
 		return Function([self, rhs], function_type='mul')
@@ -321,9 +328,25 @@ class Function:
 	def __radd__(self,lhs):
 		return self + lhs
 
+	def __rsub__(self,lhs):
+		return -self + lhs
+	
 	def __rmul__(self,lhs):
 		return self * lhs
 
+	def __rdiv__(self, lhs):
+		lhs = Function(Tc(lhs), function_type='const')
+		return lhs/self
+
+	def sqrt(self):
+		return Function([self], function_type='sqrt')
+
+	def sin(self):
+		return Function([self], function_type='sin')
+
+	def cos(self):
+		return Function([self], function_type='cos')	
+	
 
 	def __lt__(self,rhs):
 		if npy.isscalar(rhs):
@@ -384,14 +407,26 @@ class Function:
 		elif self.type == 'add':
 			return self.args[0].x + self.args[1].x
 
+		elif self.type == 'sub':
+			return self.args[0].x - self.args[1].x
+		
 		elif self.type == 'mul':
 			return self.args[0].x * self.args[1].x
 
 		elif self.type == 'div':
 			return self.args[0].x.__div__(self.args[1].x)
-		
+
+		elif self.type == 'sqrt':
+			return sqrt(self.args[0].x)
+
+		elif self.type == 'sin':
+			return sin(self.args[0].x)
+
+		elif self.type == 'cos':
+			return cos(self.args[0].x)
+			
 		else:
-			raise NotImplementedError('The operation "%s" is not supported. Please implement this case in Function.reval()!'%self.type)
+			raise NotImplementedError('The operation "%s" is not supported. Please implement this case in Function.eval()!'%self.type)
 		
 
 	def reval(self):
@@ -405,6 +440,10 @@ class Function:
 			self.args[0].xbar += self.xbar
 			self.args[1].xbar += self.xbar
 
+		elif self.type == 'sub':
+			self.args[0].xbar += self.xbar
+			self.args[1].xbar -= self.xbar
+			
 		elif self.type == 'mul':
 			self.args[0].xbar += self.xbar * self.args[1].x
 			self.args[1].xbar += self.xbar * self.args[0].x
@@ -412,7 +451,16 @@ class Function:
 		elif self.type == 'div':
 			self.args[0].xbar += self.xbar / self.args[1].x
 			self.args[1].xbar += self.xbar * self.args[0].x/(self.args[1].x * self.args[1].x)
+
+		elif self.type == 'sqrt':
+			self.args[0].xbar += self.xbar.__div__(2*sqrt(self.args[0].x))
+
+		elif self.type == 'sin':
+			self.args[0].xbar += self.xbar * cos(self.args[0].x)
 			
+		elif self.type == 'cos':
+			self.args[0].xbar -= self.xbar * sin(self.args[0].x)
+		
 		else:
 			raise NotImplementedError('The operation "%s" is not supported. Please implement this case in Function.reval()!'%self.type)
 
