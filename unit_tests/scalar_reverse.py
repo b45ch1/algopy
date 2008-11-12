@@ -713,6 +713,32 @@ def test_graph_sin():
 	assert 2*x.xbar.tc[1,0] == -cos(x.x.t0)
 	
 	
+def test_graph_exp():
+	cg = CGraph()
+	x = Function(Tc([1.,1.,0.]))
+	f = exp(x)
+	cg.independentFunctionList = [x]
+	cg.dependentFunctionList = [f]
+	cg.reverse([Tc(1)])
 
+	assert x.xbar.t0 == exp(x.x.t0)
+	assert x.xbar.tc[0,0] == exp(x.x.t0)
+	assert 2*x.xbar.tc[1,0] == exp(x.x.t0)
+
+
+def test_graph_plotting_all_implemented_functions():
+	A = array([[11., 3.],[3.,17.]])
+	def fun(x):
+		return 0.5* dot(x, dot(A,x))
 	
+	cg = CGraph()
+	x = Function(Tc([1.,1.,0.]))
+	y = Function(Tc([5.,1.,0.]))
+	g = fun([x,y])
+	f = sqrt(exp(cos(sin(x)/y)-x))
+	f = f*g
+	cg.independentFunctionList = [x]
+	cg.dependentFunctionList = [f]
+	cg.reverse([Tc(1)])
+	cg.plot('trash/cgraph_all_implemented_functions.png',method='dot')
 

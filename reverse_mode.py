@@ -281,15 +281,20 @@ class Function:
 			self.type = 'id'
 		elif function_type == 'add':
 			self.type = 'add'
+		elif function_type == 'sub':
+			self.type = 'sub'
 		elif function_type == 'mul':
 			self.type = 'mul'
 		elif function_type == 'div':
 			self.type = 'div'	
 		elif function_type == 'sqrt':
 			self.type = 'sqrt'
+		elif function_type == 'exp':
+			self.type = 'exp'
 		elif function_type == 'sin':
 			self.type = 'sin'
-
+		elif function_type == 'cos':
+			self.type = 'cos'
 		else:
 			raise NotImplementedError('function_type must be either \'v\' or \'mul\' or  \'add\'')
 
@@ -340,7 +345,10 @@ class Function:
 
 	def sqrt(self):
 		return Function([self], function_type='sqrt')
-
+	
+	def exp(self):
+		return Function([self], function_type='exp')
+	
 	def sin(self):
 		return Function([self], function_type='sin')
 
@@ -419,6 +427,9 @@ class Function:
 		elif self.type == 'sqrt':
 			return sqrt(self.args[0].x)
 
+		elif self.type == 'exp':
+			return exp(self.args[0].x)
+
 		elif self.type == 'sin':
 			return sin(self.args[0].x)
 
@@ -449,12 +460,15 @@ class Function:
 			self.args[1].xbar += self.xbar * self.args[0].x
 
 		elif self.type == 'div':
-			self.args[0].xbar += self.xbar / self.args[1].x
-			self.args[1].xbar += self.xbar * self.args[0].x/(self.args[1].x * self.args[1].x)
+			self.args[0].xbar += self.xbar.__div__(self.args[1].x)
+			self.args[1].xbar += self.xbar * self.args[0].x.__div__(self.args[1].x * self.args[1].x)
 
 		elif self.type == 'sqrt':
 			self.args[0].xbar += self.xbar.__div__(2*sqrt(self.args[0].x))
 
+		elif self.type == 'exp':
+			self.args[0].xbar += self.xbar * exp(self.args[0].x)
+			
 		elif self.type == 'sin':
 			self.args[0].xbar += self.xbar * cos(self.args[0].x)
 			
@@ -571,9 +585,31 @@ class CGraph:
 
 			if vtype == 'add':
 				s.attr['label']='+%d'%nf
+
+			elif vtype == 'sub':
+				s.attr['label']='-%d'%nf
 				
 			elif vtype == 'mul':
 				s.attr['label']='*%d'%nf
+
+			elif vtype == 'div':
+				s.attr['label']='/%d'%nf
+				
+			elif vtype == 'pow':
+				s.attr['label']='pow%d'%nf
+				
+			elif vtype == 'sqrt':
+				s.attr['label']='sqrt%d'%nf
+
+			elif vtype == 'exp':
+				s.attr['label']='exp%d'%nf
+
+			elif vtype == 'sin':
+				s.attr['label']='sin%d'%nf
+				
+			elif vtype == 'cos':
+				s.attr['label']='cos%d'%nf
+				
 				
 			elif vtype == 'id':
 				s.attr['fillcolor']="#AAFF00"
@@ -590,7 +626,8 @@ class CGraph:
 				s.attr['fillcolor']="#AA2300"
 				s.attr['shape']='circle'
 				s.attr['label']= 'const_%d'%nf
-				s.attr['fontcolor']='#000000'				
+				s.attr['fontcolor']='#000000'
+				
 				
 		#print A.string() # print to screen
 
