@@ -308,14 +308,21 @@ def test_logarithm():
 	assert b.tc[0,0] == 1./a.t0
 	assert 2*b.tc[1,0] == -1./(a.t0*a.t0)
 
+def test_sin_and_cos():
+	a = Tc([23.,1.,0.])
+	s = sin(a)
+	c = cos(a)
 
+	assert s.t0 == sin(a.t0)
+	assert c.t0 == cos(a.t0)
 
+	assert s.tc[0,0] == cos(a.t0)
+	assert c.tc[0,0] == -sin(a.t0)
 
-
-
-
+	assert 2*s.tc[1,0] == -sin(a.t0)
+	assert 2*c.tc[1,0] == -cos(a.t0)
 	
-	
+
 
 
 # conditional operators

@@ -235,6 +235,34 @@ class Tc:
 			retval.tc[d] = ( (d+1.)* self.tc[d] - sum(self.tc[:d][::-1]*tmp[:d]*retval.tc[:d]))/((d+1.)*self.t0)
 		return retval
 
+	def sin(self):
+		D,Ndir = shape(self.tc)
+		retval = self.copy()
+		tmpcos = self.copy()
+
+		tmp = array([d+1. for d in range(D)]) 
+		retval.t0 = sin(self.t0)
+		tmpcos.t0 = cos(self.t0)
+
+		for d in range(D):
+			retval.tc[d] = ( sum(tmp[:d]*tmpcos.tc[:d]*self.tc[:d]) + (d+1.)* self.tc[d]*tmpcos.t0)/(d+1.)
+			tmpcos.tc[d] = -( sum(tmp[:d]*retval.tc[:d]*self.tc[:d]) + (d+1.)* self.tc[d]*retval.t0)/(d+1.)
+
+		return retval
+
+	def cos(self):
+		D,Ndir = shape(self.tc)
+		retval = self.copy()
+		tmpsin = self.copy()
+
+		tmp = array([d+1. for d in range(D)]) 
+		retval.t0 = cos(self.t0)
+		tmpsin.t0 = sin(self.t0)
+
+		for d in range(D):
+			retval.tc[d] = -( sum(tmp[:d]*tmpsin.tc[:d]*self.tc[:d]) + (d+1.)* self.tc[d]*tmpsin.t0)/(d+1.)
+			tmpsin.tc[d] = ( sum(tmp[:d]*retval.tc[:d]*self.tc[:d]) + (d+1.)* self.tc[d]*retval.t0)/(d+1.)
+		return retval
 
 	def __str__(self):
 		return 'Tc(%s,%s)'%(str(self.t0),str(self.tc))
