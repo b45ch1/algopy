@@ -69,12 +69,9 @@ class Tc:
 		return self
 
 	def resize_tc(self,rhs):
-		D,Ndir = shape(self.tc)
 		if not isinstance(rhs,Tc):
-			tmp = tc_zeros(D,Ndir)
-			tmp.t0 = rhs
-			rhs = tmp
-			#raise NotImplementedError("Operations between Tc and constants not yet supported!")
+			rhs = Tc(rhs)
+		D,Ndir = shape(self.tc)
 		E,Ndir2 = shape(rhs.tc)
 		if Ndir < Ndir2:
 			# add more directions to self

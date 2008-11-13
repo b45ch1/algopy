@@ -137,6 +137,7 @@ def test_incremental_multiplication_single_direction_Tc_Tc_same_order():
 	assert a.tc[1] == ( inputarray3[0,0] * inputarray2[2,0]
 	                  + inputarray3[1,0] * inputarray2[1,0]
 					  + inputarray3[2,0] * inputarray2[0,0]  )
+
 					  
 def test_incremental_multiplication_single_direction_Tc_Tc_different_order():
 	inputarray1 = numpy.array([[0.,1.,2.]]).T
@@ -179,6 +180,20 @@ def test_incremental_multiplication_multiple_directions_Tc_Tc_same_order():
 					  + inputarray3[1,:] * inputarray2[0,:]
 					  + inputarray3[2,:] * 7.  )
 					  )
+
+def test_incremental_multiplication_multiple_directions_Tc_scalar():
+	t0 = 2.
+	tc = array([[1,2,3],[4,5,6]])
+	a = Tc(t0,tc.copy())
+	a *= 2
+	print 'a=',a
+	print 'a.tc=',a.tc
+	print '2*tc=',2*tc
+	assert a == 4
+	assert prod(a.tc == 2*tc)
+
+
+					  
 
 def test_incremental_division_single_direction_Tc_Tc_same_order():
 	inputarray1 = numpy.array([[1.,1.,2.]]).T
@@ -689,7 +704,7 @@ def test_conditionals():
 	c = lt(b,a)
 	d = lt(a,b)
 	assert  c.x.t0 == 34
-	assert  d.x.t0 == 34	
+	assert  d.x.t0 == 34
 
 	c = eq(a,b)
 	d = eq(b,c)
