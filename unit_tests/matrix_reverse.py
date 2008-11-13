@@ -4,8 +4,11 @@ import numpy
 import numpy.linalg
 from numpy import *
 
-sys.path = ['..'] + sys.path
-from matrix_ad import *
+try:
+	sys.path = ['..'] + sys.path
+	from matrix_ad import *
+except:
+	from matrix_ad import *
 
 def test_trace_forward():
 	x = Mtc(ones((2,2)),ones((2,2)))
@@ -246,6 +249,48 @@ def test_newtons_method():
 	delta_q = numpy.linalg.solve(H,-g[:,0])
 	q_plus = [13.,17.] + delta_q
 	assert numpy.prod(q_plus == [0.,0.])
+
+
+def test_taylor_series_of_matrices():
+	### Testing Taylor series of matrices
+	X = array([[1,2],[2,10]],dtype=float)
+	Xdot = eye(2)
+	AX = Mtc(X,Xdot)
+	Y = X.copy()
+	AY = Mtc(Y,eye(2))
+	AW = [[AX,AY],[AY,AX]]
+
+def test_taping():
+	### Testing Taylor series of matrices
+	X = array([[1,2],[2,10]],dtype=float)
+	Xdot = eye(2)
+	AX = Mtc(X,Xdot)
+	Y = X.copy()
+	AY = Mtc(Y,eye(2))
+	AW = [[AX,AY],[AY,AX]]
+	
+	#### Testing Taping
+	cg = CGraph()
+	FX = Function(AX)
+	FY = Function(AY)
+	FU = FX.dot(FY)
+
+	FV = Function([[FX,FY],[FY,FX]])
+	FU = Function([[FX,FY],[FY,FX]])
+	FW = FV*FU
+
+	FZ = FW/FV
+	FZ = FZ-FU
+
+	FZbar = Mtc(eye(4))
+	cg.independentFunctionList=[FX,FY]
+	cg.dependentFunctionList=[FZ]
+	cg.reverse([FZbar])
+
+	print cg
+	print FX.xbar.X
+	cg.plot('trash/matrix_ad_test_taping.png')
+	assert False
 
 	
 
