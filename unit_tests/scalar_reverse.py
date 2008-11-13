@@ -55,13 +55,14 @@ def test_incremental_addition_single_direction_Tc_Tc_same_order():
 	assert a.t0 == 1.
 	assert numpy.prod(a.tc == (inputarray3[1:] + inputarray2[1:]))
 
-def test_incremental_addition_with_constant():
+def test_incremental_addition_multiple_directions_with_constant():
 	D = 4
-	inputarray1 = numpy.array([[1.* i for i in range(D)]]).T
-	a = Tc(inputarray1)
+	t0 = 2.
+	tc = array([[3,5,7],[23,43,45]])
+	a = Tc(t0,tc)
 	a += 2.
-	assert a.t0 == 2.
-	assert numpy.prod(a.tc == inputarray1[1:])
+	assert a.t0 == 4.
+	assert numpy.prod(a.tc == tc)
 	
 def test_incremental_addition_single_direction_Tc_Tc_different_order():
 	D = 4
@@ -264,6 +265,25 @@ def test_addition_single_direction_Tc_Tc_different_order():
 	assert numpy.prod(c.tc[:G] == (a.tc[:G] + b.tc[:G]))
 	assert numpy.prod(c.tc[G:] == (b.tc[G:]))
 
+def test_addition_multiple_directions_Tc_float():
+	t0 = 2.
+	tc = array([[1.,2,3],[23,43,51]])
+	a = Tc(t0,tc)
+	c = a+2
+	d = 2+a
+
+	print 'c.t0=',c.t0
+	print 't0=',t0+2
+	print 'c.tc=',c.tc
+	print 'tc=',tc
+	assert c.t0 == 4.
+	assert prod(c.tc == tc)
+
+	assert d.t0 == 4.
+	assert prod(d.tc == tc)
+
+	
+
 def test_division_single_direction_Tc_Tc_different_order():
 	a = Tc(1,[[0.]])
 	b = Tc(3.,[[5.],[7.]])
@@ -382,6 +402,22 @@ def test_lt_conditional():
 #############################################################
 #   TESTING CLASS Function AND CGraph
 #############################################################
+
+
+def test_graph_addition_with_constant():
+	cg = CGraph()
+	t0 = 2
+	tc = array([[0,1],[1,0]])
+	a = Function(Tc(t0,tc))
+	b = a + 2
+	c = 2 + a
+
+	assert b.x.t0 == 4
+	assert c.x.t0 == 4
+
+	assert prod(b.x.tc == tc)
+	assert prod(c.x.tc == tc)
+	
 
 def test_plotting_simple_cgraph():
 	cg = CGraph()
@@ -742,3 +778,38 @@ def test_graph_plotting_all_implemented_functions():
 	cg.reverse([Tc(1)])
 	cg.plot('trash/cgraph_all_implemented_functions.png',method='dot')
 
+
+#############################################################
+#   TESTING HIGH LEVEL FUNCTIONS
+#############################################################
+
+def test_gradient_by_taping_then_gradient_from_graph():
+
+	# defining the function
+	A = array([[11., 3.],[3.,17.]])
+	def fun(x):
+		return 0.5* dot(x, dot(A,x))
+
+	# tape the function
+	x = array([1.,2.])
+	cg = tape(fun,x)
+
+	# compute gradient
+	g = gradient_from_graph(cg)
+
+	g_true = dot(A,x)
+	assert prod(g == g_true)
+
+def test_hessian():
+	# defining the function
+	A = array([[11., 3.],[3.,17.]])
+	def fun(x):
+		return 0.5* dot(x, dot(A,x))
+
+	# compute the Hessian
+	x = array([3.,7.])
+	H = hessian(fun,x)
+	print H
+
+	assert prod(H == A)
+	

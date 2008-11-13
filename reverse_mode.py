@@ -69,34 +69,41 @@ class Tc:
 		return self
 
 	def resize_tc(self,rhs):
-		if not isinstance(rhs,Tc):
-			rhs = Tc(rhs)
-			#raise NotImplementedError("Operations between Tc and constants not yet supported!")
 		D,Ndir = shape(self.tc)
+		if not isinstance(rhs,Tc):
+			tmp = tc_zeros(D,Ndir)
+			tmp.t0 = rhs
+			rhs = tmp
+			#raise NotImplementedError("Operations between Tc and constants not yet supported!")
 		E,Ndir2 = shape(rhs.tc)
-		assert Ndir == Ndir2
+		if Ndir < Ndir2:
+			# add more directions to self
+			self.tc = numpy.resize(self.tc,(D,Ndir2))
+			self.tc[:,Ndir:] = 0.
+			Ndir = Ndir2
+			
 		if D<E:
 			# need to reshape self.tc now
 			self.tc = numpy.resize(self.tc,(E,Ndir))
 			self.tc[D:] = 0.
 			D = E
-		return (rhs,D,E,Ndir)
+		return (rhs,D,E,Ndir,Ndir2)
 			
 
 	def __iadd__(self,rhs):
-		(rhs,D,E,Ndir) = self.resize_tc(rhs)
+		(rhs,D,E,Ndir,Ndir2) = self.resize_tc(rhs)
 		self.t0 += rhs.t0
-		self.tc[:E] += rhs.tc[:E]
+		self.tc[:E,:Ndir2] += rhs.tc[:E,:Ndir2]
 		return self
 
 	def __isub__(self,rhs):
-		(rhs,D,E,Ndir) = self.resize_tc(rhs)
+		(rhs,D,E,Ndir,Ndir2) = self.resize_tc(rhs)
 		self.t0 -= rhs.t0
-		self.tc[:E] -= rhs.tc[:E]
+		self.tc[:E,:Ndir2] -= rhs.tc[:E,:Ndir2]
 		return self
 	
 	def __imul__(self,rhs):
-		(rhs,D,E,Ndir) = self.resize_tc(rhs)
+		(rhs,D,E,Ndir,Ndir2) = self.resize_tc(rhs)
 
 		def middle_taylor_series(d,E):
 			"""in the case when rhs is of order E<d we have to sum over less elements"""
@@ -114,7 +121,7 @@ class Tc:
 		return self
 
 	def __idiv__(self,rhs):
-		(rhs,D,E,Ndir) = self.resize_tc(rhs)
+		(rhs,D,E,Ndir,Ndir2) = self.resize_tc(rhs)
 		self.t0 /= rhs.t0
 		for d in range(D):
 			e = max(0,d-E)
@@ -268,7 +275,7 @@ class Tc:
 	def __str__(self):
 		return 'Tc(%s,%s)'%(str(self.t0),str(self.tc))
 
-def zeros(D,Ndir):
+def tc_zeros(D,Ndir):
 	return Tc(0.,numpy.zeros((D,Ndir)))
 
 class Function:
@@ -638,7 +645,7 @@ def tape(f,in_x):
 	x = in_x.copy()
 	N = size(x)
 	cg = CGraph()
-	ax = numpy.array([Function(Tc([x[n]])) for n in range(N)])
+	ax = numpy.array([Function(Tc(x[n])) for n in range(N)])
 	cg.independentFunctionList = ax
 	ay = f(ax)
 
@@ -660,16 +667,17 @@ def hessian(f, in_x):
 	x = in_x.copy()
 	N = size(x)
 	cg = CGraph()
-	Id = eye(N).tolist()
-	ax = numpy.array([Function(Tc(x[n], [Id[n]])) for n in range(N)])
+	I = eye(N)
+	ax = numpy.array([Function(Tc(x[n], eye(N,1,-n).T )) for n in range(N)])
+	print ax
 	cg.independentFunctionList = ax
 	ay = f(ax)
 	cg.dependentFunctionList = numpy.array([ay])
-	cg.reverse(numpy.array([Tc(1.,[[0. for n in range(N)]])]))
+	cg.reverse(numpy.array([Tc(1., [[0,0]])]))
 	
 	H = numpy.zeros((N,N),dtype=float)
 	for r in range(N):
-		H[r,:] = ax[r].xbar.tc
+		H[r,:] = ax[r].xbar.tc[0,:]
 			
 	return H
 
