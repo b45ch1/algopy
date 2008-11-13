@@ -389,15 +389,6 @@ class Function:
 		if npy.isscalar(rhs):
 			return self.x.t0 > rhs
 		return self.x.t0 > rhs.x.t0
-
-
-
-
-
-
-
-
-	
 	
 	def __str__(self):
 		try:
