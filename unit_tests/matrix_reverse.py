@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-import sys
 import numpy
 import numpy.linalg
 from numpy import *
 
 try:
+	import sys
 	sys.path = ['..'] + sys.path
 	from matrix_ad import *
 except:
@@ -72,10 +72,27 @@ def test_2x2dot2x2_reverse():
 	assert numpy.prod(Cdot == FC.x.Xdot)
 
 	# reverse evaluation
-	assert numpy.prod(FA.xbar.X == dot(B,Cbar))
-	assert numpy.prod(FB.xbar.X == dot(Cbar,A))
+	assert numpy.prod(FA.xbar.X == dot(B,Cbar).T)
+	assert numpy.prod(FB.xbar.X == dot(Cbar,A).T)
 	#assert False # FA.xbar.Xdot has to be verified
 	#assert False # FB.xbar.Xdot has to be verified
+
+def test_2x3dot33x2_reverse():
+	A = zeros((2,3))
+	Adot = A.copy()
+	B = zeros((3,2))
+	Bdot = B.copy()
+	Cbar = zeros((2,2))
+	cg = CGraph()
+	FA = Function(Mtc(A,Adot))
+	FB = Function(Mtc(B,Bdot))
+
+	FC = FA.dot(FB)
+
+	cg.independentFunctionList = [FA,FB]
+	cg.dependentFunctionList = [FC]
+	cg.reverse([Mtc(Cbar)])
+	
 
 def test_matrix_assembly_2x2():
 	"""
@@ -290,12 +307,7 @@ def test_taping():
 	print cg
 	print FX.xbar.X
 	cg.plot('trash/matrix_ad_test_taping.png')
-	assert False
 
-	
-
-
-	
 
 if __name__ == "__main__":
 	#q = [Mtc([[1.]],[[1.]]), Mtc([[2.]],[[0.]])]

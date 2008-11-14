@@ -109,6 +109,7 @@ pylab.grid()
 
 pylab.legend((function_plot,forward_plot,taperev_plot,tape_plot,rev_plot,adolc_tape_plot,adolc_gradient_plot), ('function','forward', 'tape+rev', 'tape', 'rev','adolc tape', 'adolc gradient'), loc=2)
 pylab.savefig('runtime_comparison.eps')
+pylab.savefig('runtime_comparison.png')
 pylab.show()
 
 

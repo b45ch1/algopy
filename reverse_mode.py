@@ -5,6 +5,7 @@ from __future__ import division
 from pylab import *
 from numpy import *
 import numpy
+import numpy.linalg
 
 class Tc:
 	"""

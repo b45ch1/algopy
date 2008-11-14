@@ -1,8 +1,5 @@
 #!/usr/bin/env python
-import sys
-import numpy
-import numpy.linalg
-
+#import sys
 #sys.path = ['..'] + sys.path
 from reverse_mode import *
 

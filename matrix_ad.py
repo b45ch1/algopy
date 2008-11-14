@@ -40,17 +40,8 @@ class Tc:
 	def __add__(self,rhs):
 		return Tc(self.t0 + rhs.t0, self.tc[:] + rhs.tc[:])
 	
+	
 	def __mul__(self,rhs):
-		#print 'shape(self.tc)',shape(self.tc)
-		#print 'shape(rhs.tc)',shape(rhs.tc)
-		#print 'self.tc=',self.tc
-		#print 'rhs.tc=',rhs.tc
-		#d=2
-		#print 'self.tc[:d]',self.tc[:d-1]
-		#print 'rhs.tc[d-2::-1]',rhs.tc[d-2::-1]
-		#print 'self.tc[:d-1] * rhs.tc[d-2::-1]', self.t0*rhs.tc[d-1] +  self.tc[:d-1] * rhs.tc[d-2::-1] + self.tc[d-1] * rhs.t0
-		#exit()
-		
 		def middle_taylor_series(d):
 			if d>1:
 				return 	npy.sum(self.tc[:d-1] * rhs.tc[d-2::-1], axis = 0)
@@ -85,8 +76,19 @@ class Mtc:
 	def __add__(self,rhs):
 		return Mtc(self.X + rhs.X, self.Xdot + rhs.Xdot)
 
+	def __sub__(self,rhs):
+		return Mtc(self.X - rhs.X, self.Xdot - rhs.Xdot)
+	
 	def __mul__(self,rhs):
 		return Mtc( self.X * rhs.X, self.Xdot * rhs.X + self.X *  rhs.Xdot )
+
+	def __div__(self,rhs):
+		retval = Mtc(zeros(self.X.shape), zeros(self.X.shape))
+		retval.X = self.X / rhs.X
+		retval.Xdot = 1./rhs.X * ( self.Xdot - retval.X * rhs.Xdot)
+		return retval
+		
+		return Mtc( self.X / rhs.X, self.Xdot * rhs.X + self.X *  rhs.Xdot )
 
 	def dot(self,rhs):
 		return Mtc( dot(self.X, rhs.X), dot(self.Xdot, rhs.X) + dot(self.X, rhs.Xdot) )
@@ -107,6 +109,12 @@ class Mtc:
 	def shape(self):
 		return numpy.shape(self.X)
 
+	def get_transpose(self):
+		return self.transpose()
+	def set_transpose(self,x):
+		raise NotImplementedError('???')
+	T = property(get_transpose, set_transpose)
+
 	def transpose(self):
 		return Mtc(self.X.transpose(), self.Xdot.transpose())
 
@@ -125,10 +133,24 @@ class Mtc:
 # Numpy wrapper
 #--------------
 def inv(X):
-	if X.__class__ == Mtc:
+	if X.__class__ == Mtc or X.__class__ == Function:
 		return X.inv()
 	else:
 		return numpy.linalg.inv(X)
+
+def dot(X,Y):
+	if X.__class__ == Mtc or X.__class__ == Function:
+		return X.dot(Y)
+	else:
+		return numpy.dot(X,Y)
+	
+def trace(X):
+	if X.__class__ == Mtc or X.__class__ == Function:
+		return X.trace()
+	else:
+		return numpy.trace(X)
+
+	
 #--------------
 
 
@@ -203,8 +225,12 @@ class Function:
 			self.type = 'com'
 		elif function_type == 'add':
 			self.type = 'add'
+		elif function_type == 'sub':
+			self.type = 'sub'			
 		elif function_type == 'mul':
 			self.type = 'mul'
+		elif function_type == 'div':
+			self.type = 'div'			
 		elif function_type == 'dot':
 			self.type = 'dot'
 		elif function_type == 'trace':
@@ -264,15 +290,30 @@ class Function:
 		rhs = self.as_function(rhs)
 		return Function([self, rhs], function_type='add')
 
+	def __sub__(self,rhs):
+		rhs = self.as_function(rhs)
+		return Function([self, rhs], function_type='sub')
+
 	def __mul__(self,rhs):
 		rhs = self.as_function(rhs)
-		return Function([self, rhs], function_type='mul')	
+		return Function([self, rhs], function_type='mul')
+
+	def __div__(self,rhs):
+		rhs = self.as_function(rhs)
+		return Function([self, rhs], function_type='div')	
 
 	def __radd__(self,lhs):
 		return self + lhs
 
+	def __rsub__(self,lhs):
+		return -self + lhs
+	
 	def __rmul__(self,lhs):
 		return self * lhs
+
+	def __rdiv__(self, lhs):
+		lhs = Function(Tc(lhs), function_type='const')
+		return lhs/self
 
 	def dot(self,rhs):
 		rhs = self.as_function(rhs)
@@ -290,6 +331,12 @@ class Function:
 	def transpose(self):
 		return Function([self], function_type='trans')
 
+	def get_transpose(self):
+		return self.transpose()
+	def set_transpose(self,x):
+		raise NotImplementedError('???')
+	T = property(get_transpose, set_transpose)
+
 
 	# ----------------------------		
 
@@ -305,8 +352,14 @@ class Function:
 		elif self.type == 'add':
 			return self.args[0].x + self.args[1].x
 
+		elif self.type == 'sub':
+			return self.args[0].x - self.args[1].x		
+
 		elif self.type == 'mul':
 			return self.args[0].x * self.args[1].x
+
+		elif self.type == 'div':
+			return self.args[0].x.__div__(self.args[1].x)
 
 		elif self.type == 'dot':
 			return self.args[0].x.dot(self.args[1].x)
@@ -331,13 +384,21 @@ class Function:
 			self.args[0].xbar += self.xbar
 			self.args[1].xbar += self.xbar
 
+		elif self.type == 'sub':
+			self.args[0].xbar += self.xbar
+			self.args[1].xbar -= self.xbar
+
 		elif self.type == 'mul':
 			self.args[0].xbar += self.xbar * self.args[1].x
 			self.args[1].xbar += self.xbar * self.args[0].x
 
+		elif self.type == 'div':
+			self.args[0].xbar += self.xbar.__div__(self.args[1].x)
+			self.args[1].xbar += self.xbar * self.args[0].x.__div__(self.args[1].x * self.args[1].x)
+
 		elif self.type == 'dot':
-			self.args[0].xbar +=  self.args[1].x.dot(self.xbar)
-			self.args[1].xbar +=  self.xbar.dot(self.args[0].x)
+			self.args[0].xbar +=  self.args[1].x.dot(self.xbar).T
+			self.args[1].xbar +=  self.xbar.dot(self.args[0].x).T
 
 		elif self.type == 'trace':
 			N = self.args[0].x.shape()[0]
@@ -492,9 +553,15 @@ class CGraph:
 
 			if vtype == 'add':
 				s.attr['label']='+%d'%nf
+
+			elif vtype == 'sub':
+				s.attr['label']='-%d'%nf
 				
 			elif vtype == 'mul':
 				s.attr['label']='*%d'%nf
+
+			elif vtype == 'div':
+				s.attr['label']='/%d'%nf
 				
 			elif vtype == 'var':
 				s.attr['fillcolor']="#FFFF00"
@@ -522,46 +589,6 @@ class CGraph:
 		os.system('%s  %s.dot -T%s -o %s.%s'%(method, name, extension, name, extension))
 
 
-if __name__ == "__main__":
-
-	### Testing Taylor series of matrices
-	X = array([[1,2],[2,10]],dtype=float)
-	Xdot = eye(2)
-	AX = Mtc(X,Xdot)
-	Y = X.copy()
-	AY = Mtc(Y,eye(2))
 
 
-	AW = [[AX,AY],[AY,AX]]
-	#print AW
-	#print convert(AW)
-
-	#print AX + AY
-	#print AX * AY
-	#print dot(AX, AY)
-	#print inv(AX)
-	#print inv(X)
-
-	#### Testing Taping
-	cg = CGraph()
-	FX = Function(AX)
-	FY = Function(AY)
-	Fzer = Function(Mtc(zeros((2,2))))
-	FU = FX.dot(FY)
-
-	#FW = Function(AW)
-	FV = Function([[FX,FY],[Fzer,FX]])
-	FU = Function([[FX,FY],[Fzer,FX]])
-	FW = FV*FU
-	#print FW
-	#print FV
-
-	#FZ = dot(FX,FY)
-	#FZbar = Mtc(eye(2))
-	#cg.independentFunctionList=[FX,FY]
-	#cg.dependentFunctionList=[FZ]
-	#cg.reverse([FZbar])
-
-	#print cg.functionList
-	cg.plot()
 
