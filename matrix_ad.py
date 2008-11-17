@@ -350,27 +350,40 @@ class Function:
 			return convert(self.args)
 		
 		elif self.type == 'add':
+			self.args[0].xbar.set_zero()
+			self.args[1].xbar.set_zero()
 			return self.args[0].x + self.args[1].x
 
 		elif self.type == 'sub':
+			self.args[0].xbar.set_zero()
+			self.args[1].xbar.set_zero()
 			return self.args[0].x - self.args[1].x		
 
 		elif self.type == 'mul':
+			self.args[0].xbar.set_zero()
+			self.args[1].xbar.set_zero()
 			return self.args[0].x * self.args[1].x
 
 		elif self.type == 'div':
+			self.args[0].xbar.set_zero()
+			self.args[1].xbar.set_zero()
 			return self.args[0].x.__div__(self.args[1].x)
 
 		elif self.type == 'dot':
+			self.args[0].xbar.set_zero()
+			self.args[1].xbar.set_zero()
 			return self.args[0].x.dot(self.args[1].x)
 
 		elif self.type == 'trace':
+			self.args[0].xbar.set_zero()
 			return self.args[0].x.trace()
 
 		elif self.type == 'inv':
+			self.args[0].xbar.set_zero()
 			return self.args[0].x.inv()
 
 		elif self.type == 'trans':
+			self.args[0].xbar.set_zero()
 			return self.args[0].x.transpose()
 		
 		else:

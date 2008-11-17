@@ -47,7 +47,7 @@ def measurement_model(x,p,q):
 
 def f(t,x,p,q):
 	""" rhs of the ODE"""
-	return p[1]/q[1] + q[0]*x
+	return p[1] + q[0]*x
 
 def F(p,q,ts,Sigma, etas):
 	x = explicit_euler(p[0],f,ts,p,q)
@@ -64,12 +64,12 @@ if __name__ == "__main__":
 	# problem setup
 	Nm = 100    # number of measurements
 	Np = 2      # number of parameters
-	Nq = 2      # number of control variables
+	Nq = 1      # number of control variables
 	Nv = Np + Nq
 	ts = linspace(0,10,Nm)
 	Sigma = eye(Nm)
 	p = array([10,2.])
-	q = array([-1,-3.])
+	q = array([-1])
 	v = concatenate((p,q))
 
 	# generate pseudoe measurement data
@@ -80,14 +80,13 @@ if __name__ == "__main__":
 	p[0]-= 3;	p[1] -= 2.
 
 	# taping F
-	av = array([adolc.adouble(0) for i in range(Np+Nq)])
+	av = array([adolc.adouble(0) for i in range(Nv)])
 	y = zeros(Nm)
 	adolc.trace_on(1)
 	av[0].is_independent(p[0])
 	av[1].is_independent(p[1])
 	av[2].is_independent(q[0])
-	av[3].is_independent(q[1])
-	ay = F(av[:2],av[2:],ts,Sigma,etas)
+	ay = F(av[:Np],av[Np:],ts,Sigma,etas)
 	for m in range(Nm):
 		y[m] = adolc.depends_on(ay[m])
 	adolc.trace_off()
@@ -95,7 +94,7 @@ if __name__ == "__main__":
 	# PERFORM PARAMETER ESTIMATION
 	def dFdp(p,q,ts,Sigma, etas):
 		v[:Np] = p[:]
-		return adolc.jacobian(1,v)[:,:2]
+		return adolc.jacobian(1,v)[:,:Np]
 	res = scipy.optimize.leastsq(F,p,args=(q,ts,Sigma,etas), Dfun = dFdp, full_output = True)
 
 	# plotting solution of parameter estimation and starting point
@@ -112,43 +111,57 @@ if __name__ == "__main__":
 	xlabel(r'time $t$ []')
 	ylabel(r'measurement function $h(t,x,p,q)$')
 	legend((meas_plot,starting_plot,correct_plot,est_plot),('measurements','initial guess','true','estimated'))
+	savefig('parameter_estimation.png')
 
 	# PERFORM OED
 	v[:Np] = res[0][:]
-	
-	# 1: evaluation of J
-	J=adolc.jacobian(1,v)[:,:2]
 
-	# 2: forward evaluation of Phi
+	# tape the objective function with Algopy
+	J=adolc.jacobian(1,v)[:,:2]
 	cg = CGraph()
 	J0 = J
 	J1 = zeros(shape(J))
-	J = Function(Mtc(J0,J1))
-	f = Phi(J)
-	cg.independentFunctionList = [J]
-	cg.dependentFunctionList = [f]
+	FJ = Function(Mtc(J0,J1))
+	Ff = Phi(FJ)
+	cg.independentFunctionList = [FJ]
+	cg.dependentFunctionList = [Ff]
 
-	# 3: reverse evaluation of Phi
-	cg.reverse([Mtc([[1.]])])
-	Jbar = J.xbar.X
-	print 'shape Jbar=',shape(Jbar)
 	
-	# 4: reverse evaluation of J
-	x = v
-	D = 2
-	keep = D+1
-	V = zeros((Nv,D))
-	vbar = zeros(Nv)
-	for np in range(Np):
-		V[np,0] = 1
-		U = (Jbar.T)[:]
-		adolc.hos_forward(1,D,x,V,keep)
-		Z = adolc.hov_reverse(1,D,U)[0]
-		V[np,0] = 0
+	# perform steepest descent optimization
+	for k in range(10):
+	
+		# 1: evaluation of J
+		Jtc=Mtc(adolc.jacobian(1,v)[:,:2])
 
-		vbar += sum(Z[:,:,1],axis=0)
+		# 2: forward evaluation of Phi
+		cg.forward([Jtc])
+		#print cg.dependentFunctionList[0].x
+	
+		# 3: reverse evaluation of Phi
+		cg.reverse([Mtc([[1.]])])
+		Jbar = FJ.xbar.X
 
-	print vbar
+
+		# 4: reverse evaluation of J
+		x = v
+		D = 2
+		keep = D+1
+		V = zeros((Nv,D))
+		vbar = zeros(Nv)
+		for np in range(Np):
+			V[np,0] = 1
+			U = (Jbar.T)[:]
+			adolc.hos_forward(1,D,x,V,keep)
+			Z = adolc.hov_reverse(1,D,U)[0]
+			V[np,0] = 0
+			#print Z
+
+			vbar += sum(Z[:,:,1],axis=0)
+
+		print norm(vbar)
+
+		#update v:  x_k+1 = v_k - g
+		v[2:] -= vbar[2:]
 	#print adolc.lagra_hess_vec(1,x,u,v) # doesn't work
 	
 	

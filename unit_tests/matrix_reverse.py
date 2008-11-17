@@ -92,7 +92,37 @@ def test_2x3dot33x2_reverse():
 	cg.independentFunctionList = [FA,FB]
 	cg.dependentFunctionList = [FC]
 	cg.reverse([Mtc(Cbar)])
+
+
+def test_matrix_2x2_mul_2x2_reverse():
+	A = array([[1.,2.],[3.,4.]])
+	Adot = zeros((2,2))
+
+	cg = CGraph()
+	FA = Function(Mtc(A,Adot))
+	FC = FA*FA
+	FPhi = trace(FC)
+
+	cg.independentFunctionList = [FA]
+	cg.dependentFunctionList = [FPhi]
+
+	H = zeros((2,2,2,2))
+
+	for n in range(2):
+		for m in range(2):
+			Adot[n,m] = 1.
+			cg.forward([Mtc(A,Adot)])
+			Phibar = array([[1.]])
+			Phibardot = array([[0.]])
+			cg.reverse([Mtc(Phibar, Phibardot)])
+			H[n,m,:,:] = cg.independentFunctionList[0].xbar.Xdot
+			Adot[n,m] = 0.
+	print H
+	assert sum(H) == 4
+	assert H[0,0,0,0] == 2
+	assert H[1,1,1,1] == 2
 	
+
 
 def test_matrix_assembly_2x2():
 	"""
