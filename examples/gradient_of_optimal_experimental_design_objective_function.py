@@ -131,12 +131,14 @@ if __name__ == "__main__":
 	# 3: reverse evaluation of Phi
 	cg.reverse([Mtc([[1.]])])
 	Jbar = J.xbar.X
+	print 'shape Jbar=',shape(Jbar)
 	
 	# 4: reverse evaluation of J
 	x = v
 	D = 2
 	keep = D+1
 	V = zeros((Nv,D))
+	vbar = zeros(Nv)
 	for np in range(Np):
 		V[np,0] = 1
 		U = (Jbar.T)[:]
@@ -144,8 +146,9 @@ if __name__ == "__main__":
 		Z = adolc.hov_reverse(1,D,U)[0]
 		V[np,0] = 0
 
-		print Z[:,:,1]
-	
+		vbar += sum(Z[:,:,1],axis=0)
+
+	print vbar
 	#print adolc.lagra_hess_vec(1,x,u,v) # doesn't work
 	
 	
