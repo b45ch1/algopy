@@ -415,7 +415,7 @@ class Function:
 
 		elif self.type == 'trace':
 			N = self.args[0].x.shape()[0]
-			self.args[0].xbar += Mtc( self.xbar.X[0,0]*numpy.eye(N),  self.xbar.Xdot[0,0]*numpy.eye(N))
+			self.args[0].xbar += Mtc( dot(self.xbar.X[0,0],numpy.ones((N,N))),  dot(self.xbar.Xdot[0,0],numpy.ones((N,N))))
 
 		elif self.type == 'inv':
 			self.args[0].xbar += self.x.dot(self.xbar.dot(self.x))
