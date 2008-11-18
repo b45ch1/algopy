@@ -58,7 +58,7 @@ H = zeros((2,2))
 
 for n in range(2):
 	# 1: hos_forward, propagate two directions
-	x = array([3.,7.])
+	x = array([5.,2.])
 	D = 2
 	keep = D+1
 	V = zeros((2,1))
@@ -90,13 +90,21 @@ for n in range(2):
 
 	
 	# 4: hov_reverse
-	U = zeros((keep,4))
+	U = zeros((2,4))
 	U[0,:] = cg.independentFunctionList[0].xbar.X.flatten()
 	U[1,:] = cg.independentFunctionList[0].xbar.Xdot.flatten()
-	print 'U=',U
-	print adolc.hov_reverse(1,D,U)[0]
+	#print 'U=',U
+	#print 'adolc.hov_reverse(1,D,U)[0]=', adolc.hov_reverse(1,D,U)[0][:,:,:]
+	res = adolc.hov_reverse(1,D,U)[0].copy()
+	#print res[0,:,:]
+	#print res[1,:,:]
+	res[0,:,1:] += res[1,:,:-1]
+	#print res[0,:,:]
+	H[n,:] = res[0,:,1]
 
-#print H
+	#tmp1 = adolc.hov_reverse(1,D,U)[0][:,:,:]
+
+print H
 #for n in range(2):
 	#for m in range(2):
 		#Fdot[n,m] = 1
