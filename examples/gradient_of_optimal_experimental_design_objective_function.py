@@ -54,10 +54,9 @@ def F(p,q,ts,Sigma, etas):
 	h = measurement_model(x,p,q)
 	return dot(Sigma, h-etas)
 	
-
 def Phi(J):
 	""" prototypical OED objective function"""
-	return trace(dot(J.T,J))
+	return trace(inv(dot(J.T,J)))
 
 if __name__ == "__main__":
 
@@ -68,16 +67,16 @@ if __name__ == "__main__":
 	Nv = Np + Nq
 	ts = linspace(0,10,Nm)
 	Sigma = eye(Nm)
-	p = array([10,2.])
-	q = array([-1])
+	p = array([10.,2.])
+	q = array([-1.])
 	v = concatenate((p,q))
 
 	# generate pseudoe measurement data
-	p[0]+=3; 	p[1] += 2.
+	p[0]+=3.; 	p[1] += 2.
 	x = explicit_euler(p[0],f,ts,p,q)
 	h = measurement_model(x,p,q)
 	etas = h + numpy.random.normal(size=Nm)
-	p[0]-= 3;	p[1] -= 2.
+	p[0]-= 3.;	p[1] -= 2.
 
 	# taping F
 	av = array([adolc.adouble(0) for i in range(Nv)])
@@ -90,38 +89,58 @@ if __name__ == "__main__":
 	for m in range(Nm):
 		y[m] = adolc.depends_on(ay[m])
 	adolc.trace_off()
+	#print ay
 
-	## PERFORM PARAMETER ESTIMATION
-	#def dFdp(p,q,ts,Sigma, etas):
-		#v[:Np] = p[:]
-		#return adolc.jacobian(1,v)[:,:Np]
-	#res = scipy.optimize.leastsq(F,p,args=(q,ts,Sigma,etas), Dfun = dFdp, full_output = True)
+	# taping measurement_model
+	av = array([adolc.adouble(0) for i in range(Nv)])
+	y = zeros(Nm)
+	adolc.trace_on(2)
+	av[0].is_independent(p[0])
+	av[1].is_independent(p[1])
+	av[2].is_independent(q[0])
+	ax = explicit_euler(av[0],f,ts,av[:Np],av[Np:])
+	ay = measurement_model(ax, av[:Np],av[Np:])
+	for m in range(Nm):
+		y[m] = adolc.depends_on(ay[m])
+	adolc.trace_off()
 
-	## plotting solution of parameter estimation and starting point
-	#p[0]+=3;	p[1] += 2.
-	#x = explicit_euler(p[0],f,ts,p,q)
-	#p[0]-= 3;	p[1] -= 2.
-	#starting_plot = plot(ts,x)
-	#x = explicit_euler(p[0],f,ts,p,q)
-	#correct_plot = plot(ts,x,'b.')
-	#meas_plot = plot(ts,etas,'r.')
-	#x = explicit_euler(res[0][0],f,ts,res[0],q)
-	#est_plot = plot(ts,x)
-	#plot(ts,etas,'r.')
-	#xlabel(r'time $t$ []')
-	#ylabel(r'measurement function $h(t,x,p,q)$')
-	#legend((meas_plot,starting_plot,correct_plot,est_plot),('measurements','initial guess','true','estimated'))
-	#savefig('parameter_estimation.png')
+	#print ay
+	#exit()
+
+	# PERFORM PARAMETER ESTIMATION
+	def dFdp(p,q,ts,Sigma, etas):
+		v[:Np] = p[:]
+		return adolc.jacobian(1,v)[:,:Np]
+	res = scipy.optimize.leastsq(F,p,args=(q,ts,Sigma,etas), Dfun = dFdp, full_output = True)
+
+	# plotting solution of parameter estimation and starting point
+	p[0]+=3;	p[1] += 2.
+	x = explicit_euler(p[0],f,ts,p,q)
+	y = adolc.zos_forward(2,v,0)
+	p[0]-= 3;	p[1] -= 2.
+	starting_plot = plot(ts,x)
+	x = explicit_euler(p[0],f,ts,p,q)
+	correct_plot = plot(ts,x,'b.')
+	meas_plot = plot(ts,etas,'r.')
+	x = explicit_euler(res[0][0],f,ts,res[0],q)
+	est_plot = plot(ts,x)
+	plot(ts,etas,'r.')
+	
+	hplot = plot(ts,y,'g.')
+	
+	xlabel(r'time $t$ []')
+	ylabel(r'measurement function $h(t,x,p,q)$')
+	legend((meas_plot,starting_plot,correct_plot,est_plot,hplot),('measurements','initial guess','true','estimated','measurement model'))
+	savefig('parameter_estimation.png')
+
 
 	# PERFORM OED
-	#v[:Np] = res[0][:]
-
-	print v
 
 	# tape the objective function with Algopy
-	J=adolc.jacobian(1,v)[:,:2]
+	J=adolc.jacobian(2,v)[:,:2]
+
 	cg = CGraph()
-	J0 = J
+	J0 = J.copy()
 	J1 = zeros(shape(J))
 	FJ = Function(Mtc(J0,J1))
 	Ff = Phi(FJ)
@@ -131,22 +150,18 @@ if __name__ == "__main__":
 
 	
 	# perform steepest descent optimization
-	for k in range(2):
+	vbar = inf
+	while numpy.linalg.norm(vbar)>10**-8:
 	
 		# 1: evaluation of J
-		Jtc=Mtc(adolc.jacobian(1,v)[:,:2],J1)
-		#print 'Jtc.X=',  Jtc.X
+		Jtc=Mtc(adolc.jacobian(2,v)[:,:2],J1)
 
 		# 2: forward evaluation of Phi
 		cg.forward([Jtc])
-		#print cg.dependentFunctionList[0].x
 	
 		# 3: reverse evaluation of Phi
 		cg.reverse([Mtc([[1.]],[[0.]])])
 		Jbar = FJ.xbar.X
-
-		#print 'Jbar=',Jbar
-
 
 		# 4: reverse evaluation of J
 		x = v
@@ -156,18 +171,19 @@ if __name__ == "__main__":
 		vbar = zeros(Nv)
 		for np in range(Np):
 			V[np,0] = 1
-			U = (Jbar.T)[:]
-			adolc.hos_forward(1,D,x,V,keep)
-			Z = adolc.hov_reverse(1,D,U)[0]
+			U = (Jbar.T).copy()
+			adolc.hos_forward(2,D,x,V,keep)
+			Z = adolc.hov_reverse(2,D,U)[0]
 			V[np,0] = 0
 			#print Z
 
 			vbar += sum(Z[:,:,1],axis=0)
-		print vbar
-		#print norm(vbar)
 
 		#update v:  x_k+1 = v_k - g
 		v[2:] -= vbar[2:]
+
+	print 'Optimal value of q=',v[2]
+
 	#print adolc.lagra_hess_vec(1,x,u,v) # doesn't work
 	
 	

@@ -95,7 +95,7 @@ class Mtc:
 
 	def inv(self):
 		Y0 = numpy.linalg.inv(self.X)
-		return Mtc( Y0, dot(Y0, dot(self.Xdot, Y0) ))
+		return Mtc( Y0, -1.*dot(Y0, dot(self.Xdot, Y0) ))
 
 	def trace(self):
 		return Mtc( [[self.X.trace()]], [[self.Xdot.trace()]])
@@ -418,7 +418,7 @@ class Function:
 			self.args[0].xbar += Mtc( self.xbar.X[0,0] * numpy.eye(N),  self.xbar.Xdot[0,0] *numpy.eye(N))
 
 		elif self.type == 'inv':
-			self.args[0].xbar += self.x.dot(self.xbar.dot(self.x))
+			self.args[0].xbar -= self.x.dot(self.xbar.dot(self.x))
 
 		elif self.type == 'trans':
 			self.args[0].xbar += self.xbar.transpose()

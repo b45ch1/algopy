@@ -209,20 +209,6 @@ def test_plot_computational_graph():
 	cg.plot(filename = 'trash/computational_graph_dot.svg', method = 'dot' )
 
 
-def test_inverse_2x2():
-	A =    array([[3.,0.],[0.,7.]])
-	Adot = array([[1.,0.],[0.,0.]])
-	cg = CGraph()
-	FA = Function(Mtc(A,Adot))
-	Finv = FA.inv()
-	Cbar = eye(2)
-	cg.independentFunctionList = [FA]
-	cg.dependentFunctionList = [Finv]
-	cg.reverse([Mtc(Cbar)])
-	C = inv(A)
-	assert numpy.prod( numpy.linalg.inv(A) == Finv.x.X )
-	assert numpy.prod( dot(dot(C,Cbar),C) == FA.xbar.X)
-	
 def test_trace_2x2():
 	"""
 	"""
@@ -233,15 +219,48 @@ def test_trace_2x2():
 	
 	cg = CGraph()
 	FA = Function(Mtc(A,Adot))
-	Ftr = FA.trace()
+	Ftr = trace(FA)
 	cg.independentFunctionList = [FA]
 	cg.dependentFunctionList = [Ftr]
 	cg.reverse([Mtc(trbar,trbardot)])
-
-
+	
 	assert numpy.prod( FA.xbar.X == array([[13.,0.],[0.,13.]]))
 	
+def test_inv_2x2_forward():
+	x = 2.
+	y = 3.
+	for n in range(2):
+		A = array([[x, 0.],[0.,y]])
+		Adot = zeros((2,2))
+		Adot[n,n] = 1.
+		trbar = array([[1.]])
+		trbardot = array([[0.]])
 
+		cg = CGraph()
+		FA = Function(Mtc(A,Adot))
+		Ftr = trace(inv(FA))
+		assert Ftr.x.X[[0]] == A[0,0]**-1 +A[1,1]**-1
+		assert Ftr.x.Xdot[[0]] == -A[n,n]**-2 * Adot[n,n]
+
+def test_inv_2x2_reverse():
+	x = 3.
+	y = 7.
+	z = array([x,y])
+	for n in range(2):
+		A = array([[x, 0.],[0.,y]])
+		Adot = zeros((2,2))
+		Adot[n,n] = 1.
+		trbar = array([[1.]])
+		trbardot = array([[0.]])
+
+		cg = CGraph()
+		FA = Function(Mtc(A,Adot))
+		Ftr = trace(inv(FA))
+		cg.independentFunctionList = [FA]
+		cg.dependentFunctionList = [Ftr]
+		cg.reverse([Mtc(trbar,trbardot)])
+		assert abs(FA.xbar.Xdot[n,n] - 2./z[n]**3)<10**-7
+		assert abs(sum(FA.xbar.Xdot) - 2./z[n]**3)<10**-7
 
 def test_newtons_method():
 	"""
