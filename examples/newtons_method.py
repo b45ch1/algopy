@@ -6,6 +6,8 @@ from matrix_ad import *
 import adolc
 import numpy.random
 import scipy.optimize
+import numpy.linalg
+
 
 """
 goal: compute the Hessian of the function
@@ -18,12 +20,12 @@ F = [[x*y,x**2],[x**2*y,y**3*x]]
 # OBJECTIVE FUNCTION
 # ------------------
 def Phi(F):
-	return trace(F*F)
+	return trace( dot(F.T,F))
 
 def ffcn(x):
 	 return 0.5*array(
-[[x[0]*x[0], x[0]*x[0]],
-[ x[0]*x[0] , x[1]*x[1]]])
+[[(x[0]-17.)*(x[0]-17.), (x[0]-17.)*(x[0]-17.)],
+[ x[1]-19. , x[1]-19.]])
 
 # TAPING THE FUNCTIONS
 # --------------------
@@ -54,69 +56,56 @@ cg.dependentFunctionList = [Fy]
 # need for that to propagate two directions
 # then reverse
 
-H = zeros((2,2))
-
-for n in range(2):
-	# 1: hos_forward, propagate two directions
-	x = array([5.,2.])
-	D = 2
-	keep = D+1
+def gradient_and_hessian_of_Phi(x):
+	H = zeros((2,2)) # Hessian
+	g = zeros(2) # gradient
 	V = zeros((2,1))
 	F = zeros((2,2))
 	Fdot = zeros((2,2))
-	V[n,0] = 1.
-	(y,W) = adolc.hos_forward(1,D,x,V,keep)
-	V[n,0] = 0.
-	F[0,:] = y[:2]
-	F[1,:] = y[2:]
-	#print 'W=',W
-	Fdot[0,:] = W[:2,0]
-	Fdot[1,:] = W[2:,0]
-
-	#print 'F=',F
-	#print 'Fdot=',Fdot
+	D = 2
+	keep = D+1
 	
-	# 2: matrix forward
-	cg.forward([Mtc(F,Fdot)])
-	#print 'cg.dependentFunctionList[0].x',cg.dependentFunctionList[0].x
-	
-	# 3: matrix reverse
-	Phibar = array([[1.]])
-	Phibardot = array([[0.]])
-	cg.reverse([Mtc(Phibar, Phibardot)])
-	#print '----------------'
-	#print cg
-	#print 'cg.independentFunctionList[0].xbar',cg.independentFunctionList[0].xbar
+	for n in range(2):
+		# 1: hos_forward, propagate two directions
+		V[n,0] = 1.
+		(y,W) = adolc.hos_forward(1,D,x,V,keep)
+		V[n,0] = 0.
+		F[0,:] = y[:2]
+		F[1,:] = y[2:]
+		Fdot[0,:] = W[:2,0]
+		Fdot[1,:] = W[2:,0]
 
-	
-	# 4: hov_reverse
-	U = zeros((2,4))
-	U[0,:] = cg.independentFunctionList[0].xbar.X.flatten()
-	U[1,:] = cg.independentFunctionList[0].xbar.Xdot.flatten()
-	#print 'U=',U
-	#print 'adolc.hov_reverse(1,D,U)[0]=', adolc.hov_reverse(1,D,U)[0][:,:,:]
-	res = adolc.hov_reverse(1,D,U)[0].copy()
-	#print res[0,:,:]
-	#print res[1,:,:]
-	res[0,:,1:] += res[1,:,:-1]
-	#print res[0,:,:]
-	H[n,:] = res[0,:,1]
+		# 2: matrix forward
+		cg.forward([Mtc(F,Fdot)])
 
-	#tmp1 = adolc.hov_reverse(1,D,U)[0][:,:,:]
+		# 3: matrix reverse
+		Phibar = array([[1.]])
+		Phibardot = array([[0.]])
+		cg.reverse([Mtc(Phibar, Phibardot)])
 
-print H
-#for n in range(2):
-	#for m in range(2):
-		#Fdot[n,m] = 1
-		#cg.forward([Mtc(F,Fdot)])
-		#Phibar = array([[1.]])
-		#Phibardot = array([[0.]])
-		#cg.reverse([Mtc(Phibar, Phibardot)])
-		#Fdot[n,m] = 0
-		##print cg.independentFunctionList[0].xbar
+		# 4: hov_reverse
+		U = zeros((1,4,2))
+		U[0,:,0] = cg.independentFunctionList[0].xbar.X.flatten()
+		U[0,:,1] = cg.independentFunctionList[0].xbar.Xdot.flatten()
+		res = adolc.hovt_reverse(1,D,U)[0].copy()
+		g[:]   = res[0,:,0]
+		H[n,:] = res[0,:,1]
+		
+	return (g,H)
 
-# compute new search direction
-#delta_q = numpy.linalg.solve(H,-g[:,0])
-#print delta_q
-#q_plus = [13.,17.] + delta_q
-#assert numpy.prod(q_plus == [0.,0.])
+def newtons_method(x0):
+	x = x0.copy()
+
+	g = numpy.inf
+	k = 0
+	while numpy.linalg.norm(g)>10**-12:
+		print 'iteration: %2d'%k; k+=1
+		(g,H) = gradient_and_hessian_of_Phi(x)
+		# compute new search direction
+		delta_x = numpy.linalg.solve(H,-g)
+		#update x
+		x += delta_x
+	return x
+
+x = numpy.array([13.,17.])
+print newtons_method(x)

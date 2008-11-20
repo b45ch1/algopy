@@ -57,7 +57,7 @@ def F(p,q,ts,Sigma, etas):
 
 def Phi(J):
 	""" prototypical OED objective function"""
-	return trace(inv(dot(J.T,J)))
+	return trace(dot(J.T,J))
 
 if __name__ == "__main__":
 
@@ -91,30 +91,32 @@ if __name__ == "__main__":
 		y[m] = adolc.depends_on(ay[m])
 	adolc.trace_off()
 
-	# PERFORM PARAMETER ESTIMATION
-	def dFdp(p,q,ts,Sigma, etas):
-		v[:Np] = p[:]
-		return adolc.jacobian(1,v)[:,:Np]
-	res = scipy.optimize.leastsq(F,p,args=(q,ts,Sigma,etas), Dfun = dFdp, full_output = True)
+	## PERFORM PARAMETER ESTIMATION
+	#def dFdp(p,q,ts,Sigma, etas):
+		#v[:Np] = p[:]
+		#return adolc.jacobian(1,v)[:,:Np]
+	#res = scipy.optimize.leastsq(F,p,args=(q,ts,Sigma,etas), Dfun = dFdp, full_output = True)
 
-	# plotting solution of parameter estimation and starting point
-	p[0]+=3;	p[1] += 2.
-	x = explicit_euler(p[0],f,ts,p,q)
-	p[0]-= 3;	p[1] -= 2.
-	starting_plot = plot(ts,x)
-	x = explicit_euler(p[0],f,ts,p,q)
-	correct_plot = plot(ts,x,'b.')
-	meas_plot = plot(ts,etas,'r.')
-	x = explicit_euler(res[0][0],f,ts,res[0],q)
-	est_plot = plot(ts,x)
-	plot(ts,etas,'r.')
-	xlabel(r'time $t$ []')
-	ylabel(r'measurement function $h(t,x,p,q)$')
-	legend((meas_plot,starting_plot,correct_plot,est_plot),('measurements','initial guess','true','estimated'))
-	savefig('parameter_estimation.png')
+	## plotting solution of parameter estimation and starting point
+	#p[0]+=3;	p[1] += 2.
+	#x = explicit_euler(p[0],f,ts,p,q)
+	#p[0]-= 3;	p[1] -= 2.
+	#starting_plot = plot(ts,x)
+	#x = explicit_euler(p[0],f,ts,p,q)
+	#correct_plot = plot(ts,x,'b.')
+	#meas_plot = plot(ts,etas,'r.')
+	#x = explicit_euler(res[0][0],f,ts,res[0],q)
+	#est_plot = plot(ts,x)
+	#plot(ts,etas,'r.')
+	#xlabel(r'time $t$ []')
+	#ylabel(r'measurement function $h(t,x,p,q)$')
+	#legend((meas_plot,starting_plot,correct_plot,est_plot),('measurements','initial guess','true','estimated'))
+	#savefig('parameter_estimation.png')
 
 	# PERFORM OED
-	v[:Np] = res[0][:]
+	#v[:Np] = res[0][:]
+
+	print v
 
 	# tape the objective function with Algopy
 	J=adolc.jacobian(1,v)[:,:2]
@@ -125,21 +127,25 @@ if __name__ == "__main__":
 	Ff = Phi(FJ)
 	cg.independentFunctionList = [FJ]
 	cg.dependentFunctionList = [Ff]
+	cg.plot('testgraph.png')
 
 	
 	# perform steepest descent optimization
-	for k in range(10):
+	for k in range(2):
 	
 		# 1: evaluation of J
-		Jtc=Mtc(adolc.jacobian(1,v)[:,:2])
+		Jtc=Mtc(adolc.jacobian(1,v)[:,:2],J1)
+		#print 'Jtc.X=',  Jtc.X
 
 		# 2: forward evaluation of Phi
 		cg.forward([Jtc])
 		#print cg.dependentFunctionList[0].x
 	
 		# 3: reverse evaluation of Phi
-		cg.reverse([Mtc([[1.]])])
+		cg.reverse([Mtc([[1.]],[[0.]])])
 		Jbar = FJ.xbar.X
+
+		#print 'Jbar=',Jbar
 
 
 		# 4: reverse evaluation of J
@@ -157,8 +163,8 @@ if __name__ == "__main__":
 			#print Z
 
 			vbar += sum(Z[:,:,1],axis=0)
-
-		print norm(vbar)
+		print vbar
+		#print norm(vbar)
 
 		#update v:  x_k+1 = v_k - g
 		v[2:] -= vbar[2:]
