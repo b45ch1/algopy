@@ -1,8 +1,11 @@
 #!/usr/bin/env python
-#import sys
-#sys.path = ['..'] + sys.path
-from reverse_mode import *
 
+try:
+	import sys
+	sys.path = ['..'] + sys.path
+	from reverse_mode import *
+except:
+	from reverse_mode import *
 
 
 #############################################################
