@@ -7,6 +7,8 @@ import adolc
 import numpy.random
 import scipy.optimize
 
+from prettyplotting import * # comment this out if not available
+
 
 """
 # We look at the following OED problem:
@@ -131,10 +133,14 @@ if __name__ == "__main__":
 	xlabel(r'time $t$ []')
 	ylabel(r'measurement function $h(t,x,p,q)$')
 	legend((meas_plot,starting_plot,correct_plot,est_plot,hplot),('measurements','initial guess','true','estimated','measurement model'))
+	title('Parameter Estimation')
 	savefig('parameter_estimation.png')
+	savefig('parameter_estimation.eps')
+
 
 
 	# PERFORM OED
+	v0 = v.copy()
 
 	# tape the objective function with Algopy
 	J=adolc.jacobian(2,v)[:,:2]
@@ -147,17 +153,19 @@ if __name__ == "__main__":
 	cg.independentFunctionList = [FJ]
 	cg.dependentFunctionList = [Ff]
 	cg.plot('testgraph.png')
+	cg.plot('testgraph.svg')
+
 
 	
 	# perform steepest descent optimization
 	vbar = inf
 	while numpy.linalg.norm(vbar)>10**-8:
-	
 		# 1: evaluation of J
-		Jtc=Mtc(adolc.jacobian(2,v)[:,:2],J1)
+		Jtc=Mtc(adolc.jacobian(1,v)[:,:Np],J1)
 
 		# 2: forward evaluation of Phi
 		cg.forward([Jtc])
+		#print 'Phi=',cg.dependentFunctionList[0].x.X
 	
 		# 3: reverse evaluation of Phi
 		cg.reverse([Mtc([[1.]],[[0.]])])
@@ -171,20 +179,57 @@ if __name__ == "__main__":
 		vbar = zeros(Nv)
 		for np in range(Np):
 			V[np,0] = 1
-			U = (Jbar.T).copy()
-			adolc.hos_forward(2,D,x,V,keep)
-			Z = adolc.hov_reverse(2,D,U)[0]
+			u = (Jbar.T)[np,:].copy()
+			adolc.hos_forward(1,D,x,V,keep)
+			Z = adolc.hos_reverse(1,D,u)
 			V[np,0] = 0
-			#print Z
-
-			vbar += sum(Z[:,:,1],axis=0)
-
+			#print 'Z=',Z
+			vbar += Z[2,1]
 		#update v:  x_k+1 = v_k - g
 		v[2:] -= vbar[2:]
+	print 'v_opt =',v
+	print 'v0=',v0
 
-	print 'Optimal value of q=',v[2]
+	# plot Phi for different values of q
+	# ----------------------------------
+	def dFdp(p,q,ts,Sigma, etas):
+		v = concatenate((p,q))
+		return adolc.jacobian(2,v)[:,:Np]
+	
+	qs = linspace(-1,2,100)
+	Phis = []
+	for q in qs:
+		q = array([q])
+		J = dFdp(p,q,ts,Sigma, etas)
+		Phis.append(Phi(J))
 
-	#print adolc.lagra_hess_vec(1,x,u,v) # doesn't work
+	figure()
+	qplot = plot(qs,Phis,'k')
+	optimal_plot = plot([v[2]], cg.dependentFunctionList[0].x.X[0] , 'go')
+	xlabel(r'$q$')
+	ylabel(r'$\Phi(q)$')
+	legend((qplot, optimal_plot), (r'$\Phi(q)$','computed optimal solution'))
+	title('Optimal Design of Experiments')
+	savefig('odoe_objective_function.png')
+	savefig('odoe_objective_function.eps')
+
+	# plot state for initial value and optimal value
+	# ----------------------------------
+	figure()
+	p0 = v0[:2]
+	q0 = array([v0[2]])
+	x0 = explicit_euler(p0[0],f,ts,p0,q0)
+	initial_plot = plot(ts,x0,'b')
+
+	p_opt = v[:2]
+	q_opt = array([v[2]])
+	x_opt = explicit_euler(p_opt[0],f,ts,p_opt,q_opt)
+	opt_plot = semilogy(ts,x_opt,'r')
+	xlabel(r'time $t$ [sec]')
+	ylabel(r'$x(t)$')
+	legend((opt_plot,initial_plot),('optimal state traj.', 'initial state traj.'))
+	
+	#show()
 	
 	
 
