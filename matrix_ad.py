@@ -418,7 +418,7 @@ class Function:
 			self.args[0].xbar += Mtc( self.xbar.X[0,0] * numpy.eye(N),  self.xbar.Xdot[0,0] *numpy.eye(N))
 
 		elif self.type == 'inv':
-			self.args[0].xbar -= self.x.dot(self.xbar.dot(self.x))
+			self.args[0].xbar -= self.x.T.dot(self.xbar.dot(self.x.T))
 
 		elif self.type == 'trans':
 			self.args[0].xbar += self.xbar.transpose()
