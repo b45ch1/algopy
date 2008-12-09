@@ -7,6 +7,6 @@ from Cython.Distutils import build_ext
 
 setup(
     cmdclass = {'build_ext': build_ext},
-    ext_modules = [Extension("vector_forward_mode", ["vector_forward_mode.pyx"])]
+    ext_modules = [Extension("cython_vector_forward_mode", ["cython_vector_forward_mode.pyx"])]
 )
  

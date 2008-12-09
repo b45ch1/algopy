@@ -5,6 +5,115 @@ Vector Forward Mode
 from __future__ import division
 import numpy as npy
 import numpy
+import instant
+
+
+c_code_adouble__add__ = """
+void add(int Ndim_lhs, int * Dims_lhs, double *lhs, int Ndim_rhs, int * Dims_rhs, double *rhs, int Ndim_result, int * Dims_result, double *result){
+	if(Ndim_lhs == 2){
+		const int D = Dims_lhs[0];
+		const int Ndir = Dims_lhs[1];
+		for(int d=0; d != D; ++d){
+			for(int n=0; n != Ndir; ++n){
+				result[d*Ndir + n] += lhs[d*Ndir+n];
+				result[d*Ndir + n] += rhs[d*Ndir+n];
+			}
+		}
+	}
+	else{
+		const int D = Dims_lhs[0];
+		for(int d=0; d != D; ++d){
+			result[d] += lhs[d];
+			result[d] += rhs[d];
+		}
+	}
+}
+"""
+
+c_code_adouble__sub__ = """
+void sub(int Ndim_lhs, int * Dims_lhs, double *lhs, int Ndim_rhs, int * Dims_rhs, double *rhs, int Ndim_result, int * Dims_result, double *result){
+	if(Ndim_lhs == 2){
+		const int D = Dims_lhs[0];
+		const int Ndir = Dims_lhs[1];
+		for(int d=0; d != D; ++d){
+			for(int n=0; n != Ndir; ++n){
+				result[d*Ndir + n] -= lhs[d*Ndir+n];
+				result[d*Ndir + n] -= rhs[d*Ndir+n];
+			}
+		}
+	}
+	else{
+		const int D = Dims_lhs[0];
+		for(int d=0; d != D; ++d){
+			result[d] -= lhs[d];
+			result[d] -= rhs[d];
+		}
+	}
+}
+"""
+
+c_code_adouble__mul__ = """
+void mul(int Ndim_lhs, int * Dims_lhs, double *lhs, int Ndim_rhs, int * Dims_rhs, double *rhs, int Ndim_result, int * Dims_result, double *result){
+	if(Ndim_lhs == 2){
+		const int D = Dims_lhs[0];
+		const int Ndir = Dims_lhs[1];
+		for(int d=0; d != D; ++d){
+			for(int k = 0; k != d; ++k){
+				for(int n=0; n != Ndir; ++n){
+					result[d*Ndir + n] += lhs[k*Ndir+n] * rhs[(d-k)*Ndir+n];
+				}
+			}
+		}
+	}
+	else{
+		const int D = Dims_lhs[0];
+		for(int d=0; d != D; ++d){
+			for(int k = 0; k <= d; ++k){
+				result[d] += lhs[k] * rhs[d-k];
+			}
+		}
+	}
+}
+"""
+
+c_code_adouble__div__ = """
+void div(int Ndim_lhs, int * Dims_lhs, double *lhs, int Ndim_rhs, int * Dims_rhs, double *rhs, int Ndim_result, int * Dims_result, double *result){
+	if(Ndim_lhs == 2){
+		const int D = Dims_lhs[0];
+		const int Ndir = Dims_lhs[1];
+		for(int d=0; d != D; ++d){
+			for(int n=0; n != Ndir; ++n){
+				result[d*Ndir+n]+=lhs[d*Ndir+n];
+			}
+			for(int k=0; k!=d; ++k){
+				for(int n=0; n != Ndir; ++n){
+					result[d*Ndir + n] -= result[k*Ndir + n]*rhs[(d-k)*Ndir + n];
+				}
+			}
+			for(int n=0; n != Ndir; ++n){
+				result[d*Ndir + n] /= rhs[0+n];
+			}
+
+		}
+	}
+	else{
+		const int D = Dims_lhs[0];
+		for(int d=0; d != D; ++d){
+			result[d]+=lhs[d];
+			for(int k=0; k!=d; ++k){
+				result[d] -= result[k]*rhs[d-k];
+			}
+			result[d] /= rhs[0];
+		}
+	}
+}
+"""
+
+adouble__add__ = instant.inline_with_numpy(c_code_adouble__add__, arrays=[['Ndim_lhs', 'Dims_lhs', 'lhs'], ['Ndim_rhs', 'Dims_rhs', 'rhs'], ['Ndim_result', 'Dims_result', 'result']] )
+adouble__sub__ = instant.inline_with_numpy(c_code_adouble__sub__, arrays=[['Ndim_lhs', 'Dims_lhs', 'lhs'], ['Ndim_rhs', 'Dims_rhs', 'rhs'], ['Ndim_result', 'Dims_result', 'result']] )
+adouble__mul__ = instant.inline_with_numpy(c_code_adouble__mul__, arrays=[['Ndim_lhs', 'Dims_lhs', 'lhs'], ['Ndim_rhs', 'Dims_rhs', 'rhs'], ['Ndim_result', 'Dims_result', 'result']] )
+adouble__div__ = instant.inline_with_numpy(c_code_adouble__div__, arrays=[['Ndim_lhs', 'Dims_lhs', 'lhs'], ['Ndim_rhs', 'Dims_rhs', 'rhs'], ['Ndim_result', 'Dims_result', 'result']] )
+
 
 
 class adouble:
@@ -36,13 +145,14 @@ class adouble:
 
 	def __add__(self, rhs):
 		"""compute new Taylorseries of the function f(x,y) = x+y, where x and y adouble objects"""
-		tmp = adouble(self.tc)
+		retval = adouble(numpy.zeros(numpy.shape(self.tc)))
 		if isinstance(rhs, adouble):
-			tmp.tc += rhs.tc
-			return tmp
+			adouble__add__(self.tc,rhs.tc,retval.tc)
+			return retval
 		elif npy.isscalar(rhs):
-			tmp.tc[0] += rhs
-			return tmp
+			retval.tc += self.tc
+			retval.tc[0] += rhs
+			return retval
 		else:
 			raise NotImplementedError
 
@@ -50,37 +160,31 @@ class adouble:
 		return self+val
 
 	def __sub__(self, rhs):
-		tmp = self.copy()
+		retval = adouble(numpy.zeros(numpy.shape(self.tc)))
 		if isinstance(rhs, adouble):
-			tmp.tc -= rhs.tc
-			return tmp
+			adouble__sub__(self.tc,rhs.tc,retval.tc)
+			return retval
 		elif npy.isscalar(rhs):
-			tmp.tc[0] -= rhs
-			return tmp
+			retval.tc += self.tc
+			retval.tc[0] -= rhs
+			return retval
 		else:
 			raise NotImplementedError
 
 	def __rsub__(self, other):
 		return -self + other
 
+
 	def __mul__(self, rhs):
 		"""compute new Taylorseries of the function f(x,y) = x*y, where x and y adouble objects"""
 		if isinstance(rhs, adouble):
-			#try:
-			#print 'self.D=',self.D
-			#print 'numpy.shape(self.tc)',numpy.shape(self.tc)
-			#print ' npy.sum(self.tc[:k+1] * rhs.tc[k::-1]', self.tc[:k+1] * rhs.tc[k::-1]
-			return adouble(npy.array(
-					[ npy.sum(self.tc[:k+1] * rhs.tc[k::-1], axis = 0) for k in range(self.D)]
-					))
-			#except:
-				#print self.tc
-				#exit()
-				#for k in range(self.D):
-					#print 'self.D=',self.D
-					#print 'k=',k
-					#print 'self.tc[:k+1] * rhs.tc[k::-1] = ',self.tc[:k+1] * rhs.tc[k::-1]
-				#exit()
+			retval = adouble(numpy.zeros(numpy.shape(rhs.tc)))
+			adouble__mul__(self.tc,rhs.tc,retval.tc)
+			return retval
+			#return adouble(npy.array(
+					#[ npy.sum(self.tc[:k+1] * rhs.tc[k::-1], axis = 0) for k in range(self.D)]
+					#))
+
 		elif npy.isscalar(rhs):
 			return adouble(rhs * self.tc)
 		else:
@@ -92,10 +196,13 @@ class adouble:
 	def __div__(self, rhs):
 		"""compute new Taylorseries of the function f(x,y) = x/y, where x and y adouble objects"""
 		if isinstance(rhs, adouble):
-			y = adouble(npy.zeros(self.shp))
-			for k in range(self.D):
-				y.tc[k] = 1./ rhs.tc[0] * ( self.tc[k] - npy.sum(y.tc[:k] * rhs.tc[k:0:-1], axis = 0))
-			return y
+			retval = numpy.zeros(numpy.shape(rhs.tc))
+			adouble__div__(self.tc,rhs.tc,retval)
+			return adouble(retval)
+			#y = adouble(npy.zeros(self.shp))
+			#for k in range(self.D):
+				#y.tc[k] = 1./ rhs.tc[0] * ( self.tc[k] - npy.sum(y.tc[:k] * rhs.tc[k:0:-1], axis = 0))
+			#return y
 		else:
 			y = adouble(npy.zeros(self.shp))
 			for k in range(self.D):
@@ -327,7 +434,7 @@ def vector_gradient(f,in_x):
 	if npy.isscalar(in_x) == True:
 		x = array([in_x],dtype=float)
 	else:
-		x = in_x.copy()
+		x = numpy.array(in_x)
 	
 	N = numpy.prod(numpy.shape(x))
 	tmp = numpy.zeros((N,2,N))

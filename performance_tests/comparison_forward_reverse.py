@@ -11,7 +11,7 @@ import reverse_mode as rm
 import adolc
 
 
-Ns = [2**i for i in range(11)]
+Ns = [2**i for i in range(10)]
 function_eval_times = []
 forward_eval_times = []
 tape_rev_eval_times = []

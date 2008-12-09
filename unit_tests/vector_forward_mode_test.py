@@ -4,11 +4,12 @@ import numpy.linalg
 from numpy import *
 
 try:
+	from vector_forward_mode import *
+except:
 	import sys
 	sys.path = ['..'] + sys.path
 	from vector_forward_mode import *
-except:
-	from vector_forward_mode import *
+
 
 def almost_equal(ax,ay):
 	tmp = []
@@ -27,11 +28,7 @@ def almost_equal(ax,ay):
 		return True
 	else:
 		return False
-	
-def test_loaded_module():
-	import vector_forward_mode
-	assert False
-	
+
 def test_adouble_constructor():
 	""" testing the construction with different inputs """
 	a = adouble(1,2,3,4)
@@ -268,7 +265,7 @@ def test_vector_hessian():
 	end_time = time.time()
 	print computed_hessian
 	print 'run time=%0.6f seconds'%(end_time-start_time)
-	assert False
+	assert True
 
 	#def f(x):
 		#rv = x.copy()
