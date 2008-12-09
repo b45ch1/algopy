@@ -1,10 +1,14 @@
 #!/usr/bin/env python
-import sys
 import numpy
 import numpy.linalg
+from numpy import *
 
-#sys.path = ['..'] + sys.path
-from vector_forward_mode import *
+try:
+	import sys
+	sys.path = ['..'] + sys.path
+	from vector_forward_mode import *
+except:
+	from vector_forward_mode import *
 
 def almost_equal(ax,ay):
 	tmp = []
@@ -24,6 +28,9 @@ def almost_equal(ax,ay):
 	else:
 		return False
 	
+def test_loaded_module():
+	import vector_forward_mode
+	assert False
 	
 def test_adouble_constructor():
 	""" testing the construction with different inputs """
