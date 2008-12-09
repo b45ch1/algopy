@@ -62,11 +62,13 @@ void mul( int tmp_lhs, double *lhs, int Ndim_lhs, int * Dims_lhs, double *lhs_tc
 				}
 			}
 		}
-		lhs[0]*= rhs;	
-	}
-
+		lhs[0]*= rhs;
+	}	
 }
 """
+
+
+
 
 adouble__imul__ = instant.inline_with_numpy(c_code_adouble__imul__, arrays=[['tmp_lhs','lhs'],['Ndim_lhs', 'Dims_lhs', 'lhs_tc'], ['Ndim_rhs', 'Dims_rhs', 'rhs_tc']] )
 
@@ -728,7 +730,7 @@ def hessian(f, in_x):
 	cg.independentFunctionList = ax
 	ay = f(ax)
 	cg.dependentFunctionList = numpy.array([ay])
-	cg.reverse(numpy.array([Tc(1., [[0,0]])]))
+	cg.reverse(numpy.array([Tc(1., [[0.,0.]])]))
 	
 	H = numpy.zeros((N,N),dtype=float)
 	for r in range(N):
@@ -737,25 +739,25 @@ def hessian(f, in_x):
 	return H
 
 
-if __name__ == "__main__":
-	lhs = numpy.array([2.])
-	rhs = 3.
-	lhs_tc = numpy.array([1.,2.])
-	rhs_tc = numpy.array([1.,2.])
-	adouble__imul__(lhs, lhs_tc, rhs, rhs_tc)
+#if __name__ == "__main__":
+	#lhs = numpy.array([2.])
+	#rhs = 3.
+	#lhs_tc = numpy.array([1.,2.])
+	#rhs_tc = numpy.array([1.,2.])
+	#adouble__imul__(lhs, lhs_tc, rhs, rhs_tc)
 
-	print lhs
-	print lhs_tc
+	#print lhs
+	#print lhs_tc
 
 
-	lhs = numpy.array([2.])
-	rhs = 3.
-	lhs_tc = numpy.array([[1.],[2.]])
-	rhs_tc = numpy.array([[1.],[2.]])
-	adouble__imul__(lhs, lhs_tc, rhs, rhs_tc)
+	#lhs = numpy.array([2.])
+	#rhs = 3.
+	#lhs_tc = numpy.array([[1.],[2.]])
+	#rhs_tc = numpy.array([[1.],[2.]])
+	#adouble__imul__(lhs, lhs_tc, rhs, rhs_tc)
 
-	print lhs
-	print lhs_tc
+	#print lhs
+	#print lhs_tc
 	
 
 	## Test on Taylor Coefficients

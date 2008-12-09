@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 
 try:
+	from reverse_mode import *
+except:
 	import sys
 	sys.path = ['..'] + sys.path
 	from reverse_mode import *
-except:
-	from reverse_mode import *
-
 
 #############################################################
 #   TESTING CLASS TC
@@ -183,14 +182,14 @@ def test_incremental_multiplication_multiple_directions_Tc_Tc_same_order():
 
 def test_incremental_multiplication_multiple_directions_Tc_scalar():
 	t0 = 2.
-	tc = array([[1,2,3],[4,5,6]])
+	tc = array([[1.,2,3],[4,5,6]])
 	a = Tc(t0,tc.copy())
-	a *= 2
+	a *= 2.
 	print 'a=',a
 	print 'a.tc=',a.tc
-	print '2*tc=',2*tc
-	assert a == 4
-	assert prod(a.tc == 2*tc)
+	print '2*tc=',2.*tc
+	assert a == 4.
+	assert prod(a.tc == 2.*tc)
 
 
 					  
@@ -681,9 +680,9 @@ def test_conditionals():
 	
 		
 	cg = CGraph()
-	a = Function(Tc([1,2,3]))
-	b = Function(Tc([34,2]))
-	c = Function(Tc([34,3]))
+	a = Function(Tc([1.,2.,3.]))
+	b = Function(Tc([34.,2.]))
+	c = Function(Tc([34.,3.]))
 
 	c = ge(a,b)
 	d = ge(b,a)
@@ -750,7 +749,7 @@ def test_graph_sin():
 	#f = exp(cos(sin(x)+y)+x)
 	cg.independentFunctionList = [x]
 	cg.dependentFunctionList = [f]
-	cg.reverse([Tc(1)])
+	cg.reverse([Tc(1.)])
 
 	print 'x.xbar.t0=',x.xbar.t0
 	print 'cos(x.x.t0)=',cos(x.x.t0)
@@ -761,7 +760,7 @@ def test_graph_sin():
 	assert x.xbar.t0 == cos(x.x.t0)
 	assert x.xbar.tc[0,0] == -sin(x.x.t0)
 
-	assert 2*x.xbar.tc[1,0] == -cos(x.x.t0)
+	assert 2.*x.xbar.tc[1,0] == -cos(x.x.t0)
 	
 	
 def test_graph_exp():
@@ -770,7 +769,7 @@ def test_graph_exp():
 	f = exp(x)
 	cg.independentFunctionList = [x]
 	cg.dependentFunctionList = [f]
-	cg.reverse([Tc(1)])
+	cg.reverse([Tc(1.)])
 
 	assert x.xbar.t0 == exp(x.x.t0)
 	assert x.xbar.tc[0,0] == exp(x.x.t0)
