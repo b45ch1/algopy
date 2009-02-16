@@ -132,7 +132,12 @@ def gamma(i,j):
 	k = numpy.zeros(N,dtype=int)
 	sum_recursion(k,0)
 	return retval[0]
-		
+	
+# DEFINING THE OED PROBLEM AND IMPLEMENTATION OF THE EXPLICIT EULER ODE INTEGRATOR
+# to solve the problem, an ode integrator is needed, we implement here 
+# the explicit euler method, since it is the simplest, it can also be differentiated
+# with adol-c	
+	
 def explicit_euler(x0,f,ts,p,q):
 	N = size(ts)
 	if isinstance(p[0],adolc.adouble):
@@ -174,7 +179,7 @@ if __name__ == "__main__":
 	q = array([-1.])
 	v = concatenate((p,q))
 
-	# generate pseudoe measurement data
+	# generate pseudo measurement data
 	p[0]+=3.; 	p[1] += 2.
 	x = explicit_euler(p[0],f,ts,p,q)
 	h = measurement_model(x,p,q)
