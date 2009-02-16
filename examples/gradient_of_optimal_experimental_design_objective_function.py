@@ -136,6 +136,7 @@ if __name__ == "__main__":
 
 
 	# PERFORM OED
+	# ===========
 	v0 = v.copy()
 
 	# tape the objective function with Algopy
@@ -150,8 +151,6 @@ if __name__ == "__main__":
 	cg.dependentFunctionList = [Ff]
 	cg.plot('testgraph.png')
 	cg.plot('testgraph.svg')
-
-
 	
 	# perform steepest descent optimization
 	vbar = inf
@@ -186,8 +185,8 @@ if __name__ == "__main__":
 	print 'v_opt =',v
 	print 'v0=',v0
 
-	# plot Phi for different values of q
-	# ----------------------------------
+	# plot Phi
+	# --------
 	def dFdp(p,q,ts,Sigma, etas):
 		v = concatenate((p,q))
 		return adolc.jacobian(2,v)[:,:Np]
