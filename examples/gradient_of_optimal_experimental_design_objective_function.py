@@ -91,7 +91,6 @@ if __name__ == "__main__":
 	for m in range(Nm):
 		y[m] = adolc.depends_on(ay[m])
 	adolc.trace_off()
-	#print ay
 
 	# taping measurement_model
 	av = array([adolc.adouble(0) for i in range(Nv)])
@@ -105,9 +104,6 @@ if __name__ == "__main__":
 	for m in range(Nm):
 		y[m] = adolc.depends_on(ay[m])
 	adolc.trace_off()
-
-	#print ay
-	#exit()
 
 	# PERFORM PARAMETER ESTIMATION
 	def dFdp(p,q,ts,Sigma, etas):

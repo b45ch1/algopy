@@ -30,7 +30,7 @@ def test_1x1dot1x1_reverse():
 	#zer = Mtc(array([[0.]]))
 	#Fzer = Function(zer)
 
-	FR = Fq[0].dot(Fq[1])
+	FR = dot(Fq[0],Fq[1])
 
 	cg.independentFunctionList = Fq
 	cg.dependentFunctionList = [FR]

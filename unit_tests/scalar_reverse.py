@@ -791,6 +791,7 @@ def test_graph_plotting_all_implemented_functions():
 	cg.dependentFunctionList = [f]
 	cg.reverse([Tc(1)])
 	cg.plot('trash/cgraph_all_implemented_functions.png',method='dot')
+	cg.plot('trash/cgraph_all_implemented_functions.svg',method='dot')
 
 
 #############################################################

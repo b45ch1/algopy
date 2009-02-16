@@ -93,13 +93,13 @@ class Tc:
 		if tc == None: # case x0 = [t0,t1,t2,...,tD]
 			if ndim(in_t0) == 0:
 				self.t0 = in_t0
-				self.tc = array([[0.]])
+				self.tc = array([[0.]],dtype=float)
 			elif ndim(in_t0) == 1:
 				self.t0 = in_t0[0]
 				if size(in_t0) == 1:
-					self.tc = array([[0.]])
+					self.tc = array([[0.]],dtype=float)
 				else:
-					self.tc = asarray([in_t0[1:]]).T
+					self.tc = asarray([in_t0[1:]],dtype=float).T
 			elif ndim(in_t0) == 2: # case x0 = [[t0],[t1],[t2],[tD]]
 				self.t0 = in_t0[0,0]
 				self.tc = asarray(in_t0[1:])
@@ -109,9 +109,9 @@ class Tc:
 		else:	
 			self.t0 = in_t0
 			if ndim(tc) == 1:
-				self.tc = asarray([tc]).T
+				self.tc = asarray([tc],dtype=float).T
 			elif ndim(tc) == 2:
-				self.tc = asarray(tc)
+				self.tc = asarray(tc,dtype=float)
 			else:
 				raise Exception("tc must be of the format (D,Ndir)")
 	
@@ -642,6 +642,12 @@ class CGraph:
 				#e.attr['color']='green'
 				#e.attr['label']='a'
 
+		# extra formatting for the dependent variables
+		for f in self.dependentFunctionList:
+			s = A.get_node(f.id)
+			s.attr['fillcolor'] = "#FFFFFF"
+			s.attr['fontcolor']='#000000'
+
 		# applying the style for the nodes
 		for nf,f in enumerate(self.functionList):
 			s = A.get_node(nf)
@@ -687,11 +693,12 @@ class CGraph:
 				s.attr['fontcolor']='#000000'
 
 			elif vtype == 'const':
-				s.attr['fillcolor']="#AA2300"
-				s.attr['shape']='circle'
-				s.attr['label']= 'const_%d'%nf
+				s.attr['fillcolor']="#AAAAAA"
+				s.attr['shape']='triangle'
+				s.attr['label']= 'c_%d'%nf
 				s.attr['fontcolor']='#000000'
 				
+
 				
 		#print A.string() # print to screen
 

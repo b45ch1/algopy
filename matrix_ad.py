@@ -130,19 +130,19 @@ class Mtc:
 		return self.__str__()
 
 
-# Numpy wrapper
-#--------------
+## Numpy wrapper
+##--------------
 def inv(X):
 	if X.__class__ == Mtc or X.__class__ == Function:
 		return X.inv()
 	else:
 		return numpy.linalg.inv(X)
 
-def dot(X,Y):
-	if X.__class__ == Mtc or X.__class__ == Function:
-		return X.dot(Y)
-	else:
-		return numpy.dot(X,Y)
+#def dot(X,Y):
+	#if X.__class__ == Mtc or X.__class__ == Function:
+		#return X.dot(Y)
+	#else:
+		#return numpy.dot(X,Y)
 	
 def trace(X):
 	if X.__class__ == Mtc or X.__class__ == Function:
