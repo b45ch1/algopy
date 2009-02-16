@@ -87,7 +87,7 @@ def gradient_and_hessian_of_Phi(x):
 		U = zeros((1,4,2))
 		U[0,:,0] = cg.independentFunctionList[0].xbar.X.flatten()
 		U[0,:,1] = cg.independentFunctionList[0].xbar.Xdot.flatten()
-		res = adolc.hovt_reverse(1,D,U)[0].copy()
+		res = adolc.hov_ti_reverse(1,D,U)[0].copy()
 		g[:]   = res[0,:,0]
 		H[n,:] = res[0,:,1]
 		
@@ -101,6 +101,15 @@ def newtons_method(x0):
 	while numpy.linalg.norm(g)>10**-12:
 		print 'iteration: %2d'%k; k+=1
 		(g,H) = gradient_and_hessian_of_Phi(x)
+		# check correctness of the Hessian
+		# true gradient: d Phi = [ 2 (x[0] - 17)**3, (x[1] - 19 ]
+		# true Hessian : d**2 Phi = [[ 6 ( x[0] - 17)**2, 0 ],[0,1]]
+		assert abs( 6*(x[0]-17.)**2 - H[0,0]) <= 10**-9
+		assert abs( H[1,0])                   <= 10**-9
+		assert abs( H[0,1])                   <= 10**-9
+		assert abs( 1. - H[1,1])              <= 10**-9
+
+
 		# compute new search direction
 		delta_x = numpy.linalg.solve(H,-g)
 		#update x
@@ -108,4 +117,5 @@ def newtons_method(x0):
 	return x
 
 x = numpy.array([13.,17.])
-print newtons_method(x)
+print 'Solution found by Newton\'s method:', newtons_method(x)
+print 'True solution: [17,19]'
