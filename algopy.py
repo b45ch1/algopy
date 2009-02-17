@@ -36,14 +36,16 @@ class Mtc:
 	 [[ u_11 + v_11, ..., u_1Ndir + v_1Ndir],
 	 ...
 	  [[ u_D1 + v_D1, ..., u_DNdir + v_DNdir]]
-	  One can see, that in this order, memory chunks of size Ndir are used and the operation on each element is the same. This is desireable to avoid cache misses.
+	  
+	  For ufuncs this arangement is advantageous, because in this order, memory chunks of size Ndir are used and the operation on each element is the same. This is desireable to avoid cache misses.
 	"""
 	def __init__(self, X, Xdot = None):
 		""" INPUT:	shape([X]) = (D,P,N,M)"""
 		Ndim = ndim(X)
 		if Ndim == 4:
 			self.TC = asarray(X)
-
+		else:
+			raise NotImplementedError
 
 	def __add__(self,rhs):
 		return Mtc(self.TC + rhs.TC)
@@ -90,11 +92,20 @@ class Mtc:
 					retval.TC[d,p,:,:] = - numpy.dot(self.TC[0,p,:,:], retval.TC[d,p,:,:])
 		return retval
 
-	#def trace(self):
-		#return Mtc( [[self.X.trace()]], [[self.Xdot.trace()]])
+	def trace(self):
+		""" returns a new Mtc in standard format, i.e. the matrices are 1x1 matrices"""
+		(D,P,N,M) = shape(self.TC)
+		if N!=M:
+			raise TypeError(' N == M is required')
+		
+		retval = zeros((D,P,1,1))
+		for d in range(D):
+			for p in range(P):
+				retval[d,p,0,0] = trace(self.TC[d,p,:,:])
+		return retval
 
-	#def __getitem__(self, key):
-		#return Mtc(self.X[key], self.Xdot[key])
+	def __getitem__(self, key):
+		return Mtc(self.TC[:,:,key[0]:key[0]+1,key[1]:key[1]+1])
 
 	#def copy(self):
 		#return Mtc(self.X.copy(), self.Xdot.copy())
@@ -135,6 +146,8 @@ if __name__ == "__main__":
 	AZ = AX / AY
 	AZ = AX.dot(AY)
 	AZ = AX.inv()
-	print 'AX=',AX
-	print 'AY=',AY
+	AZ = AX.trace()
+	AZ = AX[0,0]
+	#print 'AX=',AX
+	#print 'AY=',AY
 	print 'AZ=',AZ
