@@ -34,6 +34,18 @@ def test_tapeless_forward_UTPM():
 	print 'AZ=',AZ
 
 
+def test_trace():
+	N1 = 2
+	N2 = 3
+	N3 = 4
+	N4 = 5
+	x = asarray(range(N1*N2*N3*N4))
+	x = x.reshape((N1,N2,N3,N4))
+	AX = Mtc(x)
+	AY = AX.T
+	AY.TC[0,0,2,0] = 1234
+	assert AX.TC[0,0,0,2] == AY.TC[0,0,2,0]
+
 
 
 def test_forward_UTPM_add():
@@ -48,7 +60,7 @@ def test_forward_UTPM_add():
 	cg.dependentFunctionList = [FZ]
 
 	print FZ
-	assert False
+	#assert False
 
 
 

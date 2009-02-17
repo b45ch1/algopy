@@ -163,41 +163,52 @@ if __name__ == "__main__":
 	Ff = Phi(FJ)
 	cg.independentFunctionList = [FJ]
 	cg.dependentFunctionList = [Ff]
-	cg.plot('testgraph.png')
-	cg.plot('testgraph.svg')
+	#cg.plot('testgraph.png')
+	#cg.plot('testgraph.svg')
 	
-	## perform steepest descent optimization
-	#vbar = inf
-	#while numpy.linalg.norm(vbar)>10**-8:
-		## 1: evaluation of J
-		#Jtc=Mtc(adolc.jacobian(1,v)[:,:Np],J1)
+	# perform steepest descent optimization
+	vbar = inf
+	count = 0
+	while numpy.linalg.norm(vbar)>10**-8:
+		count +=1
+		# 1: evaluation of J
+		J[0,0,:,:] = adolc.jacobian(1,v)[:,:Np]
+		Jtc=Mtc(J)
 
-		## 2: forward evaluation of Phi
-		#cg.forward([Jtc])
-		##print 'Phi=',cg.dependentFunctionList[0].x.X
+		# 2: forward evaluation of Phi
+		cg.forward([Jtc])
+		#print 'Phi=',cg.dependentFunctionList[0].x.TC
 	
-		## 3: reverse evaluation of Phi
-		#cg.reverse([Mtc([[1.]],[[0.]])])
-		#Jbar = FJ.xbar.X
+		# 3: reverse evaluation of Phi
+		Phibar = zeros((2,1,1,1))
+		Phibar[0,0,0,0]=1.
+		cg.reverse([Mtc(Phibar)])
 
-		## 4: reverse evaluation of J
-		#x = v
-		#D = 2
-		#keep = D+1
-		#V = zeros((Nv,D))
-		#vbar = zeros(Nv)
-		#for np in range(Np):
-			#V[np,0] = 1
-			#u = (Jbar.T)[np,:].copy()
-			#adolc.hos_forward(1,D,x,V,keep)
-			#Z = adolc.hos_reverse(1,D,u)
-			#V[np,0] = 0
-			##print 'Z=',Z
-			#vbar += Z[2,1]
-		##update v:  x_k+1 = v_k - g
-		#v[2:] -= vbar[2:]
-	#print 'v_opt =',v
-	#print 'v0=',v0
+		#print cg
+		
+		Jbar = FJ.xbar.TC[0,0,:,:]
+
+		#print 'Jbar=',Jbar
+
+		# 4: reverse evaluation of J
+		x = v
+		D = 2
+		keep = D+1
+		V = zeros((Nv,D))
+		vbar = zeros(Nv)
+		for np in range(Np):
+			V[np,0] = 1
+			u = (Jbar.T)[np,:].copy()
+			adolc.hos_forward(1,D,x,V,keep)
+			Z = adolc.hos_reverse(1,D,u)
+			V[np,0] = 0
+			#print 'Z=',Z
+			vbar += Z[2,1]
+		#update v:  x_k+1 = v_k - g
+		v[2:] -= vbar[2:]
+	print 'number of iterations =',count
+	print 'v_opt =',v
+	print 'v0=',v0
 
 	## plot Phi
 	## --------

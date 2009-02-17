@@ -154,7 +154,9 @@ if __name__ == "__main__":
 	
 	# perform steepest descent optimization
 	vbar = inf
+	count = 0
 	while numpy.linalg.norm(vbar)>10**-8:
+		count +=1
 		# 1: evaluation of J
 		Jtc=Mtc(adolc.jacobian(1,v)[:,:Np],J1)
 
@@ -165,6 +167,7 @@ if __name__ == "__main__":
 		# 3: reverse evaluation of Phi
 		cg.reverse([Mtc([[1.]],[[0.]])])
 		Jbar = FJ.xbar.X
+		#print 'Jbar=',Jbar
 
 		# 4: reverse evaluation of J
 		x = v
@@ -182,6 +185,7 @@ if __name__ == "__main__":
 			vbar += Z[2,1]
 		#update v:  x_k+1 = v_k - g
 		v[2:] -= vbar[2:]
+	print 'number of iterations =',count
 	print 'v_opt =',v
 	print 'v0=',v0
 

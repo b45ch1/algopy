@@ -429,8 +429,14 @@ class Function:
 			self.args[1].xbar +=  self.xbar.dot(self.args[0].x).T
 
 		elif self.type == 'trace':
-			N = self.args[0].x.shape()[0]
-			self.args[0].xbar += Mtc( self.xbar.X[0,0] * numpy.eye(N),  self.xbar.Xdot[0,0] *numpy.eye(N))
+			(D,P,N,M) = shape( self.args[0].x.TC)
+			tmp = zeros((D,P,N,M))
+			for d in range(D):
+				for p in range(P):
+					tmp[d,p,:,:] = self.xbar.TC[d,p,0,0] * eye(N)
+			self.args[0].xbar += Mtc( tmp )
+			#print 'self.args[0].xbar=',self.args[0].xbar
+			#exit()
 
 		elif self.type == 'inv':
 			self.args[0].xbar -= self.x.T.dot(self.xbar.dot(self.x.T))
