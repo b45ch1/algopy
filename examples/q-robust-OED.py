@@ -17,8 +17,8 @@ from prettyplotting import * # comment this out if not available
 #        q = v[Np:] = control variables
 #
 # model: ODE
-#        dx/dt = f(t,x,p) = p0
-#        x(0)  = x_0 = p1
+#        dx/dt = f(t,x,p) = p1 + q0*x
+#        x(0)  = x_0 = p0
 # measurement model:
 #        h(t,x,v) = x(t,v)
 # parameter estimation:
@@ -85,6 +85,7 @@ if __name__ == "__main__":
 	p = array([10.,2.])
 	q = array([-1.])
 	v = concatenate((p,q))
+	DM = 4       # degree of moments
 
 	# generate pseudo measurement data
 	p[0]+=3.; 	p[1] += 2.
@@ -155,7 +156,7 @@ if __name__ == "__main__":
 	# tape the objective function with Algopy
 	Jtmp = adolc.jacobian(2,v)[:,:2]
 	Jshp = shape(Jtmp)
-	J = zeros((2,1,Jshp[0],Jshp[1]))
+	J = zeros((DM-1,1,Jshp[0],Jshp[1]))
 	J[0,0,:,:] = Jtmp
 	cg = CGraph()
 
@@ -171,8 +172,24 @@ if __name__ == "__main__":
 	count = 0
 	while numpy.linalg.norm(vbar)>10**-8:
 		count +=1
+
+		#print shape(J)
+		#exit()
+
 		# 1: evaluation of J
-		J[0,0,:,:] = adolc.jacobian(1,v)[:,:Np]
+		#for np in range(Np):
+			#D = DM-1
+			#V = zeros((Nv,D))
+			#V[np,0] = 1.
+			#V[2,0]  = 1.
+			#tmp = adolc.hos_forward(1,D,v,V,0)[1][:,:]
+			#J[0,0,:,np] = tmp[:,0]
+			#J[1,0,:,np] = tmp[:,1]
+			#J[2,0,:,np] = tmp[:,2]
+		tmp1 = J[0,0,:,:]
+	#[0,0,:,:] = adolc.jacobian(1,v)[:,:Np]
+		tmp2 = J[0,0,:,:]
+		#print tmp1-tmp2
 		Jtc=Mtc(J)
 
 		# 2: forward evaluation of Phi
@@ -180,19 +197,38 @@ if __name__ == "__main__":
 		#print 'Phi=',cg.dependentFunctionList[0].x.TC
 	
 		# 3: reverse evaluation of Phi
-		Phibar = zeros((2,1,1,1))
+		Phibar = zeros((DM,1,1,1))
 		Phibar[0,0,0,0]=1.
 		cg.reverse([Mtc(Phibar)])
 
+
 		#print cg
 		
-		Jbar = FJ.xbar.TC[0,0,:,:]
+		Jbar = FJ.xbar.TC[:,0,:,:]
+		print shape(Jbar)
 
-		#print 'Jbar=',Jbar
+		##print 'Jbar=',Jbar
 
 		# 4: reverse evaluation of J
+		for np in range(Np):
+			D = DM-1
+			keep = D+1
+			V = zeros((Nv,D))
+			V[np,0] = 1.
+			V[2,0]  = 1.
+			adolc.hos_forward(1,D,v,V,keep)
+			U = zeros((1,Nm,D+1))
+			# U is a (Q,M,D) array
+			# Jbar is a (D,M,Np) array
+			U[0,:,0] = Jbar[0,:,np]
+			U[0,:,1] = Jbar[1,:,np]
+			U[0,:,2] = Jbar[2,:,np]
+			Z = adolc.hov_ti_reverse(1,D,U)[0]
+			#print Z
+			#exit()
+
 		x = v
-		D = 2
+		D = DM-1
 		keep = D+1
 		V = zeros((Nv,D))
 		vbar = zeros(Nv)
@@ -206,6 +242,7 @@ if __name__ == "__main__":
 			vbar += Z[2,1]
 		#update v:  x_k+1 = v_k - g
 		v[2:] -= vbar[2:]
+		print vbar
 	print 'number of iterations =',count
 	print 'v_opt =',v
 	print 'v0=',v0
