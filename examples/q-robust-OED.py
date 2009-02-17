@@ -2,7 +2,7 @@
 from pylab import *
 import sys
 sys.path = ['..'] + sys.path
-from matrix_ad import *
+from algopy import *
 import adolc
 import numpy.random
 import scipy.optimize
@@ -39,100 +39,6 @@ from prettyplotting import * # comment this out if not available
 #
 """
 
-
-# HIGHER ORDER DERIVATIVE TENSORS BY INTERPOLATION
-# the theory is explained on page 315 of the book "Evaluating Derivatives" by Andreas Griewank,
-# Chapter 13, Subsection: Multivariate Tensors via Univariate Tensors
-
-def generate_multi_indices(N,D):
-	"""
-	generates 2D array of all possible multi-indices with |i| = D
-	e.g.
-	N=3, D=2
-	array([[2, 0, 0],
-       [1, 1, 0],
-       [1, 0, 1],
-       [0, 2, 0],
-       [0, 1, 1],
-       [0, 0, 2]])
-	i.e. each row is one multi-index.
-	"""
-	T = []
-	def rec(r,n,N,D):
-		j = r.copy()
-		if n == N-1:
-			j[N-1] = D - numpy.sum(j[:])
-			T.append(j.copy())
-			return
-		for a in range( D - numpy.sum( j [:] ), -1,-1 ):
-			j[n]=a
-			rec(j,n+1,N,D)
-	r = numpy.zeros(N,dtype=int)
-	rec(r,0,N,D)
-	return numpy.array(T)
-
-
-def convert_multi_indices_to_pos(in_I):
-	"""
-	a multi-index [2,1,0] tells us that we differentiate twice w.r.t x[0] and once w.r.t
-	x[1] and never w.r.t x[2]
-	This multi-index represents therefore the [0,0,1] element in the derivative tensor.
-	"""
-	I = in_I.copy()
-	M,N = numpy.shape(I)
-	D = numpy.sum(I[0,:])
-	retval = numpy.zeros((M,D),dtype=int)
-	for m in range(M):
-		i = 0
-		for n in range(N):
-			while I[m,n]>0:
-				retval[m,i]=n
-				I[m,n]-=1
-				i+=1
-	return retval
-
-def gamma(i,j):
-	""" Compute gamma(i,j), where gamma(i,j) is define as in Griewanks book in Eqn (13.13)"""
-	N = len(i)
-	retval = [0.]
-		
-	def binomial(z,k):
-		""" computes z!/[(z-k)! k!] """
-		u = int(numpy.prod([z-i for i in range(k) ]))
-		d = numpy.prod([i for i in range(1,k+1)])
-		return u/d
-	
-	def alpha(i,j,k):
-		""" computes one element of the sum in the evaluation of gamma,
-		i.e. the equation below 13.13 in Griewanks Book"""
-		term1 = (1-2*(numpy.sum(abs(i-k))%2))
-		term2 = 1
-		for n in range(N):
-			term2 *= binomial(i[n],k[n])
-		term3 = 1
-		for n in range(N):
-			term3 *= binomial(D*k[n]/ numpy.sum(abs(k)), j[n] )
-		term4 = (numpy.sum(abs(k))/D)**(numpy.sum(abs(i)))
-		return term1*term2*term3*term4
-		
-	def sum_recursion(in_k, n):
-		""" computes gamma(i,j).
-			The summation 0<k<i, where k and i multi-indices makes it necessary to do this 
-			recursively.
-		"""
-		k = in_k.copy()
-		if n==N:
-			retval[0] += alpha(i,j,k)
-			return
-		for a in range(i[n]+1):
-			k[n]=a
-			sum_recursion(k,n+1)
-			
-	# putting everyting together here
-	k = numpy.zeros(N,dtype=int)
-	sum_recursion(k,0)
-	return retval[0]
-	
 # DEFINING THE OED PROBLEM AND IMPLEMENTATION OF THE EXPLICIT EULER ODE INTEGRATOR
 # to solve the problem, an ode integrator is needed, we implement here 
 # the explicit euler method, since it is the simplest, it can also be differentiated
@@ -164,7 +70,8 @@ def F(p,q,ts,Sigma, etas):
 	
 def Phi(J):
 	""" prototypical OED objective function"""
-	return trace(inv(dot(J.T,J)))
+	tmp1 = ((J.T).dot(J))
+	return (tmp1.inv()).trace()
 
 if __name__ == "__main__":
 
@@ -246,91 +153,92 @@ if __name__ == "__main__":
 	v0 = v.copy()
 
 	# tape the objective function with Algopy
-	J=adolc.jacobian(2,v)[:,:2]
-
+	Jtmp = adolc.jacobian(2,v)[:,:2]
+	Jshp = shape(Jtmp)
+	J = zeros((2,1,Jshp[0],Jshp[1]))
+	J[0,0,:,:] = Jtmp
 	cg = CGraph()
-	J0 = J.copy()
-	J1 = zeros(shape(J))
-	FJ = Function(Mtc(J0,J1))
+
+	FJ = Function(Mtc(J))
 	Ff = Phi(FJ)
 	cg.independentFunctionList = [FJ]
 	cg.dependentFunctionList = [Ff]
 	cg.plot('testgraph.png')
 	cg.plot('testgraph.svg')
 	
-	# perform steepest descent optimization
-	vbar = inf
-	while numpy.linalg.norm(vbar)>10**-8:
-		# 1: evaluation of J
-		Jtc=Mtc(adolc.jacobian(1,v)[:,:Np],J1)
+	## perform steepest descent optimization
+	#vbar = inf
+	#while numpy.linalg.norm(vbar)>10**-8:
+		## 1: evaluation of J
+		#Jtc=Mtc(adolc.jacobian(1,v)[:,:Np],J1)
 
-		# 2: forward evaluation of Phi
-		cg.forward([Jtc])
-		#print 'Phi=',cg.dependentFunctionList[0].x.X
+		## 2: forward evaluation of Phi
+		#cg.forward([Jtc])
+		##print 'Phi=',cg.dependentFunctionList[0].x.X
 	
-		# 3: reverse evaluation of Phi
-		cg.reverse([Mtc([[1.]],[[0.]])])
-		Jbar = FJ.xbar.X
+		## 3: reverse evaluation of Phi
+		#cg.reverse([Mtc([[1.]],[[0.]])])
+		#Jbar = FJ.xbar.X
 
-		# 4: reverse evaluation of J
-		x = v
-		D = 2
-		keep = D+1
-		V = zeros((Nv,D))
-		vbar = zeros(Nv)
-		for np in range(Np):
-			V[np,0] = 1
-			u = (Jbar.T)[np,:].copy()
-			adolc.hos_forward(1,D,x,V,keep)
-			Z = adolc.hos_reverse(1,D,u)
-			V[np,0] = 0
-			#print 'Z=',Z
-			vbar += Z[2,1]
-		#update v:  x_k+1 = v_k - g
-		v[2:] -= vbar[2:]
-	print 'v_opt =',v
-	print 'v0=',v0
+		## 4: reverse evaluation of J
+		#x = v
+		#D = 2
+		#keep = D+1
+		#V = zeros((Nv,D))
+		#vbar = zeros(Nv)
+		#for np in range(Np):
+			#V[np,0] = 1
+			#u = (Jbar.T)[np,:].copy()
+			#adolc.hos_forward(1,D,x,V,keep)
+			#Z = adolc.hos_reverse(1,D,u)
+			#V[np,0] = 0
+			##print 'Z=',Z
+			#vbar += Z[2,1]
+		##update v:  x_k+1 = v_k - g
+		#v[2:] -= vbar[2:]
+	#print 'v_opt =',v
+	#print 'v0=',v0
 
-	# plot Phi
-	# --------
-	def dFdp(p,q,ts,Sigma, etas):
-		v = concatenate((p,q))
-		return adolc.jacobian(2,v)[:,:Np]
+	## plot Phi
+	## --------
+	#def dFdp(p,q,ts,Sigma, etas):
+		#v = concatenate((p,q))
+		#return adolc.jacobian(2,v)[:,:Np]
 	
-	qs = linspace(-1,2,100)
-	Phis = []
-	for q in qs:
-		q = array([q])
-		J = dFdp(p,q,ts,Sigma, etas)
-		Phis.append(Phi(J))
+	#qs = linspace(-1,2,100)
+	#Phis = []
+	#for q in qs:
+		#q = array([q])
+		#J = dFdp(p,q,ts,Sigma, etas)
+		#Phis.append(Phi(J))
 
-	figure()
-	qplot = plot(qs,Phis,'k')
-	optimal_plot = plot([v[2]], cg.dependentFunctionList[0].x.X[0] , 'go')
-	xlabel(r'$q$')
-	ylabel(r'$\Phi(q)$')
-	legend((qplot, optimal_plot), (r'$\Phi(q)$','computed optimal solution'))
-	title('Optimal Design of Experiments')
-	savefig('odoe_objective_function.png')
-	savefig('odoe_objective_function.eps')
+	#figure()
+	#qplot = plot(qs,Phis,'k')
+	#optimal_plot = plot([v[2]], cg.dependentFunctionList[0].x.X[0] , 'go')
+	#xlabel(r'$q$')
+	#ylabel(r'$\Phi(q)$')
+	#legend((qplot, optimal_plot), (r'$\Phi(q)$','computed optimal solution'))
+	#title('Optimal Design of Experiments')
+	#savefig('odoe_objective_function.png')
+	#savefig('odoe_objective_function.eps')
 
-	# plot state for initial value and optimal value
-	# ----------------------------------
-	figure()
-	p0 = v0[:2]
-	q0 = array([v0[2]])
-	x0 = explicit_euler(p0[0],f,ts,p0,q0)
-	initial_plot = plot(ts,x0,'b')
+	## plot state for initial value and optimal value
+	## ----------------------------------
+	#figure()
+	#p0 = v0[:2]
+	#q0 = array([v0[2]])
+	#x0 = explicit_euler(p0[0],f,ts,p0,q0)
+	#initial_plot = plot(ts,x0,'b')
 
-	p_opt = v[:2]
-	q_opt = array([v[2]])
-	x_opt = explicit_euler(p_opt[0],f,ts,p_opt,q_opt)
-	opt_plot = semilogy(ts,x_opt,'r')
-	xlabel(r'time $t$ [sec]')
-	ylabel(r'$x(t)$')
-	legend((opt_plot,initial_plot),('optimal state traj.', 'initial state traj.'))
+	#p_opt = v[:2]
+	#q_opt = array([v[2]])
+	#x_opt = explicit_euler(p_opt[0],f,ts,p_opt,q_opt)
+	#opt_plot = semilogy(ts,x_opt,'r')
+	#xlabel(r'time $t$ [sec]')
+	#ylabel(r'$x(t)$')
+	#legend((opt_plot,initial_plot),('optimal state traj.', 'initial state traj.'))
 	
-	#show()
+	##show()
 	
 	
 
