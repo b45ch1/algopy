@@ -166,15 +166,9 @@ if __name__ == "__main__":
 	cg.dependentFunctionList = [Ff]
 	#cg.plot('testgraph.png')
 	#cg.plot('testgraph.svg')
-	
-	# perform steepest descent optimization
-	vbar = inf
-	count = 0
-	while numpy.linalg.norm(vbar)>10**-8:
-		count +=1
 
-
-		# 1: evaluation of J
+	def gradient_of_PHI(v):
+		""" computes grad(PHI) as needed in the steepest descent optimization"""
 		for np in range(Np):
 			D = DM-1
 			V = zeros((Nv,D))
@@ -184,29 +178,17 @@ if __name__ == "__main__":
 			J[0,0,:,np] = tmp[:,0]
 			J[1,0,:,np] = tmp[:,1]
 			J[2,0,:,np] = tmp[:,2]
-		#tmp1 = J[0,0,:,:]
-		#J[0,0,:,:] = adolc.jacobian(1,v)[:,:Np]
-		#tmp2 = J[0,0,:,:]
-		#print tmp1-tmp2
 		Jtc=Mtc(J)
-
 
 		# 2: forward evaluation of Phi
 		cg.forward([Jtc])
-		#print 'Phi=',cg.dependentFunctionList[0].x.TC
 	
 		# 3: reverse evaluation of Phi
 		Phibar = zeros((DM,1,1,1))
 		Phibar[0,0,0,0]=1.
 		cg.reverse([Mtc(Phibar)])
 
-
-		#print cg
-		
 		Jbar = FJ.xbar.TC[:,0,:,:]
-		#print shape(Jbar)
-		#print 'Jbar=',Jbar
-
 
 		# 4: reverse evaluation of J
 		vbar = zeros(Nv)
@@ -225,28 +207,113 @@ if __name__ == "__main__":
 			U[0,:,2] = Jbar[2,:,np]
 			Z = adolc.hov_ti_reverse(1,D,U)[0]
 			vbar += Z[0,2,1]
-		v[2:] -= vbar[2:]
+		return vbar
+
+	def gradient_of_E_PHI(v,DM):
+		""" computes the gradient of the expectation of PHI, i.e. grad( E[PHI] ),
+			where E[PHI] is approximated by the method of moments up to moment degree DM.
+		    This gradient is then used in the steepest descent optimization below"""
+
+		# multi indices for the full tensor of order DM-1 to compute d^(DM-1) PHI
+		# the remaining order to compute d^DM PHI is achieved by a reverse sweep later
+		Jq = generate_multi_indices(Nq,DM-1)
+		NJq = shape(Jq)[0]
+
+		# 1: evaluation of J
+		# since Nq is usually much larger than Np
+		# we want to be able to get one higher order derivative
+		# w.r.t. q by reverse mode
+		# that means we have to evaluate the mixed partial derivatives
+		# d^2 F/dpdq in the forward mode
+		# since UTPS cannot do those partial derivatives straightforward
+		# we need to use interpolation
+
+		# first we need the multi-indices
+		# we need to compute the equation 13.13  of Griewank's Book
+		# with s_1 = [1,0,0] resp. s_1 = [0,1,0]
+		# and s_2 one direction of Jq
+
+		D = DM-1
+		V = zeros((Nv,D))
+		for nq in range(NJq):
+			s2 = Jq[nq,:]
+			for n in range(Np):
+				s1 = zeros(Nv)
+				s1[n] = 1.
+				V[:,0] =  s1+s2
+				tmp1 = adolc.hos_forward(1,D,v,V,0)[1]
+				V[:,0] =  s1
+				tmp2 = adolc.hos_forward(1,D,v,V,0)[1]
+				V[:,0] =  s2
+				tmp3 = adolc.hos_forward(1,D,v,V,0)[1]
+
+				tmp = tmp1 - tmp2 - tmp3
+				# tmp are  F_{d+1}(v + t s) coefficients
+				# but we need J_d
+				# to match them up we need to rescale them
+				scale_factor = array([(d+1.)/2. for d in range(D)])
+				tmp = tmp * scale_factor
+				
+
+		## now perform the sum of Eqn 13.13 of Griewank's book
+		
+		#for ni in range(NI):
+			#for nj in range(NJv):
+				#i = I[ni,:]
+				#j = Jv[nj,:]
+				## most gamma(i,j) = 0
+				## good place to optimize!
+				#J gamma(i,j)
+
+		
+			#J[0,0,:,np] = tmp[:,0]
+			#J[1,0,:,np] = tmp[:,1]
+			#J[2,0,:,np] = tmp[:,2]
+		#Jtc=Mtc(J)
+
+		## 2: forward evaluation of Phi
+		#cg.forward([Jtc])
 	
-		#Jbar = Jbar[0,:,:]
-		#x = v
-		#D = DM-1
-		#keep = D+1
-		#V = zeros((Nv,D))
+		## 3: reverse evaluation of Phi
+		#Phibar = zeros((DM,1,1,1))
+		#Phibar[0,0,0,0]=1.
+		#cg.reverse([Mtc(Phibar)])
+
+		#Jbar = FJ.xbar.TC[:,0,:,:]
+
+		## 4: reverse evaluation of J
 		#vbar = zeros(Nv)
 		#for np in range(Np):
-			#V[np,0] = 1
-			#u = (Jbar.T)[np,:].copy()
-			#adolc.hos_forward(1,D,x,V,keep)
-			#Z = adolc.hos_reverse(1,D,u)
-			#V[np,0] = 0
-			##print 'Z=',Z
-			#vbar += Z[2,1]
-		##update v:  x_k+1 = v_k - g
+			#D = DM-1
+			#keep = D+1
+			#V = zeros((Nv,D))
+			#V[np,0] = 1.
+			#V[2,0]  = 0.
+			#adolc.hos_forward(1,D,v,V,keep)
+			#U = zeros((1,Nm,D))
+			## U is a (Q,M,D) array
+			## Jbar is a (D,M,Np) array
+			#U[0,:,0] = Jbar[0,:,np]
+			#U[0,:,1] = Jbar[1,:,np]
+			#U[0,:,2] = Jbar[2,:,np]
+			#Z = adolc.hov_ti_reverse(1,D,U)[0]
+			#vbar += Z[0,2,1]
+		#return vbar
+		
+
+	gradient_of_E_PHI(v,DM)
+	
+	## perform steepest descent optimization
+	#vbar = inf
+	#count = 0
+	#while numpy.linalg.norm(vbar)>10**-8:
+		#count +=1
+		#vbar = gradient_of_PHI(v)
 		#v[2:] -= vbar[2:]
-		#print vbar
-	print 'number of iterations =',count
-	print 'v_opt =',v
-	print 'v0=',v0
+	
+	#print 'number of iterations =',count
+	#print 'v_opt =',v
+	#print 'v0=',v0
 
 	## plot Phi
 	## --------

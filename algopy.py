@@ -61,6 +61,7 @@ def convert_multi_indices_to_pos(in_I):
 def gamma(i,j):
 	""" Compute gamma(i,j), where gamma(i,j) is define as in Griewanks book in Eqn (13.13)"""
 	N = len(i)
+	D = sum(j)
 	retval = [0.]
 		
 	def binomial(z,k):
