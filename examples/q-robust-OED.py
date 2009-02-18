@@ -173,24 +173,23 @@ if __name__ == "__main__":
 	while numpy.linalg.norm(vbar)>10**-8:
 		count +=1
 
-		#print shape(J)
-		#exit()
 
 		# 1: evaluation of J
-		#for np in range(Np):
-			#D = DM-1
-			#V = zeros((Nv,D))
-			#V[np,0] = 1.
-			#V[2,0]  = 1.
-			#tmp = adolc.hos_forward(1,D,v,V,0)[1][:,:]
-			#J[0,0,:,np] = tmp[:,0]
-			#J[1,0,:,np] = tmp[:,1]
-			#J[2,0,:,np] = tmp[:,2]
-		tmp1 = J[0,0,:,:]
-	#[0,0,:,:] = adolc.jacobian(1,v)[:,:Np]
-		tmp2 = J[0,0,:,:]
+		for np in range(Np):
+			D = DM-1
+			V = zeros((Nv,D))
+			V[np,0] = 1.
+			V[2,0]  = 0.
+			tmp = adolc.hos_forward(1,D,v,V,0)[1][:,:]
+			J[0,0,:,np] = tmp[:,0]
+			J[1,0,:,np] = tmp[:,1]
+			J[2,0,:,np] = tmp[:,2]
+		#tmp1 = J[0,0,:,:]
+		#J[0,0,:,:] = adolc.jacobian(1,v)[:,:Np]
+		#tmp2 = J[0,0,:,:]
 		#print tmp1-tmp2
 		Jtc=Mtc(J)
+
 
 		# 2: forward evaluation of Phi
 		cg.forward([Jtc])
@@ -205,44 +204,46 @@ if __name__ == "__main__":
 		#print cg
 		
 		Jbar = FJ.xbar.TC[:,0,:,:]
-		print shape(Jbar)
+		#print shape(Jbar)
+		#print 'Jbar=',Jbar
 
-		##print 'Jbar=',Jbar
 
 		# 4: reverse evaluation of J
+		vbar = zeros(Nv)
 		for np in range(Np):
 			D = DM-1
 			keep = D+1
 			V = zeros((Nv,D))
 			V[np,0] = 1.
-			V[2,0]  = 1.
+			V[2,0]  = 0.
 			adolc.hos_forward(1,D,v,V,keep)
-			U = zeros((1,Nm,D+1))
+			U = zeros((1,Nm,D))
 			# U is a (Q,M,D) array
 			# Jbar is a (D,M,Np) array
 			U[0,:,0] = Jbar[0,:,np]
 			U[0,:,1] = Jbar[1,:,np]
 			U[0,:,2] = Jbar[2,:,np]
 			Z = adolc.hov_ti_reverse(1,D,U)[0]
-			#print Z
-			#exit()
-
-		x = v
-		D = DM-1
-		keep = D+1
-		V = zeros((Nv,D))
-		vbar = zeros(Nv)
-		for np in range(Np):
-			V[np,0] = 1
-			u = (Jbar.T)[np,:].copy()
-			adolc.hos_forward(1,D,x,V,keep)
-			Z = adolc.hos_reverse(1,D,u)
-			V[np,0] = 0
-			#print 'Z=',Z
-			vbar += Z[2,1]
-		#update v:  x_k+1 = v_k - g
+			vbar += Z[0,2,1]
 		v[2:] -= vbar[2:]
-		print vbar
+	
+		#Jbar = Jbar[0,:,:]
+		#x = v
+		#D = DM-1
+		#keep = D+1
+		#V = zeros((Nv,D))
+		#vbar = zeros(Nv)
+		#for np in range(Np):
+			#V[np,0] = 1
+			#u = (Jbar.T)[np,:].copy()
+			#adolc.hos_forward(1,D,x,V,keep)
+			#Z = adolc.hos_reverse(1,D,u)
+			#V[np,0] = 0
+			##print 'Z=',Z
+			#vbar += Z[2,1]
+		##update v:  x_k+1 = v_k - g
+		#v[2:] -= vbar[2:]
+		#print vbar
 	print 'number of iterations =',count
 	print 'v_opt =',v
 	print 'v0=',v0

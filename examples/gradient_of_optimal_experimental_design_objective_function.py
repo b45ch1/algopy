@@ -160,6 +160,7 @@ if __name__ == "__main__":
 		# 1: evaluation of J
 		Jtc=Mtc(adolc.jacobian(1,v)[:,:Np],J1)
 
+
 		# 2: forward evaluation of Phi
 		cg.forward([Jtc])
 		#print 'Phi=',cg.dependentFunctionList[0].x.X
