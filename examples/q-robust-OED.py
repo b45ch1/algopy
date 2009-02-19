@@ -346,7 +346,7 @@ if __name__ == "__main__":
 	count = 0
 	while numpy.linalg.norm(vbar)>10**-8:
 		count +=1
-		vbar = gradient_of_E_PHI(v,1)
+		vbar = gradient_of_E_PHI(v,0)
 		v[2:] -= vbar[2:]
 	
 	print 'number of iterations =',count
