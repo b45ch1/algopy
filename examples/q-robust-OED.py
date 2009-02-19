@@ -262,41 +262,28 @@ if __name__ == "__main__":
 			scale_factor = array([1./prod(range(1,d+1)) for d in range(DM+1)])
 			for dm in range(DM+1):
 				J[dm,:,:,:] *= scale_factor[dm]
-			print J
-			#print scale_factor
-			#print J
-			## 2: forward evaluation of Phi
-			#Jtc=Mtc(J[:,:,:,:])
-			#cg.forward([Jtc])
-			## 3: reverse evaluation of Phi
-			#Phibar = zeros((DM,1,1,1))
-			#Phibar[0,0,0,0]=1.
-			#cg.reverse([Mtc(Phibar)])
-			#Jbar = FJ.xbar.TC[:,0,:,:]
+
+			# 2: forward evaluation of Phi
+			Jtc=Mtc(J[:,:,:,:])
+			cg.forward([Jtc])
+			# 3: reverse evaluation of Phi
+			Phibar = zeros((DM+1,1,1,1))
+			Phibar[0,0,0,0]=1.
+			cg.reverse([Mtc(Phibar)])
+			Jbar = FJ.xbar.TC[:,0,:,:]
 			#print Jbar
 
-		## 4: reverse evaluation of J
-		#vbar = zeros(Nv)
-		#for np in range(Np):
-			#D = DM-1
-			#keep = D+1
-			#V = zeros((Nv,D))
-			#V[np,0] = 1.
-			#V[2,0]  = 0.
-			#adolc.hos_forward(1,D,v,V,keep)
-			#U = zeros((1,Nm,D))
-			## U is a (Q,M,D) array
-			## Jbar is a (D,M,Np) array
-			#U[0,:,0] = Jbar[0,:,np]
-			#U[0,:,1] = Jbar[1,:,np]
-			#U[0,:,2] = Jbar[2,:,np]
-			#Z = adolc.hov_ti_reverse(1,D,U)[0]
-			#vbar += Z[0,2,1]
-		#return vbar
+			## 4: reverse evaluation of J
+			#vbar = zeros(Nv)
+			#for np in range(Np):
+
+				#Z = adolc.hov_ti_reverse(1,D,U)[0]
+				#vbar += Z[0,2,1]
+			#return vbar
 		
 
 	#gradient_of_PHI(v)
-	gradient_of_E_PHI(v,4)
+	gradient_of_E_PHI(v,3)
 	
 	## perform steepest descent optimization
 	#vbar = inf
