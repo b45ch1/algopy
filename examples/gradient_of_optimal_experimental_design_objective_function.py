@@ -184,7 +184,7 @@ if __name__ == "__main__":
 			V[np,0] = 0
 			print 'Z=',Z
 			vbar += Z[2,1]
-		
+		print vbar
 		exit()
 		#update v:  x_k+1 = v_k - g
 		v[2:] -= vbar[2:]

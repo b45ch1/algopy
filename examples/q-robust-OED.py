@@ -233,7 +233,7 @@ if __name__ == "__main__":
 		# we need to use interpolation
 
 		J = zeros((DM+1,1,Nm,Np)) # Taylor series of degree DM has DM+1 taylor coefficients (i.e. count also the zero-derivative)
-
+		qbar_rays = zeros((NJq,Nq,DM+1))
 		for nq in range(NJq):
 			# 1: evaluation of J
 
@@ -279,55 +279,74 @@ if __name__ == "__main__":
 
 			## 4: reverse evaluation of J
 			vbar = zeros(Nv)
-
+			dJ = zeros((Nq,DM+1)) # taylor coefficients for one direction in q
 			for np in range(Np): # each column of J
-				dm = DM
-				I = array([1,dm])
-				K = zeros((dm+1,2),dtype=int)
-				K[:,0] = 1
-				K[:,1] = range(dm+1)
+				for dm in range(DM+1):
+					I = array([1,dm])
+					K = zeros((dm+1,2),dtype=int)
+					K[:,0] = 1
+					K[:,1] = range(dm+1)
 
-				V = zeros((Nv,dm+1))
-				for k in K:
-					s1 = zeros(Nv)
-					s1[np] = k[0]
-					s2 = zeros(Nv)
-					s2[Np:] =  k[1]*Jq[nq,:]
-					V[:,0] =  s1+s2
+					V = zeros((Nv,dm+1))
+					for k in K:
+						s1 = zeros(Nv)
+						s1[np] = k[0]
+						s2 = zeros(Nv)
+						s2[Np:] =  k[1]*Jq[nq,:]
+						V[:,0] =  s1+s2
 
-					keep = dm + 2
-					adolc.hos_forward(1,v,V,keep)[1]
+						keep = dm + 2
+						adolc.hos_forward(1,v,V,keep)[1]
 
-					# U is a (Q,M,D) array
-					# Jbar is a (D,M,Np) array
-					U = zeros((1,Nm,keep))
-					for d in range(dm+1):
-						U[0,:,d] = Jbar[d,:,np]
-					#print 'U=',U
+						# U is a (Q,M,D) array
+						# Jbar is a (D,M,Np) array
+						U = zeros((1,Nm,keep))
+						for d in range(dm+1):
+							U[0,:,d] = Jbar[d,:,np]
+						#print 'U=',U
 
-					Z = adolc.hov_ti_reverse(1,U)[0]
-					#print 'Z=',Z
-					#J[dm,0,:,np] += (-1)**multi_index_abs( I - k) * multi_index_binomial(I,k) * tmp[:,dm]
-					#print shape(Z[0,:,:])
-					#exit()
-					#print Z[0,:,dm+1]
-					tmp =  1./prod(range(1,dm+2)) * (-1)**multi_index_abs( I - k) * multi_index_binomial(I,k) * Z[0,Np,DM+1]
-					vbar += tmp
-			#vbar += Z[0,2,1]
-			return vbar
+						Z = adolc.hov_ti_reverse(1,U)[0]
+						#print 'Z=',Z
+						#J[dm,0,:,np] += (-1)**multi_index_abs( I - k) * multi_index_binomial(I,k) * tmp[:,dm]
+						#print shape(Z[0,:,:])
+						#exit()
+						#print Z[0,:,dm+1]
+						tmp =  1./prod(range(1,dm+2)) * (-1)**multi_index_abs( I - k) * multi_index_binomial(I,k) * Z[0,Np:,dm+1]
+						dJ[:,dm] += tmp
+						#vbar += tmp
+			qbar_rays[nq,:,:] = dJ
+
+		# use interpolation to build all PHI^(dm) 0<= dm <= DM
+		derivative_tensor_list = []
+		for dm in range(DM+1):
+			derivative_tensor = numpy.zeros([Nq for i in range(dm+1)])
+			I = generate_multi_indices(Nq,dm)
+			d = sum(I[0,:])
+			NI = shape(I)[0]
+			NJq = shape(Jq)[0]
+			for ni in range(NI):
+				for nj in range(NJq):
+					derivative_tensor[tuple([0 for i in range(dm+1)])] +=  gamma(I[ni,:], Jq[nj,:]) * qbar_rays[nj,:,d]
+			derivative_tensor_list.append(derivative_tensor)
+		print derivative_tensor_list
+		#print qbar_rays
+		vbar[Np:] = derivative_tensor_list[0]
+		#vbar[Np:] = dJ[:,0]
+		return vbar
 		
 
 	#print 'gradient_of_PHI'
 	#print gradient_of_PHI(v)
 	#print 'gradient_of_E_PHI'
 	#print gradient_of_E_PHI(v,0)
+
 	
 	# perform steepest descent optimization
 	vbar = inf
 	count = 0
 	while numpy.linalg.norm(vbar)>10**-8:
 		count +=1
-		vbar = gradient_of_E_PHI(v,0)
+		vbar = gradient_of_E_PHI(v,1)
 		v[2:] -= vbar[2:]
 	
 	print 'number of iterations =',count
