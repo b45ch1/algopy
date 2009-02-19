@@ -306,32 +306,33 @@ if __name__ == "__main__":
 					#print 'U=',U
 
 					Z = adolc.hov_ti_reverse(1,U)[0]
-					print 'Z=',Z
+					#print 'Z=',Z
 					#J[dm,0,:,np] += (-1)**multi_index_abs( I - k) * multi_index_binomial(I,k) * tmp[:,dm]
 					#print shape(Z[0,:,:])
 					#exit()
 					#print Z[0,:,dm+1]
-					#vbar += 1./prod(range(1,dm+2)) * (-1)**multi_index_abs( I - k) * multi_index_binomial(I,k) * Z[0,:,dm+1]
+					tmp =  1./prod(range(1,dm+2)) * (-1)**multi_index_abs( I - k) * multi_index_binomial(I,k) * Z[0,Np,DM+1]
+					vbar += tmp
 			#vbar += Z[0,2,1]
 			return vbar
 		
 
 	#print 'gradient_of_PHI'
 	#print gradient_of_PHI(v)
-	print 'gradient_of_E_PHI'
-	print gradient_of_E_PHI(v,0)
+	#print 'gradient_of_E_PHI'
+	#print gradient_of_E_PHI(v,0)
 	
-	## perform steepest descent optimization
-	#vbar = inf
-	#count = 0
-	#while numpy.linalg.norm(vbar)>10**-8:
-		#count +=1
-		#vbar = gradient_of_PHI(v)
-		#v[2:] -= vbar[2:]
+	# perform steepest descent optimization
+	vbar = inf
+	count = 0
+	while numpy.linalg.norm(vbar)>10**-8:
+		count +=1
+		vbar = gradient_of_E_PHI(v,0)
+		v[2:] -= vbar[2:]
 	
-	#print 'number of iterations =',count
-	#print 'v_opt =',v
-	#print 'v0=',v0
+	print 'number of iterations =',count
+	print 'v_opt =',v
+	print 'v0=',v0
 
 	## plot Phi
 	## --------
