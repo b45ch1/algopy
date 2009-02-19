@@ -39,6 +39,28 @@ def generate_multi_indices(N,D):
 	return numpy.array(T)
 
 
+def multi_index_binomial(z,k):
+	"""n and k are multi-indices, i.e.
+	   n = [n1,n2,...]
+	   k = [k1,k2,...]
+	   and computes
+	   n1!/[(n1-k1)! k1!] * n2!/[(n2-k2)! k2!] * ....
+	"""
+	def binomial(z,k):
+		""" computes z!/[(z-k)! k!] """
+		u = int(numpy.prod([z-i for i in range(k) ]))
+		d = numpy.prod([i for i in range(1,k+1)])
+		return u/d
+
+	assert shape(z) == shape(k)
+	N = shape(z)[0]
+
+	return prod([ binomial(z[n],k[n]) for n in range(N)])
+
+def multi_index_abs(z):
+	return sum(z)	
+
+
 def convert_multi_indices_to_pos(in_I):
 	"""
 	a multi-index [2,1,0] tells us that we differentiate twice w.r.t x[0] and once w.r.t
@@ -132,7 +154,10 @@ class Mtc:
 	 ...
 	  [[ u_D1 + v_D1, ..., u_DNdir + v_DNdir]]
 	  
-	  For ufuncs this arangement is advantageous, because in this order, memory chunks of size Ndir are used and the operation on each element is the same. This is desireable to avoid cache misses.
+	  For ufuncs this arrangement is advantageous, because in this order, memory chunks of size Ndir are used and the operation on each element is the same. This is desireable to avoid cache misses.
+	  See for example __mul__: there, operations of self.TC[:d+1,:,:,:]* rhs.TC[d::-1,:,:,:] has to be performed. One can see, that contiguous memory blocks are used for such operations.
+
+	  A disadvantage of this arrangement is: it seems unnatural, it is easier to regard each direction separately.
 	"""
 	def __init__(self, X, Xdot = None):
 		""" INPUT:	shape([X]) = (D,P,N,M)"""

@@ -178,6 +178,8 @@ if __name__ == "__main__":
 			J[0,0,:,np] = tmp[:,0]
 			J[1,0,:,np] = tmp[:,1]
 			J[2,0,:,np] = tmp[:,2]
+
+
 		Jtc=Mtc(J)
 
 		# 2: forward evaluation of Phi
@@ -216,10 +218,9 @@ if __name__ == "__main__":
 
 		# multi indices for the full tensor of order DM-1 to compute d^(DM-1) PHI
 		# the remaining order to compute d^DM PHI is achieved by a reverse sweep later
-		Jq = generate_multi_indices(Nq,DM-1)
+		Jq = generate_multi_indices(Nq,DM)
 		NJq = shape(Jq)[0]
 
-		# 1: evaluation of J
 		# since Nq is usually much larger than Np
 		# we want to be able to get one higher order derivative
 		# w.r.t. q by reverse mode
@@ -228,58 +229,51 @@ if __name__ == "__main__":
 		# since UTPS cannot do those partial derivatives straightforward
 		# we need to use interpolation
 
-		# first we need the multi-indices
-		# we need to compute the equation 13.13  of Griewank's Book
-		# with s_1 = [1,0,0] resp. s_1 = [0,1,0]
-		# and s_2 one direction of Jq
+		J = zeros((DM+1,1,Nm,Np)) # Taylor series of degree DM has DM+1 taylor coefficients (i.e. count also the zero-derivative)
 
-		D = DM-1
-		V = zeros((Nv,D))
 		for nq in range(NJq):
-			s2 = Jq[nq,:]
-			for n in range(Np):
-				s1 = zeros(Nv)
-				s1[n] = 1.
-				V[:,0] =  s1+s2
-				tmp1 = adolc.hos_forward(1,D,v,V,0)[1]
-				V[:,0] =  s1
-				tmp2 = adolc.hos_forward(1,D,v,V,0)[1]
-				V[:,0] =  s2
-				tmp3 = adolc.hos_forward(1,D,v,V,0)[1]
+			# 1: evaluation of J
 
-				tmp = tmp1 - tmp2 - tmp3
-				# tmp are  F_{d+1}(v + t s) coefficients
-				# but we need J_d
-				# to match them up we need to rescale them
-				scale_factor = array([(d+1.)/2. for d in range(D)])
-				tmp = tmp * scale_factor
-				
+			# here, we have to use nested interpolation
+			# we need to compute
+			# d^d F(x + s_1 z_1 + s_2 z_2) |
+			# ---------------------------- |
+			#   d z_1 d^(d-1) z_2          |_z=0
+			# for s_1 = [1,0,0] resp. s_1 = [0,1,0] (one direction for each parameter p)
+			# we use here formula (13) of the paper "Evaluating higher derivative tensors by forward propagation of univariate Taylor series"
 
-		## now perform the sum of Eqn 13.13 of Griewank's book
-		
-		#for ni in range(NI):
-			#for nj in range(NJv):
-				#i = I[ni,:]
-				#j = Jv[nj,:]
-				## most gamma(i,j) = 0
-				## good place to optimize!
-				#J gamma(i,j)
 
-		
-			#J[0,0,:,np] = tmp[:,0]
-			#J[1,0,:,np] = tmp[:,1]
-			#J[2,0,:,np] = tmp[:,2]
-		#Jtc=Mtc(J)
-
-		## 2: forward evaluation of Phi
-		#cg.forward([Jtc])
-	
-		## 3: reverse evaluation of Phi
-		#Phibar = zeros((DM,1,1,1))
-		#Phibar[0,0,0,0]=1.
-		#cg.reverse([Mtc(Phibar)])
-
-		#Jbar = FJ.xbar.TC[:,0,:,:]
+			for np in range(Np): # each column of J
+				for dm in range(DM+1):
+					I = array([1,dm])
+					K = zeros((dm+1,2),dtype=int)
+					K[:,0] = 1
+					K[:,1] = range(dm+1)
+					V = zeros((Nv,dm+1))
+					for k in K:
+						s1 = zeros(Nv)
+						s1[np] = k[0]
+						s2 = zeros(Nv)
+						s2[Np:] =  k[1]*Jq[nq,:]
+						V[:,0] =  s1+s2
+						tmp = adolc.hos_forward(1,dm+1,v,V,0)[1]
+						J[dm,0,:,np] += (-1)**multi_index_abs( I - k) * multi_index_binomial(I,k) * tmp[:,dm]
+						
+			scale_factor = array([1./prod(range(1,d+1)) for d in range(DM+1)])
+			for dm in range(DM+1):
+				J[dm,:,:,:] *= scale_factor[dm]
+			print J
+			#print scale_factor
+			#print J
+			## 2: forward evaluation of Phi
+			#Jtc=Mtc(J[:,:,:,:])
+			#cg.forward([Jtc])
+			## 3: reverse evaluation of Phi
+			#Phibar = zeros((DM,1,1,1))
+			#Phibar[0,0,0,0]=1.
+			#cg.reverse([Mtc(Phibar)])
+			#Jbar = FJ.xbar.TC[:,0,:,:]
+			#print Jbar
 
 		## 4: reverse evaluation of J
 		#vbar = zeros(Nv)
@@ -301,7 +295,8 @@ if __name__ == "__main__":
 		#return vbar
 		
 
-	gradient_of_E_PHI(v,DM)
+	#gradient_of_PHI(v)
+	gradient_of_E_PHI(v,4)
 	
 	## perform steepest descent optimization
 	#vbar = inf
