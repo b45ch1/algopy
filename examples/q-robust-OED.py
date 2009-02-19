@@ -167,49 +167,52 @@ if __name__ == "__main__":
 	#cg.plot('testgraph.png')
 	#cg.plot('testgraph.svg')
 
-	def gradient_of_PHI(v):
-		""" computes grad(PHI) as needed in the steepest descent optimization"""
-		for np in range(Np):
-			D = DM-1
-			V = zeros((Nv,D))
-			V[np,0] = 1.
-			V[2,0]  = 0.
-			tmp = adolc.hos_forward(1,D,v,V,0)[1][:,:]
-			J[0,0,:,np] = tmp[:,0]
-			J[1,0,:,np] = tmp[:,1]
-			J[2,0,:,np] = tmp[:,2]
+	#def gradient_of_PHI(v):
+		#""" computes grad(PHI) as needed in the steepest descent optimization"""
+		#DM = 2
+		#for np in range(Np):
+			#D = DM-1
+			#V = zeros((Nv,D))
+			#V[np,0] = 1.
+			#V[2,0]  = 0.
+			#tmp = adolc.hos_forward(1,v,V,0)[1][:,:]
+			#J[0,0,:,np] = tmp[:,0]
+			#J[1,0,:,np] = tmp[:,1]
+			#J[2,0,:,np] = tmp[:,2]
 
+		#Jtc=Mtc(J)
 
-		Jtc=Mtc(J)
-
-		# 2: forward evaluation of Phi
-		cg.forward([Jtc])
+		## 2: forward evaluation of Phi
+		#cg.forward([Jtc])
 	
-		# 3: reverse evaluation of Phi
-		Phibar = zeros((DM,1,1,1))
-		Phibar[0,0,0,0]=1.
-		cg.reverse([Mtc(Phibar)])
+		## 3: reverse evaluation of Phi
+		#Phibar = zeros((DM,1,1,1))
+		#Phibar[0,0,0,0]=1.
+		#cg.reverse([Mtc(Phibar)])
 
-		Jbar = FJ.xbar.TC[:,0,:,:]
+		#Jbar = FJ.xbar.TC[:,0,:,:]
 
-		# 4: reverse evaluation of J
-		vbar = zeros(Nv)
-		for np in range(Np):
-			D = DM-1
-			keep = D+1
-			V = zeros((Nv,D))
-			V[np,0] = 1.
-			V[2,0]  = 0.
-			adolc.hos_forward(1,D,v,V,keep)
-			U = zeros((1,Nm,D))
-			# U is a (Q,M,D) array
-			# Jbar is a (D,M,Np) array
-			U[0,:,0] = Jbar[0,:,np]
-			U[0,:,1] = Jbar[1,:,np]
-			U[0,:,2] = Jbar[2,:,np]
-			Z = adolc.hov_ti_reverse(1,D,U)[0]
-			vbar += Z[0,2,1]
-		return vbar
+		## 4: reverse evaluation of J
+		#vbar = zeros(Nv)
+		#for np in range(Np):
+			#D = DM-1
+			#keep = D+1
+			#V = zeros((Nv,D))
+			#V[np,0] = 1.
+			#V[2,0]  = 0.
+			#adolc.hos_forward(1,v,V,keep)
+			#U = zeros((1,Nm,D))
+			## U is a (Q,M,D) array
+			## Jbar is a (D,M,Np) array
+			#U[0,:,0] = Jbar[0,:,np]
+			#U[0,:,1] = Jbar[1,:,np]
+			#U[0,:,2] = Jbar[2,:,np]
+			#print 'U=',U
+			#Z = adolc.hov_ti_reverse(1,U)[0]
+			##print 'Z=',Z
+	
+			#vbar += Z[0,2,1]
+		#return vbar
 
 	def gradient_of_E_PHI(v,DM):
 		""" computes the gradient of the expectation of PHI, i.e. grad( E[PHI] ),
@@ -256,7 +259,7 @@ if __name__ == "__main__":
 						s2 = zeros(Nv)
 						s2[Np:] =  k[1]*Jq[nq,:]
 						V[:,0] =  s1+s2
-						tmp = adolc.hos_forward(1,dm+1,v,V,0)[1]
+						tmp = adolc.hos_forward(1,v,V,0)[1]
 						J[dm,0,:,np] += (-1)**multi_index_abs( I - k) * multi_index_binomial(I,k) * tmp[:,dm]
 						
 			scale_factor = array([1./prod(range(1,d+1)) for d in range(DM+1)])
@@ -272,18 +275,51 @@ if __name__ == "__main__":
 			cg.reverse([Mtc(Phibar)])
 			Jbar = FJ.xbar.TC[:,0,:,:]
 			#print Jbar
+			#print shape(Jbar)
 
 			## 4: reverse evaluation of J
-			#vbar = zeros(Nv)
-			#for np in range(Np):
+			vbar = zeros(Nv)
 
-				#Z = adolc.hov_ti_reverse(1,D,U)[0]
-				#vbar += Z[0,2,1]
-			#return vbar
+			for np in range(Np): # each column of J
+				dm = DM
+				I = array([1,dm])
+				K = zeros((dm+1,2),dtype=int)
+				K[:,0] = 1
+				K[:,1] = range(dm+1)
+
+				V = zeros((Nv,dm+1))
+				for k in K:
+					s1 = zeros(Nv)
+					s1[np] = k[0]
+					s2 = zeros(Nv)
+					s2[Np:] =  k[1]*Jq[nq,:]
+					V[:,0] =  s1+s2
+
+					keep = dm + 2
+					adolc.hos_forward(1,v,V,keep)[1]
+
+					# U is a (Q,M,D) array
+					# Jbar is a (D,M,Np) array
+					U = zeros((1,Nm,keep))
+					for d in range(dm+1):
+						U[0,:,d] = Jbar[d,:,np]
+					#print 'U=',U
+
+					Z = adolc.hov_ti_reverse(1,U)[0]
+					print 'Z=',Z
+					#J[dm,0,:,np] += (-1)**multi_index_abs( I - k) * multi_index_binomial(I,k) * tmp[:,dm]
+					#print shape(Z[0,:,:])
+					#exit()
+					#print Z[0,:,dm+1]
+					#vbar += 1./prod(range(1,dm+2)) * (-1)**multi_index_abs( I - k) * multi_index_binomial(I,k) * Z[0,:,dm+1]
+			#vbar += Z[0,2,1]
+			return vbar
 		
 
-	#gradient_of_PHI(v)
-	gradient_of_E_PHI(v,3)
+	#print 'gradient_of_PHI'
+	#print gradient_of_PHI(v)
+	print 'gradient_of_E_PHI'
+	print gradient_of_E_PHI(v,0)
 	
 	## perform steepest descent optimization
 	#vbar = inf

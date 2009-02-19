@@ -172,18 +172,20 @@ if __name__ == "__main__":
 
 		# 4: reverse evaluation of J
 		x = v
-		D = 2
+		D = 1
 		keep = D+1
 		V = zeros((Nv,D))
 		vbar = zeros(Nv)
 		for np in range(Np):
 			V[np,0] = 1
 			u = (Jbar.T)[np,:].copy()
-			adolc.hos_forward(1,D,x,V,keep)
+			adolc.hos_forward(1,x,V,keep)
 			Z = adolc.hos_reverse(1,D,u)
 			V[np,0] = 0
-			#print 'Z=',Z
+			print 'Z=',Z
 			vbar += Z[2,1]
+		
+		exit()
 		#update v:  x_k+1 = v_k - g
 		v[2:] -= vbar[2:]
 	print 'number of iterations =',count

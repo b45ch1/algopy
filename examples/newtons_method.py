@@ -62,13 +62,14 @@ def gradient_and_hessian_of_Phi(x):
 	V = zeros((2,1))
 	F = zeros((2,2))
 	Fdot = zeros((2,2))
-	D = 2
+	D = 1
 	keep = D+1
+
 	
 	for n in range(2):
 		# 1: hos_forward, propagate two directions
 		V[n,0] = 1.
-		(y,W) = adolc.hos_forward(1,D,x,V,keep)
+		(y,W) = adolc.hos_forward(1,x,V,keep)
 		V[n,0] = 0.
 		F[0,:] = y[:2]
 		F[1,:] = y[2:]
@@ -87,7 +88,7 @@ def gradient_and_hessian_of_Phi(x):
 		U = zeros((1,4,2))
 		U[0,:,0] = cg.independentFunctionList[0].xbar.X.flatten()
 		U[0,:,1] = cg.independentFunctionList[0].xbar.Xdot.flatten()
-		res = adolc.hov_ti_reverse(1,D,U)[0].copy()
+		res = adolc.hov_ti_reverse(1,U)[0].copy()
 		g[:]   = res[0,:,0]
 		H[n,:] = res[0,:,1]
 		
