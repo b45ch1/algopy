@@ -104,15 +104,20 @@ if __name__ == "__main__":
 	q = array([-1.])
 	v = concatenate((p,q))
 	DM = 4       # degree of moments
-	sigma = 0.1  # "deviation" of the uniform distribution
+	sigma = 0.3  # "deviation" of the uniform distribution
 
 	# test_explicit_euler_integration
 	x0 = array([v[0], 1., 0.])
 	x = explicit_euler(x0, f2, ts, v[:Np], v[Np:])
 	figure()
-	plot(ts,x[:,0])
-	plot(ts,x[:,1])
-	plot(ts,x[:,2])
+	plot(ts,x[:,0],linewidth=1.3,label='$x(t)$')
+	plot(ts,x[:,1],linewidth=1.3,label='$x_{p_1}(t)$')
+	plot(ts,x[:,2],linewidth=1.3,label='$x_{p_2}(t)$')
+
+	title('Trajectory of an ODE')
+	xlabel(r'states $x(t),x_{p_1}(t)$ and $x_{p_2}(t)$')
+	ylabel(r' time $t$')
+	savefig('variational_ode_trajectory.eps')
 	
 	# generate pseudo measurement data
 	p[0]+=3.; 	p[1] += 2.
@@ -191,17 +196,25 @@ if __name__ == "__main__":
 
 
 	# plot objective function
-	figure()
-
+	fig = figure()
 	for dm in range(0,7,2):
 		print dm
-		Nqs = 200
+		Nqs = 400
 		qs = linspace(-1,2,Nqs)
 		Phis = zeros(Nqs)
 		for n in range(Nqs):
 			v = array([p[0],p[1],qs[n]])
 			Phis[n] = expectation_of_phi(v,dm,sigma)
-		semilogy(qs,Phis)
+		plot(qs,Phis,linewidth=1.3, label=' %d\'th order'%dm)
+	ylim(-0.5,1)
+	text(-0.8, 0.8, "$\sigma=%0.2f$"%sigma, {'color' : 'k', 'fontsize' : 10})
+	title('Shortcoming of Taylor Approximations')
+	xlabel(r'control variable $q$')
+	ylabel(r'objective function $\Phi(q)$')
+	legend()
+	savefig('c-robust_oed.eps')
+	
+	
 	show()
 	
 
