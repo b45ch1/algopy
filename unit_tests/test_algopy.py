@@ -62,5 +62,28 @@ def test_forward_UTPM_add():
 	print FZ
 	#assert False
 
+def test_forward_UTPM_inv():
+	X = numpy.zeros((3,1,2,2))
+	X[0,0,:,:] = array([[10.,2.],[2.,11.]])
+	X[1,0,:,:] = array([[1.,2.],[3.,4.]])
+	X[2,0,:,:] = array([[5.,6.],[7.,8.]])
+	cg = CGraph()
+	FX = Function(Mtc(X))
+	FZ = FX.inv()
+	cg.independentFunctionList = [FX]
+	cg.dependentFunctionList = [FZ]
+
+	Z = numpy.zeros((3,1,2,2))
+	Z[0,0,:,:] = numpy.linalg.inv(X[0,0,:,:])
+	Z[1,0,:,:] = dot(dot(-Z[0,0,:,:],X[1,0,:,:]),Z[0,0,:,:])
+	Z[2,0,:,:] = dot(-Z[0,0,:,:], dot(X[2,0,:,:],Z[0,0,:,:]) + dot(X[1,0,:,:], Z[1,0,:,:])  )
+
+	assert sum( abs(Z[0,0,:,:] - FZ.x.TC[0,0,:,:])) < 10**-10
+	assert sum( abs(Z[1,0,:,:] - FZ.x.TC[1,0,:,:])) < 10**-10
+	assert sum( abs(Z[2,0,:,:] - FZ.x.TC[2,0,:,:])) < 10**-10
+
+
+	
+
 
 

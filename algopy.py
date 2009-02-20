@@ -207,11 +207,11 @@ class Mtc:
 			retval.TC[0,p,:,:] = numpy.linalg.inv(self.TC[0,p,:,:])
 			
 		# TC[d] elements
-		for d in range(D):
+		for d in range(1,D):
 			for p in range(P):
-				for c in range(d):
-					retval.TC[d,p,:,:] += numpy.dot(retval.TC[c,p,:,:], self.TC[d-c,p,:,:])
-					retval.TC[d,p,:,:] = - numpy.dot(self.TC[0,p,:,:], retval.TC[d,p,:,:])
+				for c in range(1,d+1):
+					retval.TC[d,p,:,:] += numpy.dot(self.TC[c,p,:,:], retval.TC[d-c,p,:,:],)
+				retval.TC[d,p,:,:] =  numpy.dot(-retval.TC[0,p,:,:], retval.TC[d,p,:,:],)
 		return retval
 
 	def trace(self):
