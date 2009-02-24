@@ -57,9 +57,9 @@ def explicit_euler(x0,f,ts,p,q):
 		x[m,:]= x[m-1,:] + h*f(ts[m-1],x[m-1,:],p,q)
 	return x
 
-def f(t,x,p,q):
+def f1(t,x,p,q):
 	""" rhs of the ODE"""
-	return array([p[1] + q[0]*x[0], q[0]*x[1], 1. + q[0]*x[2]])
+	return array([p[1] + q[0]*q[0]*x[0], q[0]*q[0]*x[1], 1. + q[0]*q[0]*x[2]])
 
 def f2(t,x,p,q):
 	""" rhs of the ODE"""
@@ -70,13 +70,13 @@ def measurement_model(x,p,q):
 
 def F(p,q,ts,Sigma, etas):
 	x0 = array([v[0], 1., 0.])
-	x = explicit_euler(x0,f2,ts,p,q)
+	x = explicit_euler(x0,f1,ts,p,q)
 	h = measurement_model(x[:,0],p,q)
 	return dot(Sigma, h-etas)
 
 def dFdp(p,q,ts,Sigma, etas):
 	x0 = array([v[0], 1., 0.])
-	x = explicit_euler(x0,f2,ts,p,q)
+	x = explicit_euler(x0,f1,ts,p,q)
 	h = measurement_model(x[:,1:],p,q)
 	return dot(Sigma,h)
 
@@ -100,15 +100,15 @@ if __name__ == "__main__":
 	Nv = Np + Nq
 	ts = linspace(0,3,Nm)
 	Sigma = eye(Nm)
-	p = array([1.,2.])
+	p = array([10**-10,2.])
 	q = array([-1.])
 	v = concatenate((p,q))
-	DM = 4       # degree of moments
-	sigma = 0.3  # "deviation" of the uniform distribution
+	DM = 2       # degree of moments
+	sigma = 0.7  # "deviation" of the uniform distribution
 
 	# test_explicit_euler_integration
 	x0 = array([v[0], 1., 0.])
-	x = explicit_euler(x0, f2, ts, v[:Np], v[Np:])
+	x = explicit_euler(x0, f1, ts, v[:Np], v[Np:])
 	figure()
 	plot(ts,x[:,0],linewidth=1.3,label='$x(t)$')
 	plot(ts,x[:,1],linewidth=1.3,label='$x_{p_1}(t)$')
@@ -122,7 +122,7 @@ if __name__ == "__main__":
 	# generate pseudo measurement data
 	p[0]+=3.; 	p[1] += 2.
 	x0 = array([v[0], 1., 0.])
-	x = explicit_euler(x0,f2,ts,p,q)
+	x = explicit_euler(x0,f1,ts,p,q)
 	h = measurement_model(x[:,0],p,q)
 	etas = h + numpy.random.normal(size=Nm)
 	p[0]-= 3.;	p[1] -= 2.
@@ -199,16 +199,16 @@ if __name__ == "__main__":
 	fig = figure()
 	for dm in range(0,7,2):
 		print dm
-		Nqs = 400
-		qs = linspace(-1,2,Nqs)
+		Nqs = 100
+		qs = linspace(-1.5,1.5,Nqs)
 		Phis = zeros(Nqs)
 		for n in range(Nqs):
 			v = array([p[0],p[1],qs[n]])
 			Phis[n] = expectation_of_phi(v,dm,sigma)
 		plot(qs,Phis,linewidth=1.3, label=' %d\'th order'%dm)
-	ylim(-0.5,1)
+	#ylim(-0.5,1)
 	text(-0.8, 0.8, "$\sigma=%0.2f$"%sigma, {'color' : 'k', 'fontsize' : 10})
-	title('Shortcoming of Taylor Approximations')
+	title('Robustness by Method of Moments')
 	xlabel(r'control variable $q$')
 	ylabel(r'objective function $\Phi(q)$')
 	legend()
