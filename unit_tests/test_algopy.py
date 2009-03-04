@@ -82,7 +82,17 @@ def test_forward_UTPM_inv():
 	assert sum( abs(Z[1,0,:,:] - FZ.x.TC[1,0,:,:])) < 10**-10
 	assert sum( abs(Z[2,0,:,:] - FZ.x.TC[2,0,:,:])) < 10**-10
 
-
+def test_solve():
+	A = numpy.zeros((2,1,3,3))
+	A[0,0,:,:] = eye(3)
+	X = numpy.ones((2,1,3,1))
+	X[1,:,:,:] = 2.
+	X = Mtc(X)
+	X.solve(A)
+	X = Function(Mtc(X))
+	print X.solve(A)
+	
+	#assert False
 	
 
 

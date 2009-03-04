@@ -213,6 +213,19 @@ class Mtc:
 					retval.TC[d,p,:,:] += numpy.dot(self.TC[c,p,:,:], retval.TC[d-c,p,:,:],)
 				retval.TC[d,p,:,:] =  numpy.dot(-retval.TC[0,p,:,:], retval.TC[d,p,:,:],)
 		return retval
+				
+	def solve(self,A):
+		print 'warning: this can\'t do UTPM in A, only in x'
+		retval = Mtc(zeros(shape(self.TC)))
+		(D,P,N,M) = shape(retval.TC)
+		assert M == 1
+		for p in range(P):
+			X = self.TC[:,p,:,:]
+			X = numpy.reshape(X,(D,N))
+			X = numpy.transpose(X)
+			retval.TC[:,p,:,0] = numpy.linalg.solve(A[0,0,:,:],X).T
+		return retval
+		
 
 	def trace(self):
 		""" returns a new Mtc in standard format, i.e. the matrices are 1x1 matrices"""
@@ -264,6 +277,8 @@ class Function:
 				self.type = 'var'
 		elif function_type == 'id':
 			self.type = 'id'
+		elif function_type == 'const':
+			self.type = 'const'
 		elif function_type == 'com':
 			self.type = 'com'
 		elif function_type == 'add':
@@ -280,6 +295,8 @@ class Function:
 			self.type = 'trace'
 		elif function_type == 'inv':
 			self.type = 'inv'
+		elif function_type == 'solve':
+			self.type = 'solve'
 		elif function_type == 'trans':
 			self.type = 'trans'
 		
@@ -298,8 +315,11 @@ class Function:
 	# ---------------------
 	def as_function(self, in_x):
 		if not isinstance(in_x, Function):
-			fun = Function(self.x.copy().set_zero())
-			fun.x.t0 = in_x
+			(D,P,N,M) = numpy.shape(self.x.TC)
+			fun = Mtc(numpy.zeros([D,P]+ list(numpy.shape(in_x))))
+			fun = Function(fun, function_type='const')
+			for p in range(P):
+				fun.x.TC[0,p,:,:] = in_x
 			return fun
 		return in_x
 
@@ -366,8 +386,12 @@ class Function:
 	def inv(self):
 		return Function([self], function_type='inv')
 	
+	def solve(self,rhs):
+		rhs = self.as_function(rhs)
+		return Function([self, rhs], function_type='solve')
+	
 	def shape(self):
-		return numpy.shape(self.x.X)
+		return self.x.shape()
 
 	def transpose(self):
 		return Function([self], function_type='trans')
@@ -386,9 +410,12 @@ class Function:
 	def eval(self):
 		if self.type == 'var':
 			return self.args
+		
+		elif self.type == 'const':
+			return self.args
 
-		elif self.type == 'com':
-			return convert(self.args)
+		#elif self.type == 'com':
+			#return convert(self.args)
 		
 		elif self.type == 'add':
 			self.args[0].xbar_from_x()
@@ -434,6 +461,10 @@ class Function:
 			self.args[0].xbar_from_x()
 			#self.args[0].xbar.set_zero()
 			return self.args[0].x.inv()
+		
+		elif self.type == 'solve':
+			self.args[0].xbar_from_x()
+			return self.args[0].x.solve(self.args[1].x)
 
 		elif self.type == 'trans':
 			self.args[0].xbar_from_x()
@@ -479,6 +510,9 @@ class Function:
 
 		elif self.type == 'inv':
 			self.args[0].xbar -= self.x.T.dot(self.xbar.dot(self.x.T))
+			
+		elif self.type == 'solve':
+			raise NotImplementedError
 
 		elif self.type == 'trans':
 			self.args[0].xbar += self.xbar.transpose()
@@ -666,3 +700,32 @@ class CGraph:
 		A.write('%s.dot'%name)
 		os.system('%s  %s.dot -T%s -o %s.%s'%(method, name, extension, name, extension))
 
+# Numpy wrapper
+#--------------
+def inv(X):
+	if X.__class__ == Mtc or X.__class__ == Function:
+		return X.inv()
+	else:
+		return numpy.linalg.inv(X)
+
+def dot(X,Y):
+	if X.__class__ == Mtc or X.__class__ == Function:
+		return X.dot(Y)
+	else:
+		return numpy.dot(X,Y)
+	
+def trace(X):
+	if X.__class__ == Mtc or X.__class__ == Function:
+		return X.trace()
+	else:
+		return numpy.trace(X)
+	
+def solve(A,X):
+	"""
+	Solve the linear system AY=X
+	where A (N,M) array, X (M,K) array and B (N,K) array
+	"""
+	if X.__class__ == Mtc or X.__class__ == Function:
+		return X.solve(A)
+	else:
+		return numpy.solve(A,B)
