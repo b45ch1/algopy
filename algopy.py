@@ -223,7 +223,7 @@ class Mtc:
 			X = self.TC[:,p,:,:]
 			X = numpy.reshape(X,(D,N))
 			X = numpy.transpose(X)
-			retval.TC[:,p,:,0] = numpy.linalg.solve(A[0,0,:,:],X).T
+			retval.TC[:,p,:,0] = numpy.linalg.solve(A.TC[0,0,:,:],X).T
 		return retval
 		
 
@@ -642,8 +642,9 @@ class CGraph:
 		A.node_attr['fixedsize']='true'
 
 		# build graph
+
 		for f in self.functionList:
-			if f.type == 'var':
+			if f.type == 'var' or f.type == 'const':
 				A.add_node(f.id)
 				continue
 			for a in numpy.ravel(f.args):
@@ -680,6 +681,11 @@ class CGraph:
 				s.attr['shape']='circle'
 				s.attr['label']= 'v_%d'%nf
 				s.attr['fontcolor']='#000000'
+			elif vtype == 'const':
+				s.attr['fillcolor']="#AAAAAA"
+				s.attr['shape']='triangle'
+				s.attr['label']= 'c_%d'%nf
+				s.attr['fontcolor']='#000000'
 				
 			elif vtype == 'dot':
 				s.attr['label']='dot%d'%nf
@@ -692,10 +698,14 @@ class CGraph:
 
 			elif vtype == 'inv':
 				s.attr['label']='inv%d'%nf
+				
+			elif vtype == 'solve':
+				s.attr['label']='slv%d'%nf
 
 			elif vtype == 'trans':
 				s.attr['label']='T%d'%nf
 		#print A.string() # print to screen
+
 
 		A.write('%s.dot'%name)
 		os.system('%s  %s.dot -T%s -o %s.%s'%(method, name, extension, name, extension))
