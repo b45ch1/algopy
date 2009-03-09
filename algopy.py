@@ -6,7 +6,6 @@ from numpy.linalg import *
 import numpy
 import numpy.linalg
 
-
 # HIGHER ORDER DERIVATIVE TENSORS BY INTERPOLATION
 # the theory is explained on page 315 of the book "Evaluating Derivatives" by Andreas Griewank,
 # Chapter 13, Subsection: Multivariate Tensors via Univariate Tensors

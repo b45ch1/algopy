@@ -83,22 +83,25 @@ def test_forward_UTPM_inv():
 	assert sum( abs(Z[2,0,:,:] - FZ.x.TC[2,0,:,:])) < 10**-10
 
 def test_solve():
-	B = numpy.zeros((2,1,3,3))
-	B[0,0,:,:] = 2*eye(3)
-	X = numpy.ones((2,1,3,1))
-	X[1,:,:,:] = 2.
-	B = Mtc(B)
+	X = numpy.zeros((2,1,3,1))
+	X[1,:,0,0] = 1.
+	X[0,:,0,0] = 1.
 	X = Mtc(X)
-	#Y = X.solve(A)
 	cg = CGraph()
 	FX = Function(X)
-	#B = Function(B)
-	B = 2*eye(3)
-	FY = FX.solve(B)
+	B = eye(3) - outer([1,2,3],[1,2,3.])
+	A = inv(B)
+	FY = FX.solve(A)
 	cg.independentFunctionList = [FX]
 	cg.dependentFunctionList = [FY]
 	
-	cg.plot('test_solve.png',method = 'circo')
+	##cg.plot('test_solve.png',method = 'circo')
+	
+	print FY
+	
+	print shape(B)
+	#print shape(X[0,0,:,:])
+	print dot(B,X.TC[0,0,:,:])
 	
 	#print 'X=',X
 	#print 'Y=',Y
