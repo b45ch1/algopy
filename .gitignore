@@ -20,5 +20,9 @@ trash
 *.eps
 *~
 
+report
+report/
+
+
 # exceptions
 !.gitignore
