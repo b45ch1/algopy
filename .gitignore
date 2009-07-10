@@ -11,10 +11,7 @@
 *.pyc
 *.txt
 trash/*
-report/*
 trash
-report
-report/
 *.png
 *.svg
 *.dot
