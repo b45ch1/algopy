@@ -7,7 +7,7 @@ import numpy
 import numpy.linalg
 
 
-# HIGHER ORDER DERIVATIVE TENSORS BY INTERPOLATION
+# HIGHER ORDER DERIVATIVE TENSORS BY EXACT INTERPOLATION
 # the theory is explained on page 315 of the book "Evaluating Derivatives" by Andreas Griewank,
 # Chapter 13, Subsection: Multivariate Tensors via Univariate Tensors
 
@@ -123,6 +123,62 @@ def gamma(i,j):
 	sum_recursion(k,0)
 	return retval[0]
 
+
+# convenience functions (should be as few as possible)
+#-----------------------------------------------------
+def convert(in_X):
+	"""
+	expects an array or list consisting of entries of type Mtc, e.g.
+	in_X = [[Mtc1,Mtc2],[Mtc3,Mtc4]]
+	and returns
+	Mtc([[Mtc1.TC,Mtc2.TC],[Mtc3.TC,Mtc4.TC]])
+
+	if a matrix/list of Function is provided, the Taylor series are extracted
+	"""
+	
+	in_X = numpy.array(in_X)
+	Rb,Cb = numpy.shape(in_X)
+
+	# find the degree D and number of directions P
+	D = 0; 	P = 0;
+	if in_X[0,0].__class__ == Function:
+		for r in range(Rb):
+			for c in range(Cb):
+				D = max(D, in_X[r,c].x.TC.shape[0])
+				P = max(P, in_X[r,c].x.TC.shape[1])		
+	
+	else:
+		for r in range(Rb):
+			for c in range(Cb):
+				D = max(D, in_X[r,c].TC.shape[0])
+				P = max(P, in_X[r,c].TC.shape[1])
+
+	# find the sizes of the blocks
+	rows = []
+	cols = []
+	for r in range(Rb):
+		rows.append(in_X[r,0].shape[0])
+	for c in range(Cb):
+		cols.append(in_X[0,c].shape[1])
+	rowsums = numpy.array([ numpy.sum(rows[:r]) for r in range(0,Rb+1)],dtype=int)
+	colsums = numpy.array([ numpy.sum(cols[:c]) for c in range(0,Cb+1)],dtype=int)
+
+	# create new matrix where the blocks will be copied into
+	TC = zeros((D, P, rowsums[-1],colsums[-1]))
+
+	# check if input is list of Functions
+	if in_X[0,0].__class__ == Function:
+		for r in range(Rb):
+			for c in range(Cb):
+				TC[:,:,rowsums[r]:rowsums[r+1], colsums[c]:colsums[c+1]] = in_X[r,c].x.TC[:,:,:,:]
+
+	else:
+		for r in range(Rb):
+			for c in range(Cb):
+				TC[:,:,rowsums[r]:rowsums[r+1], colsums[c]:colsums[c+1]] = in_X[r,c].TC[:,:,:,:]
+
+	return Mtc(TC)
+
 class Mtc:
 	"""
 	Matrix Taylor Coefficients
@@ -232,8 +288,10 @@ class Mtc:
 	def copy(self):
 		return Mtc(self.TC.copy())
 
-	def shape(self):
+	def get_shape(self):
 		return numpy.shape(self.TC[0,0,:,:])
+
+	shape = property(get_shape)
 
 	def get_transpose(self):
 		return self.transpose()
@@ -366,8 +424,10 @@ class Function:
 	def inv(self):
 		return Function([self], function_type='inv')
 	
-	def shape(self):
-		return numpy.shape(self.x.X)
+	def get_shape(self):
+		return numpy.shape(self.x)
+
+	shape = property(get_shape)
 
 	def transpose(self):
 		return Function([self], function_type='trans')
@@ -491,9 +551,9 @@ class Function:
 			cols = []
 			#print type(args)
 			for r in range(Rb):
-				rows.append(args[r,0].shape()[0])
+				rows.append(args[r,0].shape[0])
 			for c in range(Cb):
-				cols.append(args[0,c].shape()[0])
+				cols.append(args[0,c].shape[1])
 
 			#print rows
 			#print cols
@@ -501,17 +561,17 @@ class Function:
 			rowsums = [ int(sum(rows[:r])) for r in range(0,Rb+1)]
 			colsums = [ int(sum(cols[:c])) for c in range(0,Cb+1)]
 
-			#print rowsums
-			#print colsums
-			#print 'shape of xbar=', shape(self.xbar.X)
-			#print 'shape of x=', shape(self.x.X)
+			print rowsums
+			print colsums
+			print 'shape of xbar=', shape(self.xbar.TC)
+			print 'shape of x=', shape(self.x.TC)
 			
 			for r in range(Rb):
 				for c in range(Cb):
 					#print 'args[r,c].xbar=\n',args[r,c].xbar.shape()
 					#print 'rhs=\n', self.xbar[rowsums[r]:rowsums[r+1],colsums[c]:colsums[c+1]].shape()
 					
-					args[r,c].xbar += self.xbar[rowsums[r]:rowsums[r+1],colsums[c]:colsums[c+1]]
+					args[r,c].xbar.TC[:,:,:,:] += self.xbar.TC[:,:,rowsums[r]:rowsums[r+1],colsums[c]:colsums[c+1]]
 		
 		else:
 			raise Exception('Unknown function "%s". Please add rule to Mtc.reval()'%self.type)
@@ -566,7 +626,7 @@ class CGraph:
 		for f in self.functionList[::-1]:
 			f.reval()
 
-	def plot(self, filename = None, method = None):
+	def plot(self, filename = None, method = None, orientation = 'TD'):
 		"""
 		accepted filenames, e.g.:
 		filename = 
@@ -577,6 +637,9 @@ class CGraph:
 		accepted methods
 		method = 'dot'
 		method = 'circo'
+
+		accepted orientations:
+		orientation = 'LR'
 		''
 		"""
 
@@ -586,6 +649,9 @@ class CGraph:
 		# checking filename and converting appropriately
 		if filename == None:
 			filename = 'computational_graph.png'
+
+		if orientation != 'LR' and orientation != 'TD' :
+			orientation = 'TD'
 
 		if method != 'dot' and method != 'circo':
 			method = 'dot'
@@ -598,12 +664,12 @@ class CGraph:
 		print 'name=',name, 'extension=', extension
 
 		# setting the style for the nodes
-		A = pygraphviz.agraph.AGraph(directed=True, strict = False)
-		A.node_attr['fillcolor']="#000000"
+		A = pygraphviz.agraph.AGraph(directed=True, strict = False, rankdir = orientation)
+		A.node_attr['fillcolor']= '#ffffff'
 		A.node_attr['shape']='rect'
 		A.node_attr['width']='0.5'
 		A.node_attr['height']='0.5'
-		A.node_attr['fontcolor']='#ffffff'
+		A.node_attr['fontcolor']="#000000"
 		A.node_attr['style']='filled'
 		A.node_attr['fixedsize']='true'
 
@@ -642,7 +708,7 @@ class CGraph:
 				s.attr['label']='/%d'%nf
 				
 			elif vtype == 'var':
-				s.attr['fillcolor']="#FFFF00"
+				s.attr['fillcolor']="#FFFFFF"
 				s.attr['shape']='circle'
 				s.attr['label']= 'v_%d'%nf
 				s.attr['fontcolor']='#000000'

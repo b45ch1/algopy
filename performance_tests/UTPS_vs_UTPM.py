@@ -72,9 +72,12 @@ def print_loc(aA):
 if __name__ == "__main__":
 	from numpy.random import random
 
-	Ns = range(1,25)
+	Ns = range(1,22)
 	adolc_times = []
 	adolc_taping_times = []
+	adolc_num_operations = []
+	adolc_num_locations = []
+	
 	algopy_times = []
 	
 
@@ -102,6 +105,10 @@ if __name__ == "__main__":
 		ay = trace(aC)
 		dependent(ay)
 		trace_off()
+
+		adolc_num_locations.append(tapestats(0)['NUM_LOCATIONS'])
+		adolc_num_operations.append(tapestats(0)['NUM_OPERATIONS'])
+	
 		t_end = time()
 		adolc_taping_times.append(t_end-t_start)
 		t_start = time()
@@ -144,10 +151,12 @@ if __name__ == "__main__":
 		algopy_times.append(t_end-t_start)
 
 		#print H1 - H2
+
+	figure()
 	semilogy(Ns,adolc_taping_times,'ko', label='pyadolc: taping')
 	semilogy(Ns,adolc_times,'k.', label='pyadolc: hessian computation')
 	semilogy(Ns,algopy_times,'kd', label='algopy: hessian computation')
-	legend(loc=2)
+	legend(loc=4)
 	title('UTPS vs UTPM for Hessian Computation of $y =$tr$X^{-1}$')
 	xlabel('matrix size $N$')
 	ylabel('runtime $t$ in seconds')
@@ -155,6 +164,17 @@ if __name__ == "__main__":
 	savefig('utps_vs_utpm.png')
 	savefig('utps_vs_utpm.eps')
 
+	figure()
+	semilogy(Ns,adolc_num_operations,'k.', label='Number of Operations')
+	semilogy(Ns,adolc_num_locations,'ko', label='Number of Locations')
+
+	title('Memory needed by PyADOLC')
+	xlabel('matrix size $N$')
+	ylabel('size')
+
+	savefig('pyadolc_locs_and_ops.png')
+	savefig('pyadolc_locs_and_ops.eps')
+	legend(loc=4)
 
 	
 	show()
