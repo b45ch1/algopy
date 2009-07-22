@@ -561,10 +561,10 @@ class Function:
 			rowsums = [ int(sum(rows[:r])) for r in range(0,Rb+1)]
 			colsums = [ int(sum(cols[:c])) for c in range(0,Cb+1)]
 
-			print rowsums
-			print colsums
-			print 'shape of xbar=', shape(self.xbar.TC)
-			print 'shape of x=', shape(self.x.TC)
+			#print rowsums
+			#print colsums
+			#print 'shape of xbar=', shape(self.xbar.TC)
+			#print 'shape of x=', shape(self.x.TC)
 			
 			for r in range(Rb):
 				for c in range(Cb):

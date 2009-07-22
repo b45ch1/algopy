@@ -163,26 +163,50 @@ def test_forward_reverse_combine():
 	M = [1,1,1]
 
 	cg = CGraph()
-
+	
+	# preparing independent variables
 	Fs = []
+	Js = []
 	for i in range(3):
-		Fs.append([Function(Mtc(numpy.random.rand(D[i],P[i],N[i],M[i])))])
+		J = numpy.random.rand(D[i],P[i],N[i],M[i])
+		Js.append(J)
+		Fs.append([Function(Mtc(J))])
 
+	# perform matrix computations
 	FX = Function(Fs)
 	FXT = FX.T
 	FTR = FXT.dot(FX).trace()
+
+	# set independent and dependent Functions
 	cg.independentFunctionList = [Fs[i][0] for i in range(3)]
 	cg.dependentFunctionList   = [FTR]
+	#cg.plot(filename = 'trash/test_forward_reverse_combine.png', method = 'circo' )
 
-	cg.plot(filename = 'trash/test_forward_reverse_combine.png', method = 'circo' )
-
+	# compute the gradient of the computational procedure
 	cg.reverse([Mtc(numpy.array([[[[1.]]]]))])
 
-	print cg
 
-	#print cg.independentFunctionList[0]
-	assert False
-	# check the left-top block
-	#assert_array_almost_equal(MX.TC[:,:,:N[0],:M[0]], Ms[0][0].x.TC[:,:,:,:])
+	# compute some elements of the gradient by finite differences
+	epsilon = 10**-8
+	X = numpy.zeros((numpy.sum(N), 1))
+
+	for i in range(3):
+		X[ numpy.sum(N[:i]): numpy.sum(N[:i+1]),:] = Js[i][0,0,:,:]
+
+	X2 = numpy.zeros(numpy.shape(X))
+	X2[:,:] =  X[:,:]
+	X2[0,0] += epsilon
+
+	XT = X.T
+	X2T = X2.T
+
+	XTR = numpy.trace(numpy.dot(XT,X))
+	X2TR = numpy.trace(numpy.dot(X2T, X2))
+
+	f11 = (X2TR - XTR)/epsilon
+	g11 = cg.independentFunctionList[0].xbar.TC[0,0,0,0]
+
+	assert_almost_equal(g11, f11)
+
 
 	
