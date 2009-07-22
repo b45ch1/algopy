@@ -11,10 +11,7 @@
 *.pyc
 *.txt
 trash/*
-report/*
 trash
-report
-report/
 *.png
 *.svg
 *.dot
@@ -22,6 +19,10 @@ report/
 *.so
 *.eps
 *~
+
+report
+report/
+
 
 # exceptions
 !.gitignore

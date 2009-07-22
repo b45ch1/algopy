@@ -86,8 +86,6 @@ def test_trace():
 	assert AX.TC[0,0,0,2] == AY.TC[0,0,2,0]
 
 
-
-
 # TESTING MATRIX AD
 # -----------------
 
@@ -126,6 +124,36 @@ def test_forward_UTPM_inv():
 	assert sum( abs(Z[2,0,:,:] - FZ.x.TC[2,0,:,:])) < 10**-10
 
 
+def test_solve():
+	X = numpy.zeros((2,1,3,1))
+	X[1,:,0,0] = 1.
+	X[0,:,0,0] = 1.
+	X = Mtc(X)
+
+	cg = CGraph()
+
+	FX = Function(X)
+	B = eye(3) - outer([1,2,3],[1,2,3.])
+	A = inv(B)
+	FY = FX.solve(A)
+	cg.independentFunctionList = [FX]
+	cg.dependentFunctionList = [FY]
+
+	##cg.plot('test_solve.png',method = 'circo')
+	
+	#print FY
+	
+	#print shape(B)
+	#print shape(X[0,0,:,:])
+	#print dot(B,X.TC[0,0,:,:])
+	
+	#print 'X=',X
+	#print 'Y=',Y
+	#print 'A=',A
+	
+	#assert False
+	
+
 
 def test_plot_computational_graph():
 	X = 2 * numpy.random.rand(2,2,2,2)
@@ -133,6 +161,7 @@ def test_plot_computational_graph():
 
 	AX = Mtc(X)
 	AY = Mtc(Y)
+
 	cg = CGraph()
 	FX = Function(AX)
 	FY = Function(AY)
@@ -147,9 +176,11 @@ def test_plot_computational_graph():
 	FW = Function([[FX, FZ], [FZ, FY]])
 
 	FTR = FW.trace()
+
 	
 	cg.independentFunctionList = [FX, FY]
 	cg.dependentFunctionList = [FTR]
+
 	
 	cg.plot(filename = 'trash/computational_graph_circo.png', method = 'circo' )
 	cg.plot(filename = 'trash/computational_graph_circo.svg', method = 'circo' )
@@ -184,7 +215,6 @@ def test_forward_reverse_combine():
 
 	# compute the gradient of the computational procedure
 	cg.reverse([Mtc(numpy.array([[[[1.]]]]))])
-
 
 	# compute some elements of the gradient by finite differences
 	epsilon = 10**-8
