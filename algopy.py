@@ -1,14 +1,12 @@
 #!/usr/bin/env python
-
-from numpy import *
-from numpy.linalg import *
-
 import numpy
 import numpy.linalg
 
 # HIGHER ORDER DERIVATIVE TENSORS BY EXACT INTERPOLATION
 # the theory is explained on page 315 of the book "Evaluating Derivatives" by Andreas Griewank,
 # Chapter 13, Subsection: Multivariate Tensors via Univariate Tensors
+# or in the paper "Evaluating higher derivative tensors by forward propagation of univariate Taylor series"
+# by  Andreas Griewank, Jean Utke, Andrea Walther
 
 def generate_multi_indices(N,D):
 	"""

@@ -20,8 +20,9 @@ trash
 *.eps
 *~
 
+build
+
 report
-report/
 
 
 # exceptions
