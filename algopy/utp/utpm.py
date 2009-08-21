@@ -9,7 +9,7 @@ where M is the ring of matrices.
 """
 
 import numpy.linalg
-from numpy import shape, dot, zeros
+from numpy import shape, dot, zeros, ndim, asarray, sum, trace
 
 
 class MatPoly:
