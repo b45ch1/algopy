@@ -1,6 +1,9 @@
 """
-The tracer records the sequence of elementary operations (+,-,*,/,sin,cos,...)
-in the following way:
+The tracer records the sequence of elementary operations (+,-,*,/,sin,cos,...).
+The sequence of elementary operations is necessary to implement the
+reverse mode of AD.
+
+The tracer defined in the file works in the following way:
     * each variable that should be traced is an object of the class Function
     * the Function object is operations aware, i.e. it knows that is used in a
       function.
@@ -151,9 +154,6 @@ class Function:
     def set_transpose(self,x):
         raise NotImplementedError('???')
     T = property(get_transpose, set_transpose)
-
-
-    # ----------------------------      
 
     # forward and reverse evaluation
     # ------------------------------

@@ -4,7 +4,7 @@ The algebraic class is
 
 M[t]/<t^D>
 
-where M is the ring of matrices.
+where M is the ring of matrices and t in R.
 
 """
 
