@@ -1,26 +1,42 @@
 """
-The tracer records the sequence of elementary operations (+,-,*,/,sin,cos,...).
+The tracer records the sequence of elementary operations (+,-,*,/,sin,cos,dot,solve,...).
 The sequence of elementary operations is necessary to implement the
 reverse mode of AD.
 
 The tracer defined in the file works in the following way:
     * each variable that should be traced is an object of the class Function
     * the Function object is operations aware, i.e. it knows that is used in a
-      function.
+    function.
     * This operations awareness is accomplished by operator overloading, i.e.
-      when Function(1)*Function(2) is called, it is equivalent to
-      Function(1).__mul__(Function(2))
-      and the __mul__ operator is defined to record the operation
+    when Function(1)*Function(2) is called, it is equivalent to
+    Function(1).__mul__(Function(2))
+    and the __mul__ operator is defined to record the operation
     * The sequence of recorded operations is stored in a DAG (computational graph)
     * The DAG has the special property that each node in the graph knows its
-      parents. This is necessary to revert the control flow direction.
+    parents. This is necessary to revert the control flow direction.
 """
 
-import numpy 
+import numpy
+import copy
 
 class Function:
-    """ Function node of the Computational Graph CGraph defined below."""
+    """
+    Function node of the Computational Graph CGraph defined below.
+    It is only a container class with the true value saved in self.x
+    Its parents are saved as list in self.args.
+
+    Before instances of the Function class can be made, one has to register a
+    computational graph. This is simply done by calling creating an instance of
+    a computational graph:
+    >>>CGraph()
+
+    The CGraph init function registers this instance in the Function class:
+    CGraph.__init__(self):
+        Function.cgraph = self
+    """
     def __init__(self, args, function_type='var'):
+
+        # register all supported elementary functions here
         if function_type == 'var':
             if type(args) == list:
                 self.type = 'com'
@@ -32,14 +48,16 @@ class Function:
             self.type = 'const'
         elif function_type == 'com':
             self.type = 'com'
+        elif function_type == 'neg':
+            self.type = 'neg'
         elif function_type == 'add':
             self.type = 'add'
         elif function_type == 'sub':
-            self.type = 'sub'           
+            self.type = 'sub'
         elif function_type == 'mul':
             self.type = 'mul'
         elif function_type == 'div':
-            self.type = 'div'           
+            self.type = 'div'
         elif function_type == 'dot':
             self.type = 'dot'
         elif function_type == 'trace':
@@ -50,13 +68,15 @@ class Function:
             self.type = 'solve'
         elif function_type == 'trans':
             self.type = 'trans'
-        
         else:
             raise NotImplementedError('function_type "%s" is unknown, please add to Function.__init__'%function_type)
 
+        # save the arguments and compute the value of the operation and save it in self.x
         self.args = args
         self.x = self.eval()
-        self.xbar_from_x()
+        #self.xbar_from_x()
+
+        # update the computational graph
         self.id = self.cgraph.functionCount
         self.cgraph.functionCount += 1
         self.cgraph.functionList.append(self)
@@ -75,13 +95,7 @@ class Function:
         return in_x
 
     def xbar_from_x(self):
-        if type(self.x) == list:
-            self.xbar = []
-            for r in self.x:
-                self.xbar.append([c.x.copy().set_zero() for c in r])
-            return
-        else:
-            self.xbar = self.x.copy().set_zero()
+        self.xbar = numpy.zeros_like(self.x)
 
 
     def __str__(self):
@@ -96,8 +110,11 @@ class Function:
     # ---------------------
 
 
-    # overloaded matrix operations
-    # ----------------------------
+    # overloaded elementary operations
+    # --------------------------------
+    def __neg__(self):
+        return Function([self], function_type='neg')
+    
     def __add__(self,rhs):
         rhs = self.as_function(rhs)
         return Function([self, rhs], function_type='add')
@@ -112,14 +129,14 @@ class Function:
 
     def __div__(self,rhs):
         rhs = self.as_function(rhs)
-        return Function([self, rhs], function_type='div')   
+        return Function([self, rhs], function_type='div')
 
     def __radd__(self,lhs):
         return self + lhs
 
     def __rsub__(self,lhs):
         return -self + lhs
-    
+
     def __rmul__(self,lhs):
         return self * lhs
 
@@ -136,12 +153,12 @@ class Function:
 
     def inv(self):
         return Function([self], function_type='inv')
-    
+
     def get_shape(self):
         return numpy.shape(self.x)
 
     shape = property(get_shape)
-    
+
     def solve(self,rhs):
         rhs = self.as_function(rhs)
         return Function([self, rhs], function_type='solve')
@@ -155,76 +172,84 @@ class Function:
         raise NotImplementedError('???')
     T = property(get_transpose, set_transpose)
 
-    # forward and reverse evaluation
-    # ------------------------------
+
     def eval(self):
+        """
+        one step in the forward evaluation
+        """
         if self.type == 'var':
             return self.args
-        
+
         elif self.type == 'const':
             return self.args
 
         elif self.type == 'com':
             return convert(self.args)
-        
+
+        elif self.type == 'neg':
+            return -self.args[0].x
+
         elif self.type == 'add':
-            self.args[0].xbar_from_x()
-            self.args[1].xbar_from_x()
+            #self.args[0].xbar_from_x()
+            #self.args[1].xbar_from_x()
             #self.args[0].xbar.set_zero()
             #self.args[1].xbar.set_zero()
             return self.args[0].x + self.args[1].x
 
         elif self.type == 'sub':
-            self.args[0].xbar_from_x()
-            self.args[1].xbar_from_x()
+            #self.args[0].xbar_from_x()
+            #self.args[1].xbar_from_x()
             #self.args[0].xbar.set_zero()
             #self.args[1].xbar.set_zero()
-            return self.args[0].x - self.args[1].x      
+            return self.args[0].x - self.args[1].x
 
         elif self.type == 'mul':
-            self.args[0].xbar_from_x()
-            self.args[1].xbar_from_x()
+            #self.args[0].xbar_from_x()
+            #self.args[1].xbar_from_x()
             #self.args[0].xbar.set_zero()
             #self.args[1].xbar.set_zero()
             return self.args[0].x * self.args[1].x
 
         elif self.type == 'div':
-            self.args[0].xbar_from_x()
-            self.args[1].xbar_from_x()  
+            #self.args[0].xbar_from_x()
+            #self.args[1].xbar_from_x()
             #self.args[0].xbar.set_zero()
             #self.args[1].xbar.set_zero()
             return self.args[0].x.__div__(self.args[1].x)
 
         elif self.type == 'dot':
-            self.args[0].xbar_from_x()
-            self.args[1].xbar_from_x()
+            #self.args[0].xbar_from_x()
+            #self.args[1].xbar_from_x()
             #self.args[0].xbar.set_zero()
             #self.args[1].xbar.set_zero()
             return self.args[0].x.dot(self.args[1].x)
 
         elif self.type == 'trace':
-            self.args[0].xbar_from_x()
+            #self.args[0].xbar_from_x()
             #self.args[0].xbar.set_zero()
             return self.args[0].x.trace()
 
         elif self.type == 'inv':
-            self.args[0].xbar_from_x()
+            #self.args[0].xbar_from_x()
             #self.args[0].xbar.set_zero()
             return self.args[0].x.inv()
-        
+
         elif self.type == 'solve':
-            self.args[0].xbar_from_x()
+            #self.args[0].xbar_from_x()
             return self.args[0].x.solve(self.args[1].x)
 
         elif self.type == 'trans':
-            self.args[0].xbar_from_x()
+            #self.args[0].xbar_from_x()
             #self.args[0].xbar.set_zero()
             return self.args[0].x.transpose()
-        
+
         else:
             raise Exception('Unknown function "%s". Please add rule to Mtc.eval()'%self.type)
 
     def reval(self):
+        """
+        one step in the reverse evaluation
+        """
         if self.type == 'var':
             pass
 
@@ -260,7 +285,7 @@ class Function:
 
         elif self.type == 'inv':
             self.args[0].xbar -= self.x.T.dot(self.xbar.dot(self.x.T))
-            
+
         elif self.type == 'solve':
             raise NotImplementedError
 
@@ -289,22 +314,21 @@ class Function:
             #print colsums
             #print 'shape of xbar=', shape(self.xbar.TC)
             #print 'shape of x=', shape(self.x.TC)
-            
+
             for r in range(Rb):
                 for c in range(Cb):
                     #print 'args[r,c].xbar=\n',args[r,c].xbar.shape()
                     #print 'rhs=\n', self.xbar[rowsums[r]:rowsums[r+1],colsums[c]:colsums[c+1]].shape()
-                    
+
                     args[r,c].xbar.TC[:,:,:,:] += self.xbar.TC[:,:,rowsums[r]:rowsums[r+1],colsums[c]:colsums[c+1]]
-        
+
         else:
             raise Exception('Unknown function "%s". Please add rule to Mtc.reval()'%self.type)
-            
-    # ------------------------------
+
 
 class CGraph:
     """
-    We implement the Computational Graph (CG) as Directed Graph
+    We implement the Computational Graph (CG) as Directed Acyclic Graph.
     The Graph of y = x1(x2+x3) looks like
 
     --- independent variables
@@ -313,13 +337,13 @@ class CGraph:
     v3(x3): None
 
     --- function operations
-    +4(v2.x + v3.x): [v2,v3] 
+    +4(v2.x + v3.x): [v2,v3]
     *5(v1.x * +4.x): [v1,+4]
 
     --- dependent variables
     v6(*5.x): [*5]
     """
-    
+
     def __init__(self):
         self.functionCount = 0
         self.functionList = []
@@ -334,7 +358,7 @@ class CGraph:
         # populate independent arguments with new values
         for nf,f in enumerate(self.independentFunctionList):
             f.args = x[nf]
-            
+
         # traverse the computational tree
         for f in self.functionList:
             f.x = f.eval()
@@ -342,8 +366,12 @@ class CGraph:
     def reverse(self,xbar):
         if numpy.size(self.dependentFunctionList) == 0:
             print 'You forgot to specify which variables are dependent!\n e.g. with cg.dependentFunctionList = [F1,F2]'
-            return 
-        
+            return
+
+        # initial all xbar to zero
+        for f in self.functionList:
+            f.xbar_from_x()
+
         for nf,f in enumerate(self.dependentFunctionList):
             f.xbar = xbar[nf]
 
@@ -353,7 +381,7 @@ class CGraph:
     def plot(self, filename = None, method = None, orientation = 'TD'):
         """
         accepted filenames, e.g.:
-        filename = 
+        filename =
         'myfolder/mypic.png'
         'mypic.svg'
         etc.
@@ -364,7 +392,7 @@ class CGraph:
 
         accepted orientations:
         orientation = 'LR'
-        ''
+        orientation = 'TD'
         """
 
         import pygraphviz
@@ -425,13 +453,13 @@ class CGraph:
 
             elif vtype == 'sub':
                 s.attr['label']='-%d'%nf
-                
+
             elif vtype == 'mul':
                 s.attr['label']='*%d'%nf
 
             elif vtype == 'div':
                 s.attr['label']='/%d'%nf
-                
+
             elif vtype == 'var':
                 s.attr['fillcolor']="#FFFFFF"
                 s.attr['shape']='circle'
@@ -442,19 +470,19 @@ class CGraph:
                 s.attr['shape']='triangle'
                 s.attr['label']= 'c_%d'%nf
                 s.attr['fontcolor']='#000000'
-                
+
             elif vtype == 'dot':
                 s.attr['label']='dot%d'%nf
-                
+
             elif vtype == 'com':
                 s.attr['label']='com%d'%nf
-                
+
             elif vtype == 'trace':
                 s.attr['label']='tr%d'%nf
 
             elif vtype == 'inv':
                 s.attr['label']='inv%d'%nf
-                
+
             elif vtype == 'solve':
                 s.attr['label']='slv%d'%nf
 

@@ -7,7 +7,7 @@ from algopy.utp.utpm import *
 class TestMatPoly(TestCase):
     def test_UTPM(self):
         """
-        this checks just if calling the operations is ok
+        this checks _only_ if calling the operations is ok
         """
         X = 2 * numpy.random.rand(2,2,2,2)
         Y = 3 * numpy.random.rand(2,2,2,2)
