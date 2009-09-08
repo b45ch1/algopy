@@ -1,4 +1,5 @@
 from algopy.tests.test_tracer import *
+from algopy.utp.tests.test_utps import *
 from algopy.utp.tests.test_utpm import *
 
 

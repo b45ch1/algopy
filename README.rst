@@ -29,6 +29,12 @@ Rationale:
             algorithm. For that, the sequence of operation is recorded by tracing the 
             evaluation of the algorithm. Implementation in: `./algopy/tracer.py`
 
+    ALGOPY aims to provide algorithms in a clean and accessible way allowing quick
+    understanding of the underlying algorithms. Therefore, it should be easy to
+    port to other programming languages, take code snippets.
+    If optimized algorithms are wanted, they should be provided in a subclass derived
+    from the reference implementation.
+    
 
 Dependencies:
     ALGOPY Core:
@@ -37,6 +43,9 @@ Dependencies:
     ALGOPY Examples:
         * pyadolc
         * scipy
+
+    Run tests:
+        * Nose
 
 Alternatives:
     If you are looking for a robust tool for AD in Python you should try:

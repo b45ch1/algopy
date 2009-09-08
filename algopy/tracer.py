@@ -4,6 +4,7 @@ The sequence of elementary operations is necessary to implement the
 reverse mode of AD.
 
 The tracer defined in the file works in the following way:
+    
     * each variable that should be traced is an object of the class Function
     * the Function object is operations aware, i.e. it knows that is used in a
     function.
@@ -18,6 +19,22 @@ The tracer defined in the file works in the following way:
 
 import numpy
 import copy
+
+
+#def combine_function_blocks(in_X):
+    #"""
+    #FZ = combine_blocks([[FX1,FX2],[FX3,FX4]])
+
+    #combine_blocks returns a Function object where the input matrix of functions
+    #is combined in a function of the combined matrix
+
+    #"""
+    #import algopy.utp.utpm
+
+    #X = numpy.array(in_X)
+    #AX = numpy.reshape(map(lambda v: getattr(v,'x'), X.ravel()), numpy.shape(X))
+    #AY = algopy.utp.utpm.combine_blocks(AX)
+    #return Function(AY)
 
 class Function:
     """
@@ -95,7 +112,10 @@ class Function:
         return in_x
 
     def xbar_from_x(self):
-        self.xbar = numpy.zeros_like(self.x)
+        if numpy.isscalar(self.x):
+            self.xbar = 0.
+        else:
+            self.xbar = self.x.zeros_like()
 
 
     def __str__(self):
@@ -184,63 +204,40 @@ class Function:
             return self.args
 
         elif self.type == 'com':
-            return convert(self.args)
+            import algopy.utp.utpm
+            X = numpy.array(self.args)
+            AX = numpy.reshape(map(lambda v: getattr(v,'x'), X.ravel()), numpy.shape(X))
+            AY = algopy.utp.utpm.combine_blocks(AX)
+            return AY
 
         elif self.type == 'neg':
             return -self.args[0].x
 
         elif self.type == 'add':
-            #self.args[0].xbar_from_x()
-            #self.args[1].xbar_from_x()
-            #self.args[0].xbar.set_zero()
-            #self.args[1].xbar.set_zero()
             return self.args[0].x + self.args[1].x
 
         elif self.type == 'sub':
-            #self.args[0].xbar_from_x()
-            #self.args[1].xbar_from_x()
-            #self.args[0].xbar.set_zero()
-            #self.args[1].xbar.set_zero()
             return self.args[0].x - self.args[1].x
 
         elif self.type == 'mul':
-            #self.args[0].xbar_from_x()
-            #self.args[1].xbar_from_x()
-            #self.args[0].xbar.set_zero()
-            #self.args[1].xbar.set_zero()
             return self.args[0].x * self.args[1].x
 
         elif self.type == 'div':
-            #self.args[0].xbar_from_x()
-            #self.args[1].xbar_from_x()
-            #self.args[0].xbar.set_zero()
-            #self.args[1].xbar.set_zero()
             return self.args[0].x.__div__(self.args[1].x)
 
         elif self.type == 'dot':
-            #self.args[0].xbar_from_x()
-            #self.args[1].xbar_from_x()
-            #self.args[0].xbar.set_zero()
-            #self.args[1].xbar.set_zero()
             return self.args[0].x.dot(self.args[1].x)
 
         elif self.type == 'trace':
-            #self.args[0].xbar_from_x()
-            #self.args[0].xbar.set_zero()
             return self.args[0].x.trace()
 
         elif self.type == 'inv':
-            #self.args[0].xbar_from_x()
-            #self.args[0].xbar.set_zero()
             return self.args[0].x.inv()
 
         elif self.type == 'solve':
-            #self.args[0].xbar_from_x()
             return self.args[0].x.solve(self.args[1].x)
 
         elif self.type == 'trans':
-            #self.args[0].xbar_from_x()
-            #self.args[0].xbar.set_zero()
             return self.args[0].x.transpose()
 
         else:

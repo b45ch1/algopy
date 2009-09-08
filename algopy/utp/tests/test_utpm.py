@@ -12,8 +12,8 @@ class TestMatPoly(TestCase):
         X = 2 * numpy.random.rand(2,2,2,2)
         Y = 3 * numpy.random.rand(2,2,2,2)
 
-        AX = MatPoly(X)
-        AY = MatPoly(Y)
+        AX = UTPM(X)
+        AY = UTPM(Y)
         AZ = AX + AY
         AZ = AX - AY
         AZ = AX * AY
@@ -25,6 +25,19 @@ class TestMatPoly(TestCase):
         AZ = AX.T
         AX = AX.set_zero()
 
+    def test_scalar_operations(self):
+        X = 2 * numpy.random.rand(2,2,2,2)
+
+        AX = UTPM(X)
+        AY = 2 + AX
+        AY = 2 - AX
+        AY = 2 * AX
+        AY = 2 / AX
+        AY = AX + 2
+        AY = AX - 2
+        AY = AX * 2
+        AY = AX / 2
+
     def test_trace(self):
         N1 = 2
         N2 = 3
@@ -32,12 +45,25 @@ class TestMatPoly(TestCase):
         N4 = 5
         x = numpy.asarray(range(N1*N2*N3*N4))
         x = x.reshape((N1,N2,N3,N4))
-        AX = MatPoly(x)
+        AX = UTPM(x)
         AY = AX.T
-        AY.TC[0,0,2,0] = 1234
-        assert AX.TC[0,0,0,2] == AY.TC[0,0,2,0]
+        AY.tc[0,0,2,0] = 1234
+        assert AX.tc[0,0,0,2] == AY.tc[0,0,2,0]
 
 
+class TestCombineBlocks(TestCase):
+    def test_convert(self):
+        X1 = 2 * numpy.random.rand(2,2,2,2)
+        X2 = 2 * numpy.random.rand(2,2,2,2)
+        X3 = 2 * numpy.random.rand(2,2,2,2)
+        X4 = 2 * numpy.random.rand(2,2,2,2)
+        AX1 = UTPM(X1)
+        AX2 = UTPM(X2)
+        AX3 = UTPM(X3)
+        AX4 = UTPM(X4)
+        AY = combine_blocks([[AX1,AX2],[AX3,AX4]])
+
+        assert_array_equal(numpy.shape(AY.tc),(2,2,4,4))
 
 
 if __name__ == "__main__":
