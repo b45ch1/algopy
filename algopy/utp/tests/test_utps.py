@@ -20,7 +20,7 @@ class TestUTPS(TestCase):
         AZ = AX * AY
         AZ = AX / AY
 
-    def	test_simple_multipication(self):
+    def test_simple_multipication(self):
         """differentiation of f(x,y) = x*y at [5,7] in direction [13,17]"""
         def f(z):
             return z[0]*z[1]
