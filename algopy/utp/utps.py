@@ -48,7 +48,6 @@ class UTPS:
         return self.tc
     def set_tc(self,x):
         self.tc[:] = x[:]
-
     tc = property(get_tc, set_tc)
 
     def copy(self):
@@ -150,13 +149,6 @@ class UTPS:
             return (self.tc[0] > rhs).any()
         return (self.tc[0] > rhs.tc[0]).any()
 
-    def sqrt(self):
-        y = UTPS(numpy.zeros(self.shp))
-        y.tc[0] = numpy.sqrt(self.tc[0])
-        for k in range(1,self.D):
-            y.tc[k] = 1./(2*y.tc[0]) * ( self.tc[k] - numpy.sum( y.tc[1:k] * y.tc[k-1:0:-1]))
-        return y
-
     def __abs__(self):
         tmp = self.copy()
         if (tmp.tc[0] < 0).any():
@@ -174,6 +166,22 @@ class UTPS:
             return tmp
         else:
             raise TypeError("Second argumnet must be an integer")
+
+    def sqrt(self):
+        y = UTPS(numpy.zeros(self.shp))
+        y.tc[0] = numpy.sqrt(self.tc[0])
+        for k in range(1,self.D):
+            y.tc[k] = 1./(2*y.tc[0]) * ( self.tc[k] - numpy.sum( y.tc[1:k] * y.tc[k-1:0:-1]))
+        return y
+            
+    def exp(self):
+        y = self.zeros_like()
+        y.tc[0] = numpy.exp(self.tc[0])
+        factor  = numpy.arange(1, self.D, dtype=float)
+        xtctilde = factor * self.tc[1:]
+        for d in range(1, self.D):
+            y.tc[d] = numpy.sum(y.tc[:d][::-1]*xtctilde[:d])/d
+        return y
 
     def zeros_like(self):
         return UTPS(numpy.zeros_like(self.tc))
