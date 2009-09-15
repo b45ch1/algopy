@@ -36,13 +36,10 @@ class UTPS:
             taylor_coeffs = numpy.array(taylor_coeffs[0],dtype=float)
         self.tc = numpy.array(taylor_coeffs,dtype=float)
         self.off = 0
+        if numpy.ndim(self.tc) == 1:
+            self.tc = numpy.reshape(self.tc, (numpy.shape(self.tc)[0],1))
         self.shp = numpy.shape(self.tc)
-        if len(self.shp) ==2:
-            self.Ndir = numpy.shape(self.tc)[1]
-            self.D = numpy.shape(self.tc)[0]
-        else:
-            self.D = numpy.shape(self.tc)[0]
-
+        self.D, self.P = self.shp
 
     def get_tc(self):
         return self.tc
