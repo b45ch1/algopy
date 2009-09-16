@@ -21,6 +21,18 @@ def utpm2utps(x):
     
     
 def utps2utpm(x):
+    """
+    converts a 2D array x of UTPS instances with x.shape = (N,M)
+    and x_ij.tc.shape = (D,P)
+    to a UTPM instance y where y.tc.shape = (D,P,N,M)
+    
+    if x is a 1D array it is converted to a (D,P,N,1) matrix
+    
+    """
+    
+    if numpy.ndim(x) == 1:
+        x = numpy.reshape(x, (numpy.size(x),1))
+    
     N,M = numpy.shape(x)
     P,D = numpy.shape(x[0,0].tc)
     
