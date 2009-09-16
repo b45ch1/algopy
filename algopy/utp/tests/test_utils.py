@@ -19,7 +19,18 @@ class TestUtils ( TestCase ):
         y = utps2utpm(x)
         
         assert_array_equal(y.tc.shape, (D,P,N,M))
-
+            
+        
+    def test_utps2base_and_dirs2utps(self):
+        N,P,D = 2,5,3
+        x = numpy.array([UTPS(numpy.random.rand(D,P))  for n in range(N)])
+        y,W = utps2base_and_dirs(x)
+        x2= base_and_dirs2utps(y,W)
+        y2,W2= utps2base_and_dirs(x2)
+        
+        assert_array_almost_equal(y,y2)
+        assert_array_almost_equal(W,W2)
+        
 
 if __name__ == "__main__":
     run_module_suite()
