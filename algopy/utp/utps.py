@@ -22,7 +22,7 @@ class UTPS:
 
     in vector forward mode
     Input:
-    in the most general form, the input is a 4-tensor.
+    in the most general form, the input is a 2-tensor.
     We use the notation:
     P: number of directions
     D: degree of the Taylor series
@@ -189,4 +189,4 @@ class UTPS:
 
     def __repr__(self):
         """ human readable output of the UTPS object or debugging UTPS([1,2,3]).__repr__()"""
-        return 'UTPS object with taylor coefficients %s'%self.tc
+        return str(self)

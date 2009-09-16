@@ -61,8 +61,8 @@ class UTPM:
     Input:
     in the most general form, the input is a 4-tensor.
     We use the notation:
-    P: number of directions
     D: degree of the Taylor series
+    P: number of directions
     N: number of rows of A_0
     M: number of cols of A_0
 
