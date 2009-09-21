@@ -84,27 +84,30 @@ class UTPM:
     For ufuncs this arrangement is advantageous, because in this order, memory chunks of size Ndir are used and the operation on each element is the same. This is desireable to avoid cache misses.
     See for example __mul__: there, operations of self.tc[:d+1,:,:,:]* rhs.tc[d::-1,:,:,:] has to be performed. One can see, that contiguous memory blocks are used for such operations.
 
-    A disadvantage of this arrangement is: it seems unnatural, it is easier to regard each direction separately.
+    A disadvantage of this arrangement is: it seems unnatural. It is easier to regard each direction separately.
     """
+    
     def __init__(self, X, Xdot = None):
         """ INPUT:	shape([X]) = (D,P,N,M)"""
         Ndim = ndim(X)
-        if Ndim == 4:
+        if Ndim >= 2:
             self.tc = numpy.asarray(X)
-        elif Ndim == 3:
-            self.tc = numpy.asarray(X)
-            self.tc = self.tc.reshape(self.tc.shape + (1))
-        elif Ndim == 2:
-            self.tc = numpy.asarray(X)
-            print self.tc.shape + (1,1)
-            self.tc = self.tc.reshape(self.tc.shape + (1,1))            
         else:
             raise NotImplementedError
             
     def __getitem__(self, sl):
-        sl = (slice(None),slice(None)) + sl
-        tmp = self.tc.__getitem__(sl)
+        tmp = self.tc.__getitem__((Ellipsis,) + sl)
         return UTPM(tmp)
+        
+    # def __setitem__(self, sl, rhs):
+        # sl = (slice(None),slice(None)) + sl
+        # if isinstance(rhs, UTPM):
+            # print self.tc.shape
+            # print self.tc.__getitem__(sl).shape
+            # print rhs.tc.shape
+            # return self.tc.__setitem__(sl, rhs.tc)
+        # else:
+            # raise NotImplementedError('rhs must be of the type algopy.UTPM!')
         
     def __add__(self,rhs):
         if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):

@@ -51,14 +51,38 @@ class TestMatPoly(TestCase):
         AY = AX * Y
         AY = AX / Y
         
-    def test_slicing(self):
+    def test_getitem_single_element(self):
         X  = numpy.zeros((2,3,4,5))
         X2 = X.copy()
         X2[:,:,0,0] += 1
         AX = UTPM(X)
         AY = AX[0,0]
-        AY.tc[:,:,0,0] = 1.
+        AY.tc[:,:] += 1.
         assert_array_almost_equal(X,X2)
+        
+    def test_getitem_slice(self):
+        X  = numpy.zeros((2,3,4,5))
+        X2 = X.copy()
+        X2[:,:,0:2,1:3] += 1
+        AX = UTPM(X)
+        AY = AX[0:2,1:3]
+        AY.tc[:,:] += 1.
+        assert_array_almost_equal(X,X2)        
+        
+    # def test_setitem(self):
+        # D,P,N,M = 2,3,4,4
+        # X  = numpy.ones((D,P,N,M))
+        # Y  = numpy.ones((D,P))
+        
+        # AX = UTPM(X)
+        # AY = UTPM(Y)
+        
+        # for n in range(N):
+            # AX[n,n] = AY
+        
+        
+        
+        
 
     def test_trace(self):
         N1 = 2
