@@ -69,20 +69,21 @@ class TestMatPoly(TestCase):
         AY.tc[:,:] += 1.
         assert_array_almost_equal(X,X2)        
         
-    # def test_setitem(self):
-        # D,P,N,M = 2,3,4,4
-        # X  = numpy.ones((D,P,N,M))
-        # Y  = numpy.ones((D,P))
+    def test_setitem(self):
+        D,P,N,M = 2,3,4,4
+        X  = numpy.zeros((D,P,N,M))
+        X2 = X.copy()
+        for n in range(N):
+            X2[:,:,n,n] = 1.
+        Y  = numpy.ones((D,P))
         
-        # AX = UTPM(X)
-        # AY = UTPM(Y)
+        AX = UTPM(X)
+        AY = UTPM(Y)
+
+        for n in range(N):
+            AX[n,n] = AY
         
-        # for n in range(N):
-            # AX[n,n] = AY
-        
-        
-        
-        
+        assert_array_almost_equal(X,X2)
 
     def test_trace(self):
         N1 = 2
@@ -106,7 +107,7 @@ class TestMatPoly(TestCase):
         assert_array_almost_equal(A.dot(Ainv).tc, Id)
         
     def test_solve(self):
-        (D,P,N,M) = 4,3,30,1
+        (D,P,N,M) = 3,3,30,1
         x = UTPM(numpy.random.rand(D,P,N,M))
         A = UTPM(numpy.random.rand(D,P,N,N))
         y = x.solve(A)

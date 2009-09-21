@@ -99,15 +99,11 @@ class UTPM:
         tmp = self.tc.__getitem__((Ellipsis,) + sl)
         return UTPM(tmp)
         
-    # def __setitem__(self, sl, rhs):
-        # sl = (slice(None),slice(None)) + sl
-        # if isinstance(rhs, UTPM):
-            # print self.tc.shape
-            # print self.tc.__getitem__(sl).shape
-            # print rhs.tc.shape
-            # return self.tc.__setitem__(sl, rhs.tc)
-        # else:
-            # raise NotImplementedError('rhs must be of the type algopy.UTPM!')
+    def __setitem__(self, sl, rhs):
+        if isinstance(rhs, UTPM):
+            return self.tc.__setitem__((Ellipsis,) + sl, rhs.tc)
+        else:
+            raise NotImplementedError('rhs must be of the type algopy.UTPM!')
         
     def __add__(self,rhs):
         if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
