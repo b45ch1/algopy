@@ -113,7 +113,6 @@ class TestMatPoly(TestCase):
         y = x.solve(A)
         x2 = A.dot(y)
         assert_array_almost_equal(x.tc, x2.tc, decimal = 4)
-            
 
 
 class TestCombineBlocks(TestCase):
