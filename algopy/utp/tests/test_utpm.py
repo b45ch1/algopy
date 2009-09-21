@@ -52,11 +52,13 @@ class TestMatPoly(TestCase):
         AY = AX / Y
         
     def test_slicing(self):
-        X = 2 * numpy.random.rand(2,3,4,5)
+        X  = numpy.zeros((2,3,4,5))
+        X2 = X.copy()
+        X2[:,:,0,0] += 1
         AX = UTPM(X)
-        AY = AX[0:1,1:2]
-        AY = AX[2,3]
-        
+        AY = AX[0,0]
+        AY.tc[:,:,0,0] = 1.
+        assert_array_almost_equal(X,X2)
 
     def test_trace(self):
         N1 = 2

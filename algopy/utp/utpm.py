@@ -93,15 +93,16 @@ class UTPM:
             self.tc = numpy.asarray(X)
         elif Ndim == 3:
             self.tc = numpy.asarray(X)
-            self.tc.reshape(self.tc.shape + (1))
+            self.tc = self.tc.reshape(self.tc.shape + (1))
         elif Ndim == 2:
             self.tc = numpy.asarray(X)
-            self.tc.reshape(self.tc.shape + (1,1))            
+            print self.tc.shape + (1,1)
+            self.tc = self.tc.reshape(self.tc.shape + (1,1))            
         else:
             raise NotImplementedError
             
     def __getitem__(self, sl):
-        sl = (slice(0,1),slice(0,1)) + sl
+        sl = (slice(None),slice(None)) + sl
         tmp = self.tc.__getitem__(sl)
         return UTPM(tmp)
         
