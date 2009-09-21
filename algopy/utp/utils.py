@@ -46,10 +46,12 @@ def utps2utpm(x):
 
 def utps2base_and_dirs(x):
     """
-    this function converts a 1D array of UTPS instances to the format (y,W)
-    where x is an (Nx,)-array and W an (Nx,P,D-1) array.
-    (y,W) is the input format for adolc.hov_forward
+    Conversion function from algopy.utps to adolc.hov_forward input argument format.
     
+    This function converts a 1D array of UTPS instances to the format (y,W)
+    where x is an (Nx,)-array and W an (Nx,P,D-1) array.
+    
+    (y,W) is the input format for adolc.hov_forward
     D is the largest degree of the polynomial, i.e. t^D
     """
     Nx = numpy.shape(x)[0]
@@ -64,7 +66,6 @@ def utps2base_and_dirs(x):
         W[nx,:,:] = x[nx].tc[1:,:].T
         
     return (y,W)
-    
     
 
 def base_and_dirs2utps(x,V):
@@ -89,3 +90,16 @@ def base_and_dirs2utps(x,V):
         y.append(UTPS(tmp))
     return numpy.array(y)
     
+def utpm2base_and_dirs(x):
+    """
+    this should be implemented more efficiently
+    """
+    tmp = utpm2utps(x)
+    return utps2base_and_dirs(tmp)
+    
+def base_and_dirs2utpm(x,V):
+    """
+    this should be implemented more efficiently
+    """
+    tmp = base_and_dirs2utps(x,V)
+    return utps2utpm(tmp)
