@@ -271,8 +271,9 @@ class Function:
             self.args[1].xbar +=  self.xbar.dot(self.args[0].x).T
 
         elif self.type == 'trace':
-            N = self.args[0].xbar.shape
-            self.args[0].xbar += self.xbar * numpy.eye(N)
+            N = self.args[0].xbar.shape[0]
+            for n in range(N):
+                self.args[0].xbar[n,n] += self.xbar
 
         elif self.type == 'inv':
             self.args[0].xbar -= self.x.T.dot(self.xbar.dot(self.x.T))

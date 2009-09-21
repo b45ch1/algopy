@@ -21,7 +21,6 @@ class TestMatPoly(TestCase):
         AZ = AX.dot(AY)
         AZ = AX.inv()
         AZ = AX.trace()
-        AZ = AX[0,0]
         AZ = AX.T
         AX = AX.set_zero()
 
@@ -50,7 +49,13 @@ class TestMatPoly(TestCase):
         AY = AX + Y
         AY = AX - Y
         AY = AX * Y
-        AY = AX / Y        
+        AY = AX / Y
+        
+    def test_slicing(self):
+        X = 2 * numpy.random.rand(2,3,4,5)
+        AX = UTPM(X)
+        AY = AX[0:1,1:2]
+        AY = AX[2,3]
         
 
     def test_trace(self):

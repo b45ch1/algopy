@@ -91,9 +91,20 @@ class UTPM:
         Ndim = ndim(X)
         if Ndim == 4:
             self.tc = numpy.asarray(X)
+        elif Ndim == 3:
+            self.tc = numpy.asarray(X)
+            self.tc.reshape(self.tc.shape + (1))
+        elif Ndim == 2:
+            self.tc = numpy.asarray(X)
+            self.tc.reshape(self.tc.shape + (1,1))            
         else:
             raise NotImplementedError
-
+            
+    def __getitem__(self, sl):
+        sl = (slice(0,1),slice(0,1)) + sl
+        tmp = self.tc.__getitem__(sl)
+        return UTPM(tmp)
+        
     def __add__(self,rhs):
         if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
             retval = UTPM(numpy.copy(self.tc))
@@ -113,7 +124,10 @@ class UTPM:
     def __mul__(self,rhs):
         if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
             retval = UTPM(numpy.copy(self.tc))
-            retval.tc[:,:] *= rhs
+            (D,P,N,M) = retval.tc.shape
+            for d in range(D):
+                for p in range(P):
+                    retval.tc[d,p,:,:] *= rhs
             return retval
             
         else:
@@ -136,7 +150,6 @@ class UTPM:
                 retval.tc[d,:,:,:] = 1./ rhs.tc[0,:,:,:] * ( self.tc[d,:,:,:] - sum(retval.tc[:d,:,:,:] * rhs.tc[d:0:-1,:,:,:], axis=0))
             return retval
 
-
     def __radd__(self,rhs):
         return self + rhs
 
@@ -153,7 +166,6 @@ class UTPM:
 
     def __neg__(self):
         return UTPM(-self.tc)
-    
 
     def dot(self,rhs):
         shp = list(shape(self.tc))
@@ -199,7 +211,6 @@ class UTPM:
                 retval.tc[d,p,:,:] = numpy.linalg.solve(A.tc[0,p,:,:],tmp)
         return retval
 
-
     def trace(self):
         """ returns a new UTPM in standard format, i.e. the matrices are 1x1 matrices"""
         (D,P,N,M) = shape(self.tc)
@@ -212,8 +223,7 @@ class UTPM:
                 retval[d,p,0,0] = trace(self.tc[d,p,:,:])
         return UTPM(retval)
 
-    def __getitem__(self, key):
-        return UTPM(self.tc[:,:,key[0]:key[0]+1,key[1]:key[1]+1])
+
 
     def copy(self):
         return UTPM(self.tc.copy())
@@ -236,10 +246,8 @@ class UTPM:
         self.tc[:,:,:,:] = 0.
         return self
 
-
     def zeros_like(self):
         return UTPM(numpy.zeros_like(self.tc))
-
 
     def __str__(self):
         return str(self.tc)
