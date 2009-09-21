@@ -182,15 +182,20 @@ class UTPM:
         return retval
 
     def solve(self,A):
-        print 'warning: this can\'t do UTPM in A, only in x'
+        """
+        A y = x  <=> y = solve(A,x)
+        is implemented here as y = x.solve(A)
+        """
         retval = UTPM(zeros(shape(self.tc)))
         (D,P,N,M) = shape(retval.tc)
         assert M == 1
-        for p in range(P):
-            X = self.tc[:,p,:,:]
-            X = numpy.reshape(X,(D,N))
-            X = numpy.transpose(X)
-            retval.tc[:,p,:,0] = numpy.linalg.solve(A.tc[0,0,:,:],X).T
+        tmp = numpy.zeros((N,M),dtype=float)
+        for d in range(D):
+            for p in range(P):
+                tmp[:,:] = self.tc[d,p,:,:]
+                for k in range(1,d+1):
+                    tmp[:,:] -= numpy.dot(A.tc[k,p,:,:],retval.tc[d-k,p,:,:])
+                retval.tc[d,p,:,:] = numpy.linalg.solve(A.tc[0,p,:,:],tmp)
         return retval
 
 

@@ -49,6 +49,24 @@ class TestMatPoly(TestCase):
         AY = AX.T
         AY.tc[0,0,2,0] = 1234
         assert AX.tc[0,0,0,2] == AY.tc[0,0,2,0]
+        
+    def test_inv(self):
+        (D,P,N,M) = 2,3,5,1
+        A = UTPM(numpy.random.rand(D,P,N,N))
+        Ainv = A.inv()
+        
+        Id = numpy.zeros((D,P,N,N))
+        Id[0,:,:,:] = numpy.eye(N)
+        assert_array_almost_equal(A.dot(Ainv).tc, Id)
+        
+    def test_solve(self):
+        (D,P,N,M) = 4,3,30,1
+        x = UTPM(numpy.random.rand(D,P,N,M))
+        A = UTPM(numpy.random.rand(D,P,N,N))
+        y = x.solve(A)
+        x2 = A.dot(y)
+        assert_array_almost_equal(x.tc, x2.tc, decimal = 4)
+            
 
 
 class TestCombineBlocks(TestCase):
