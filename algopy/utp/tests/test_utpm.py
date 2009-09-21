@@ -37,6 +37,21 @@ class TestMatPoly(TestCase):
         AY = AX - 2
         AY = AX * 2
         AY = AX / 2
+        
+    def test_array_operations(self):
+        
+        X = 2 * numpy.random.rand(2,2,2,2)
+        Y = 3 * numpy.random.rand(2,2)
+        AX = UTPM(X)
+        AY = Y + AX
+        AY = Y - AX
+        AY = Y * AX
+        AY = Y / AX
+        AY = AX + Y
+        AY = AX - Y
+        AY = AX * Y
+        AY = AX / Y        
+        
 
     def test_trace(self):
         N1 = 2

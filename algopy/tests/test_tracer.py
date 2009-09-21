@@ -136,10 +136,10 @@ class TestCGraphOnUTPS(TestCase):
         xbar_symbolic = 3 * ax**2 * ay**2 + ay**2
         ybar_symbolic = 2*ax**3 * ay + 2 * ax * ay
 
-        print xbar_symbolic.tc
-        print xbar_reverse
-        print ybar_symbolic
-        print ybar_reverse
+        # print xbar_symbolic.tc
+        # print xbar_reverse
+        # print ybar_symbolic
+        # print ybar_reverse
         
         assert_array_almost_equal(xbar_reverse.tc, xbar_symbolic.tc)
         assert_array_almost_equal(ybar_reverse.tc, ybar_symbolic.tc)
@@ -206,10 +206,10 @@ class TestCGraphOnUTPM(TestCase):
         xbar_symbolic = 3. * ax*ax * ay*ay + ay*ay
         ybar_symbolic = 2.*ax*ax*ax * ay + 2. * ax * ay
 
-        print xbar_symbolic.tc
-        print xbar_reverse
-        print ybar_symbolic
-        print ybar_reverse
+        # print xbar_symbolic.tc
+        # print xbar_reverse
+        # print ybar_symbolic
+        # print ybar_reverse
         
         assert_array_almost_equal(xbar_reverse.tc, xbar_symbolic.tc)
         assert_array_almost_equal(ybar_reverse.tc, ybar_symbolic.tc)

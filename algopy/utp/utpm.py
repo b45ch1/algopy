@@ -95,26 +95,27 @@ class UTPM:
             raise NotImplementedError
 
     def __add__(self,rhs):
-        if numpy.isscalar(rhs):
+        if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
             retval = UTPM(numpy.copy(self.tc))
-            retval.tc[0,:,:,:] += rhs
+            retval.tc[0,:] += rhs
             return retval
         else:
             return UTPM(self.tc + rhs.tc)
 
     def __sub__(self,rhs):
-        if numpy.isscalar(rhs):
+        if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
             retval = UTPM(numpy.copy(self.tc))
-            retval.tc[0,:,:,:] -= rhs
+            retval.tc[0,:] -= rhs
             return retval
         else:
             return UTPM(self.tc - rhs.tc)
 
     def __mul__(self,rhs):
-        if numpy.isscalar(rhs):
+        if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
             retval = UTPM(numpy.copy(self.tc))
-            retval.tc[:,:,:,:] *= rhs
+            retval.tc[:,:] *= rhs
             return retval
+            
         else:
             retval = UTPM(zeros(shape(self.tc)))
             (D,P,N,M) = shape(retval.tc)
@@ -123,9 +124,9 @@ class UTPM:
             return retval
 
     def __div__(self,rhs):
-        if numpy.isscalar(rhs):
+        if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
             retval = UTPM(numpy.copy(self.tc))
-            retval.tc[:,:,:,:] /= rhs
+            retval.tc[:,:] /= rhs
             return retval
 
         else:
