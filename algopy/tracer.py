@@ -267,8 +267,8 @@ class Function:
             self.args[1].xbar += self.xbar * self.args[0].x.__div__(self.args[1].x * self.args[1].x)
 
         elif self.type == 'dot':
-            self.args[0].xbar +=  self.args[1].x.dot(self.xbar).T
-            self.args[1].xbar +=  self.xbar.dot(self.args[0].x).T
+            self.args[0].xbar +=  self.xbar.dot(self.args[1].x.T)
+            self.args[1].xbar +=  self.args[0].x.T.dot(self.xbar)
 
         elif self.type == 'trace':
             N = self.args[0].xbar.shape[0]

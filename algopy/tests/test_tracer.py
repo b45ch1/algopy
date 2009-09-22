@@ -184,7 +184,7 @@ class TestCGraphOnUTPM(TestCase):
         cg.forward([aX,aY])
         assert_array_almost_equal(cg.dependentFunctionList[0].x.tc, ((aX*aY * aX + aY)*aX*aY).tc)
 
-    def test_reverse(self):
+    def test_reverse_on_basic_element_wise_functions(self):
         cg = CGraph()
         D,P,N,M = 2,5,7,11
         ax = UTPM(numpy.random.rand(D,P,N,M))
@@ -214,7 +214,32 @@ class TestCGraphOnUTPM(TestCase):
         assert_array_almost_equal(xbar_reverse.tc, xbar_symbolic.tc)
         assert_array_almost_equal(ybar_reverse.tc, ybar_symbolic.tc)
 
-
+    def test_dot(self):
+        cg = CGraph()
+        D,P,N,M = 2,5,7,11
+        ax = UTPM(numpy.random.rand(D,P,N,M))
+        ay = UTPM(numpy.random.rand(D,P,M,N))
+        fx = Function(ax)
+        fy = Function(ay)
+        fz = fx.dot(fy)
+        cg.independentFunctionList = [fx,fy]
+        cg.dependentFunctionList = [fz]
+        
+        ax = UTPM(numpy.random.rand(D,P,N,M))
+        ay = UTPM(numpy.random.rand(D,P,M,N))
+        azbar = UTPM(numpy.random.rand(*fz.x.tc.shape))
+        cg.forward([ax,ay])
+        cg.reverse([azbar])
+        
+        xbar_reverse = cg.independentFunctionList[0].xbar
+        ybar_reverse = cg.independentFunctionList[1].xbar        
+        
+        xbar_symbolic = azbar.dot(ay.T)
+        ybar_symbolic = (ax.T).dot(azbar)
+        
+        assert_array_almost_equal(xbar_reverse.tc, xbar_symbolic.tc)
+        assert_array_almost_equal(ybar_reverse.tc, ybar_symbolic.tc)
+        
 if __name__ == "__main__":
     run_module_suite()
 
