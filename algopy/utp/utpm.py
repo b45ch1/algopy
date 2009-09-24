@@ -168,14 +168,26 @@ class UTPM:
         return UTPM(-self.tc)
 
     def dot(self,rhs):
-        shp = list(shape(self.tc))
-        shp[3] = shape(rhs.tc)[3]
-        retval = UTPM(zeros(shp))
-        (D,P,N,M) = shape(retval.tc)
+        D,P = self.tc.shape[0:2]
+        
+        if len(self.shape) ==1 and len(rhs.shape) == 1:
+            raise NotImplementedError('vector vector dot not implemented')
+            
+        elif len(self.shape) == 2 and len(rhs.shape) == 1 :
+            print 'matrix vector dot'
+            tc = numpy.zeros((D,P,self.shape[0]))
+            
+        elif  len(self.shape) == 1 and len(rhs.shape) == 2:
+            tc = numpy.zeros((D,P,rhs.shape[1]))
+            
+        else:
+            raise NotImplementedError('you tried to dot(%s,%s)'%(str(self.shape),str(rhs.shape))) 
+            
+        retval = UTPM(tc)
         for d in range(D):
             for p in range(P):
                 for c in range(d+1):
-                    retval.tc[d,p,:,:] += numpy.dot(self.tc[c,p,:,:], rhs.tc[d-c,p,:,:])
+                    retval.tc[d,p,...] += numpy.dot(self.tc[c,p,...], rhs.tc[d-c,p,...])
         return retval
 
     def inv(self):
@@ -223,13 +235,11 @@ class UTPM:
                 retval[d,p,0,0] = trace(self.tc[d,p,:,:])
         return UTPM(retval)
 
-
-
-    def copy(self):
+    def clone(self):
         return UTPM(self.tc.copy())
 
     def get_shape(self):
-        return numpy.shape(self.tc[0,0,:,:])
+        return numpy.shape(self.tc[0,0,...])
 
     shape = property(get_shape)
 
@@ -239,11 +249,15 @@ class UTPM:
         raise NotImplementedError('???')
     T = property(get_transpose, set_transpose)
 
-    def transpose(self):
-        return UTPM( numpy.transpose(self.tc,axes=(0,1,3,2)))
+    def transpose(self, axes = None):
+        if axes != None:
+            raise NotImplementedError('should implement that...')
+        Nshp = len(self.shape)
+        axes_ids = tuple(range(Nshp)[::-1])
+        return UTPM( numpy.transpose(self.tc,axes=(0,1) + axes_ids))
 
     def set_zero(self):
-        self.tc[:,:,:,:] = 0.
+        self.tc[...] = 0.
         return self
 
     def zeros_like(self):

@@ -1,4 +1,5 @@
 import numpy
+import numpy.testing
 from algopy.utp.utps import UTPS
 from algopy.utp.utpm import UTPM
 
@@ -94,12 +95,33 @@ def utpm2base_and_dirs(x):
     """
     this should be implemented more efficiently
     """
+    raise NotImplementedError()
     tmp = utpm2utps(x)
     return utps2base_and_dirs(tmp)
     
 def base_and_dirs2utpm(x,V):
     """
-    this should be implemented more efficiently
+    x_utpm = base_and_dirs2utpm(x,V)
+    where x_utpm is an instance of UTPM
+    V.shape = x.shape + (P,D)
+    then x_utpm.tc.shape = (D+1,P) = x.shape
     """
-    tmp = base_and_dirs2utps(x,V)
-    return utps2utpm(tmp)
+    x = numpy.asarray(x)
+    V = numpy.asarray(V)
+    
+    xshp = x.shape
+    Vshp = V.shape
+    P,D = Vshp[-2:]
+    Nxshp = len(xshp)
+    NVshp = len(Vshp)
+    numpy.testing.assert_array_equal(xshp, Vshp[:-2], err_msg = 'x.shape does not match V.shape')
+    
+    tc = numpy.zeros((D+1,P) + xshp)
+    for p in range(P):
+        tc[0,p,...] = x[...]
+    
+    axes_ids = tuple(numpy.arange(NVshp))    
+    tc[1:,...] = V.transpose((axes_ids[-1],axes_ids[-2]) + axes_ids[:-2])
+    
+    return UTPM(tc)
+
