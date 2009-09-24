@@ -25,7 +25,7 @@ class TestUTPS(TestCase):
         def f(z):
             return z[0]*z[1]
         a = numpy.array([UTPS([5.,13.]),UTPS([7.,17.])])
-        assert_array_almost_equal([35. ,176.], f(a).tc)
+        assert_array_almost_equal([[35.] ,[176.]], f(a).tc)
 
     def test_abs(self):
         """differentiation of abs(x) at x=-2.3"""
@@ -44,40 +44,40 @@ class TestUTPS(TestCase):
         """\ndirectional derivative of norm(x) at x=[2.1,3.4] with direction d = [5.6,7.8]"""
         def f(x):
             return numpy.linalg.norm(x)
-        a = numpy.array([UTPS(2.1,5.6),UTPS(3.4,7.8)])
+        a = numpy.array([UTPS([2.1,5.6]),UTPS([3.4,7.8])])
         b = f(a)
-        correct_result = UTPS( numpy.linalg.norm([2.1,3.4]), 9.57898451145 )
+        correct_result = UTPS([numpy.linalg.norm([2.1,3.4]), 9.57898451145 ])
         assert_array_almost_equal(correct_result.tc, b.tc)
 
     def test_sqrt(self):
         """\ndirectional derivative of sqrt(x) at x = 3.1 with direction d = 7.4"""
         def f(x):
             return numpy.sqrt(x)
-        a = UTPS(3.1,7.4)
+        a = UTPS([3.1,7.4])
         b = f(a)
-        correct_result = UTPS( numpy.sqrt(3.1), 0.5/numpy.sqrt(3.1) * 7.4 )
+        correct_result = UTPS( [numpy.sqrt(3.1), 0.5/numpy.sqrt(3.1) * 7.4 ])
         assert_array_almost_equal(correct_result.tc, b.tc)
 
     def test_mixed_arguments_double_UTPS(self):
         """\nfunction f(ax,y) = ax+y that works on mixed arguments, i.e. doubles (y) and UTPS (x)"""
         def f(x,y):
             return x+y
-        a1 = UTPS(2.,13.)
+        a1 = UTPS([2.,13.])
         a2 = 1.
         b = f(a1,a2)
         print 'b=',b
-        correct_result = UTPS(f(a1.tc[0],a2), 13.)
+        correct_result = UTPS([f(a1.tc[0,0],a2), 13.])
         assert_array_almost_equal(correct_result.tc, b.tc)
 
     def test_double_mul_UTPS(self):
         """ function f(ax,y) = ax * y"""
         def f(x,y):
             return x*y
-        a1 = UTPS(2.,13.)
+        a1 = UTPS([[2.],[13.]])
         a2 = 5.
         b = f(a1,a2)
         print 'b=',b
-        correct_result = UTPS(f(a1.tc[0],a2), 65.)
+        correct_result = UTPS([[f(a1.tc[0,0],a2)], [65.]])
         assert_array_almost_equal(correct_result.tc, b.tc)
 
     def test_multivariate_function(self):
@@ -90,7 +90,7 @@ class TestUTPS(TestCase):
                                 [x[0]*x[1], x[0]**2]])
             return numpy.dot(jac.T,h)
 
-        a = [UTPS(1.,1.),UTPS(2.,1.),UTPS(3.,1.)]
+        a = [UTPS([1.,1.]),UTPS([2.,1.]),UTPS([3.,1.])]
         b = f(a)
         h = [1,1,1]
         fa = f([1.,2.,3.])
@@ -108,7 +108,7 @@ class TestUTPS(TestCase):
             return numpy.dot(2*x[::-1],h)
 
         ax = numpy.array(
-            [UTPS(1.,1.),UTPS(2.,0),UTPS(3.,0)]
+            [UTPS([1.,1.]),UTPS([2.,0]),UTPS([3.,0])]
             )
         ay = f(ax)
         x = numpy.array([1,2,3])

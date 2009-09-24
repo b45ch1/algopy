@@ -5,7 +5,7 @@ from algopy.utp.utpm import *
 
 
 class TestMatPoly(TestCase):
-    def test_UTPM(self):
+    def test_UTPM_in_a_stupid_way(self):
         """
         this checks _only_ if calling the operations is ok
         """
@@ -23,6 +23,26 @@ class TestMatPoly(TestCase):
         AZ = AX.trace()
         AZ = AX.T
         AX = AX.set_zero()
+        
+        
+    def test_dot_output_shapes(self):
+        D,P,N,M = 2,3,4,5
+        X = 2 * numpy.random.rand(D,P,N,M)
+        Y = 3 * numpy.random.rand(D,P,M,N)
+        A = 3 * numpy.random.rand(D,P,M,N)
+        x = 2 * numpy.random.rand(D,P,N)
+        y = 2 * numpy.random.rand(D,P,N)
+
+        aX = UTPM(X)
+        aY = UTPM(Y)
+        aA = UTPM(A)
+        ax = UTPM(x)
+        ay = UTPM(y)
+        
+        assert_array_equal( aX.dot(aY).tc.shape, (D,P,N,N))
+        assert_array_equal( aY.dot(aX).tc.shape, (D,P,M,M))
+        assert_array_equal( aA.dot(ax).tc.shape, (D,P,M))
+        assert_array_equal( ax.dot(ay).tc.shape, (D,P,1))
 
     def test_scalar_operations(self):
         X = 2 * numpy.random.rand(2,2,2,2)
@@ -84,7 +104,23 @@ class TestMatPoly(TestCase):
             AX[n,n] = AY
         
         assert_array_almost_equal(X,X2)
-
+        
+    def test_reshape(self):
+        D,P,N,M = 2,3,4,5
+        X  = numpy.zeros((D,P,N,M))
+        AX = UTPM(X)
+        AY = AX.reshape((5,4))
+        assert_array_equal(AY.tc.shape, (2,3,5,4))
+        assert AY.tc.flags['OWNDATA']==False
+        
+        
+        
+    def test_transpose(self):
+        D,P,N,M = 2,3,4,5
+        X  = numpy.zeros((D,P,N,M))
+        AX = UTPM(X)
+        assert_array_equal(AX.T.tc.shape, (D,P,M,N))
+        
     def test_trace(self):
         N1 = 2
         N2 = 3

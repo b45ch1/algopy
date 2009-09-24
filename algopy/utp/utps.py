@@ -30,15 +30,13 @@ class UTPS:
     shape([x]) = (D,P)
     """
 
-    def __init__(self,  *taylor_coeffs):
-        """Constructor takes a list, array, tuple and variable lenght input"""
-        if not numpy.isscalar(taylor_coeffs[0]):
-            taylor_coeffs = numpy.array(taylor_coeffs[0],dtype=float)
-        self.tc = numpy.array(taylor_coeffs,dtype=float)
+    def __init__(self,  taylor_coeffs):
+        """Constructor takes a list, array, tuple"""
+        self.tc = numpy.asarray(taylor_coeffs, dtype=float)
         self.off = 0
         if numpy.ndim(self.tc) == 1:
-            self.tc = numpy.reshape(self.tc, (numpy.shape(self.tc)[0],1))
-        self.shp = numpy.shape(self.tc)
+            self.tc = numpy.reshape(self.tc, (self.tc.shape[0],1))
+        self.shp = self.tc.shape
         self.D, self.P = self.shp
 
     def get_tc(self):

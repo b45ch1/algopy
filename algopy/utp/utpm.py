@@ -170,15 +170,17 @@ class UTPM:
     def dot(self,rhs):
         D,P = self.tc.shape[0:2]
         
-        if len(self.shape) ==1 and len(rhs.shape) == 1:
-            raise NotImplementedError('vector vector dot not implemented')
+        if len(self.shape) == 1 and len(rhs.shape) == 1:
+            tc = numpy.zeros((D,P,1))
             
         elif len(self.shape) == 2 and len(rhs.shape) == 1 :
-            print 'matrix vector dot'
             tc = numpy.zeros((D,P,self.shape[0]))
             
         elif  len(self.shape) == 1 and len(rhs.shape) == 2:
             tc = numpy.zeros((D,P,rhs.shape[1]))
+
+        elif  len(self.shape) == 2 and len(rhs.shape) == 2:
+            tc = numpy.zeros((D,P, self.shape[0],rhs.shape[1]))
             
         else:
             raise NotImplementedError('you tried to dot(%s,%s)'%(str(self.shape),str(rhs.shape))) 
@@ -240,8 +242,11 @@ class UTPM:
 
     def get_shape(self):
         return numpy.shape(self.tc[0,0,...])
-
     shape = property(get_shape)
+    
+    def reshape(self, dims):
+        return UTPM(self.tc.reshape(self.tc.shape[0:2] + dims))
+        
 
     def get_transpose(self):
         return self.transpose()
@@ -253,7 +258,7 @@ class UTPM:
         if axes != None:
             raise NotImplementedError('should implement that...')
         Nshp = len(self.shape)
-        axes_ids = tuple(range(Nshp)[::-1])
+        axes_ids = tuple(range(2,2+Nshp)[::-1])
         return UTPM( numpy.transpose(self.tc,axes=(0,1) + axes_ids))
 
     def set_zero(self):
