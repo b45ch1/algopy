@@ -114,7 +114,6 @@ class TestMatPoly(TestCase):
         assert AY.tc.flags['OWNDATA']==False
         
         
-        
     def test_transpose(self):
         D,P,N,M = 2,3,4,5
         X  = numpy.zeros((D,P,N,M))

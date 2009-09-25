@@ -90,7 +90,21 @@ def base_and_dirs2utps(x,V):
         tmp[1:,:] = V[nx,:,:].T
         y.append(UTPS(tmp))
     return numpy.array(y)
+
+def utpm2dirs(u):
+    """
+    Vbar = utpm2dirs(u)
     
+    where u is an UTPM instance with
+    u.tc.shape = (D,P) + shp
+    
+    and  V.shape == shp + (P,D)
+    """
+    axes =  tuple( numpy.arange(2,u.tc.ndim))+ (1,0)
+    Vbar = u.tc.transpose(axes)
+    return Vbar
+
+
 def utpm2base_and_dirs(u):
     """
     x,V = utpm2base_and_dirs(u)
