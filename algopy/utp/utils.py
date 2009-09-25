@@ -91,13 +91,27 @@ def base_and_dirs2utps(x,V):
         y.append(UTPS(tmp))
     return numpy.array(y)
     
-def utpm2base_and_dirs(x):
+def utpm2base_and_dirs(u):
     """
-    this should be implemented more efficiently
+    x,V = utpm2base_and_dirs(u)
+    
+    where u is an UTPM instance with
+    u.tc.shape = (D+1,P) + shp
+    
+    then x.shape == shp
+    and  V.shape == shp + (P,D)
     """
-    raise NotImplementedError()
-    tmp = utpm2utps(x)
-    return utps2base_and_dirs(tmp)
+    D,P = u.tc.shape[:2]
+    D -= 1
+    shp = u.tc.shape[2:]
+    
+    x = numpy.zeros(shp)
+    V = numpy.zeros(shp+(P,D))
+    
+    x[...] = u.tc[0,0,...]
+    V[...] = u.tc[1:,...].transpose( tuple(2+numpy.arange(len(shp))) + (1,0))
+    return x,V
+
     
 def base_and_dirs2utpm(x,V):
     """
