@@ -141,17 +141,21 @@ class UTPM:
             # return retval
 
     def __div__(self,rhs):
-        if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
-            retval = UTPM(numpy.copy(self.tc))
-            retval.tc[:,:] /= rhs
-            return retval
+        retval = self.clone()
+        retval.__idiv__(rhs)
+        return retval
+        
+        # if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
+            # retval = UTPM(numpy.copy(self.tc))
+            # retval.tc[:,:] /= rhs
+            # return retval
 
-        else:
-            retval = UTPM(zeros(shape(self.tc)))
-            D,P = retval.tc.shape[:2]
-            for d in range(D):
-                retval.tc[d,:,...] = 1./ rhs.tc[0,:,...] * ( self.tc[d,:,...] - sum(retval.tc[:d,:,...] * rhs.tc[d:0:-1,:,...], axis=0))
-            return retval
+        # else:
+            # retval = UTPM(zeros(shape(self.tc)))
+            # D,P = retval.tc.shape[:2]
+            # for d in range(D):
+                # retval.tc[d,:,...] = 1./ rhs.tc[0,:,...] * ( self.tc[d,:,...] - sum(retval.tc[:d,:,...] * rhs.tc[d:0:-1,:,...], axis=0))
+            # return retval
 
     def __radd__(self,rhs):
         return self + rhs
@@ -200,8 +204,10 @@ class UTPM:
         if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
             self.tc[...] /= rhs
         else:
-            for d in range(D)[::-1]:
-                self.tc[d,:,...] = 1./ rhs.tc[0,:,...] * ( self.tc[d,:,...] - numpy.sum(self.tc[:d,:,...] * rhs.tc[d:0:-1,:,...], axis=0))
+            retval = self.clone()
+            for d in range(D):
+                retval.tc[d,:,...] = 1./ rhs.tc[0,:,...] * ( self.tc[d,:,...] - sum(retval.tc[:d,:,...] * rhs.tc[d:0:-1,:,...], axis=0))
+            self.tc[...] = retval.tc[...]
         return self
 
 
