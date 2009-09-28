@@ -45,31 +45,95 @@ class TestMatPoly(TestCase):
         assert_array_equal( ax.dot(ay).tc.shape, (D,P,1))
 
     def test_scalar_operations(self):
-        X = 2 * numpy.random.rand(2,2,2,2)
+        D,P,N,M = 2,3,4,5
+        X = 2 * numpy.random.rand(D,P,N,M)
 
         AX = UTPM(X)
-        AY = 2 + AX
-        AY = 2 - AX
-        AY = 2 * AX
-        AY = 2 / AX
-        AY = AX + 2
-        AY = AX - 2
-        AY = AX * 2
-        AY = AX / 2
+        AY1 = 2 + AX
+        AY2 = 2 - AX
+        AY3 = 2 * AX
+        AY4 = 2 / AX
+        AY5 = AX + 2
+        AY6 = AX - 2
+        AY7 = AX * 2
+        AY8 = AX / 2
+        
+        AX1 = UTPM(X.copy())
+        AX2 = UTPM(X.copy())
+        AX3 = UTPM(X.copy())
+        AX4 = UTPM(X.copy())
+        
+        AX1 += 2
+        AX2 -= 2
+        AX3 *= 2
+        AX4 /= 2
+        
+        Z1 = X.copy()
+        Z2 = - X.copy()
+        Z3 = X.copy()
+        Z4 = 1./X.copy()
+        Z5 = X.copy()
+        Z6 = X.copy()
+        Z7 = X.copy()
+        Z8 = X.copy()
+            
+        for d in range(D):    
+            for p in range(P):
+                if d == 0:
+                    Z1[0,p,...] += 2
+                    Z2[0,p,...] += 2
+                    Z5[0,p,...] += 2
+                    Z6[0,p,...] -= 2
+                Z3[d,p,...] *= 2
+                Z7[d,p,...] *= 2
+                Z8[d,p,...] /= 2
+                
+        assert_array_almost_equal(AY1.tc, Z1 )
+        assert_array_almost_equal(AY2.tc, Z2 )
+        assert_array_almost_equal(AY3.tc, Z3 )
+        # assert_array_almost_equal(AY4.tc, Z4 )
+        assert_array_almost_equal(AY5.tc, Z5 )
+        assert_array_almost_equal(AY6.tc, Z6 )
+        assert_array_almost_equal(AY7.tc, Z7 )
+        assert_array_almost_equal(AY8.tc, Z8 )
+        
+        assert_array_almost_equal(AX1.tc, AY5.tc )
+        assert_array_almost_equal(AX2.tc, AY6.tc )
+        assert_array_almost_equal(AX3.tc, AY7.tc )
+        assert_array_almost_equal(AX4.tc, AY8.tc )
+
         
     def test_array_operations(self):
+        D,P,N,M = 2,3,4,5
         
-        X = 2 * numpy.random.rand(2,2,2,2)
-        Y = 3 * numpy.random.rand(2,2)
+        X = 2 * numpy.random.rand(D,P,N,M)
+        Y = 3 * numpy.random.rand(N,M)
         AX = UTPM(X)
-        AY = Y + AX
-        AY = Y - AX
-        AY = Y * AX
-        AY = Y / AX
-        AY = AX + Y
-        AY = AX - Y
-        AY = AX * Y
-        AY = AX / Y
+        AY1 = Y + AX
+        AY2 = Y - AX
+        AY3 = Y * AX
+        AY4 = Y / AX
+        AY5 = AX + Y
+        AY6 = AX - Y
+        AY7 = AX * Y
+        AY8 = AX / Y
+        
+        AX1 = UTPM(X.copy())
+        AX2 = UTPM(X.copy())
+        AX3 = UTPM(X.copy())
+        AX4 = UTPM(X.copy())
+        
+        AX1 += Y
+        AX2 -= Y
+        AX3 *= Y
+        AX4 /= Y
+        
+        assert_array_almost_equal(AX1.tc, AY5.tc )
+        assert_array_almost_equal(AX2.tc, AY6.tc )
+        assert_array_almost_equal(AX3.tc, AY7.tc )
+        assert_array_almost_equal(AX4.tc, AY8.tc )
+        
+
         
     def test_getitem_single_element(self):
         X  = numpy.zeros((2,3,4,5))
@@ -99,11 +163,24 @@ class TestMatPoly(TestCase):
         
         AX = UTPM(X)
         AY = UTPM(Y)
-
         for n in range(N):
             AX[n,n] = AY
         
         assert_array_almost_equal(X,X2)
+        
+    def test_setitem_iadd_scalar(self):
+        D,P,N,M = 2,3,4,4
+        X  = numpy.zeros((D,P,N,M))
+        X2 = X.copy()
+        for n in range(N):
+            X2[0,:,n,n] += 2.
+        
+        AX = UTPM(X)
+        for n in range(N):
+            AX[n,n] += 2.
+        
+        assert_array_almost_equal(X,X2)        
+        
         
     def test_reshape(self):
         D,P,N,M = 2,3,4,5

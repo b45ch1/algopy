@@ -163,6 +163,41 @@ class UTPM:
         tmp = self.zeros_like()
         tmp.tc[0,:,:,:] = rhs
         return tmp/self
+        
+    def __iadd__(self,rhs):
+        if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
+            self.tc[0,...] += rhs
+        else:
+            self.tc[...] += rhs.tc[...]
+        return self
+        
+    def __isub__(self,rhs):
+        if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
+            self.tc[0,...] -= rhs
+        else:
+            self.tc[...] -= rhs.tc[...]
+        return self
+        
+    def __imul__(self,rhs):
+        (D,P) = self.tc.shape[0:2]
+        if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
+            for d in range(D):
+                for p in range(P):
+                    self.tc[d,p,:,:] *= rhs
+        else:
+            for d in range(D):
+                self.tc[d,:,:,:] = numpy.sum( self.tc[:d+1,:,:,:] * rhs.tc[d::-1,:,:,:], axis=0)
+        return self
+        
+    def __idiv__(self,rhs):
+        (D,P) = self.tc.shape[0:2]
+        if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
+            self.tc[...] /= rhs
+        else:
+            for d in range(D):
+                self.tc[d,:,:,:] = 1./ rhs.tc[0,:,:,:] * ( self.tc[d,:,:,:] - numpy.sum(self.tc[:d,:,:,:] * rhs.tc[d:0:-1,:,:,:], axis=0))
+        return self
+
 
     def __neg__(self):
         return UTPM(-self.tc)
@@ -227,14 +262,11 @@ class UTPM:
 
     def trace(self):
         """ returns a new UTPM in standard format, i.e. the matrices are 1x1 matrices"""
-        (D,P,N,M) = shape(self.tc)
-        if N!=M:
-            raise TypeError(' N == M is required')
-
-        retval = zeros((D,P,1,1))
+        D,P = self.tc.shape[:2]
+        retval = numpy.zeros((D,P))
         for d in range(D):
             for p in range(P):
-                retval[d,p,0,0] = trace(self.tc[d,p,:,:])
+                retval[d,p] = numpy.trace(self.tc[d,p,...])
         return UTPM(retval)
 
     def clone(self):
