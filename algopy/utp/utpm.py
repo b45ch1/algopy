@@ -200,7 +200,7 @@ class UTPM:
         if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
             self.tc[...] /= rhs
         else:
-            for d in range(D):
+            for d in range(D)[::-1]:
                 self.tc[d,:,...] = 1./ rhs.tc[0,:,...] * ( self.tc[d,:,...] - numpy.sum(self.tc[:d,:,...] * rhs.tc[d:0:-1,:,...], axis=0))
         return self
 

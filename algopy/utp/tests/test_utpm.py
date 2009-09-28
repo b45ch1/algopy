@@ -39,7 +39,10 @@ class TestMatPoly(TestCase):
         Z2[:,:] = X[:,:] - Y[:,:]
         
         Z3[0,:] = X[0,:] * Y[0,:]
-        Z3[1,:] = X[0,:] * Y[1,:] + X[1,:] * Y[0,:]        
+        Z3[1,:] = X[0,:] * Y[1,:] + X[1,:] * Y[0,:]
+        
+        Z4[0,:] = X[0,:] / Y[0,:]
+        Z4[1,:] = 1./Y[0,:] * ( X[1,:] - X[0,:] * Y[1,:]/ Y[0,:])
         
         aX = UTPM(X)
         aY = UTPM(Y)
@@ -53,7 +56,7 @@ class TestMatPoly(TestCase):
         assert_array_almost_equal(aZ1.tc, Z1)
         assert_array_almost_equal(aZ2.tc, Z2)
         assert_array_almost_equal(aZ3.tc, Z3)
-        # assert_array_almost_equal(aZ4.tc, Z4)
+        assert_array_almost_equal(aZ4.tc, Z4)
         assert_array_almost_equal(aZ5.tc, Z3)
         
         
@@ -84,7 +87,7 @@ class TestMatPoly(TestCase):
         AY1 = 2 + AX
         AY2 = 2 - AX
         AY3 = 2 * AX
-        AY4 = 2 / AX
+        AY4 = 2. / AX
         AY5 = AX + 2
         AY6 = AX - 2
         AY7 = AX * 2
@@ -103,7 +106,7 @@ class TestMatPoly(TestCase):
         Z1 = X.copy()
         Z2 = - X.copy()
         Z3 = X.copy()
-        Z4 = 1./X.copy()
+        # Z4 = 1./X.copy()
         Z5 = X.copy()
         Z6 = X.copy()
         Z7 = X.copy()
