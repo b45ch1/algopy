@@ -24,6 +24,38 @@ class TestMatPoly(TestCase):
         AZ = AX.T
         AX = AX.set_zero()
         
+    def test_operations_on_scalar_UTPM(self):
+        D,P = 2,1
+        X = 3 * numpy.random.rand(D,P)
+        Y = 2 * numpy.random.rand(D,P)
+        
+        Z1 = numpy.zeros((D,P))
+        Z2 = numpy.zeros((D,P))
+        Z3 = numpy.zeros((D,P))
+        Z4 = numpy.zeros((D,P))
+
+        
+        Z1[:,:] = X[:,:] + Y[:,:]
+        Z2[:,:] = X[:,:] - Y[:,:]
+        
+        Z3[0,:] = X[0,:] * Y[0,:]
+        Z3[1,:] = X[0,:] * Y[1,:] + X[1,:] * Y[0,:]        
+        
+        aX = UTPM(X)
+        aY = UTPM(Y)
+        
+        aZ1 = aX + aY
+        aZ2 = aX - aY
+        aZ3 = aX * aY
+        aZ4 = aX / aY
+        aZ5 = aX.dot(aY)
+        
+        assert_array_almost_equal(aZ1.tc, Z1)
+        assert_array_almost_equal(aZ2.tc, Z2)
+        assert_array_almost_equal(aZ3.tc, Z3)
+        # assert_array_almost_equal(aZ4.tc, Z4)
+        assert_array_almost_equal(aZ5.tc, Z3)
+        
         
     def test_dot_output_shapes(self):
         D,P,N,M = 2,3,4,5
@@ -180,7 +212,16 @@ class TestMatPoly(TestCase):
             AX[n,n] += 2.
         
         assert_array_almost_equal(X,X2)        
+    
+    def test_clone(self):
+        D,P,N,M = 2,3,4,5
+        X = 2 * numpy.random.rand(D,P,N,M)
+        AX = UTPM(X)
+        AY = AX.clone()
         
+        AX.tc[...] += 13
+        assert_equal(AY.tc.flags['OWNDATA'],True)
+        assert_array_almost_equal( AX.tc, AY.tc + 13)
         
     def test_reshape(self):
         D,P,N,M = 2,3,4,5

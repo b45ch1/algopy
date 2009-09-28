@@ -122,20 +122,23 @@ class UTPM:
             return UTPM(self.tc - rhs.tc)
 
     def __mul__(self,rhs):
-        if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
-            retval = UTPM(numpy.copy(self.tc))
-            (D,P,N,M) = retval.tc.shape
-            for d in range(D):
-                for p in range(P):
-                    retval.tc[d,p,:,:] *= rhs
-            return retval
+        retval = self.clone()
+        retval.__imul__(rhs)
+        return retval
+        # if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
+            # retval = UTPM(numpy.copy(self.tc))
+            # (D,P,N,M) = retval.tc.shape
+            # for d in range(D):
+                # for p in range(P):
+                    # retval.tc[d,p,:,:] *= rhs
+            # return retval
             
-        else:
-            retval = UTPM(zeros(shape(self.tc)))
-            (D,P,N,M) = shape(retval.tc)
-            for d in range(D):
-                retval.tc[d,:,:,:] = sum( self.tc[:d+1,:,:,:] * rhs.tc[d::-1,:,:,:], axis=0)
-            return retval
+        # else:
+            # retval = UTPM(zeros(shape(self.tc)))
+            # (D,P,N,M) = shape(retval.tc)
+            # for d in range(D):
+                # retval.tc[d,:,:,:] = sum( self.tc[:d+1,:,:,:] * rhs.tc[d::-1,:,:,:], axis=0)
+            # return retval
 
     def __div__(self,rhs):
         if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
@@ -145,9 +148,9 @@ class UTPM:
 
         else:
             retval = UTPM(zeros(shape(self.tc)))
-            (D,P,N,M) = shape(retval.tc)
+            D,P = retval.tc.shape[:2]
             for d in range(D):
-                retval.tc[d,:,:,:] = 1./ rhs.tc[0,:,:,:] * ( self.tc[d,:,:,:] - sum(retval.tc[:d,:,:,:] * rhs.tc[d:0:-1,:,:,:], axis=0))
+                retval.tc[d,:,...] = 1./ rhs.tc[0,:,...] * ( self.tc[d,:,...] - sum(retval.tc[:d,:,...] * rhs.tc[d:0:-1,:,...], axis=0))
             return retval
 
     def __radd__(self,rhs):
@@ -179,23 +182,26 @@ class UTPM:
         return self
         
     def __imul__(self,rhs):
-        (D,P) = self.tc.shape[0:2]
+        (D,P) = self.tc.shape[:2]
         if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
             for d in range(D):
                 for p in range(P):
-                    self.tc[d,p,:,:] *= rhs
+                    self.tc[d,p,...] *= rhs
         else:
-            for d in range(D):
-                self.tc[d,:,:,:] = numpy.sum( self.tc[:d+1,:,:,:] * rhs.tc[d::-1,:,:,:], axis=0)
+            for d in range(D)[::-1]:
+                for p in range(P):
+                    self.tc[d,p,...] *= rhs.tc[0,p,...]
+                    for c in range(d):
+                        self.tc[d,p,...] += self.tc[c,p,...] * rhs.tc[d-c,p,...]
         return self
         
     def __idiv__(self,rhs):
-        (D,P) = self.tc.shape[0:2]
+        (D,P) = self.tc.shape[:2]
         if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
             self.tc[...] /= rhs
         else:
             for d in range(D):
-                self.tc[d,:,:,:] = 1./ rhs.tc[0,:,:,:] * ( self.tc[d,:,:,:] - numpy.sum(self.tc[:d,:,:,:] * rhs.tc[d:0:-1,:,:,:], axis=0))
+                self.tc[d,:,...] = 1./ rhs.tc[0,:,...] * ( self.tc[d,:,...] - numpy.sum(self.tc[:d,:,...] * rhs.tc[d:0:-1,:,...], axis=0))
         return self
 
 
@@ -203,7 +209,7 @@ class UTPM:
         return UTPM(-self.tc)
 
     def dot(self,rhs):
-        D,P = self.tc.shape[0:2]
+        D,P = self.tc.shape[:2]
         
         if len(self.shape) == 1 and len(rhs.shape) == 1:
             tc = numpy.zeros((D,P,1))
@@ -216,6 +222,9 @@ class UTPM:
 
         elif  len(self.shape) == 2 and len(rhs.shape) == 2:
             tc = numpy.zeros((D,P, self.shape[0],rhs.shape[1]))
+            
+        elif self.ndim == 0 and rhs.ndim == 0:
+            tc = numpy.zeros((D,P))
             
         else:
             raise NotImplementedError('you tried to dot(%s,%s)'%(str(self.shape),str(rhs.shape))) 
@@ -275,6 +284,10 @@ class UTPM:
     def get_shape(self):
         return numpy.shape(self.tc[0,0,...])
     shape = property(get_shape)
+    
+    def get_ndim(self):
+        return numpy.ndim(self.tc[0,0,...])
+    ndim = property(get_ndim)
     
     def reshape(self, dims):
         return UTPM(self.tc.reshape(self.tc.shape[0:2] + dims))
