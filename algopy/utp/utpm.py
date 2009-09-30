@@ -284,16 +284,29 @@ class UTPM:
                 retval[d,p] = numpy.trace(self.tc[d,p,...])
         return UTPM(retval)
         
-    def toTransposedJacobian(self):
+    def FtoJT(self):
         """
-        Combines several directional derivatives and combines them to a Jacobian, i.e.
+        Combines several directional derivatives and combines them to a transposed Jacobian JT, i.e.
         x.tc.shape = (D,P,shp)
-        y = x.toTransposedJacobian()
+        y = x.FtoJT()
         y.tc.shape = (D-1, (P,1) + shp)
         """
         D,P = self.tc.shape[:2]
         shp = self.tc.shape[2:]
         return UTPM(self.tc[1:,...].reshape((D-1,1) + (P,) + shp))
+        
+    def JTtoF(self):
+        """
+        inverse operation of FtoJT
+        x.tc.shape = (D,1, P,shp)
+        y = x.JTtoF()
+        y.tc.shape = (D+1, P, shp)
+        """
+        D,P = self.tc.shape[[0,2]]
+        shp = self.tc.shape[3:]
+        tmp = numpy.zeros((D+1,P) + shp)
+        tmp[0:D,...] = self.tc.reshape((D,P) + shp)
+        return UTPM(tmp)        
 
     def clone(self):
         return UTPM(self.tc.copy())

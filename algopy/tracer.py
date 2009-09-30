@@ -81,6 +81,8 @@ class Function:
             self.type = 'trace'
         elif function_type == 'inv':
             self.type = 'inv'
+        elif function_type == 'JT':
+            self.type = 'JT'            
         elif function_type == 'solve':
             self.type = 'solve'
         elif function_type == 'trans':
@@ -173,6 +175,9 @@ class Function:
 
     def inv(self):
         return Function([self], function_type='inv')
+        
+    def toTransposedJacobian(self):
+        return Function([self], function_type='JT')
 
     def get_shape(self):
         return numpy.shape(self.x)
@@ -233,7 +238,10 @@ class Function:
 
         elif self.type == 'inv':
             return self.args[0].x.inv()
-
+            
+        elif self.type == 'JT':
+            return self.args[0].x.JT()
+            
         elif self.type == 'solve':
             return self.args[0].x.solve(self.args[1].x)
 
@@ -277,6 +285,9 @@ class Function:
 
         elif self.type == 'inv':
             self.args[0].xbar -= self.x.T.dot(self.xbar.dot(self.x.T))
+            
+        # elif self.type == 'JT':
+            # self.args[0].xbar += self.x.T.dot(self.xbar.dot(self.x.T))            
 
         elif self.type == 'solve':
             raise NotImplementedError
