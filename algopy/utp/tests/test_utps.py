@@ -2,12 +2,7 @@ from numpy.testing import *
 import numpy
 
 from algopy.utp.utps import *
-
-class TestFunctionOfJacobian(TestCase):
-    def test_simple_function(self):
-        x = UTPS([[3,3],[1,0]])
-        y = UTPS([[2,2],[0,1]])
-        
+ 
 
 class TestUTPS(TestCase):
     def test_UTPS(self):
@@ -71,7 +66,6 @@ class TestUTPS(TestCase):
         a1 = UTPS([2.,13.])
         a2 = 1.
         b = f(a1,a2)
-        print 'b=',b
         correct_result = UTPS([f(a1.tc[0,0],a2), 13.])
         assert_array_almost_equal(correct_result.tc, b.tc)
 
@@ -82,7 +76,6 @@ class TestUTPS(TestCase):
         a1 = UTPS([[2.],[13.]])
         a2 = 5.
         b = f(a1,a2)
-        print 'b=',b
         correct_result = UTPS([[f(a1.tc[0,0],a2)], [65.]])
         assert_array_almost_equal(correct_result.tc, b.tc)
 

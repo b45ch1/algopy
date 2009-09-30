@@ -4,6 +4,16 @@ import numpy
 from algopy.utp.utpm import *
 
 
+class TestFunctionOfJacobian(TestCase):
+    def test_simple_function(self):
+        x = UTPS([[3,3],[1,0]])
+        y = UTPS([[2,2],[0,1]])
+        
+        f = x*y
+        g = UTPS(f.tc[1:,:])
+        print f
+        print g
+
 class TestMatPoly(TestCase):
     def test_UTPM_in_a_stupid_way(self):
         """
