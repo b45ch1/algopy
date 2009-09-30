@@ -272,6 +272,22 @@ class TestMatPoly(TestCase):
         Id[0,:,:,:] = numpy.eye(N)
         assert_array_almost_equal(A.dot(Ainv).tc, Id)
         
+    def test_FtoJT(self):
+        (D,P,N) = 2,5,5
+        x = UTPM(numpy.random.rand(D,P,N))
+        z = x.tc[1:,...].reshape((D-1,1,P,N))
+        y = x.FtoJT()
+        assert_array_equal(y.tc.shape, [1,1,5,5])
+        assert_array_almost_equal(y.tc, z)
+        
+    def test_JTtoF(self):
+        (D,P,N) = 2,5,5
+        x = UTPM(numpy.random.rand(D,P,N))
+        y = x.FtoJT()
+        z = y.JTtoF()
+        assert_array_almost_equal(x.tc, z.tc)
+        
+        
     def test_solve(self):
         (D,P,N,M) = 3,3,30,1
         x = UTPM(numpy.random.rand(D,P,N,M))
