@@ -3,6 +3,12 @@ import numpy
 
 from algopy.utp.utps import *
 
+class TestFunctionOfJacobian(TestCase):
+    def test_simple_function(self):
+        x = UTPS([[3,3],[1,0]])
+        y = UTPS([[2,2],[0,1]])
+        
+
 class TestUTPS(TestCase):
     def test_UTPS(self):
         """
