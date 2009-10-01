@@ -21,30 +21,137 @@ class TestFunctionOfJacobian(TestCase):
         
         assert_array_equal(x.tc.shape, z.tc.shape)
        
-        assert_array_almost_equal(x.tc[1:,...], z.tc[:-1,...])    
-    
-    def test_first_order_J(self):
-        D,P,N = 2,2,1
-        x = UTPM(numpy.zeros((D,P,N)))
-        y = UTPM(numpy.zeros((D,P,N)))
-        x.tc[0,:,0] = 3
-        x.tc[1,0,0] = 1
-        y.tc[0,:,0] = 5
-        y.tc[1,1,0] = 1        
+        assert_array_almost_equal(x.tc[1:,...], z.tc[:-1,...])
         
+    def test_shifted_multiplication_from_left(self):
+        D,P,N = 3,1,1
+        x = numpy.zeros((D,P,N))
+        x[:,0,0] = [1,11,13]
+        xbar = numpy.zeros((D-1,P,N))
+        xbar[:,0,0] = [5,7]
+
+        x = UTPM(x)
+        xbar = UTPM(xbar,shift=1)
+        
+        zbar = xbar * x
+        assert_array_almost_equal(zbar.tc[:,0,0], [55,142])
+        
+    def test_composite_shifted_multiplication_from_left(self):
+        D,P,N = 2,1,1
+        x = numpy.zeros((D,P,N))
+        y = numpy.zeros((D,P,N))
+        x[:,0,0] = [2,1]
+        y[:,0,0] = [3,0]
+
+        x = UTPM(x)
+        y = UTPM(y)
+        
+        # forward
+        z = x * y
+        
+        # reverse
+        zbar = numpy.zeros((D-1,P,N))
+        zbar[0,0,0] = 5
+        zbar = UTPM(zbar,shift=1)
+        
+        xbar = zbar * y
+        ybar = zbar * x
+        
+        # compare to the analytical solution
+        # zbar * d d/dx (xy) = zbar dy
+        assert_almost_equal(xbar.tc[0,0,0], 0)
+        assert_almost_equal(ybar.tc[0,0,0], zbar.tc[0,0,0])
+        
+        
+    def test_first_order_J(self):
+        """
+        function:        
+            f = x * y
+        gradient:
+            g = [ y, x]
+            
+        analytical pull back:
+            gbar.T d g = gbar1 dy  +  gbar2 dx  
+        
+        """    
+        
+        
+        D,P = 2,2
+        x = UTPM(numpy.zeros((D,P)))
+        y = UTPM(numpy.zeros((D,P)))
+        
+        x0,y0 = 3,5
+        
+        x.tc[0,:] = x0
+        x.tc[1,0] = 1
+        y.tc[0,:] = y0
+        y.tc[1,1] = 1        
+        
+        # forward
+        f = x*y
+        
+        # reverse
+        gbar = UTPM(numpy.random.rand(D-1,1,P), shift=1)
+        fbar = gbar
+        fbar.tc = fbar.tc.reshape((D-1,P))
+        
+        xbar1 = (fbar * y).tc[0,:].sum()
+        ybar1 = (fbar * x).tc[0,:].sum()
+        
+        # analytical solution
+        xbar2 = fbar.tc[0,1]
+        ybar2 = fbar.tc[0,0]
+        
+        assert_almost_equal(xbar1,xbar2)
+        assert_almost_equal(ybar1,ybar2)
+    
+    def test_first_order_J2(self):
+        """
+        function:        
+            f = x**2 * y
+        gradient:
+            g = [2 x y, x**2]
+            
+        analytical pull back:
+            gbar.T d g = (gbar1 2 x) dy + ( gbar1 2 y + 2 gbar2 x) dx 
+        
+        """
+        
+        D,P = 2,2
+        x = UTPM(numpy.zeros((D,P)))
+        y = UTPM(numpy.zeros((D,P)))
+        
+        x0,y0 = 3,5
+        
+        x.tc[0,:] = x0
+        x.tc[1,0] = 1
+        y.tc[0,:] = y0
+        y.tc[1,1] = 1        
         
         # forward
         f = x*y*x
-        g = f.FtoJT()
         
         # reverse
-        gbar = UTPM(numpy.random.rand(D-1,1,N,P))
-       
+        gbar = UTPM(numpy.random.rand(D-1,1,P), shift=1)
+        fbar = gbar
+        fbar.tc = fbar.tc.reshape((D-1,P))
+        fbar.shift = 1
         
-        # analytical solution
-        #print x[0]
-        #xbar = gbar[0,0] * 2 * y + gbar[0,1] * 2 * x
-        #ybar = gbar[0,0] * x
+        xbar1 = fbar * 2 * y * x
+        ybar1 = fbar * x*x
+        
+
+        print xbar1
+        print ybar1
+        
+        # print gbar * g
+        
+        # # analytical solution
+        # xbar = gbar.tc[0,0,0] * 2 * y0 + gbar.tc[0,0,1] * 2 * x0
+        # ybar = gbar.tc[0,0,0] * 2 * x0
+        
+        # print xbar
+        # print ybar
         
 
 class TestMatPoly(TestCase):
@@ -212,14 +319,30 @@ class TestMatPoly(TestCase):
         assert_array_almost_equal(AX4.tc, AY8.tc )
         
 
+    def test_constructor_stores_reference_of_tc_and_does_not_copy(self):
+        X  = numpy.zeros((2,3,4,5))
+        Y  = X + 1
+        AX = UTPM(X)
+        AX.tc[...] = 1.
+        assert_array_almost_equal(AX.tc, Y)
+
+    def test_getitem_single_element_of_vector(self):
+        X  = numpy.zeros((2,3,4))
+        X2 = X.copy()
+        X2[:,:,0] += 1
+        AX = UTPM(X)
+        AY = AX[0]
+        AY.tc[:,:] += 1
+        assert_array_almost_equal(X,X2)
+
         
-    def test_getitem_single_element(self):
+    def test_getitem_single_element_of_matrix(self):
         X  = numpy.zeros((2,3,4,5))
         X2 = X.copy()
         X2[:,:,0,0] += 1
         AX = UTPM(X)
         AY = AX[0,0]
-        AY.tc[:,:] += 1.
+        AY.tc[:,:] += 1
         assert_array_almost_equal(X,X2)
         
     def test_getitem_slice(self):

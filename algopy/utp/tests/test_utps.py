@@ -2,7 +2,7 @@ from numpy.testing import *
 import numpy
 
 from algopy.utp.utps import *
- 
+
 
 class TestUTPS(TestCase):
     def test_UTPS(self):

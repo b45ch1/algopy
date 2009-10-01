@@ -87,21 +87,43 @@ class UTPM:
     A disadvantage of this arrangement is: it seems unnatural. It is easier to regard each direction separately.
     """
     
-    def __init__(self, X, Xdot = None):
-        """ INPUT:	shape([X]) = (D,P,N,M)"""
+    def __init__(self, X, Xdot = None, shift = 0):
+        """ INPUT:	shape([X]) = (D,P,N,M)
+        
+        shift>0 is necessary for the reverse mode.
+        Example:
+        In the forward mode compute
+            y(t) = d/dt x(t)
+        In the reverse mode compute
+        
+            ybar(t) d y(t) = ybar(t) d/dt d y(t)
+            
+        I.e. that means that ybar_shift(t) = ybar(t) d/dt is another adjoint operator.
+        Multiplying with this operator, i.e. 
+            ybar(t) = [yb0,yb1]
+            y(t)    = [y0,y1,y2]
+            
+            ybar_shift(t) * d y(t) = [yb0 * dy1, yb0 * dy2 + yb1 * dy1]
+        
+        """
         Ndim = ndim(X)
+        self.shift = shift
         if Ndim >= 2:
             self.tc = numpy.asarray(X)
         else:
             raise NotImplementedError
             
     def __getitem__(self, sl):
-        tmp = self.tc.__getitem__((Ellipsis,) + (sl,))
+        if type(sl) == int or sl == Ellipsis:
+            sl = (sl,)
+        tmp = self.tc.__getitem__((slice(None),slice(None)) + sl)
         return UTPM(tmp)
         
     def __setitem__(self, sl, rhs):
         if isinstance(rhs, UTPM):
-            return self.tc.__setitem__((Ellipsis,) + (sl,), rhs.tc)
+            if type(sl) == int or sl == Ellipsis:
+                sl = (sl,)            
+            return self.tc.__setitem__((slice(None),slice(None)) + sl, rhs.tc)
         else:
             raise NotImplementedError('rhs must be of the type algopy.UTPM!')
         
@@ -125,37 +147,11 @@ class UTPM:
         retval = self.clone()
         retval.__imul__(rhs)
         return retval
-        # if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
-            # retval = UTPM(numpy.copy(self.tc))
-            # (D,P,N,M) = retval.tc.shape
-            # for d in range(D):
-                # for p in range(P):
-                    # retval.tc[d,p,:,:] *= rhs
-            # return retval
-            
-        # else:
-            # retval = UTPM(zeros(shape(self.tc)))
-            # (D,P,N,M) = shape(retval.tc)
-            # for d in range(D):
-                # retval.tc[d,:,:,:] = sum( self.tc[:d+1,:,:,:] * rhs.tc[d::-1,:,:,:], axis=0)
-            # return retval
 
     def __div__(self,rhs):
         retval = self.clone()
         retval.__idiv__(rhs)
         return retval
-        
-        # if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
-            # retval = UTPM(numpy.copy(self.tc))
-            # retval.tc[:,:] /= rhs
-            # return retval
-
-        # else:
-            # retval = UTPM(zeros(shape(self.tc)))
-            # D,P = retval.tc.shape[:2]
-            # for d in range(D):
-                # retval.tc[d,:,...] = 1./ rhs.tc[0,:,...] * ( self.tc[d,:,...] - sum(retval.tc[:d,:,...] * rhs.tc[d:0:-1,:,...], axis=0))
-            # return retval
 
     def __radd__(self,rhs):
         return self + rhs
@@ -194,9 +190,9 @@ class UTPM:
         else:
             for d in range(D)[::-1]:
                 for p in range(P):
-                    self.tc[d,p,...] *= rhs.tc[0,p,...]
+                    self.tc[d,p,...] *= rhs.tc[self.shift,p,...]
                     for c in range(d):
-                        self.tc[d,p,...] += self.tc[c,p,...] * rhs.tc[d-c,p,...]
+                        self.tc[d,p,...] += self.tc[c,p,...] * rhs.tc[d-c + self.shift,p,...]
         return self
         
     def __idiv__(self,rhs):
@@ -310,7 +306,7 @@ class UTPM:
         return UTPM(tmp)        
 
     def clone(self):
-        return UTPM(self.tc.copy())
+        return UTPM(self.tc.copy(), shift = self.shift)
 
     def get_shape(self):
         return numpy.shape(self.tc[0,0,...])
