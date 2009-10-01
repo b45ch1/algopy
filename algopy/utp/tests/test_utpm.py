@@ -36,32 +36,6 @@ class TestFunctionOfJacobian(TestCase):
         zbar = xbar * x
         assert_array_almost_equal(zbar.tc[:,0,0], [55,142])
         
-    def test_composite_shifted_multiplication_from_left(self):
-        D,P,N = 2,1,1
-        x = numpy.zeros((D,P,N))
-        y = numpy.zeros((D,P,N))
-        x[:,0,0] = [2,1]
-        y[:,0,0] = [3,0]
-
-        x = UTPM(x)
-        y = UTPM(y)
-        
-        # forward
-        z = x * y
-        
-        # reverse
-        zbar = numpy.zeros((D-1,P,N))
-        zbar[0,0,0] = 5
-        zbar = UTPM(zbar,shift=1)
-        
-        xbar = zbar * y
-        ybar = zbar * x
-        
-        # compare to the analytical solution
-        # zbar * d d/dx (xy) = zbar dy
-        assert_almost_equal(xbar.tc[0,0,0], 0)
-        assert_almost_equal(ybar.tc[0,0,0], zbar.tc[0,0,0])
-        
         
     def test_first_order_J(self):
         """
@@ -71,7 +45,10 @@ class TestFunctionOfJacobian(TestCase):
             g = [ y, x]
             
         analytical pull back:
-            gbar.T d g = gbar1 dy  +  gbar2 dx  
+            gbar.T d g = gbar1 dy  +  gbar2 dx
+            
+        numerical:
+            gbar^T d d/dt f = gbar d/dt (1 d f)
         
         """    
         
@@ -95,15 +72,21 @@ class TestFunctionOfJacobian(TestCase):
         fbar = gbar
         fbar.tc = fbar.tc.reshape((D-1,P))
         
-        xbar1 = (fbar * y).tc[0,:].sum()
-        ybar1 = (fbar * x).tc[0,:].sum()
+        xbar1 = numpy.dot(fbar.tc[0,:],y.tc[1,:])
+        ybar1 = numpy.dot(fbar.tc[0,:], x.tc[1,:])
         
+        xbar3 = (fbar * y).tc[0,:].sum()
+        ybar3 = (fbar * x).tc[0,:].sum()
+
         # analytical solution
         xbar2 = fbar.tc[0,1]
         ybar2 = fbar.tc[0,0]
         
         assert_almost_equal(xbar1,xbar2)
         assert_almost_equal(ybar1,ybar2)
+        assert_almost_equal(ybar1,ybar3)
+        assert_almost_equal(ybar1,ybar3)
+        
     
     def test_first_order_J2(self):
         """
@@ -131,27 +114,25 @@ class TestFunctionOfJacobian(TestCase):
         # forward
         f = x*y*x
         
-        # reverse
+        # reverse of g = d/dt f
         gbar = UTPM(numpy.random.rand(D-1,1,P), shift=1)
         fbar = gbar
         fbar.tc = fbar.tc.reshape((D-1,P))
-        fbar.shift = 1
         
-        xbar1 = fbar * 2 * y * x
-        ybar1 = fbar * x*x
+        # reverse of f
+        xbar = 2 * x * y
+        ybar = x * x
         
+        # compute d d/dt f
+        xbar1 = (fbar * xbar).tc[0,:].sum()
+        ybar1 = (fbar * ybar).tc[0,:].sum()
+        
+        # analytical solution
+        xbar2 = fbar.tc[0,0] * 2 * y0 + fbar.tc[0,1] * 2 * x0
+        ybar2 = fbar.tc[0,0] * 2 * x0
 
-        print xbar1
-        print ybar1
-        
-        # print gbar * g
-        
-        # # analytical solution
-        # xbar = gbar.tc[0,0,0] * 2 * y0 + gbar.tc[0,0,1] * 2 * x0
-        # ybar = gbar.tc[0,0,0] * 2 * x0
-        
-        # print xbar
-        # print ybar
+        assert_almost_equal(xbar1,xbar2)
+        assert_almost_equal(ybar1,ybar2)
         
 
 class TestMatPoly(TestCase):
