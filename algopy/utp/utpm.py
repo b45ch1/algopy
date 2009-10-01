@@ -96,12 +96,12 @@ class UTPM:
             raise NotImplementedError
             
     def __getitem__(self, sl):
-        tmp = self.tc.__getitem__((Ellipsis,) + sl)
+        tmp = self.tc.__getitem__((Ellipsis,) + (sl,))
         return UTPM(tmp)
         
     def __setitem__(self, sl, rhs):
         if isinstance(rhs, UTPM):
-            return self.tc.__setitem__((Ellipsis,) + sl, rhs.tc)
+            return self.tc.__setitem__((Ellipsis,) + (sl,), rhs.tc)
         else:
             raise NotImplementedError('rhs must be of the type algopy.UTPM!')
         
@@ -302,7 +302,8 @@ class UTPM:
         y = x.JTtoF()
         y.tc.shape = (D+1, P, shp)
         """
-        D,P = self.tc.shape[[0,2]]
+        D = self.tc.shape[0]
+        P = self.tc.shape[2]
         shp = self.tc.shape[3:]
         tmp = numpy.zeros((D+1,P) + shp)
         tmp[0:D,...] = self.tc.reshape((D,P) + shp)

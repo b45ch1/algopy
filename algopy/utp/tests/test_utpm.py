@@ -5,14 +5,47 @@ from algopy.utp.utpm import *
 
 
 class TestFunctionOfJacobian(TestCase):
-    def test_simple_function(self):
-        x = UTPS([[3,3],[1,0]])
-        y = UTPS([[2,2],[0,1]])
+    def test_FtoJT(self):
+        (D,P,N) = 2,5,5
+        x = UTPM(numpy.random.rand(D,P,N))
+        z = x.tc[1:,...].reshape((D-1,1,P,N))
+        y = x.FtoJT()
+        assert_array_equal(y.tc.shape, [1,1,5,5])
+        assert_array_almost_equal(y.tc, z)
         
-        f = x*y
-        g = UTPS(f.tc[1:,:])
-        print f
-        print g
+    def test_JTtoF(self):
+        (D,P,N) = 2,5,5
+        x = UTPM(numpy.random.rand(D,P,N))
+        y = x.FtoJT()
+        z = y.JTtoF()
+        
+        assert_array_equal(x.tc.shape, z.tc.shape)
+       
+        assert_array_almost_equal(x.tc[1:,...], z.tc[:-1,...])    
+    
+    def test_first_order_J(self):
+        D,P,N = 2,2,1
+        x = UTPM(numpy.zeros((D,P,N)))
+        y = UTPM(numpy.zeros((D,P,N)))
+        x.tc[0,:,0] = 3
+        x.tc[1,0,0] = 1
+        y.tc[0,:,0] = 5
+        y.tc[1,1,0] = 1        
+        
+        
+        # forward
+        f = x*y*x
+        g = f.FtoJT()
+        
+        # reverse
+        gbar = UTPM(numpy.random.rand(D-1,1,N,P))
+       
+        
+        # analytical solution
+        #print x[0]
+        #xbar = gbar[0,0] * 2 * y + gbar[0,1] * 2 * x
+        #ybar = gbar[0,0] * x
+        
 
 class TestMatPoly(TestCase):
     def test_UTPM_in_a_stupid_way(self):
@@ -271,22 +304,6 @@ class TestMatPoly(TestCase):
         Id = numpy.zeros((D,P,N,N))
         Id[0,:,:,:] = numpy.eye(N)
         assert_array_almost_equal(A.dot(Ainv).tc, Id)
-        
-    def test_FtoJT(self):
-        (D,P,N) = 2,5,5
-        x = UTPM(numpy.random.rand(D,P,N))
-        z = x.tc[1:,...].reshape((D-1,1,P,N))
-        y = x.FtoJT()
-        assert_array_equal(y.tc.shape, [1,1,5,5])
-        assert_array_almost_equal(y.tc, z)
-        
-    def test_JTtoF(self):
-        (D,P,N) = 2,5,5
-        x = UTPM(numpy.random.rand(D,P,N))
-        y = x.FtoJT()
-        z = y.JTtoF()
-        assert_array_almost_equal(x.tc, z.tc)
-        
         
     def test_solve(self):
         (D,P,N,M) = 3,3,30,1
