@@ -146,6 +146,7 @@ class TestCGraphOnUTPS(TestCase):
 
 
 class TestCGraphOnUTPM(TestCase):
+
     def test_plotting_the_graph(self):
         import os.path
         cg = CGraph()
@@ -239,6 +240,37 @@ class TestCGraphOnUTPM(TestCase):
         
         assert_array_almost_equal(xbar_reverse.tc, xbar_symbolic.tc)
         assert_array_almost_equal(ybar_reverse.tc, ybar_symbolic.tc)
+        
+        
+    def test_transpose(self):
+        cg = CGraph()
+        D,P,N,M = 2,5,7,11
+        ax = UTPM(numpy.random.rand(D,P,N,M))
+        fx = Function(ax)
+        fy = fx.T
+        cg.independentFunctionList = [fx]
+        cg.dependentFunctionList = [fy]
+
+        assert_array_equal(fy.shape, (M,N))
+        assert_array_equal(fy.x.tc.shape, (D,P,M,N))
+        
+        cg.forward([ax])
+        assert_array_equal(cg.dependentFunctionList[0].shape, (M,N))
+        assert_array_equal(cg.dependentFunctionList[0].x.tc.shape, (D,P,M,N))
+    
+    def test_part_of_ODOE_objective_function(self):
+        D,P,N,M = 2,5,100,3
+        MJs = [ UTPM(numpy.random.rand(D,P,N,M)), UTPM(numpy.random.rand(D,P,N,M))]
+        cg = CGraph()
+        FJs = [Function(MJ) for MJ in MJs]
+        FPhi = numpy.sum([ (FJ.T).dot(FJ) for FJ in FJs ])
+        cg.independentFunctionList = FJs
+        cg.dependentFunctionList = [FPhi]
+        
+        assert_array_equal(FPhi.shape, (M,M))
+        cg.forward(MJs)
+        assert_array_equal(cg.dependentFunctionList[0].x.tc.shape, [D,P,M,M])
+        
         
 if __name__ == "__main__":
     run_module_suite()

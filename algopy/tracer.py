@@ -356,6 +356,12 @@ class CGraph:
 
     def __str__(self):
         return 'vertices:\n' + str(self.functionList)
+        
+    def node_shapes(self):
+        retval = ''
+        for nf, f in enumerate(self.functionList):
+            retval += 'Function %s%d:  '%(f.type,nf) + str(f.shape) + '\n'
+        return retval
 
     def forward(self,x):
         # populate independent arguments with new values
