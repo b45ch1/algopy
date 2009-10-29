@@ -16,9 +16,12 @@ trash
 *.svg
 *.dot
 *.o
+*.os
 *.so
 *.eps
 *~
+*.log
+
 SConstruct
 
 build
