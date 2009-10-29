@@ -4,7 +4,7 @@ import numpy
 from algopy.utp.ctps import *
 
 class TestCTPSUtils(TestCase):
-        def test_i2m(self):
+    def test_i2m(self):
         i = numpy.ones(10,dtype=bool)
         j = numpy.ones(10,dtype=bool)
         k = numpy.array([0,1,0,1],dtype=bool)
@@ -40,25 +40,20 @@ class TestCTPSUtils(TestCase):
         j = m2i(M,i)
         assert_array_equal(i,j)
         
-    def test_memory_access(self):
-        i = numpy.array([0,0,1,0,0,1], dtype=bool)
-        M = 2**numpy.sum(i)
-        for m in range(M):
-            print i2m(m2i(m,i))
+    # def test_memory_access(self):
+        # i = numpy.array([0,0,1,0,0,1], dtype=bool)
+        # M = 2**numpy.sum(i)
+        # for m in range(M):
+            # print i2m(m2i(m,i))
 
 
 class Test_CTPS_operations(TestCase):
     
-    def test_inconv2():
+    def test_inconv2(self):
         x = numpy.random.rand(8)
         y = numpy.random.rand(8)
         z = numpy.zeros(8)
-        inconv2(x,y,z)
-        print x
-        print y
-        print z
-    
-        print x[1]*y[4] + x[4]*y[1]
+        inconv2(z, x, y)
     
         # (0,0,0)
         assert_almost_equal(z[0], x[0]*y[0])
@@ -73,7 +68,7 @@ class Test_CTPS_operations(TestCase):
         assert_almost_equal(z[6], x[0]*y[6] + x[2]*y[4] + x[4]*y[2] + x[6]*y[0])
         assert_almost_equal(z[7], x[0]*y[7] + x[1]*y[6] + x[2]*y[5] + x[3]*y[4] + x[4]*y[3] + x[5]*y[2] + x[6]*y[1] + x[7]*y[0])
     
-    def test_simple_hessian():
+    def test_simple_hessian(self):
         """
         test function:
         f: R^4 -> R
@@ -92,17 +87,14 @@ class Test_CTPS_operations(TestCase):
         x4 = numpy.random.rand()
     
         # compute d/dx1 d/x3 f
-        ax1 = adouble(numpy.array([x1,1,0,0],dtype=float))
-        ax2 = adouble(numpy.array([x2,0,0,0],dtype=float))
-        ax3 = adouble(numpy.array([x3,0,1,0],dtype=float))
-        ax4 = adouble(numpy.array([x4,0,0,0],dtype=float))
+        ax1 = CTPS(numpy.array([x1,1,0,0],dtype=float))
+        ax2 = CTPS(numpy.array([x2,0,0,0],dtype=float))
+        ax3 = CTPS(numpy.array([x3,0,1,0],dtype=float))
+        ax4 = CTPS(numpy.array([x4,0,0,0],dtype=float))
     
         ay = ax1 * ax2 * ax3 * ax4
-    
-        print ay.tc
-        print x2*x4
-    
-        assert_almost_equal(ay.tc[2**2 - 1], x2*x4, decimal = 3)
+   
+        assert_almost_equal(ay.data[2**2 - 1], x2*x4, decimal = 3)
         
         
 

@@ -8,6 +8,7 @@ where R the real numbers.
 """
 
 import numpy
+from algopy.base_type import GradedRing
 
 def i2m(i):
     """
@@ -18,8 +19,6 @@ def i2m(i):
     therefore, N = log2(size(i))
 
     m(i) = sum([2**n i[n] for n in range(N)])
-
-
     """
     N = numpy.size(i)
     return int(numpy.sum([2**n * i[n] for n in range(N)]))
@@ -57,15 +56,17 @@ def m2i(m, bits = None):
         retval[b] = tmp[:]
         return retval
 
+def inconv(z, x, y):
+    N = numpy.size(x)
+    if N == 1:
+        z[0] += x[0] * y[0]
+    else:
+        N = N/2
+        inconv(z[:N], x[:N], y[:N])
+        inconv(z[N:], x[:N], y[N:])
+        inconv(z[N:], x[N:], y[:N])
 
-#def inconv3(x, y, z):
-    #Nx = int(numpy.log2(numpy.size(x)))
-    #z[0] = x[0] * y[0]
-    #for nx in range(Nx):
-        #for m in range(2**(nx)-1):
-            #z[2**nx + m] = numpy.sum(x[:m+1]*y[::-1][:m+1])
-
-def inconv2(x, y, z):
+def inconv2(z, x, y):
     Nx = int(numpy.log2(numpy.size(x)))
     i = numpy.ones(Nx,dtype=bool)
 
@@ -75,35 +76,32 @@ def inconv2(x, y, z):
             k = m2i(mk,j)
             z[i2m(j)] += x[i2m(k)]*y[i2m(j-k)]
 
+#def inconv3(x, y, z):
+    #Nx = int(numpy.log2(numpy.size(x)))
+    #z[0] = x[0] * y[0]
+    #for nx in range(Nx):
+        #for m in range(2**(nx)-1):
+            #z[2**nx + m] = numpy.sum(x[:m+1]*y[::-1][:m+1])
 
-def inconv(x, y, z):
-    N = numpy.size(x)
-    if N == 1:
-        z[0] += x[0] * y[0]
-    else:
-        N = N/2
-        inconv(x[:N], y[:N], z[:N])
-        inconv(x[:N], y[N:], z[N:])
-        inconv(x[N:], y[:N], z[N:])
-
-
-class CTPS:
-    def __init__(self, tc):
+class CTPS(GradedRing):
+    def __init__(self, data):
         """
         CTPS = Cross Derivative Taylor Polynomial
         Implements the factor ring  R[t1,...,tK]/<t1^2,...,tK^2>
         """
-        self.tc = numpy.array(tc)
+        self.data = numpy.array(data)
+        
+    @classmethod
+    def zeros_like(cls, data):
+        return numpy.zeros_like(data)
 
+    @classmethod
+    def mul(cls, retval_data, lhs_data, rhs_data):
+        inconv(retval_data, lhs_data, rhs_data)
 
-    def __mul__(self, rhs):
-        S = numpy.size(self.tc)
-        retval = adouble( numpy.zeros(S , dtype = float))
-        inconv(self.tc, rhs.tc, retval.tc)
-        return retval
 
     def __repr__(self):
         return self.__str__()
 
     def __str__(self):
-        return str(self.tc) 
+        return str(self.data) 
