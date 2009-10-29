@@ -19,6 +19,7 @@ trash
 *.so
 *.eps
 *~
+SConstruct
 
 build
 

@@ -24,7 +24,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <time.h> /* for tests (ticks measurement) */
-#include <adolc/adolc.h> /* for 
 
 
 /* EPSILON - precision value, used in the test program.

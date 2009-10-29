@@ -1,0 +1,2 @@
+Import('env')
+ctps = env.SharedLibrary(target='ctps', source=['src/ctps.c'])

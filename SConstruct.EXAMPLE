@@ -1,0 +1,30 @@
+import distutils.sysconfig
+import numpy
+
+
+LIBS         = []
+INCLUDEPATH  = []
+LIBPATH      = []
+
+# 0: setup the command line parsing
+AddOption('--prefix',
+        dest='prefix',
+        nargs=1, type='string',
+        action='store',
+        metavar='DIR',
+        help='installation prefix')
+
+env = Environment(
+    PREFIX = GetOption('prefix'),
+    TMPBUILD = '/tmp/builddir',
+	CPPPATH=[distutils.sysconfig.get_python_inc(),numpy.get_include()] + INCLUDEPATH,
+	CXXFLAGS="-ftemplate-depth-100  -pthread -fno-strict-aliasing -DNDEBUG -fwrapv -O3 -Wfatal-errors",
+	LIBPATH= LIBPATH,
+	LIBS= LIBS,
+	RPATH = LIBPATH, #include information where shared libraries can be found to avoid errors like: "ImportError: libboost_python-gcc42-mt-1_34_1.so.1.34.1: cannot open shared object file: No such file or directory"
+	SHLIBPREFIX="", #gets rid of lib prefix
+)
+env.Append(LINKFLAGS = "-pthread")
+
+Export('env')
+SConscript('algopy/utp/SConscript')
