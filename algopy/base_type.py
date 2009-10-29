@@ -22,7 +22,7 @@ class GradedRing(object):
     data = NotImplementedError()
     
     def __add__(self, rhs):
-        retval = self.__class__(self.__class__.zeros_like(self.data, rhs.data))
+        retval = self.__class__(self.__class__.zeros_like(self.data))
         self.__class__.add(retval.data, self.data, rhs.data)
         return retval
 

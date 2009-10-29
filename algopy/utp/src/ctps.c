@@ -29,34 +29,30 @@ Problems/bugs: Composition of crossmultwise() with divide() is not accurate
 /* EPSILON - precision value, used in the test program.
 PI - PI constant */
 #define EPSILON (0.0000000001)
-#define PI M_PI
+#define PI 3.14159265358979323846264338327950288
 
-/* These definitions are to improve precision of calculations*/
-#define double long double
-#define fabs fabsl
-#define modf modfl
 
 /*============================================================================*/
-void add(int h, double* u, double* w, double* v)
-{
-/* Implementation of v=u+w.
-Run-time: O(2^n).
-Storage: O(1).*/
+void add(int h, double* u, double* w, double* v){
+    /* Implementation of v=u+w.
+    Run-time: O(2^n).
+    Storage: O(1).*/
 
-int i;
-for(i=0;i<h;i++)
-    v[i] = u[i]+w[i];
+    int i;
+    for(i=0;i<h;i++){
+        v[i] = u[i]+w[i];
+    }
 }
 /*============================================================================*/
-void sub(int h, double* u, double* w, double* v)
-{
-/* Implementation of v=u-w.
-Run-time: O(2^n).
-Storage: O(1).*/
+void sub(int h, double* u, double* w, double* v){
+    /* Implementation of v=u-w.
+    Run-time: O(2^n).
+    Storage: O(1).*/
 
-int i;
-for(i=0;i<h;i++)
-    v[i] = u[i]-w[i];
+    int i;
+    for(i=0;i<h;i++){
+        v[i] = u[i]-w[i];
+    }
 }
 /*============================================================================*/
 
@@ -69,24 +65,23 @@ and multiply_to() are the fastest.
 IMPORTANT: crossmult, crossmultwise, multiply_to can handle deconvolution.
             mult, smartmult - cannot handle deconvolution.
 ============================================================================*/
-void crossmult(int h, double* u, double* w, double* v)
-{
-/* crossmultiplies the first h ( power of 2 ) elments of u with
-those of w and increments the entries of v by it.
-printf(" h=%d,  i= %d , j= %d count = %d \n",h, i,j,count );
-Runtime: O(3^n)
-Storage: O(n).*/
+void crossmult(int h, double* u, double* w, double* v){
+    /* crossmultiplies the first h ( power of 2 ) elments of u with
+    those of w and increments the entries of v by it.
+    printf(" h=%d,  i= %d , j= %d count = %d \n",h, i,j,count );
+    Runtime: O(3^n)
+    Storage: O(n).*/
 
-int i;
-int c=(h>0?1:-1);
-*v += c* *u* *w;
-if(abs(h)>1)
-    v[1]+=c* (u[0]*w[1]+u[1]*w[0]);
-/*loop*/
-for (i=2; i<abs(h); i*=2) {
-    crossmult((h>0?i:-i), u, w+i, v+i);
-    crossmult((h>0?i:-i), u+i, w, v+i);
-}
+    int i;
+    int c=(h>0?1:-1);
+    *v += c* *u* *w;
+    if(abs(h)>1)
+        v[1]+=c* (u[0]*w[1]+u[1]*w[0]);
+    /*loop*/
+    for (i=2; i<abs(h); i*=2) {
+        crossmult((h>0?i:-i), u, w+i, v+i);
+        crossmult((h>0?i:-i), u+i, w, v+i);
+    }
 }
 /*==========================================================================*/
 void crossmultwise (int h, double*u, double*w, double* v)
@@ -789,74 +784,4 @@ v[0]=fmod(u[0],w[0]);
 k=(u[0]-v[0])/w[0];
 for (i=1; i<h; i++)
     v[i]=u[i]-k*w[i];
-}
-/*==========================================================================*/
-/*   Test suggestions: -Call to a function and then an inverse function,
-                        check if original input is obtained.
-                    -Use identities like sin^2+cos^2=1 or cosh^2-sinh^2=1, call to
-                        these functions and see if output array corresponds to 1.*/
-
-int main()
-{
-int i,j,n,h,count=0;
-double *u, *v, *w, *v1, *v2, *sine, *cose;
-clock_t tick1, tick2, tick3, tick4;
-char  *str1="square", *str2="sqaroot";
-
-printf ("Insert number of independent variables: ");
-scanf("%d",&n);
-
-h = pow(2,n);
-u = (double*) calloc(h,sizeof(double));
-w = (double*) calloc(h,sizeof(double));
-v = (double*) calloc(h,sizeof(double));
-v1= (double*) calloc(h,sizeof(double));
-v2 = (double*) calloc(h,sizeof(double));
-sine= (double*) calloc(h,sizeof(double));
-cose= (double*) calloc(h,sizeof(double));
-
-for(j=0;j<h;j++) {
-    u[j] = cos(random());
-    w[j] = sin(random());
-    v[j]=v1[j]=v2[j]=sine[j]=cose[j]=0;
-}
-
-printf ("%ld ticks per second\n",CLOCKS_PER_SEC);
-printf ("Starting %s()...\n",str1);
-tick1=clock();
-square(h,u,v1); /*<--------------------------------------- First function*/
-tick2=clock();
-
-printf ("Starting %s()...\n",str2);
-tick3=clock();
-squaroot(h,v1,v2);/*<--------------------------------------- Second function*/
-tick4=clock();
-
-for (i=0; i<h; i++) {
-    v1[i]=u[i];
-}
-
-/*for(j=0;j<h; j++) {
-    printf("v1[%d] = %Le <-> v2[%d]= %Le\n",j,v1[j],j,v2[j]);
-}*/
-
-for(j=0;j<h; j++) {
-    if (fabs(v1[j]-v2[j])>EPSILON) {
-        printf("Difference found: fabs(v1[%d]-v2[%d])= %Le\n",j,j,fabs(v1[j]-v2[j]));
-        count++;
-    }
-}
-printf ("Total %d differences\n",count);
-printf ("ticks of %s=%ld\n",str1,(tick2-tick1));
-printf ("ticks of %s=%ld\n",str2,(tick4-tick3));
-
-free(u);
-free(w);
-free(v);
-free(v1);
-free(v2);
-free(sine);
-free(cose);
-
-return 1;
 }

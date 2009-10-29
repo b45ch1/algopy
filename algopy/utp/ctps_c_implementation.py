@@ -7,11 +7,11 @@ from algopy.base_type import GradedRing
 
 _ctps = numpy.ctypeslib.load_library('libctps', os.path.dirname(__file__))
 
-dvec = ndpointer(dtype=numpy.float64, ndim=1, flags='CONTIGUOUS,ALIGNED')
+double_ptr =  ctypes.POINTER(ctypes.c_double)
+argtypes = [ctypes.c_int, double_ptr, double_ptr, double_ptr]
 
-_ctps.add.argtypes = [ctypes.c_int, dvec, dvec, dvec ]
-_ctps.crossmultwise.argtypes = [ctypes.c_int, dvec, dvec, dvec ]
-
+_ctps.add.argtypes = argtypes
+_ctps.crossmultwise.argtypes = argtypes
 
 class CTPS_C(GradedRing):
     def __init__(self, data):
@@ -28,10 +28,20 @@ class CTPS_C(GradedRing):
         return numpy.zeros_like(data)
 
     @classmethod
-    def mul(cls, retval_data, lhs_data, rhs_data):
-        K = 100000
-        _ctps.crossmultwise(K, lhs_data, rhs_data, retval_data)
+    def add(cls, retval_data, lhs_data, rhs_data):
+        K = retval_data.size
+        _ctps.add(K,
+        lhs_data.ctypes.data_as(double_ptr),
+        rhs_data.ctypes.data_as(double_ptr),
+        retval_data.ctypes.data_as(double_ptr))
 
+    @classmethod
+    def mul(cls, retval_data, lhs_data, rhs_data):
+        K = retval_data.size
+        _ctps.crossmultwise(K,
+        lhs_data.ctypes.data_as(double_ptr),
+        rhs_data.ctypes.data_as(double_ptr),
+        retval_data.ctypes.data_as(double_ptr))
 
     def __repr__(self):
         return self.__str__()
