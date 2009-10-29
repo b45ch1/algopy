@@ -10,7 +10,6 @@ where R is the field of real numbers
 
 import numpy
 
-
 class UTPS:
     """
     UTPS == Univariate Taylor Polynomial on Scalars
