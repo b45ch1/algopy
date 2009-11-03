@@ -26,7 +26,7 @@ class CTPS_C(GradedRing):
         self.data = numpy.array(data)
         
     @classmethod
-    def zeros_like(cls, data):
+    def __zeros_like__(cls, data):
         return numpy.zeros_like(data)
 
     @classmethod
@@ -59,7 +59,7 @@ class CTPS_C(GradedRing):
         _ctps.ctps_div(K,
         lhs_data.ctypes.data_as(double_ptr),
         rhs_data.ctypes.data_as(double_ptr),
-        retval_data.ctypes.data_as(double_ptr))        
+        retval_data.ctypes.data_as(double_ptr))
 
     def __repr__(self):
         return self.__str__()

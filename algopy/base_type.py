@@ -22,22 +22,22 @@ class GradedRing(object):
     data = NotImplementedError()
     
     def __add__(self, rhs):
-        retval = self.__class__(self.__class__.zeros_like(self.data))
+        retval = self.__class__(self.__class__.__zeros_like__(self.data))
         self.__class__.add(retval.data, self.data, rhs.data)
         return retval
         
     def __sub__(self, rhs):
-        retval = self.__class__(self.__class__.zeros_like(self.data))
+        retval = self.__class__(self.__class__.__zeros_like__(self.data))
         self.__class__.sub(retval.data, self.data, rhs.data)
         return retval        
 
     def __mul__(self,rhs):
-        retval = self.__class__(self.__class__.zeros_like(self.data))
+        retval = self.__class__(self.__class__.__zeros_like__(self.data))
         self.__class__.mul(retval.data, self.data, rhs.data)
         return retval
         
     def __div__(self,rhs):
-        retval = self.__class__(self.__class__.zeros_like(self.data))
+        retval = self.__class__(self.__class__.__zeros_like__(self.data))
         self.__class__.div(retval.data, self.data, rhs.data)
         return retval        
         
@@ -46,6 +46,10 @@ class GradedRing(object):
         
     def __rmul__(self, lhs):
         return self * lhs
+        
+        
+    def zeros_like(self):
+        return self.__class__(self.__class__.__zeros_like__(self.data))
         
     def __str__(self):
        return str(self.data)

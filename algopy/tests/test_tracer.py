@@ -276,8 +276,8 @@ class TestCGraphOnUTPM(TestCase):
 class TestCGraphOnCTPS(TestCase):
     def test_forward(self):
         cg = CGraph()
-        ax = UTPS([3.,1.])
-        ay = UTPS([7.,0.])
+        ax = CTPS_C([3.,1.,0.,0.])
+        ay = CTPS_C([7.,0.,0.,0.])
         fx = Function(ax)
         fy = Function(ay)
         fv1 = fx * fy
@@ -285,10 +285,36 @@ class TestCGraphOnCTPS(TestCase):
         cg.independentFunctionList = [fx,fy]
         cg.dependentFunctionList = [fv2]
         cg.forward([ax,ay])
-        assert_array_almost_equal(cg.dependentFunctionList[0].x.tc, ((ax*ay * ax + ay)*ax*ay).tc)
+        assert_array_almost_equal(cg.dependentFunctionList[0].x.data, ((ax*ay * ax + ay)*ax*ay).data)
 
+    def test_reverse(self):
+        cg = CGraph()
+        ax = CTPS_C([3.,1.,0.,0.])
+        ay = CTPS_C([7.,0.,0.,0.])
+        fx = Function(ax)
+        fy = Function(ay)
+        fv1 = fx * fy
+        fv2 = (fv1 * fx + fy)*fv1
+        cg.independentFunctionList = [fx,fy]
+        cg.dependentFunctionList = [fv2]
+        cg.forward([ax,ay])
+        
+        v2bar = CTPS_C([1.,0.,0.,0.])
+        cg.reverse([v2bar])
 
+        # xbar_reverse = cg.independentFunctionList[0].xbar
+        # ybar_reverse = cg.independentFunctionList[1].xbar
+        
+        # xbar_symbolic = 3 * ax**2 * ay**2 + ay**2
+        # ybar_symbolic = 2*ax**3 * ay + 2 * ax * ay
 
+        # # print xbar_symbolic.tc
+        # # print xbar_reverse
+        # # print ybar_symbolic
+        # # print ybar_reverse
+        
+        # assert_array_almost_equal(xbar_reverse.tc, xbar_symbolic.tc)
+        # assert_array_almost_equal(ybar_reverse.tc, ybar_symbolic.tc)
 
         
 if __name__ == "__main__":
