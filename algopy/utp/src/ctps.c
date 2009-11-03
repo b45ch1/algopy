@@ -13,7 +13,7 @@ General Comments: Some of the implemented functions aren't differentiable or
                     actual runtime may differ, we have used clock ticks to measure
                     actual runtime. To see difference in clock ticks use
                     15 variables or more as an input to the main() function.
-Problems/bugs: Composition of crossmultwise() with divide() is not accurate
+Problems/bugs: Composition of ctps_mul() with ctps_div() is not accurate
                 for 16 varibles or more, which is relatively a bad result.
                 Other compositions work well. Some are very good like exponent
                 and natural logarithm, square and squareroot, for 20 variables
@@ -33,7 +33,7 @@ PI - PI constant */
 
 
 /*============================================================================*/
-void add(int h, double* u, double* w, double* v){
+void ctps_add(int h, double* u, double* w, double* v){
     /* Implementation of v=u+w.
     Run-time: O(2^n).
     Storage: O(1).*/
@@ -44,7 +44,7 @@ void add(int h, double* u, double* w, double* v){
     }
 }
 /*============================================================================*/
-void sub(int h, double* u, double* w, double* v){
+void ctps_sub(int h, double* u, double* w, double* v){
     /* Implementation of v=u-w.
     Run-time: O(2^n).
     Storage: O(1).*/
@@ -56,140 +56,114 @@ void sub(int h, double* u, double* w, double* v){
 }
 /*============================================================================*/
 
-/*==========================================================================
-Here are functions dealing with crossmultiplication, there are several versions
-of these functions, see comment on each function. All functions can propogate
-partials of v=u*w and are at least of O(3^n) run-time complexity (n - number of
-independent variables). Tests have shown (based on clock ticks),that crossmultwise()
-and multiply_to() are the fastest.
-IMPORTANT: crossmult, crossmultwise, multiply_to can handle deconvolution.
-            mult, smartmult - cannot handle deconvolution.
-============================================================================*/
-void crossmult(int h, double* u, double* w, double* v){
-    /* crossmultiplies the first h ( power of 2 ) elments of u with
-    those of w and increments the entries of v by it.
-    printf(" h=%d,  i= %d , j= %d count = %d \n",h, i,j,count );
+
+/*==========================================================================*/
+void ctps_mul(int h, double*u, double*w, double* v)
+{
+    /* This version is preferable because the base condition
+    saving recursive function calls.
     Runtime: O(3^n)
-    Storage: O(n).*/
+    Storage: O(n). */
+    
+    if (h==4) {
+        v[3] += (u[3]*w[0]+u[2]*w[1]+u[1]*w[2]+u[0]*w[3]);
+        v[2] += (u[2]*w[0]+u[0]*w[2]);
+        v[1] += (u[1]*w[0]+u[0]*w[1]);
+        v[0] += (u[0]*w[0]);
+        return;
+    }
+    if (h==2) {
+        v[1] += (u[1]*w[0]+u[0]*w[1]);
+        v[0] += (u[0]*w[0]);
+        return;
+    }
+    if (h==1) {
+        v[0] += (u[0]*w[0]);
+        return;
+    }
+    if (h==-4) {
+        v[0] -= (u[0]*w[0]);
+        v[1] -= (u[1]*w[0]+u[0]*w[1]);
+        v[2] -= (u[2]*w[0]+u[0]*w[2]);
+        v[3] -= (u[3]*w[0]+u[2]*w[1]+u[1]*w[2]+u[0]*w[3]);
+        return;
+    }
+    if (h==-2) {
+        v[0] -= (u[0]*w[0]);
+        v[1] -= (u[1]*w[0]+u[0]*w[1]);
+        return;
+    }
+    if (h==-1) {
+        v[0] -= (u[0]*w[0]);
+        return;
+    }
+    
+    h /= 2;
+    if(h > 0) {
+        ctps_mul(h,u,w+abs(h),v+abs(h));
+        ctps_mul(h,u+abs(h),w,v+abs(h));
+        ctps_mul(h,u,w,v);
+    } else {
+        ctps_mul(h,u,w,v);
+        ctps_mul(h,u+abs(h),w,v+abs(h));
+        ctps_mul(h,u,w+abs(h),v+abs(h));
+    }
+}
+/*==========================================================================*/
+void ctps_div(int h, double* u, double* w, double* v){
+    /* Implementation of v=u/w using deconvolutions. Writing result into v.
+    Runtime: O(3^n)
+    Storage: O(n) */
+    
+    int i,j;
+    double w0;
+    
+    w0 = *w;
+    for(j=0;j<h;j++) {
+        v[j] = u[j] / w0;
+        w[j] /= w0;
+    }
+    *w = 0;
+    
+    /* i=1: v[1]-=w[1]*v[0]; v[1]-=w[0]*v[1]; but w[0]==0
+        unnormalized v[1]=u[1]/w[0]-w[1]*u[0]/(w[0]*w[0]); */
+    
+    for(i=1;i<h;i*=2) {
+        ctps_mul(-i,w+i,v,v+i);
+        ctps_mul(-i,w,v+i,v+i);
+    }
+    for(j=1;j<h;j++) {
+        w[j] *= w0;
+    }
+    *w = w0;
+}
+/*==========================================================================*/
+void ctps_iadd(int h, double* u, double* v){
+    /* Implementation of v+=u
+    Run-time: O(2^n).
+    Storage: O(1).*/
 
     int i;
-    int c=(h>0?1:-1);
-    *v += c* *u* *w;
-    if(abs(h)>1)
-        v[1]+=c* (u[0]*w[1]+u[1]*w[0]);
-    /*loop*/
-    for (i=2; i<abs(h); i*=2) {
-        crossmult((h>0?i:-i), u, w+i, v+i);
-        crossmult((h>0?i:-i), u+i, w, v+i);
+    for(i=0;i<h;i++){
+        v[i] += u[i];
     }
 }
 /*==========================================================================*/
-void crossmultwise (int h, double*u, double*w, double* v)
-{
-/* This version is preferable because the base condition
-saving recursive function calls.
-Runtime: O(3^n)
-Storage: O(n). */
+void ctps_isub(int h, double* u, double* v){
+    /* Implementation of v-=u
+    Run-time: O(2^n).
+    Storage: O(1).*/
 
-if (h==4) {
-    v[3] += (u[3]*w[0]+u[2]*w[1]+u[1]*w[2]+u[0]*w[3]);
-    v[2] += (u[2]*w[0]+u[0]*w[2]);
-    v[1] += (u[1]*w[0]+u[0]*w[1]);
-    v[0] += (u[0]*w[0]);
-    return;
-}
-if (h==2) {
-    v[1] += (u[1]*w[0]+u[0]*w[1]);
-    v[0] += (u[0]*w[0]);
-    return;
-}
-if (h==1) {
-    v[0] += (u[0]*w[0]);
-    return;
-}
-if (h==-4) {
-    v[0] -= (u[0]*w[0]);
-    v[1] -= (u[1]*w[0]+u[0]*w[1]);
-    v[2] -= (u[2]*w[0]+u[0]*w[2]);
-    v[3] -= (u[3]*w[0]+u[2]*w[1]+u[1]*w[2]+u[0]*w[3]);
-    return;
-}
-if (h==-2) {
-    v[0] -= (u[0]*w[0]);
-    v[1] -= (u[1]*w[0]+u[0]*w[1]);
-    return;
-}
-if (h==-1) {
-    v[0] -= (u[0]*w[0]);
-    return;
-}
-
-h /= 2;
-if(h > 0) {
-    crossmultwise(h,u,w+abs(h),v+abs(h));
-    crossmultwise(h,u+abs(h),w,v+abs(h));
-    crossmultwise(h,u,w,v);
-} else {
-    crossmultwise(h,u,w,v);
-    crossmultwise(h,u+abs(h),w,v+abs(h));
-    crossmultwise(h,u,w+abs(h),v+abs(h));
-}
-}
-/*==========================================================================*/
-void mult (int h, double* u, double* w, double* v)
-{
-/* This version is the non-recursive implementation of multiplicaton.
-Storage: O(1), However, run-time is longer (additional branch
-checks). Runtime: At least O(3^n). Note the analogy between the indices
-and bitwise operations to sets and set operations.
-IMPORTANT - cannot calculate deconvolution. */
-
-int i,j,t,delta; /* i,j are indices over the u,w arrays. delta is
-                    the step for j'th index (j is not always incremented
-                    by 1), t is the intersection index of i and j. */
-v[0]+=w[0]*u[0];
-
-for (i=0; i<h; i++) {
-
-    delta=1;
-    while ((delta&i)!=0) {delta*=2;}
-
-    j=0;
-    while (j<i) {
-        t=i&j;
-        if (t==0) {
-            v[i|j]+=(u[i]*w[j] + u[j]*w[i]);
-            j+=delta;
-        }
-        else {
-            j+=t;
-        }
-    }
-}
-}
-/*==========================================================================*/
-void smartmult (int h, double* u, double*w, double*v)
-{
-/* The base condition saving recursive function calls - it uses loop.
-IMPORTANT - cannot calculate deconvolution.
-Storage: O(n)
-Runtime: O(3^n) */
-
-if( h<= 16)
-    mult (h,u,w,v);
-else
-    {
-    h /= 2;
-    smartmult(h,u,w,v);
-    smartmult(h,u+abs(h),w,v+abs(h));
-    smartmult(h,u,w+abs(h),v+abs(h));
+    int i;
+    for(i=0;i<h;i++){
+        v[i] -= u[i];
     }
 }
 /*==========================================================================*/
-void multiply_to (int h, double* u, double* v)
+void ctps_imul(int h, double* u, double* v)
 {
 /* 2 operand version of multplication. Computes derivatives
-of u*v and writes them into v.
+of v*=u and writes them into v.
 Storage: O(n)
 Runtime: O(3^n)
 */
@@ -199,8 +173,8 @@ int c=(h>0)?1:-1;
 
 while (abs(k)>2) {
     k/=2;
-    multiply_to (k,u,v+abs(k));
-    crossmultwise (k,u+abs(k),v,v+abs(k));
+    ctps_imul (k,u,v+abs(k));
+    ctps_mul (k,u+abs(k),v,v+abs(k));
 }
 if(abs(h)>1) {
     v[1]*=(c*u[0]);
@@ -209,83 +183,52 @@ if(abs(h)>1) {
 v[0]*=(c*u[0]);
 }
 /*==========================================================================*/
-void divide(int h, double* u, double* w, double* v)
-{
-/* Implementation of v=u/w using deconvolutions. Writing result into v.
-Runtime: O(3^n)
-Storage: O(n) */
-
-int i,j;
-double w0;
-
-w0 = *w;
-for(j=0;j<h;j++) {
-    v[j] = u[j] / w0;
-    w[j] /= w0;
-}
-*w = 0;
-
-/* i=1: v[1]-=w[1]*v[0]; v[1]-=w[0]*v[1]; but w[0]==0
-    unnormalized v[1]=u[1]/w[0]-w[1]*u[0]/(w[0]*w[0]); */
-
-for(i=1;i<h;i*=2) {
-    crossmultwise(-i,w+i,v,v+i);
-    crossmultwise(-i,w,v+i,v+i);
-}
-for(j=1;j<h;j++) {
-    w[j] *= w0;
-}
-*w = w0;
-}
-/*==========================================================================*/
-void divide_by (int h, double* u, double* v)
-{
-/* 2 operand version of division. Computes derivatives
-of v/u and writes them into v.
-Runtime: O(3^n)
-Storage: O(n).  */
-
-int k;
-double u0=u[0];
-
-for(k=0; k<h; k++){
-    u[k] /= u0;
-    v[k] /= u0;
-}
-if (h==1) {
-    u[0]=u0;
-    return;
-}
-v[1]-=v[0]*u[1];
-for (k=2; k<h; k*=2) {
-    crossmultwise (-k,u+k,v,v+k);
-    divide_by (k,u,v+k);
-}
-for(k=0; k<h; k++){
-    u[k] *= u0;
-}
-}
-/*==========================================================================*/
-void invert (int h, double* u)
-{
-/* 1 operand version of reciprocal. Computes derivatives
-of 1/u and writes them into u.
-Runtime: O(3^n).
-Storage: O(n) */
-
-int i,k=h;
-
-u[0]=1/u[0];
-if (h==1) return;
-u[1]=-u[0]*u[0]*u[1];
-
-for(k=2; k<h; k*=2) {
-    multiply_to (k,u,u+k);
-    multiply_to (k,u,u+k);
-    for (i=0; i<k; i++) {
-        u[k+i]=-u[k+i];
+void ctps_idiv (int h, double* u, double* v){
+    /* 2 operand version of division. Computes derivatives
+    of v /= u
+    Runtime: O(3^n)
+    Storage: O(n).  */
+    
+    int k;
+    double u0=u[0];
+    
+    for(k=0; k<h; k++){
+        u[k] /= u0;
+        v[k] /= u0;
+    }
+    if (h==1) {
+        u[0]=u0;
+        return;
+    }
+    v[1]-=v[0]*u[1];
+    for (k=2; k<h; k*=2) {
+        ctps_mul (-k,u+k,v,v+k);
+        ctps_idiv (k,u,v+k);
+    }
+    for(k=0; k<h; k++){
+        u[k] *= u0;
     }
 }
+/*==========================================================================*/
+void invert (int h, double* u){
+    /* 1 operand version of reciprocal. Computes derivatives
+    of 1/u and writes them into u.
+    Runtime: O(3^n).
+    Storage: O(n) */
+    
+    int i,k=h;
+    
+    u[0]=1/u[0];
+    if (h==1) return;
+    u[1]=-u[0]*u[0]*u[1];
+    
+    for(k=2; k<h; k*=2) {
+        ctps_imul (k,u,u+k);
+        ctps_imul (k,u,u+k);
+        for (i=0; i<k; i++) {
+            u[k+i]=-u[k+i];
+        }
+    }
 }
 /*==========================================================================*/
 void exponent(int h, double* u, double* v)
@@ -298,7 +241,7 @@ int i;
 for(i=0;i<h;i++) v[i] = 0.0;
 *v = exp(*u);
 for(i=1;i<h;i*=2)
-    crossmultwise(i, v, u+i, v+i);
+    ctps_mul(i, v, u+i, v+i);
 }
 /*==========================================================================*/
 void naturalog(int h, double* u, double* v)
@@ -317,7 +260,7 @@ for(i=1;i<h;i++) {
 u0 = *u;
 *u = 0;
 for(i=1;i<h;i*=2) {
-    crossmultwise(-i,u,v+i,v+i);
+    ctps_mul(-i,u,v+i,v+i);
 }
 *u = u0;
 for(i=1;i<h;i++) {
@@ -356,8 +299,8 @@ for(i=1;i<h;i++) {
     cose[i] = 0.0;
 }
 for(i=1;i<h;i*=2) {
-    crossmultwise(i,cose,u+i,sine+i);
-    crossmultwise(-i,sine,u+i,cose+i);
+    ctps_mul(i,cose,u+i,sine+i);
+    ctps_mul(-i,sine,u+i,cose+i);
 }
 }
 /*==========================================================================*/
@@ -380,13 +323,13 @@ if (h==2) return;
 w[1]=2*v[0]*v[1];
 
 for (k=2; k<h/2; k*=2) {
-    crossmultwise(k,w,u+k,v+k);
-    crossmultwise(k,v,v+k,w+k);
+    ctps_mul(k,w,u+k,v+k);
+    ctps_mul(k,v,v+k,w+k);
     for (i=0; i<k; i++) {
         w[k+i]*=2;
     }
 }
-multiply_to (h/2,u+h/2,v+h/2);
+ctps_imul (h/2,u+h/2,v+h/2);
 }
 /*==========================================================================*/
 void tangent_ver2 (int h, double* u, double* v)
@@ -399,7 +342,7 @@ double* sine = (double*) calloc(h,sizeof(double));
 double* cose = (double*) calloc(h,sizeof(double));
 
 trigon(h,u,sine,cose);
-divide (h,sine,cose,v);
+ctps_div (h,sine,cose,v);
 
 free(sine);
 free(cose);
@@ -423,11 +366,11 @@ for(j=1;j<h;j++) {
 u0 = *u;
 *u = 0;
 for(i=1;i<h;i*=2) {
-        crossmultwise(i,v,u+i,v+i);
+        ctps_mul(i,v,u+i,v+i);
         for(j=i;j<2*i;j++) {
         v[j] *= r;
         }
-        crossmultwise(-i,u,v+i,v+i);
+        ctps_mul(-i,u,v+i,v+i);
 }
 *u = u0;
 for(i=1;i<h;i++) {
@@ -447,7 +390,7 @@ for(j=1;j<h;j++) {
     v[j] = 0;
 }
 for(i=1;i<h;i*=2) {
-    crossmultwise(i,u,u+i,v+i);
+    ctps_mul(i,u,u+i,v+i);
 }
 for(j=1;j<h;j++) {
     v[j] *= 2;
@@ -467,7 +410,7 @@ for(i=1;i<h;i++) {
     v[i] = 0.5*u[i]/ *u;
 }
 for(i=1;i<h;i*=2) {
-    crossmultwise(-i,v,v+i,v+i);
+    ctps_mul(-i,v,v+i,v+i);
 }
 *v = sqrt(*u);
 for(i=1;i<h;i++) {
@@ -492,8 +435,8 @@ for(i=1;i<h;i++) {
     cos_hyp[i] = 0.0;
 }
 for(i=1;i<h;i*=2) {
-    crossmultwise(i,cos_hyp,u+i,sin_hyp+i);
-    crossmultwise(i,sin_hyp,u+i,cos_hyp+i);
+    ctps_mul(i,cos_hyp,u+i,sin_hyp+i);
+    ctps_mul(i,sin_hyp,u+i,cos_hyp+i);
 }
 }
 /*==========================================================================*/
@@ -517,13 +460,13 @@ if (h==2) return;
 w[1]=(-2)*v[0]*v[1];
 
 for (k=2; k<h/2; k*=2) {
-    crossmultwise(k,w,u+k,v+k);
-    crossmultwise(k,v,v+k,w+k);
+    ctps_mul(k,w,u+k,v+k);
+    ctps_mul(k,v,v+k,w+k);
     for (i=0; i<k; i++) {
         w[k+i]*=(-2);
     }
 }
-multiply_to (h/2,u+h/2,v+h/2);
+ctps_imul (h/2,u+h/2,v+h/2);
 }
 /*==========================================================================*/
 
@@ -537,7 +480,7 @@ double* sin_hyp = (double*) calloc(h,sizeof(double));
 double* cos_hyp = (double*) calloc(h,sizeof(double));
 
 trigon_hyp(h,u,sin_hyp,cos_hyp);
-divide (h,sin_hyp,cos_hyp,v);
+ctps_div (h,sin_hyp,cos_hyp,v);
 
 free(sin_hyp);
 free(cos_hyp);
@@ -563,17 +506,17 @@ if (h==2) return;
 w[1]=v[1]*u[0];
 
 for (k=2; k<h/2; k*=2) {
-    divide (k,u+k,w,v+k);
+    ctps_div (k,u+k,w,v+k);
     for (i=0; i<k; i++) {
         v[k+i]*=-1;
     }
-    crossmultwise(k,u,v+k,w+k);
+    ctps_mul(k,u,v+k,w+k);
 }
 invert (h/2,w);
 for (i=0; i<h/2; i++) {
     w[i]*=-1;
 }
-multiply_to(h/2,u+h/2,w);
+ctps_imul(h/2,u+h/2,w);
 }
 /*==========================================================================*/
 
@@ -612,14 +555,14 @@ if (h==2) return;
 w[1]=2*u[0]*u[1];
 
 for (k=2; k<h/2; k*=2) {
-    divide (k,u+k,w,v+k);
-    crossmultwise(k,u,u+k,w+k);
+    ctps_div (k,u+k,w,v+k);
+    ctps_mul(k,u,u+k,w+k);
     for (i=0; i<k; i++) {
         w[k+i]*=2;
     }
 }
 invert (h/2,w);
-multiply_to(h/2,u+h/2,w);
+ctps_imul(h/2,u+h/2,w);
 }
 /*==========================================================================*/
 void arctan2 (int h, double* y, double* x, double* v)
@@ -634,7 +577,7 @@ double *temp= (double*) calloc(h,sizeof(double));
 
 if (fabs(y[0]/x[0])<1)
 {
-    divide (h,y,x,temp);
+    ctps_div (h,y,x,temp);
     arctan (h,temp,v);
     if (x[0]<0)
     {
@@ -648,7 +591,7 @@ if (fabs(y[0]/x[0])<1)
 }
 else
 {
-    divide (h,x,y,temp);
+    ctps_div (h,x,y,temp);
     arctan (h,temp,v);
     if (v[0]>0) {
         v[0]=PI/2-v[0];
@@ -729,7 +672,7 @@ for (i=0; i<h; i++) {
     arr2[i]=0;
 }
 naturalog (h,u,arr1);
-crossmultwise(h,w,arr1,arr2);
+ctps_mul(h,w,arr1,arr2);
 exponent (h,arr2,v);
 
 free (arr1);
@@ -785,3 +728,83 @@ k=(u[0]-v[0])/w[0];
 for (i=1; i<h; i++)
     v[i]=u[i]-k*w[i];
 }
+
+/*==========================================================================
+Here are functions dealing with crossmultiplication, there are several versions
+of these functions, see comment on each function. All functions can propogate
+partials of v=u*w and are at least of O(3^n) run-time complexity (n - number of
+independent variables). Tests have shown (based on clock ticks),that mul()
+and ctps_imul() are the fastest.
+IMPORTANT: crossmult, mul, ctps_imul can handle deconvolution.
+            mult, smartmult - cannot handle deconvolution.
+============================================================================*/
+void crossmult(int h, double* u, double* w, double* v){
+    /* crossmultiplies the first h ( power of 2 ) elments of u with
+    those of w and increments the entries of v by it.
+    printf(" h=%d,  i= %d , j= %d count = %d \n",h, i,j,count );
+    Runtime: O(3^n)
+    Storage: O(n).*/
+
+    int i;
+    int c=(h>0?1:-1);
+    *v += c* *u* *w;
+    if(abs(h)>1)
+        v[1]+=c* (u[0]*w[1]+u[1]*w[0]);
+    /*loop*/
+    for (i=2; i<abs(h); i*=2) {
+        crossmult((h>0?i:-i), u, w+i, v+i);
+        crossmult((h>0?i:-i), u+i, w, v+i);
+    }
+}
+
+/*==========================================================================*/
+void mult (int h, double* u, double* w, double* v){
+    /* This version is the non-recursive implementation of multiplicaton.
+    Storage: O(1), However, run-time is longer (additional branch
+    checks). Runtime: At least O(3^n). Note the analogy between the indices
+    and bitwise operations to sets and set operations.
+    IMPORTANT - cannot calculate deconvolution. */
+    
+    int i,j,t,delta; /* i,j are indices over the u,w arrays. delta is
+                        the step for j'th index (j is not always incremented
+                        by 1), t is the intersection index of i and j. */
+    v[0]+=w[0]*u[0];
+    
+    for (i=0; i<h; i++) {
+    
+        delta=1;
+        while ((delta&i)!=0) {delta*=2;}
+    
+        j=0;
+        while (j<i) {
+            t=i&j;
+            if (t==0) {
+                v[i|j]+=(u[i]*w[j] + u[j]*w[i]);
+                j+=delta;
+            }
+            else {
+                j+=t;
+            }
+        }
+    }
+}
+
+/*==========================================================================*/
+void smartmult (int h, double* u, double*w, double*v)
+{
+    /* The base condition saving recursive function calls - it uses loop.
+    IMPORTANT - cannot calculate deconvolution.
+    Storage: O(n)
+    Runtime: O(3^n) */
+    
+    if( h<= 16)
+        mult (h,u,w,v);
+    else{
+        h /= 2;
+        smartmult(h,u,w,v);
+        smartmult(h,u+abs(h),w,v+abs(h));
+        smartmult(h,u,w+abs(h),v+abs(h));
+    }
+}
+/*==========================================================================*/
+

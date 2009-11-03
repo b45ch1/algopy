@@ -1,7 +1,6 @@
 import os
 import ctypes
 import numpy
-from numpy.ctypeslib import ndpointer
 
 from algopy.base_type import GradedRing
 
@@ -10,8 +9,8 @@ _ctps = numpy.ctypeslib.load_library('libctps', os.path.dirname(__file__))
 double_ptr =  ctypes.POINTER(ctypes.c_double)
 argtypes = [ctypes.c_int, double_ptr, double_ptr, double_ptr]
 
-_ctps.add.argtypes = argtypes
-_ctps.crossmultwise.argtypes = argtypes
+_ctps.ctps_add.argtypes = argtypes
+_ctps.ctps_mul.argtypes = argtypes
 
 class CTPS_C(GradedRing):
     def __init__(self, data):
@@ -30,7 +29,7 @@ class CTPS_C(GradedRing):
     @classmethod
     def add(cls, retval_data, lhs_data, rhs_data):
         K = retval_data.size
-        _ctps.add(K,
+        _ctps.ctps_add(K,
         lhs_data.ctypes.data_as(double_ptr),
         rhs_data.ctypes.data_as(double_ptr),
         retval_data.ctypes.data_as(double_ptr))
@@ -38,7 +37,7 @@ class CTPS_C(GradedRing):
     @classmethod
     def mul(cls, retval_data, lhs_data, rhs_data):
         K = retval_data.size
-        _ctps.crossmultwise(K,
+        _ctps.ctps_mul(K,
         lhs_data.ctypes.data_as(double_ptr),
         rhs_data.ctypes.data_as(double_ptr),
         retval_data.ctypes.data_as(double_ptr))
