@@ -15,8 +15,8 @@ General Comments: Some of the implemented functions aren't differentiable or
                     15 variables or more as an input to the main() function.
 Problems/bugs: Composition of ctps_mul() with ctps_div() is not accurate
                 for 16 varibles or more, which is relatively a bad result.
-                Other compositions work well. Some are very good like exponent
-                and natural logarithm, square and squareroot, for 20 variables
+                Other compositions work well. Some are very good like ctps_exp
+                and natural logarithm, ctps_square and squareroot, for 20 variables
                 they show good results.
 ============================================================================*/
 
@@ -210,7 +210,7 @@ void ctps_idiv (int h, double* u, double* v){
     }
 }
 /*==========================================================================*/
-void invert (int h, double* u){
+void ctps_inv (int h, double* u){
     /* 1 operand version of reciprocal. Computes derivatives
     of 1/u and writes them into u.
     Runtime: O(3^n).
@@ -231,7 +231,7 @@ void invert (int h, double* u){
     }
 }
 /*==========================================================================*/
-void exponent(int h, double* u, double* v)
+void ctps_exp(int h, double* u, double* v)
 {
 /* Implementation of v=exp(u) based on its ODE.
 Runtime: O(3^n)
@@ -244,7 +244,7 @@ for(i=1;i<h;i*=2)
     ctps_mul(i, v, u+i, v+i);
 }
 /*==========================================================================*/
-void naturalog(int h, double* u, double* v)
+void ctps_log(int h, double* u, double* v)
 {
 /* Implementation of v=ln(u) based on its ODE.
 Runtime: O(3^n)
@@ -268,16 +268,16 @@ for(i=1;i<h;i++) {
 }
 }
 /*==========================================================================*/
-void decimalog(int h, double* u, double* v)
+void ctps_log10(int h, double* u, double* v)
 {
-/* Implementation of v=log10(u) based on naturalog().
+/* Implementation of v=log10(u) based on ctps_log().
 Runtime: O(3^n)
 Storage: O(n) */
 
 int i;
 double c=1/log(10);
 
-naturalog(h,u,v);
+ctps_log(h,u,v);
 for(i=0;i<h;i++) {
     v[i] *= c;
 }
@@ -304,7 +304,7 @@ for(i=1;i<h;i*=2) {
 }
 }
 /*==========================================================================*/
-void tangent (int h, double* u, double* v)
+void ctps_tangent (int h, double* u, double* v)
 {
 /* Implementation of v=tan(u) based on its ODE,
 and then applying recursive rule, using the
@@ -348,7 +348,7 @@ free(sine);
 free(cose);
 }
 /*==========================================================================*/
-void power(int h, double r, double* u, double* v)
+void ctps_pow(int h, double r, double* u, double* v)
 {
 /* Implementation of v=u^r. r-constant passed to
 the function. based on its ODE.
@@ -378,7 +378,7 @@ for(i=1;i<h;i++) {
 }
 }
 /*==========================================================================*/
-void square(int h, double* u, double* v)
+void ctps_square(int h, double* u, double* v)
 {
 /* Implementation of v=u^2 based on its ODE.
 Runtime: O(3^n)
@@ -397,7 +397,7 @@ for(j=1;j<h;j++) {
 }
 }
 /*==========================================================================*/
-void squaroot(int h, double* u, double* v)
+void ctps_sqrt(int h, double* u, double* v)
 {
 /* Implementation of v=sqrt(u) based on its ODE.
 Runtime: O(3^n)
@@ -512,7 +512,7 @@ for (k=2; k<h/2; k*=2) {
     }
     ctps_mul(k,u,v+k,w+k);
 }
-invert (h/2,w);
+ctps_inv (h/2,w);
 for (i=0; i<h/2; i++) {
     w[i]*=-1;
 }
@@ -561,7 +561,7 @@ for (k=2; k<h/2; k*=2) {
         w[k+i]*=2;
     }
 }
-invert (h/2,w);
+ctps_inv (h/2,w);
 ctps_imul(h/2,u+h/2,w);
 }
 /*==========================================================================*/
@@ -607,7 +607,7 @@ free(temp);
 }
 
 /*==========================================================================*/
-void fabsolute (int h, double* u, double* v)
+void ctps_fabs (int h, double* u, double* v)
 {
 /* Implementation of v=fabs(u). depends on u[0] value.
 Runtime: O(2^n)
@@ -671,9 +671,9 @@ arr2 = (double*) calloc(h,sizeof(double));
 for (i=0; i<h; i++) {
     arr2[i]=0;
 }
-naturalog (h,u,arr1);
+ctps_log (h,u,arr1);
 ctps_mul(h,w,arr1,arr2);
-exponent (h,arr2,v);
+ctps_exp (h,arr2,v);
 
 free (arr1);
 free (arr2);
