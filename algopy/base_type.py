@@ -25,11 +25,21 @@ class GradedRing(object):
         retval = self.__class__(self.__class__.zeros_like(self.data))
         self.__class__.add(retval.data, self.data, rhs.data)
         return retval
+        
+    def __sub__(self, rhs):
+        retval = self.__class__(self.__class__.zeros_like(self.data))
+        self.__class__.sub(retval.data, self.data, rhs.data)
+        return retval        
 
     def __mul__(self,rhs):
         retval = self.__class__(self.__class__.zeros_like(self.data))
         self.__class__.mul(retval.data, self.data, rhs.data)
         return retval
+        
+    def __div__(self,rhs):
+        retval = self.__class__(self.__class__.zeros_like(self.data))
+        self.__class__.div(retval.data, self.data, rhs.data)
+        return retval        
         
     def __radd__(self, lhs):
         return self + lhs

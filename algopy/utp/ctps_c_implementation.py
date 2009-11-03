@@ -7,10 +7,13 @@ from algopy.base_type import GradedRing
 _ctps = numpy.ctypeslib.load_library('libctps', os.path.dirname(__file__))
 
 double_ptr =  ctypes.POINTER(ctypes.c_double)
-argtypes = [ctypes.c_int, double_ptr, double_ptr, double_ptr]
+argtypes1 = [ctypes.c_int, double_ptr, double_ptr, double_ptr]
 
-_ctps.ctps_add.argtypes = argtypes
-_ctps.ctps_mul.argtypes = argtypes
+_ctps.ctps_add.argtypes = argtypes1
+_ctps.ctps_sub.argtypes = argtypes1
+_ctps.ctps_mul.argtypes = argtypes1
+_ctps.ctps_div.argtypes = argtypes1
+
 
 class CTPS_C(GradedRing):
     def __init__(self, data):
@@ -33,6 +36,14 @@ class CTPS_C(GradedRing):
         lhs_data.ctypes.data_as(double_ptr),
         rhs_data.ctypes.data_as(double_ptr),
         retval_data.ctypes.data_as(double_ptr))
+        
+    @classmethod
+    def sub(cls, retval_data, lhs_data, rhs_data):
+        K = retval_data.size
+        _ctps.ctps_sub(K,
+        lhs_data.ctypes.data_as(double_ptr),
+        rhs_data.ctypes.data_as(double_ptr),
+        retval_data.ctypes.data_as(double_ptr))        
 
     @classmethod
     def mul(cls, retval_data, lhs_data, rhs_data):
@@ -41,6 +52,14 @@ class CTPS_C(GradedRing):
         lhs_data.ctypes.data_as(double_ptr),
         rhs_data.ctypes.data_as(double_ptr),
         retval_data.ctypes.data_as(double_ptr))
+        
+    @classmethod
+    def div(cls, retval_data, lhs_data, rhs_data):
+        K = retval_data.size
+        _ctps.ctps_div(K,
+        lhs_data.ctypes.data_as(double_ptr),
+        rhs_data.ctypes.data_as(double_ptr),
+        retval_data.ctypes.data_as(double_ptr))        
 
     def __repr__(self):
         return self.__str__()
