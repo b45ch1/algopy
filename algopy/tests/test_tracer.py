@@ -9,6 +9,7 @@ import algopy.utp.utpm
 from algopy.tracer import *
 from algopy.utp.utps import *
 from algopy.utp.utpm import *
+from algopy.utp.ctps_c import *
 
 
 class TestFunction(TestCase):
@@ -270,7 +271,25 @@ class TestCGraphOnUTPM(TestCase):
         assert_array_equal(FPhi.shape, (M,M))
         cg.forward(MJs)
         assert_array_equal(cg.dependentFunctionList[0].x.tc.shape, [D,P,M,M])
-        
+
+
+class TestCGraphOnCTPS(TestCase):
+    def test_forward(self):
+        cg = CGraph()
+        ax = UTPS([3.,1.])
+        ay = UTPS([7.,0.])
+        fx = Function(ax)
+        fy = Function(ay)
+        fv1 = fx * fy
+        fv2 = (fv1 * fx + fy)*fv1
+        cg.independentFunctionList = [fx,fy]
+        cg.dependentFunctionList = [fv2]
+        cg.forward([ax,ay])
+        assert_array_almost_equal(cg.dependentFunctionList[0].x.tc, ((ax*ay * ax + ay)*ax*ay).tc)
+
+
+
+
         
 if __name__ == "__main__":
     run_module_suite()

@@ -1,7 +1,7 @@
 from numpy.testing import *
 import numpy
 
-from algopy.utp.ctps_c_implementation import *
+from algopy.utp.ctps_c import *
 
 class Test_CTPS_C_operations(TestCase):
     def test_add(self):
