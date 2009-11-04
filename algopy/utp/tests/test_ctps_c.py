@@ -51,18 +51,17 @@ class Test_CTPS_C_operations(TestCase):
 
         ax1 = CTPS_C(numpy.array([x1,1,0,0],dtype=float))
         ay = ax1 + x2
-        assert_array_almost_equal(ay.data, ax1.data + x2)
+        assert_array_almost_equal(ay.data, ax1.data + [x2,0,0,0])
         
-        
-   def test_scalar_sub(self):
+    def test_scalar_sub(self):
         x1 = numpy.random.rand()
         x2 = numpy.random.rand()
-    
+        
         ax1 = CTPS_C(numpy.array([x1,1,0,0],dtype=float))
-
+        
         ay = ax1 - x2
-        assert_array_almost_equal(ay.data, ax1.data - x2)        
-
+        assert_array_almost_equal(ay.data, ax1.data - [x2,0,0,0])
+        
     def test_scalar_mul(self):
         x1 = numpy.random.rand()
         x2 = numpy.random.rand()
@@ -80,9 +79,6 @@ class Test_CTPS_C_operations(TestCase):
 
         ay = ax1 / x2
         assert_array_almost_equal([x1/x2, 1./x2, 0, 0], ay.data)        
-        
-        
-        
         
 
     def test_simple_hessian(self):
