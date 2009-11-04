@@ -304,16 +304,16 @@ class TestCGraphOnCTPS(TestCase):
         xbar_reverse = cg.independentFunctionList[0].xbar
         ybar_reverse = cg.independentFunctionList[1].xbar
         
-        # xbar_symbolic = 3 * ax**2 * ay**2 + ay**2
-        # ybar_symbolic = 2*ax**3 * ay + 2 * ax * ay
+        xbar_symbolic = 3 * ax*ax * ay*ay + ay*ay
+        ybar_symbolic = 2*ax*ax*ax * ay + 2 * ax * ay
 
         # print xbar_symbolic.data
-        # # print xbar_reverse
+        # print xbar_reverse.data
         # # print ybar_symbolic
         # # print ybar_reverse
         
-        # assert_array_almost_equal(xbar_reverse.tc, xbar_symbolic.tc)
-        # assert_array_almost_equal(ybar_reverse.tc, ybar_symbolic.tc)
+        assert_array_almost_equal(xbar_reverse.data, xbar_symbolic.data)
+        assert_array_almost_equal(ybar_reverse.data, ybar_symbolic.data)
 
         
 if __name__ == "__main__":
