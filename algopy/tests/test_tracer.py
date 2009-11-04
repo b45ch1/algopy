@@ -272,7 +272,6 @@ class TestCGraphOnUTPM(TestCase):
         cg.forward(MJs)
         assert_array_equal(cg.dependentFunctionList[0].x.tc.shape, [D,P,M,M])
 
-
 class TestCGraphOnCTPS(TestCase):
     def test_forward(self):
         cg = CGraph()
@@ -302,13 +301,13 @@ class TestCGraphOnCTPS(TestCase):
         v2bar = CTPS_C([1.,0.,0.,0.])
         cg.reverse([v2bar])
 
-        # xbar_reverse = cg.independentFunctionList[0].xbar
-        # ybar_reverse = cg.independentFunctionList[1].xbar
+        xbar_reverse = cg.independentFunctionList[0].xbar
+        ybar_reverse = cg.independentFunctionList[1].xbar
         
         # xbar_symbolic = 3 * ax**2 * ay**2 + ay**2
         # ybar_symbolic = 2*ax**3 * ay + 2 * ax * ay
 
-        # # print xbar_symbolic.tc
+        # print xbar_symbolic.data
         # # print xbar_reverse
         # # print ybar_symbolic
         # # print ybar_reverse

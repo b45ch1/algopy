@@ -26,6 +26,10 @@ class CTPS_C(GradedRing):
         self.data = numpy.array(data)
         
     @classmethod
+    def __scalar_to_data__(cls, x, xdata):
+        xdata[0] = x
+        
+    @classmethod
     def __zeros_like__(cls, data):
         return numpy.zeros_like(data)
 
