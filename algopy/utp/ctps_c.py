@@ -14,14 +14,13 @@ _ctps.ctps_sub.argtypes = argtypes1
 _ctps.ctps_mul.argtypes = argtypes1
 _ctps.ctps_div.argtypes = argtypes1
 
-
 class CTPS_C(GradedRing):
     def __init__(self, data):
         """
         CTPS = Cross Derivative Taylor Polynomial
         Implements the factor ring  R[t1,...,tK]/<t1^2,...,tK^2>
         
-        Calls C functions internally.
+        Calls C functions internally. I.e. functionality *should* be the same as for the class CTPS.
         """
         self.data = numpy.array(data)
         

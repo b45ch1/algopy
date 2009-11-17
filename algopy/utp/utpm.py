@@ -10,7 +10,6 @@ where M is the ring of matrices and t in R.
 
 import numpy.linalg
 import numpy
-from numpy import shape, dot, zeros, ndim, asarray, sum, trace
 
 def combine_blocks(in_X):
     """
@@ -43,7 +42,7 @@ def combine_blocks(in_X):
     colsums = numpy.array([ numpy.sum(cols[:c]) for c in range(0,Cb+1)],dtype=int)
 
     # create new matrix where the blocks will be copied into
-    tc = zeros((D, P, rowsums[-1],colsums[-1]))
+    tc = numpy.zeros((D, P, rowsums[-1],colsums[-1]))
     for r in range(Rb):
         for c in range(Cb):
             tc[:,:,rowsums[r]:rowsums[r+1], colsums[c]:colsums[c+1]] = in_X[r,c].tc[:,:,:,:]
@@ -106,7 +105,7 @@ class UTPM:
             ybar_shift(t) * d y(t) = [yb0 * dy1, yb0 * dy2 + yb1 * dy1]
         
         """
-        Ndim = ndim(X)
+        Ndim = numpy.ndim(X)
         self.shift = shift
         if Ndim >= 2:
             self.tc = numpy.asarray(X)
@@ -202,7 +201,7 @@ class UTPM:
         else:
             retval = self.clone()
             for d in range(D):
-                retval.tc[d,:,...] = 1./ rhs.tc[0,:,...] * ( self.tc[d,:,...] - sum(retval.tc[:d,:,...] * rhs.tc[d:0:-1,:,...], axis=0))
+                retval.tc[d,:,...] = 1./ rhs.tc[0,:,...] * ( self.tc[d,:,...] - numpy.sum(retval.tc[:d,:,...] * rhs.tc[d:0:-1,:,...], axis=0))
             self.tc[...] = retval.tc[...]
         return self
 
@@ -239,8 +238,8 @@ class UTPM:
         return retval
 
     def inv(self):
-        retval = UTPM(zeros(shape(self.tc)))
-        (D,P,N,M) = shape(retval.tc)
+        retval = UTPM(numpy.zeros(numpy.shape(self.tc)))
+        (D,P,N,M) = numpy.shape(retval.tc)
 
         # tc[0] element
         for p in range(P):
@@ -259,8 +258,8 @@ class UTPM:
         A y = x  <=> y = solve(A,x)
         is implemented here as y = x.solve(A)
         """
-        retval = UTPM(zeros(shape(self.tc)))
-        (D,P,N,M) = shape(retval.tc)
+        retval = UTPM( numpy.zeros( numpy.shape(self.tc)))
+        (D,P,N,M) = numpy.shape(retval.tc)
         assert M == 1
         tmp = numpy.zeros((N,M),dtype=float)
         for d in range(D):
@@ -270,6 +269,27 @@ class UTPM:
                     tmp[:,:] -= numpy.dot(A.tc[k,p,:,:],retval.tc[d-k,p,:,:])
                 retval.tc[d,p,:,:] = numpy.linalg.solve(A.tc[0,p,:,:],tmp)
         return retval
+        
+    def eig(self, A):
+        """
+        computes the full eigenvalue decomposition for symmetric positive definite A.
+        
+        (L,Q) = eig(A)   <==>  A Q = Q L 
+        
+        INPUTS:
+            A            (N,N) array            symmetric positive definite matrix
+            
+        OUTPUTS:
+            L           (N,) array              diagonal matrix of eigenvalues  L_1>L_2>...>L_N
+            Q           (N,N) array             orthogonal matrix of eigenvectors Q_1,...,Q_N
+        """
+        
+        # STEP 1: compute delta_F1 and delta_F2
+        pass
+        
+        
+        
+        
 
     def trace(self):
         """ returns a new UTPM in standard format, i.e. the matrices are 1x1 matrices"""
