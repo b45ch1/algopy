@@ -16,19 +16,13 @@ import numpy
 # override numpy definitions
 def shape(x):
     if isinstance(x, UTPM):
-        return x.shape()
+        return x.shape
     else:
         return numpy.shape(x)
         
 def size(x):
     if isinstance(x, UTPM):
-        return x.size()
-    else:
-        return numpy.size(x)
-        
-def size(x):
-    if isinstance(x, UTPM):
-        return x.size()
+        return x.size
     else:
         return numpy.size(x)
         
