@@ -155,6 +155,21 @@ class TestMatPoly(TestCase):
         AZ = AX.T
         AX = AX.set_zero()
         
+        
+    def test_generic_calling(self):
+        """
+        this checks _only_ if calling the operations is ok
+        """
+        X = 2 * numpy.random.rand(2,2,2,2)
+        Y = 3 * numpy.random.rand(2,2,2,2)
+
+        AX = UTPM(X)
+        AY = UTPM(Y)
+
+        assert_array_almost_equal( AX.dot(AY).tc, dot(AX,AY).tc)
+        assert_array_almost_equal( AX.inv().tc,  inv(AX).tc)
+        assert_array_almost_equal( AX.trace().tc,  trace(AX).tc)
+        
     def test_operations_on_scalar_UTPM(self):
         D,P = 2,1
         X = 3 * numpy.random.rand(D,P)

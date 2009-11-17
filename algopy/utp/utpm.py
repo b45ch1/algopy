@@ -11,6 +11,47 @@ where M is the ring of matrices and t in R.
 import numpy.linalg
 import numpy
 
+
+
+# override numpy definitions
+def shape(x):
+    if isinstance(x, UTPM):
+        return x.shape()
+    else:
+        return numpy.shape(x)
+        
+def size(x):
+    if isinstance(x, UTPM):
+        return x.size()
+    else:
+        return numpy.size(x)
+        
+def size(x):
+    if isinstance(x, UTPM):
+        return x.size()
+    else:
+        return numpy.size(x)
+        
+def trace(x):
+    if isinstance(x, UTPM):
+        return x.trace()
+    else:
+        return numpy.trace(x)              
+        
+def inv(x):
+    if isinstance(x, UTPM):
+        return x.inv()
+    else:
+        return numpy.linalg.inv(x)
+        
+def dot(x,y):
+    if isinstance(x, UTPM):
+        if not isinstance(y, UTPM):
+            raise NotImplementedError('dot currently only implemented for x,y UTPM instances')
+        return x.dot(y)
+    else:
+        return numpy.dot(x,y)
+
 def combine_blocks(in_X):
     """
     expects an array or list consisting of entries of type UTPM, e.g.
