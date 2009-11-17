@@ -144,6 +144,7 @@ class UTPM:
         self.shift = shift
         if Ndim >= 2:
             self.tc = numpy.asarray(X)
+            self.data = self.tc
         else:
             raise NotImplementedError
             
