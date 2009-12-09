@@ -307,9 +307,21 @@ class UTPM(GradedRing):
                     tmp[:,:] -= numpy.dot(A.tc[k,p,:,:],retval.tc[d-k,p,:,:])
                 retval.tc[d,p,:,:] = numpy.linalg.solve(A.tc[0,p,:,:],tmp)
         return retval
-        
+
     @classmethod
-    def qr(cls, Q_data, R_data, A_data):
+    def __zeros_like__(cls, data):
+        return numpy.zeros_like(data)
+
+    def qr(self):
+        Q = self.__class__(self.__class__.__zeros_like__(self.data))
+        R = self.__class__(self.__class__.__zeros_like__(self.data))
+
+        UTPM.cls_qr(Q.data, R.data, self.data)
+
+        return Q,R
+    
+    @classmethod
+    def cls_qr(cls, Q_data, R_data, A_data):
         """
         computes the qr decomposition (Q,R) = qr(A)    <===>    QR = A
         
