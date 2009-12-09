@@ -11,6 +11,7 @@ where M is the ring of matrices and t in R.
 import numpy.linalg
 import numpy
 
+from algopy.base_type import GradedRing
 
 
 # override numpy definitions
@@ -84,7 +85,7 @@ def combine_blocks(in_X):
 
     return UTPM(tc)
 
-class UTPM:
+class UTPM(GradedRing):
     """
     UTPM == Univariate Taylor Polynomial of Matrices
     This class implements univariate Taylor arithmetic on matrices, i.e.
@@ -177,6 +178,7 @@ class UTPM:
             return retval
         else:
             return UTPM(self.tc - rhs.tc)
+            
 
     def __mul__(self,rhs):
         retval = self.clone()
@@ -306,25 +308,59 @@ class UTPM:
                 retval.tc[d,p,:,:] = numpy.linalg.solve(A.tc[0,p,:,:],tmp)
         return retval
         
-    def eig(self, A):
+    @classmethod
+    def qr(cls, Q_data, R_data, A_data):
         """
-        computes the full eigenvalue decomposition for symmetric positive definite A.
-        
-        (L,Q) = eig(A)   <==>  A Q = Q L 
+        computes the qr decomposition (Q,R) = qr(A)    <===>    QR = A
         
         INPUTS:
-            A            (N,N) array            symmetric positive definite matrix
+            A_data      (D,P,N,N) array             symmetric positive definite matrix
             
         OUTPUTS:
-            L           (N,) array              diagonal matrix of eigenvalues  L_1>L_2>...>L_N
-            Q           (N,N) array             orthogonal matrix of eigenvectors Q_1,...,Q_N
+            Q_data      (D,P,N,N) array             orthogonal matrix of eigenvectors Q_1,...,Q_N
+            R_data      (D,P,N,N) array             upper triagonal matrix
+        
         """
+        DT,P,N,N = numpy.shape(A_data)
         
-        # STEP 1: compute delta_F1 and delta_F2
-        pass
+        # QR decomposition at the base point, i.e. for order D=1
         
+        for p in range(P):
+            Q_data[0,p,:,:], R_data[0,p,:,:] = numpy.linalg.qr(A_data[0,p,:,:])
         
+        dF = numpy.zeros((P,N,N))
+        dG = numpy.zeros((P,N,N))
+        X  = numpy.zeros((P,N,N))
+
+        PL = numpy.array([[ r > c for c in range(N)] for r in range(N)],dtype=float)
         
+        for D in range(1,DT):
+            # STEP 1:
+            dF[...] = 0.
+            dG[...] = 0
+            X[...]  = 0
+
+            for d in range(1,D):
+                for p in range(P):
+                    dF[p] += numpy.dot(Q_data[d,p,:,:].T, R_data[D-d,p,:,:])
+                    dG[p] += numpy.dot(Q_data[d,p,:,:].T, Q_data[D-d,p,:,:])
+                    
+            # STEP 2:
+            H = A_data[D,:,:,:] - dF[:,:,:]
+            S = - 0.5 * dF
+            
+            # STEP 3:
+            for p in range(P):
+                X[p,:,:] = PL * (numpy.dot( numpy.dot(Q_data[0,p,:,:].T, H[p,:,:,]), numpy.linalg.inv(R_data[0,p,:,:])) - S[p,:,:])
+                X[p,:,:] = X[p,:,:] - X[p,:,:].T
+                
+            # STEP 4:
+            K = S + X
+            
+            # STEP 5:
+            for p in range(P):
+                Q_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:],K[p,:,:])
+                R_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:].T, H[p,:,:]) - numpy.dot(K[p,:,:],R_data[0,p,:,:])
         
 
     def trace(self):

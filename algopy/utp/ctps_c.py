@@ -25,7 +25,7 @@ class CTPS_C(GradedRing):
         self.data = numpy.array(data)
         
     @classmethod
-    def __scalar_to_data__(cls, x, xdata):
+    def __scalar_to_data__(cls, xdata, x):
         xdata[0] = x
         
     @classmethod

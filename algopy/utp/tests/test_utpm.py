@@ -431,7 +431,20 @@ class TestMatPoly(TestCase):
         y = x.solve(A)
         x2 = A.dot(y)
         assert_array_almost_equal(x.tc, x2.tc, decimal = 4)
-
+        
+    def test_qr(self):
+        (D,P,N) = 2,1,2
+        A_data = numpy.random.rand(D,P,N,N)
+        R_data = numpy.zeros((D,P,N,N))
+        Q_data = numpy.zeros((D,P,N,N))
+        
+        UTPM.qr(Q_data, R_data, A_data)
+        
+        A = UTPM(A_data)
+        Q = UTPM(Q_data)
+        R = UTPM(R_data)
+        
+        print Q.dot(R) - A
 
 class TestCombineBlocks(TestCase):
     def test_convert(self):

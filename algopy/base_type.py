@@ -41,7 +41,7 @@ class GradedRing(object):
         """
         if numpy.isscalar(x):
             xdata = self.__class__.__zeros_like__(self.data)
-            self.__class__.__scalar_to_data__(x, xdata)
+            self.__class__.__scalar_to_data__(xdata, x)
             return self.__class__(xdata)
             
         elif isinstance(x, numpy.ndarray):
