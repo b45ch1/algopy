@@ -435,7 +435,7 @@ class TestMatPoly(TestCase):
         
         y = x.solve(A)
         x2 = A.dot(y)
-        assert_array_almost_equal(x.tc, x2.tc, decimal = 12)
+        assert_array_almost_equal(x.tc, x2.tc, decimal = 8)
 
     def test_qr(self):
         (D,P,N) = 4,3,20
@@ -450,6 +450,23 @@ class TestMatPoly(TestCase):
 
         Q,R = A.qr()
         assert_array_almost_equal( (Q.dot(R)).data, A.data, decimal = 12)
+        
+    def test_qr_rectangular(self):
+        (D,P,M,N) = 2,1,3,2
+        A_data = numpy.random.rand(D,P,M,N)
+        
+        # make A_data sufficiently regular
+        for p in range(P):
+            for n in range(N):
+                A_data[0,p,n,n] += 1.
+        
+        A = UTPM(A_data)
+
+        Q,R = A.qr_rectangular()
+        
+        print numpy.dot(Q.data[0,0], R.data[0,0]) - A.data[0,0]
+        
+        
 
 class TestCombineBlocks(TestCase):
     def test_convert(self):

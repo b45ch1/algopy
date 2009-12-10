@@ -311,6 +311,10 @@ class UTPM(GradedRing):
     @classmethod
     def __zeros_like__(cls, data):
         return numpy.zeros_like(data)
+        
+    @classmethod
+    def __zeros__(cls, shp):
+        return numpy.zeros(shp)
 
     def qr(self):
         Q = self.__class__(self.__class__.__zeros_like__(self.data))
@@ -326,10 +330,10 @@ class UTPM(GradedRing):
         computes the qr decomposition (Q,R) = qr(A)    <===>    QR = A
         
         INPUTS:
-            A_data      (D,P,N,N) array             symmetric positive definite matrix
+            A_data      (D,P,N,N) array             regular matrix
             
         OUTPUTS:
-            Q_data      (D,P,N,N) array             orthogonal matrix of eigenvectors Q_1,...,Q_N
+            Q_data      (D,P,N,N) array             orthogonal matrix Q_1,...,Q_N
             R_data      (D,P,N,N) array             upper triagonal matrix
         
         """
@@ -375,7 +379,86 @@ class UTPM(GradedRing):
                 R_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:].T, H[p,:,:]) - numpy.dot(K[p,:,:],R_data[0,p,:,:])
                 
                 R_data[D,p,:,:] = R_data[D,p,:,:] - PL * R_data[D,p,:,:]
+   
+
+    def qr_rectangular(self):
+        D,P,M,N = numpy.shape(self.data)
+        K = min(M,N)
         
+        Q = self.__class__(self.__class__.__zeros__((D,P,M,K)))
+        R = self.__class__(self.__class__.__zeros__((D,P,K,N)))
+
+        UTPM.cls_qr_rectangular(Q.data, R.data, self.data)
+
+        return Q,R
+
+   
+    @classmethod
+    def cls_qr_rectangular(cls, Q_data, R_data, A_data):
+        """
+        computes the qr decomposition (Q,R) = qr(A)    <===>    QR = A
+        
+        INPUTS:
+            A_data      (D,P,M,N) array             regular matrix
+            
+        OUTPUTS:
+            Q_data      (D,P,M,K) array             orthogonal vectors Q_1,...,Q_K
+            R_data      (D,P,K,N) array             upper triagonal matrix
+            
+            where K = min(M,N)
+        
+        """
+        
+        # input checks
+        DT,P,M,N = numpy.shape(A_data)
+        K = min(M,N)
+        
+        if Q_data.shape != (DT,P,M,K):
+            raise ValueError('expected Q_data.shape = %s but provided %s'%(str((DT,P,M,K)),str(Q_data.shape)))
+        assert R_data.shape == (DT,P,K,N)
+        
+        assert M >= N
+        
+        # INIT: compute the base point
+        for p in range(P):
+            Q_data[0,p,:,:], R_data[0,p,:,:] = numpy.linalg.qr(A_data[0,p,:,:])
+        
+        # dF = numpy.zeros((P,N,N))
+        # dG = numpy.zeros((P,N,N))
+        # X  = numpy.zeros((P,N,N))
+
+        # PL = numpy.array([[ r > c for c in range(N)] for r in range(N)],dtype=float)
+        
+        # # ITERATE: compute the derivatives
+        # for D in range(1,DT):
+            # # STEP 1:
+            # dF[...] = 0.
+            # dG[...] = 0
+            # X[...]  = 0
+
+            # for d in range(1,D):
+                # for p in range(P):
+                    # dF[p] += numpy.dot(Q_data[d,p,:,:], R_data[D-d,p,:,:])
+                    # dG[p] -= numpy.dot(Q_data[d,p,:,:].T, Q_data[D-d,p,:,:])
+                    
+            # # STEP 2:
+            # H = A_data[D,:,:,:] - dF[:,:,:]
+            # S = - 0.5 * dF
+            
+            # # STEP 3:
+            # for p in range(P):
+                # X[p,:,:] = PL * (numpy.dot( numpy.dot(Q_data[0,p,:,:].T, H[p,:,:,]), numpy.linalg.inv(R_data[0,p,:,:])) - S[p,:,:])
+                # X[p,:,:] = X[p,:,:] - X[p,:,:].T
+                
+            # # STEP 4:
+            # K = S + X
+            
+            # # STEP 5:
+            # for p in range(P):
+                # Q_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:],K[p,:,:])
+                # R_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:].T, H[p,:,:]) - numpy.dot(K[p,:,:],R_data[0,p,:,:])
+                
+                # R_data[D,p,:,:] = R_data[D,p,:,:] - PL * R_data[D,p,:,:]
 
     def trace(self):
         """ returns a new UTPM in standard format, i.e. the matrices are 1x1 matrices"""

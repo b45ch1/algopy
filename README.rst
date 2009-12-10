@@ -19,7 +19,9 @@ Rationale:
             * Univariate Taylor Propagation on Scalars  (UTPS)
               Implementation in: `./algopy/utp/utps.py`
             * Univariate Taylor Propagation on Matrices (UTPM)
-              Implemenation in: `./algopy/utp/utpm.py`
+              Implementation in: `./algopy/utp/utpm.py`
+            * Cross Taylor Propagation on Scalars (CPTS)
+              Implementation in: `./algopy/utp/ctps_c.py`
             * Exact Interpolation of Higher Order Derivative Tensors:
               (Hessians, etc.)
               
