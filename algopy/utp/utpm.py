@@ -443,22 +443,22 @@ class UTPM(GradedRing):
                     
             # STEP 2:
             H = A_data[D,:,:,:] - dF[:,:,:]
-            S = - 0.5 * dF
+            S = - 0.5 * dG
             
-            # # STEP 3:
-            # for p in range(P):
-                # X[p,:,:] = PL * (numpy.dot( numpy.dot(Q_data[0,p,:,:].T, H[p,:,:,]), numpy.linalg.inv(R_data[0,p,:,:])) - S[p,:,:])
-                # X[p,:,:] = X[p,:,:] - X[p,:,:].T
+            # STEP 3:
+            for p in range(P):
+                X[p,:,:] = PL * (numpy.dot( numpy.dot(Q_data[0,p,:,:].T, H[p,:,:,]), numpy.linalg.inv(R_data[0,p,:,:])) - S[p,:,:])
+                X[p,:,:] = X[p,:,:] - X[p,:,:].T
                 
-            # # STEP 4:
-            # K = S + X
+            # STEP 4:
+            K = X
             
-            # # STEP 5:
-            # for p in range(P):
-                # Q_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:],K[p,:,:])
-                # R_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:].T, H[p,:,:]) - numpy.dot(K[p,:,:],R_data[0,p,:,:])
+            # STEP 5:
+            for p in range(P):
+                Q_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:],K[p,:,:])
+                R_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:].T, H[p,:,:]) - numpy.dot(K[p,:,:],R_data[0,p,:,:])
                 
-                # R_data[D,p,:,:] = R_data[D,p,:,:] - PL * R_data[D,p,:,:]
+                R_data[D,p,:,:] = R_data[D,p,:,:] - PL * R_data[D,p,:,:]
 
     def trace(self):
         """ returns a new UTPM in standard format, i.e. the matrices are 1x1 matrices"""
