@@ -469,6 +469,27 @@ class TestMatPoly(TestCase):
         assert_array_almost_equal( (Q.dot(R)).data, A.data, decimal = 14)
 
 
+    def test_dot_on_utpm_data(self):
+        (D,P,N,M) = 4,3,2,5
+        A = numpy.array([ i for i in range(D*P*N*M)],dtype=float)
+        A = A.reshape((D,P,N,M))
+        B = A.transpose((0,1,3,2)).copy()
+
+        R  = vdot(A[0],B[0])
+        R2 = numpy.zeros((P,N,N))
+        for p in range(P):
+            R2[p,:,:] = numpy.dot(A[0,p],B[0,p])
+
+        S  = vdot(A,B)
+        S2 = numpy.zeros((D,P,N,N))
+        for d in range(D):
+            for p in range(P):
+                S2[d,p,:,:] = numpy.dot(A[d,p],B[d,p])
+
+        assert_array_almost_equal(R,R2)
+        assert_array_almost_equal(S,S2)
+
+
 
     def test_eig(self):
         (D,P,N) = 2,1,2
@@ -480,6 +501,8 @@ class TestMatPoly(TestCase):
 
         A = UTPM(A_data)
         L,Q = A.eig()
+
+        #print L,Q
 
 
 class TestCombineBlocks(TestCase):

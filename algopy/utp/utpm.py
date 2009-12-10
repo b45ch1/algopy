@@ -47,6 +47,33 @@ def dot(x,y):
     else:
         return numpy.dot(x,y)
 
+
+def vdot(x,y):
+    x_shp = numpy.shape(x)
+    y_shp = numpy.shape(y)
+
+    if x_shp[-1] != y_shp[-2]:
+        raise ValueError('got x.shape = %s and y.shape = %s'%(str(x_shp),str(y_shp)))
+
+    if numpy.ndim(x) == 3:
+        P,N,M  = x_shp
+        P,M,K  = y_shp
+        retval = numpy.zeros((P,N,K))
+        for p in range(P):
+            retval[p,:,:] = numpy.dot(x[p,:,:], y[p,:,:])
+
+        return retval
+
+    elif numpy.ndim(x) == 4:
+        D,P,N,M  = x_shp
+        D,P,M,K  = y_shp
+        retval = numpy.zeros((D,P,N,K))
+        for d in range(D):
+            for p in range(P):
+                retval[d,p,:,:] = numpy.dot(x[d,p,:,:], y[d,p,:,:])
+
+        return retval
+
 def combine_blocks(in_X):
     """
     expects an array or list consisting of entries of type UTPM, e.g.
@@ -469,7 +496,7 @@ class UTPM(GradedRing):
         L = self.__class__(self.__class__.__zeros__((D,P,N)))
         
         UTPM.cls_eig(Q.data, L.data, self.data)
-        
+      
         return L,Q
 
 
@@ -499,6 +526,36 @@ class UTPM(GradedRing):
             raise ValueError('expected L_data.shape = %s but provided %s'%(str((DT,P,N)),str(L_data.shape)))
 
 
+
+        # INIT: compute the base point
+        for p in range(P):
+            L_data[0,p,:], Q_data[0,p,:,:] = numpy.linalg.eig(A_data[0,p,:,:])
+
+
+        dF = numpy.zeros((P,N,N))
+        dG = numpy.zeros((P,N,N))
+
+        # ITERATE: compute derivatives
+        for D in range(1,DT):
+            print 'D=',D
+            dF[...] = 0.
+            dG[...] = 0.
+
+            # STEP 1:
+            for d in range(D+1):
+                for c in range(D+1):
+                    for p in range(P):
+                        dF[p,:,:] += (d!=D) * (c!=D) * ( (D-d-c) != D) * numpy.dot(Q_data[d,p,:,:].T, numpy.dot(A_data[c,p,:,:], Q_data[D-d-c,p,:,:]))
+
+            for d in range(1,D):
+                for p in range(P):
+                    dG[p] += numpy.dot(Q_data[d,p,:,:].T, Q_data[D-d,p,:,:])
+
+
+            # STEP 2:
+            S = -0.5 * dG
+
+            # STEP 3:
 
     def trace(self):
         """ returns a new UTPM in standard format, i.e. the matrices are 1x1 matrices"""
