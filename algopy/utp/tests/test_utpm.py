@@ -428,35 +428,28 @@ class TestMatPoly(TestCase):
         (D,P,N,M) = 3,3,30,1
         x = UTPM(numpy.random.rand(D,P,N,M))
         A = UTPM(numpy.random.rand(D,P,N,N))
+        
+        for p in range(P):
+            for n in range(N):
+                A.data[0,p,n,n] += 1.
+        
         y = x.solve(A)
         x2 = A.dot(y)
-        
-        # reduce decimal to 10, A could be ill conditioned
-        assert_array_almost_equal(x.tc, x2.tc, decimal = 10)
-        
-    # def test_cls_qr(self):
-        # (D,P,N) = 2,1,2
-        # A_data = numpy.random.rand(D,P,N,N)
-        # R_data = numpy.zeros((D,P,N,N))
-        # Q_data = numpy.zeros((D,P,N,N))
-        
-        # UTPM.cls_qr(Q_data, R_data, A_data)
-        
-        # A = UTPM(A_data)
-        # Q = UTPM(Q_data)
-        # R = UTPM(R_data)
-        
-        
-        # assert_array_almost_equal( (Q.dot(R)).data, A.data)
+        assert_array_almost_equal(x.tc, x2.tc, decimal = 12)
 
     def test_qr(self):
-        (D,P,N) = 4,2,2
+        (D,P,N) = 4,3,20
         A_data = numpy.random.rand(D,P,N,N)
+        
+        # make A_data sufficiently regular
+        for p in range(P):
+            for n in range(N):
+                A_data[0,p,n,n] += 1.
+        
         A = UTPM(A_data)
 
         Q,R = A.qr()
-
-        assert_array_almost_equal( (Q.dot(R)).data, A.data, decimal = 14)
+        assert_array_almost_equal( (Q.dot(R)).data, A.data, decimal = 12)
 
 class TestCombineBlocks(TestCase):
     def test_convert(self):
