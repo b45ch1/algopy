@@ -548,8 +548,7 @@ class UTPM(GradedRing):
                         dF[p,:,:] += (d!=D) * (c!=D) * ( (D-d-c) != D) * numpy.dot(Q_data[d,p,:,:].T, numpy.dot(A_data[c,p,:,:], Q_data[D-d-c,p,:,:]))
 
             for d in range(1,D):
-                for p in range(P):
-                    dG[p] += numpy.dot(Q_data[d,p,:,:].T, Q_data[D-d,p,:,:])
+                dG += vdot(Q_data[d,...].T, Q_data[D-d,...])
 
 
             # STEP 2:
