@@ -363,7 +363,7 @@ class UTPM(GradedRing):
                     
             # STEP 2:
             H = A_data[D,:,:,:] - dF[:,:,:]
-            S = - 0.5 * dF
+            S = - 0.5 * dG
             
             # STEP 3:
             for p in range(P):
@@ -423,27 +423,27 @@ class UTPM(GradedRing):
         for p in range(P):
             Q_data[0,p,:,:], R_data[0,p,:,:] = numpy.linalg.qr(A_data[0,p,:,:])
         
-        # dF = numpy.zeros((P,N,N))
-        # dG = numpy.zeros((P,N,N))
-        # X  = numpy.zeros((P,N,N))
+        dF = numpy.zeros((P,M,N))
+        dG = numpy.zeros((P,K,K))
+        X  = numpy.zeros((P,K,K))
 
-        # PL = numpy.array([[ r > c for c in range(N)] for r in range(N)],dtype=float)
+        PL = numpy.array([[ r > c for c in range(N)] for r in range(K)],dtype=float)
         
-        # # ITERATE: compute the derivatives
-        # for D in range(1,DT):
-            # # STEP 1:
-            # dF[...] = 0.
-            # dG[...] = 0
-            # X[...]  = 0
+        # ITERATE: compute the derivatives
+        for D in range(1,DT):
+            # STEP 1:
+            dF[...] = 0.
+            dG[...] = 0
+            X[...]  = 0
 
-            # for d in range(1,D):
-                # for p in range(P):
-                    # dF[p] += numpy.dot(Q_data[d,p,:,:], R_data[D-d,p,:,:])
-                    # dG[p] -= numpy.dot(Q_data[d,p,:,:].T, Q_data[D-d,p,:,:])
+            for d in range(1,D):
+                for p in range(P):
+                    dF[p] += numpy.dot(Q_data[d,p,:,:], R_data[D-d,p,:,:])
+                    dG[p] -= numpy.dot(Q_data[d,p,:,:].T, Q_data[D-d,p,:,:])
                     
-            # # STEP 2:
-            # H = A_data[D,:,:,:] - dF[:,:,:]
-            # S = - 0.5 * dF
+            # STEP 2:
+            H = A_data[D,:,:,:] - dF[:,:,:]
+            S = - 0.5 * dF
             
             # # STEP 3:
             # for p in range(P):
