@@ -460,6 +460,46 @@ class UTPM(GradedRing):
                 
                 R_data[D,p,:,:] = R_data[D,p,:,:] - PL * R_data[D,p,:,:]
 
+
+    def eig(self):
+        
+        D,P,M,N = numpy.shape(self.data)
+        
+        Q = self.__class__(self.__class__.__zeros__((D,P,N,N)))
+        L = self.__class__(self.__class__.__zeros__((D,P,N)))
+        
+        UTPM.cls_eig(Q.data, L.data, self.data)
+        
+        return L,Q
+
+
+        
+        
+    @classmethod
+    def cls_eig(cls, Q_data, L_data, A_data):
+        """
+        computes the eigenvalue decompositon
+
+        L,Q = eig(A)
+
+        for symmetric matrix A with distinct eigenvalues, i.e. 
+        where L is a diagonal matrix of ordered eigenvalues l_1 > l_2 > ...> l_N
+        and Q a matrix of corresponding orthogonal eigenvectors
+
+        """
+        # input checks
+        DT,P,M,N = numpy.shape(A_data)
+        
+        assert M == N
+
+        if Q_data.shape != (DT,P,N,N):
+            raise ValueError('expected Q_data.shape = %s but provided %s'%(str((DT,P,M,K)),str(Q_data.shape)))
+
+        if L_data.shape != (DT,P,N):
+            raise ValueError('expected L_data.shape = %s but provided %s'%(str((DT,P,N)),str(L_data.shape)))
+
+
+
     def trace(self):
         """ returns a new UTPM in standard format, i.e. the matrices are 1x1 matrices"""
         D,P = self.tc.shape[:2]
