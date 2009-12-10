@@ -452,20 +452,21 @@ class TestMatPoly(TestCase):
         assert_array_almost_equal( (Q.dot(R)).data, A_data_old, decimal = 14)
         
     def test_qr_rectangular(self):
-        (D,P,M,N) = 2,1,3,3
+        (D,P,M,N) = 5,3,3,3
         A_data = numpy.random.rand(D,P,M,N)
         
         # make A_data sufficiently regular
         for p in range(P):
             for n in range(N):
-                A_data[0,p,n,n] += 1.
+                A_data[0,p,n,n] += (N + 1)
         
         A = UTPM(A_data)
 
         Q,R = A.qr_rectangular()
         
-        print R
-        print 'zero?\n',dot(Q, R) - A
+        # print R
+        # print 'zero?\n',dot(Q, R) - A
+        assert_array_almost_equal( (Q.dot(R)).data, A.data, decimal = 14)
 
 
 class TestCombineBlocks(TestCase):

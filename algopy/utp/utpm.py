@@ -451,7 +451,7 @@ class UTPM(GradedRing):
                 X[p,:,:] = X[p,:,:] - X[p,:,:].T
                 
             # STEP 4:
-            K = X
+            K = S + X
             
             # STEP 5:
             for p in range(P):
