@@ -354,8 +354,8 @@ class UTPM(GradedRing):
 
             for d in range(1,D):
                 for p in range(P):
-                    dF[p] += numpy.dot(Q_data[d,p,:,:].T, R_data[D-d,p,:,:])
-                    dG[p] += numpy.dot(Q_data[d,p,:,:].T, Q_data[D-d,p,:,:])
+                    dF[p] += numpy.dot(Q_data[d,p,:,:], R_data[D-d,p,:,:])
+                    dG[p] -= numpy.dot(Q_data[d,p,:,:].T, Q_data[D-d,p,:,:])
                     
             # STEP 2:
             H = A_data[D,:,:,:] - dF[:,:,:]
@@ -373,6 +373,8 @@ class UTPM(GradedRing):
             for p in range(P):
                 Q_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:],K[p,:,:])
                 R_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:].T, H[p,:,:]) - numpy.dot(K[p,:,:],R_data[0,p,:,:])
+                
+                R_data[D,p,:,:] = R_data[D,p,:,:] - PL * R_data[D,p,:,:]
         
 
     def trace(self):

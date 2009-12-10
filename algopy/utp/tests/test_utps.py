@@ -4,7 +4,7 @@ import numpy
 from algopy.utp.utps import *
 
 
-class TestUTPS(TestCase):
+class ElementaryFunctions(TestCase):
     def test_UTPS(self):
         """
         this checks _only_ if calling the operations is ok
@@ -41,14 +41,6 @@ class TestUTPS(TestCase):
         correct_result = UTPS(numpy.array([5.1,1.]))
         assert_array_almost_equal(correct_result.tc, b.tc)
 
-    def test_numpy_linalg_norm(self):
-        """\ndirectional derivative of norm(x) at x=[2.1,3.4] with direction d = [5.6,7.8]"""
-        def f(x):
-            return numpy.linalg.norm(x)
-        a = numpy.array([UTPS([2.1,5.6]),UTPS([3.4,7.8])])
-        b = f(a)
-        correct_result = UTPS([numpy.linalg.norm([2.1,3.4]), 9.57898451145 ])
-        assert_array_almost_equal(correct_result.tc, b.tc)
 
     def test_sqrt(self):
         """\ndirectional derivative of sqrt(x) at x = 3.1 with direction d = 7.4"""
@@ -99,6 +91,10 @@ class TestUTPS(TestCase):
         assert_array_almost_equal( correct_result[0].tc,b[0].tc)
         assert_array_almost_equal( correct_result[1].tc,b[1].tc)
 
+
+
+
+class NumpyArrayOperationsTests(TestCase):
     def test_numpy_slicing(self):
         """ f= sum(x[1:]*x[-2::-1])"""
         def f(x):
@@ -116,6 +112,24 @@ class TestUTPS(TestCase):
             [f(x),df(x,h)]
             )
         assert_array_almost_equal(correct_result.tc, ay.tc)
+        
+    def test_numpy_linalg_norm(self):
+        """\ndirectional derivative of norm(x) at x=[2.1,3.4] with direction d = [5.6,7.8]"""
+        def f(x):
+            return numpy.linalg.norm(x)
+        a = numpy.array([UTPS([2.1,5.6]),UTPS([3.4,7.8])])
+        b = f(a)
+        correct_result = UTPS([numpy.linalg.norm([2.1,3.4]), 9.57898451145 ])
+        assert_array_almost_equal(correct_result.tc, b.tc)
+        
+    def test_qr_decomposition(self):
+       N,D,P = 2,4,2
+       A = numpy.array([[UTPS(numpy.random.rand(D,P)) for c in range(N)] for r in range(N)])
+       
+       Q,R =  qr(A)
+       
+       print numpy.dot(Q,R) - A
+   
 
 
 if __name__ == "__main__":
