@@ -74,6 +74,27 @@ def vdot(x,y):
 
         return retval
 
+def truncated_triple_dot(X,Y,Z, D):
+    """
+    computes d^D/dt^D ( [X]_D [Y]_D [Z]_D) with t set to zero after differentiation
+    
+    X,Y,Z are (DT,P,N,M) arrays s.t. the dimensions match to compute dot(X[d,p,:,:], dot(Y[d,p,:,:], Z[d,p,:,:])) 
+    
+    """
+    import algopy.utp.exact_interpolation
+    DT,P,N,M = X.shape
+    multi_indices = algopy.utp.exact_interpolation.generate_multi_indices(3,D)
+    retval = numpy.zeros((P,N,M))
+    
+    for mi in multi_indices:
+        for p in range(P):
+            if mi[0] == D or mi[1] == D or mi[2] == D:
+                continue
+            retval[p] += numpy.dot(X[mi[0],p,:,:], numpy.dot(Y[mi[1],p,:,:], Z[mi[2],p,:,:]))
+                
+    return retval
+
+
 def combine_blocks(in_X):
     """
     expects an array or list consisting of entries of type UTPM, e.g.
@@ -555,6 +576,8 @@ class UTPM(GradedRing):
             S = -0.5 * dG
 
             # STEP 3:
+            # K = dF + vdot(vdot(Q_data.transpose(0,1,3,2)[0], A_data[D]),Q_data[0]) +\
+                # vdot(S,
 
     def trace(self):
         """ returns a new UTPM in standard format, i.e. the matrices are 1x1 matrices"""
