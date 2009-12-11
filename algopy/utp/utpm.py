@@ -82,9 +82,11 @@ def truncated_triple_dot(X,Y,Z, D):
     
     """
     import algopy.utp.exact_interpolation
-    DT,P,N,M = X.shape
+    DT,P,NX,MX = X.shape
+    DT,P,NZ,MZ = Z.shape
+
     multi_indices = algopy.utp.exact_interpolation.generate_multi_indices(3,D)
-    retval = numpy.zeros((P,N,M))
+    retval = numpy.zeros((P,NX,MZ))
     
     for mi in multi_indices:
         for p in range(P):
@@ -547,37 +549,57 @@ class UTPM(GradedRing):
             raise ValueError('expected L_data.shape = %s but provided %s'%(str((DT,P,N)),str(L_data.shape)))
 
 
-
         # INIT: compute the base point
         for p in range(P):
             L_data[0,p,:], Q_data[0,p,:,:] = numpy.linalg.eig(A_data[0,p,:,:])
 
+        Id = numpy.zeros((P,N,N))
+        for p in range(P):
+            Id[p] = numpy.eye(N)
 
-        dF = numpy.zeros((P,N,N))
+        # save zero'th coefficient of L_data as diagonal matrix
+        L = numpy.zeros((P,N,N))
+        for p in range(P):
+            L[p] = numpy.diag(L_data[0,p])
+            
         dG = numpy.zeros((P,N,N))
 
         # ITERATE: compute derivatives
         for D in range(1,DT):
             print 'D=',D
-            dF[...] = 0.
             dG[...] = 0.
+            
+            dL = numpy.zeros((P,N,N))
 
             # STEP 1:
-            for d in range(D+1):
-                for c in range(D+1):
-                    for p in range(P):
-                        dF[p,:,:] += (d!=D) * (c!=D) * ( (D-d-c) != D) * numpy.dot(Q_data[d,p,:,:].T, numpy.dot(A_data[c,p,:,:], Q_data[D-d-c,p,:,:]))
-
+            dF = truncated_triple_dot(Q_data.transpose(0,1,3,2), A_data, Q_data, D)
+                
             for d in range(1,D):
                 dG += vdot(Q_data[d,...].T, Q_data[D-d,...])
-
 
             # STEP 2:
             S = -0.5 * dG
 
             # STEP 3:
-            # K = dF + vdot(vdot(Q_data.transpose(0,1,3,2)[0], A_data[D]),Q_data[0]) +\
-                # vdot(S,
+            K = dF + vdot(vdot(Q_data.transpose(0,1,3,2)[0], A_data[D]),Q_data[0]) + \
+                vdot(S, L) + vdot(L,S)
+                
+            # STEP 4:
+            dL = Id * K
+                
+            # STEP 5:
+            H = numpy.zeros((P,N,N),dtype=float)
+            for p in range(P):
+                for r in range(N):
+                    for c in range(N):
+                        H[p,r,c] = 1./( L_data[0,p,c] - L_data[0,p,r])
+                        
+            # # STEP 6:
+            # tmp0 = K - 
+            # tmp1 =
+            # tmp2 = 
+            # Q_data[D] = vdot(Q_data[0], tmp2)
+                
 
     def trace(self):
         """ returns a new UTPM in standard format, i.e. the matrices are 1x1 matrices"""

@@ -491,8 +491,6 @@ class TestMatPoly(TestCase):
         
         
     def test_triple_truncated_dot(self):
-
-
         D,P,N,M = 3,1,1,1
         A = numpy.random.rand(D,P,N,M)
         B = numpy.random.rand(D,P,N,M)
@@ -515,8 +513,6 @@ class TestMatPoly(TestCase):
         
         assert_array_almost_equal(R,S)        
         
-        
-        
 
     def test_eig(self):
         (D,P,N) = 2,1,2
@@ -528,7 +524,8 @@ class TestMatPoly(TestCase):
 
         A = UTPM(A_data)
         L,Q = A.eig()
-
+        
+        print L
         #print L,Q
 
 
