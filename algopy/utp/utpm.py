@@ -366,85 +366,85 @@ class UTPM(GradedRing):
     def __zeros__(cls, shp):
         return numpy.zeros(shp)
 
-    def qr(self):
-        Q = self.__class__(self.__class__.__zeros_like__(self.data))
-        R = self.__class__(self.__class__.__zeros_like__(self.data))
+    # def qr(self):
+        # Q = self.__class__(self.__class__.__zeros_like__(self.data))
+        # R = self.__class__(self.__class__.__zeros_like__(self.data))
 
-        UTPM.cls_qr(Q.data, R.data, self.data)
+        # UTPM.cls_qr(Q.data, R.data, self.data)
 
-        return Q,R
+        # return Q,R
     
-    @classmethod
-    def cls_qr(cls, Q_data, R_data, A_data):
-        """
-        computes the qr decomposition (Q,R) = qr(A)    <===>    QR = A
+    # @classmethod
+    # def cls_qr(cls, Q_data, R_data, A_data):
+        # """
+        # computes the qr decomposition (Q,R) = qr(A)    <===>    QR = A
         
-        INPUTS:
-            A_data      (D,P,N,N) array             regular matrix
+        # INPUTS:
+            # A_data      (D,P,N,N) array             regular matrix
             
-        OUTPUTS:
-            Q_data      (D,P,N,N) array             orthogonal matrix Q_1,...,Q_N
-            R_data      (D,P,N,N) array             upper triagonal matrix
+        # OUTPUTS:
+            # Q_data      (D,P,N,N) array             orthogonal matrix Q_1,...,Q_N
+            # R_data      (D,P,N,N) array             upper triagonal matrix
         
-        """
-        DT,P,N,N = numpy.shape(A_data)
+        # """
+        # DT,P,N,N = numpy.shape(A_data)
         
-        # QR decomposition at the base point, i.e. for order D=1
+        # # QR decomposition at the base point, i.e. for order D=1
         
-        for p in range(P):
-            Q_data[0,p,:,:], R_data[0,p,:,:] = numpy.linalg.qr(A_data[0,p,:,:])
+        # for p in range(P):
+            # Q_data[0,p,:,:], R_data[0,p,:,:] = numpy.linalg.qr(A_data[0,p,:,:])
         
-        dF = numpy.zeros((P,N,N))
-        dG = numpy.zeros((P,N,N))
-        X  = numpy.zeros((P,N,N))
+        # dF = numpy.zeros((P,N,N))
+        # dG = numpy.zeros((P,N,N))
+        # X  = numpy.zeros((P,N,N))
 
-        PL = numpy.array([[ r > c for c in range(N)] for r in range(N)],dtype=float)
+        # PL = numpy.array([[ r > c for c in range(N)] for r in range(N)],dtype=float)
         
-        for D in range(1,DT):
-            # STEP 1:
-            dF[...] = 0.
-            dG[...] = 0
-            X[...]  = 0
+        # for D in range(1,DT):
+            # # STEP 1:
+            # dF[...] = 0.
+            # dG[...] = 0
+            # X[...]  = 0
 
-            for d in range(1,D):
-                for p in range(P):
-                    dF[p] += numpy.dot(Q_data[d,p,:,:], R_data[D-d,p,:,:])
-                    dG[p] -= numpy.dot(Q_data[d,p,:,:].T, Q_data[D-d,p,:,:])
+            # for d in range(1,D):
+                # for p in range(P):
+                    # dF[p] += numpy.dot(Q_data[d,p,:,:], R_data[D-d,p,:,:])
+                    # dG[p] -= numpy.dot(Q_data[d,p,:,:].T, Q_data[D-d,p,:,:])
                     
-            # STEP 2:
-            H = A_data[D,:,:,:] - dF[:,:,:]
-            S = - 0.5 * dG
+            # # STEP 2:
+            # H = A_data[D,:,:,:] - dF[:,:,:]
+            # S = - 0.5 * dG
             
-            # STEP 3:
-            for p in range(P):
-                X[p,:,:] = PL * (numpy.dot( numpy.dot(Q_data[0,p,:,:].T, H[p,:,:,]), numpy.linalg.inv(R_data[0,p,:,:])) - S[p,:,:])
-                X[p,:,:] = X[p,:,:] - X[p,:,:].T
+            # # STEP 3:
+            # for p in range(P):
+                # X[p,:,:] = PL * (numpy.dot( numpy.dot(Q_data[0,p,:,:].T, H[p,:,:,]), numpy.linalg.inv(R_data[0,p,:,:])) - S[p,:,:])
+                # X[p,:,:] = X[p,:,:] - X[p,:,:].T
                 
-            # STEP 4:
-            K = S + X
+            # # STEP 4:
+            # K = S + X
             
-            # STEP 5:
-            for p in range(P):
-                Q_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:],K[p,:,:])
-                R_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:].T, H[p,:,:]) - numpy.dot(K[p,:,:],R_data[0,p,:,:])
+            # # STEP 5:
+            # for p in range(P):
+                # Q_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:],K[p,:,:])
+                # R_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:].T, H[p,:,:]) - numpy.dot(K[p,:,:],R_data[0,p,:,:])
                 
-                R_data[D,p,:,:] = R_data[D,p,:,:] - PL * R_data[D,p,:,:]
+                # R_data[D,p,:,:] = R_data[D,p,:,:] - PL * R_data[D,p,:,:]
    
 
-    def qr_rectangular(self):
+    def qr(self):
         D,P,M,N = numpy.shape(self.data)
         K = min(M,N)
         
         Q = self.__class__(self.__class__.__zeros__((D,P,M,K)))
         R = self.__class__(self.__class__.__zeros__((D,P,K,N)))
 
-        UTPM.cls_qr_rectangular(Q.data, R.data, self.data)
+        UTPM.cls_qr(Q.data, R.data, self.data)
 
         return Q,R
 
    
     @classmethod
-    def cls_qr_rectangular(cls, Q_data, R_data, A_data):
+    def cls_qr(cls, Q_data, R_data, A_data):
         """
         computes the qr decomposition (Q,R) = qr(A)    <===>    QR = A
         

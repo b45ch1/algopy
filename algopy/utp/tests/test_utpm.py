@@ -462,7 +462,7 @@ class TestMatPoly(TestCase):
         
         A = UTPM(A_data)
 
-        Q,R = A.qr_rectangular()
+        Q,R = A.qr()
         
         assert_array_equal( Q.data.shape, [D,P,M,N])
         assert_array_equal( R.data.shape, [D,P,N,N])
