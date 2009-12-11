@@ -377,7 +377,6 @@ class UTPM(GradedRing):
 
         return Q,R
 
-   
     @classmethod
     def cls_qr(cls, Q_data, R_data, A_data):
         """
@@ -537,11 +536,11 @@ class UTPM(GradedRing):
                     for c in range(N):
                         H[p,r,c] = 1./( L_data[0,p,c] - L_data[0,p,r])
                         
-            # # STEP 6:
-            # tmp0 = K - 
-            # tmp1 =
-            # tmp2 = 
-            # Q_data[D] = vdot(Q_data[0], tmp2)
+            # STEP 6:
+            tmp0 = K - dL
+            tmp1 = H * tmp0
+            tmp2 = tmp1 + S
+            Q_data[D] = vdot(Q_data[0], tmp2)
                 
 
     def trace(self):
