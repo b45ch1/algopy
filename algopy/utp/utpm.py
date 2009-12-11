@@ -517,7 +517,7 @@ class UTPM(GradedRing):
             dF = truncated_triple_dot(Q_data.transpose(0,1,3,2), A_data, Q_data, D)
                 
             for d in range(1,D):
-                dG += vdot(Q_data[d,...].T, Q_data[D-d,...])
+                dG += vdot(Q_data[d,...].transpose(0,2,1), Q_data[D-d,...])
 
             # STEP 2:
             S = -0.5 * dG
@@ -534,13 +534,19 @@ class UTPM(GradedRing):
             for p in range(P):
                 for r in range(N):
                     for c in range(N):
-                        H[p,r,c] = 1./( L_data[0,p,c] - L_data[0,p,r])
+                        if c == r:
+                            continue
+                        H[p,r,c] = 1./( L[p,c,c] - L[p,r,r])
                         
             # STEP 6:
             tmp0 = K - dL
             tmp1 = H * tmp0
             tmp2 = tmp1 + S
             Q_data[D] = vdot(Q_data[0], tmp2)
+            
+            # STEP 7:
+            for p in range(P):
+                L_data[D,p,:] = numpy.diag(dL[p])
                 
 
     def trace(self):

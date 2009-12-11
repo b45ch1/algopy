@@ -517,7 +517,7 @@ class TestMatPoly(TestCase):
         
 
     def test_eig(self):
-        (D,P,N) = 2,1,2
+        (D,P,N) = 4,3,5
         A_data = numpy.zeros((D,P,N,N))
         for d in range(D):
             for p in range(P):
@@ -525,10 +525,19 @@ class TestMatPoly(TestCase):
                 A_data[d,p,:,:] = numpy.dot(tmp.T,tmp)
 
         A = UTPM(A_data)
-        L,Q = A.eig()
         
-        # print L
-        #print L,Q
+        l,Q = A.eig()
+        
+        L_data = numpy.zeros((D,P,N,N))
+        for d in range(D):
+            for p in range(P):
+                for n in range(N):
+                    L_data[d,p,n,n] = l.data[d,p,n]
+        
+        L = UTPM(L_data)
+        
+        assert_array_almost_equal(Q.dot(L.dot(Q.T)).data, A.data, decimal = 12)
+
 
 
 class TestCombineBlocks(TestCase):
