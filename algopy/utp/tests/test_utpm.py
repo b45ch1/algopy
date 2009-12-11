@@ -452,7 +452,7 @@ class TestMatPoly(TestCase):
         assert_array_almost_equal( (Q.dot(R)).data, A_data_old, decimal = 12)
         
     def test_qr_rectangular(self):
-        (D,P,M,N) = 5,3,3,3
+        (D,P,M,N) = 5,3,5,3
         A_data = numpy.random.rand(D,P,M,N)
         
         # make A_data sufficiently regular
@@ -464,7 +464,9 @@ class TestMatPoly(TestCase):
 
         Q,R = A.qr_rectangular()
         
-        # print R
+        assert_array_equal( Q.data.shape, [D,P,M,N])
+        assert_array_equal( R.data.shape, [D,P,N,N])
+        
         # print 'zero?\n',dot(Q, R) - A
         assert_array_almost_equal( (Q.dot(R)).data, A.data, decimal = 14)
 
@@ -525,7 +527,7 @@ class TestMatPoly(TestCase):
         A = UTPM(A_data)
         L,Q = A.eig()
         
-        print L
+        # print L
         #print L,Q
 
 

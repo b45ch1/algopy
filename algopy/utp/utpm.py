@@ -467,7 +467,8 @@ class UTPM(GradedRing):
             raise ValueError('expected Q_data.shape = %s but provided %s'%(str((DT,P,M,K)),str(Q_data.shape)))
         assert R_data.shape == (DT,P,K,N)
         
-        assert M >= N
+        if not M >= N:
+            raise NotImplementedError('A_data.shape = (DT,P,M,N) = %s but require (for now) that M>=N')
         
         # INIT: compute the base point
         for p in range(P):
@@ -478,6 +479,10 @@ class UTPM(GradedRing):
         X  = numpy.zeros((P,K,K))
 
         PL = numpy.array([[ r > c for c in range(N)] for r in range(K)],dtype=float)
+        
+        Rinv = numpy.zeros((P,K,N))
+        for p in range(P):
+            Rinv[p] = numpy.linalg.inv(R_data[0,p])
         
         # ITERATE: compute the derivatives
         for D in range(1,DT):
@@ -505,10 +510,13 @@ class UTPM(GradedRing):
             
             # STEP 5:
             for p in range(P):
-                Q_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:],K[p,:,:])
                 R_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:].T, H[p,:,:]) - numpy.dot(K[p,:,:],R_data[0,p,:,:])
-                
                 R_data[D,p,:,:] = R_data[D,p,:,:] - PL * R_data[D,p,:,:]
+                
+            # STEP 6:
+            for p in range(P):
+                Q_data[D,p,:,:] = numpy.dot(H[p] - numpy.dot(Q_data[0,p],R_data[D,p]), Rinv[p]) #numpy.dot(Q_data[0,p,:,:],K[p,:,:])
+
 
 
     def eig(self):
@@ -566,7 +574,7 @@ class UTPM(GradedRing):
 
         # ITERATE: compute derivatives
         for D in range(1,DT):
-            print 'D=',D
+            # print 'D=',D
             dG[...] = 0.
             
             dL = numpy.zeros((P,N,N))
