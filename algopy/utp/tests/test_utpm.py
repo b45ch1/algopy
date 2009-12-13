@@ -437,6 +437,21 @@ class TestMatPoly(TestCase):
         x2 = A.dot(y)
         assert_array_almost_equal(x.tc, x2.tc, decimal = 12)
 
+    def test_solve2(self):
+        (D,P,M,N,K) = 3,3,30,30, 5
+        x = UTPM(numpy.random.rand(D,P,M,K))
+        A = UTPM(numpy.random.rand(D,P,M,N))
+
+        for p in range(P):
+            for n in range(N):
+                A.data[0,p,n,n] += (N + 1)
+
+        y = x.solve2(A)
+
+        print y
+        #x2 = A.dot(y)
+        #assert_array_almost_equal(x.tc, x2.tc, decimal = 12)
+
     def test_qr(self):
         (D,P,N) = 6,3,20
         A_data = numpy.random.rand(D,P,N,N)
@@ -536,9 +551,32 @@ class TestMatPoly(TestCase):
         
         L = UTPM(L_data)
         
-        assert_array_almost_equal(Q.dot(L.dot(Q.T)).data, A.data, decimal = 12)
+        assert_array_almost_equal(Q.dot(L.dot(Q.T)).data, A.data, decimal = 10)
 
 
+
+class ODOE_example_for_ICCS2010_conference(TestCase):
+    def test_forward(self):
+        D,Nx,Ny,NF = 2,3,3,20
+        P = Ny
+        x = UTPM(numpy.random.rand(D,P,Nx))
+        y = UTPM(numpy.random.rand(D,P,Ny))
+
+        F = UTPM(numpy.zeros((D,P,NF)))
+
+        for nf in range(NF):
+            F[nf] =  numpy.sum([ (nf+1.)**n * x[n]*y[-n] for n in range(Nx)])
+        
+        J = F.FtoJT().T
+        Q,R = J.qr()
+
+        #Id = numpy.eye(P)
+        #D = (R.T).solve(Id)
+
+        
+        
+
+        
 
 class TestCombineBlocks(TestCase):
     def test_convert(self):
