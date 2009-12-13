@@ -325,6 +325,19 @@ class UTPM(GradedRing):
                     retval.tc[d,p,...] += numpy.dot(self.tc[c,p,...], rhs.tc[d-c,p,...])
         return retval
 
+    @classmethod
+    def cls_dot(cls, retval, lhs, rhs):
+        """
+        z = dot(x,y)
+        """
+        D,P = x_data.shape[:2]
+        
+        for d in range(D):
+            for p in range(P):
+                for c in range(d+1):
+                    z_data[d,p,...] += numpy.dot(x_data[c,p,...], y_data[d-c,p,...])
+        
+
     def inv(self):
         retval = UTPM(numpy.zeros(numpy.shape(self.tc)))
         (D,P,N,M) = numpy.shape(retval.tc)
