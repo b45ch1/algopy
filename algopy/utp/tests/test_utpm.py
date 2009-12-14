@@ -270,6 +270,12 @@ class TestMatPoly(TestCase):
         
         assert_array_almost_equal(dot(aA,ax).data[0,0], dot(aA, x).data[0,0])
         assert_array_almost_equal(dot(aA,ax).data[0,0], dot(A, ax).data[0,0])
+        
+        assert_array_almost_equal(dot(aA,aX).data[0,0], dot(aA, X).data[0,0])
+        assert_array_almost_equal(dot(aA,aX).data[0,0], dot(A, aX).data[0,0])
+        
+        assert_array_almost_equal(dot(ax,ay).data[0,0], dot(ax, y).data[0,0])
+        assert_array_almost_equal(dot(ax,ay).data[0,0], dot(x, ay).data[0,0])
 
 
 
