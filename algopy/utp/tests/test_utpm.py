@@ -493,16 +493,16 @@ class TestMatPoly(TestCase):
         
     def test_solve_non_UTPM_A(self):
         (D,P,N,M) = 3,3,30,4
-        x = UTPM(numpy.random.rand(D,P,N,M))
-        A = numpy.random.rand(N,N)
+        A  = UTPM(numpy.random.rand(D,P,N,N))
+        Id = numpy.zeros((N,N))
         
         for p in range(P):
             for n in range(N):
                 A[n,n] += (N + 1)
+                Id[n,n] = 1
         
-        y = x.solve(A)
-        
-        # print y
+        # y = x.solve(A)
+
         # x2 = A.dot(y)
         # assert_array_almost_equal(x.tc, x2.tc, decimal = 12)        
         
