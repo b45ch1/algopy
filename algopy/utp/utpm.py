@@ -308,6 +308,40 @@ class UTPM(GradedRing):
     def __neg__(self):
         return UTPM(-self.tc)
 
+
+    def max(self, axis = None, out = None):
+        if out != None:
+            raise NotImplementedError('should implement that')
+
+        if axis != None:
+            raise NotImplementedError('should implement that')
+        
+        self_shp = self.data.shape 
+        retval_shp = self_shp[:2]
+        retval = self.__class__(self.__class__.__zeros__(retval_shp))
+        self.__class__.cls_max( self.data, axis = axis, out = retval.data)
+        return retval
+        
+
+    @classmethod
+    def cls_max(cls, x_data, axis = None, out = None):
+
+        if out == None:
+            raise NotImplementedError('should implement that')
+        
+        x_shp = x_data.shape
+
+        D,P = x_shp[:2]
+        shp = x_shp[2:]
+
+        if len(shp) > 1:
+            raise NotImplementedError('should implement that')
+        
+        for p in range(P):
+            out[:,p] = x_data[:,p,numpy.argmax(x_data[0,p])]
+        
+        
+
     def dot_old(self,rhs):
         D,P = self.tc.shape[:2]
         

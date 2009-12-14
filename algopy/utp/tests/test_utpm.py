@@ -367,7 +367,17 @@ class TestMatPoly(TestCase):
         assert_array_almost_equal(AX2.tc, AY6.tc )
         assert_array_almost_equal(AX3.tc, AY7.tc )
         assert_array_almost_equal(AX4.tc, AY8.tc )
-        
+
+    def test_max(self):
+        D,P,N = 2,3,4
+        X = numpy.array([ dpn for dpn in range(D*P*N)],dtype = float)
+        X = X.reshape((D,P,N))
+        AX = UTPM(X)
+
+        axmax = AX.max()
+        #print axmax
+        #print  AX.data[:,:,-1]
+        assert_array_almost_equal(axmax.data, AX.data[:,:,-1])
 
     def test_constructor_stores_reference_of_tc_and_does_not_copy(self):
         X  = numpy.zeros((2,3,4,5))
@@ -602,12 +612,15 @@ class TestMatPoly(TestCase):
         
 
     def test_eig(self):
-        (D,P,N) = 4,3,5
+        (D,P,N) = 3,3,5
         A_data = numpy.zeros((D,P,N,N))
         for d in range(D):
             for p in range(P):
                 tmp = numpy.random.rand(N,N)
                 A_data[d,p,:,:] = numpy.dot(tmp.T,tmp)
+
+                if d == 0:
+                    A_data[d,p,:,:] += N * numpy.eye(N)
 
         A = UTPM(A_data)
         
@@ -645,7 +658,6 @@ class ODOE_example_for_ICCS2010_conference(TestCase):
         C = D.solve(R)
         Lam,U = C.eig()
 
-        print Lam
 
 
 class TestCombineBlocks(TestCase):
