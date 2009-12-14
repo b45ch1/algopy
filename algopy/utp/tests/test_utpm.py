@@ -452,21 +452,6 @@ class TestMatPoly(TestCase):
         assert_array_almost_equal(Z.data,Z2.data)
         
 
-    def test_solve2(self):
-        (D,P,M,N,K) = 3,3,30,30, 5
-        x = UTPM(numpy.random.rand(D,P,M,K))
-        A = UTPM(numpy.random.rand(D,P,M,N))
-
-        for p in range(P):
-            for n in range(N):
-                A.data[0,p,n,n] += (N + 1)
-
-        y = x.solve2(A)
-
-        # print y
-        #x2 = A.dot(y)
-        #assert_array_almost_equal(x.tc, x2.tc, decimal = 12)
-
     def test_qr(self):
         (D,P,N) = 6,3,20
         A_data = numpy.random.rand(D,P,N,N)

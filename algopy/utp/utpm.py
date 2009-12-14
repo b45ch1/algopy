@@ -46,6 +46,17 @@ def dot(x,y):
         return x.dot(y)
     else:
         return numpy.dot(x,y)
+        
+        
+def solve(A,x):
+    if isinstance(x, UTPM):
+        return x.inv(A)
+    
+    elif isinstance(A, UTPM):
+        raise NotImplementedError('should implement that...')
+    
+    else:
+        return numpy.linalg.solve(A,x)
 
 
 def vdot(x,y):
@@ -392,7 +403,7 @@ class UTPM(GradedRing):
                 retval.tc[d,p,:,:] =  numpy.dot(-retval.tc[0,p,:,:], retval.tc[d,p,:,:],)
         return retval
 
-    def solve(self,A):
+    def solve_old(self,A):
         """
         A y = x  <=> y = solve(A,x)
         is implemented here as y = x.solve(A)
@@ -416,7 +427,7 @@ class UTPM(GradedRing):
                 retval.tc[d,p,:,:] = numpy.linalg.solve(A.tc[0,p,:,:],tmp)
         return retval
 
-    def solve2(self, A):
+    def solve(self, A):
         A_shp = numpy.shape(A.data)
         x_shp = numpy.shape(self.data)
 
@@ -441,17 +452,23 @@ class UTPM(GradedRing):
         
         """
         
+        x_shp = numpy.shape(x_data)
         A_shp = numpy.shape(A_data)
-        D,P = A_shp[:2]
+        D,P,M,N = A_shp
+        D,P,M,K = x_shp
 
         # d = 0:  base point
         for p in range(P):
             y_data[0,p,...] = numpy.linalg.solve(A_data[0,p,...], x_data[0,p,...])
 
         # d = 1,...,D-1
-        for d in range(1,D):
-            pass
-            #tmp = x_data[d] - numpy.sum([
+        tmp = numpy.zeros((M,K),dtype=float)
+        for d in range(1, D):
+            for p in range(P):
+                tmp[:,:] = x_data[d,p,:,:]
+                for k in range(1,d+1):
+                    tmp[:,:] -= numpy.dot(A_data[k,p,:,:],y_data[d-k,p,:,:])
+                y_data[d,p,:,:] = numpy.linalg.solve(A_data[0,p,:,:],tmp)
         
 
     @classmethod
