@@ -414,11 +414,14 @@ class UTPM(GradedRing):
             lhs_shp = lhs.shape
             
             if  len(self_shp[2:]) == 1:
-                retval_shp = lhs_shp[:-1]
+                retval_shp = self_shp[:2] + lhs_shp[:-1]
                 
             else:
                 retval_shp = self_shp[:2] + lhs_shp[:-1] + self_shp[2:][:-2] + self_shp[2:][-1:]
                 
+            # print 'self_shp=',self_shp
+            # print 'lhs_shp=', lhs_shp
+            # print 'retval_shp=', retval_shp
             retval = self.__class__(self.__class__.__zeros__(retval_shp))
             
             self.__class__.cls_dot_non_UTPM_x(retval.data, lhs, self.data)            

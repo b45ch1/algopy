@@ -267,6 +267,10 @@ class TestMatPoly(TestCase):
         
         assert_array_almost_equal(dot(aX,aY).data[0,0], dot(aX, Y).data[0,0])
         assert_array_almost_equal(dot(aX,aY).data[0,0], dot(X, aY).data[0,0])
+        
+        assert_array_almost_equal(dot(aA,ax).data[0,0], dot(aA, x).data[0,0])
+        assert_array_almost_equal(dot(aA,ax).data[0,0], dot(A, ax).data[0,0])
+
 
 
     def test_scalar_operations(self):
