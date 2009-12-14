@@ -222,8 +222,12 @@ class TestMatPoly(TestCase):
         
         assert_array_equal( aX.dot(aY).tc.shape, (D,P,N,N))
         assert_array_equal( aY.dot(aX).tc.shape, (D,P,M,M))
+        
+        print 'calling 1'
         assert_array_equal( aA.dot(ax).tc.shape, (D,P,M))
-        assert_array_equal( ax.dot(ay).tc.shape, (D,P,1))
+        
+        print 'calling'
+        assert_array_equal( ax.dot(ay).tc.shape, (D,P))
 
     def test_scalar_operations(self):
         D,P,N,M = 2,3,4,5
@@ -436,6 +440,17 @@ class TestMatPoly(TestCase):
         y = x.solve(A)
         x2 = A.dot(y)
         assert_array_almost_equal(x.tc, x2.tc, decimal = 12)
+        
+    def test_dot2(self):
+        (D,P,M,N,K) = 3,3,4,5,6
+        X = UTPM(numpy.random.rand(D,P,M,K))
+        Y = UTPM(numpy.random.rand(D,P,K,N))
+        
+        Z = X.dot_old(Y)
+        Z2 = X.dot(Y)
+        
+        assert_array_almost_equal(Z.data,Z2.data)
+        
 
     def test_solve2(self):
         (D,P,M,N,K) = 3,3,30,30, 5
@@ -448,7 +463,7 @@ class TestMatPoly(TestCase):
 
         y = x.solve2(A)
 
-        print y
+        # print y
         #x2 = A.dot(y)
         #assert_array_almost_equal(x.tc, x2.tc, decimal = 12)
 

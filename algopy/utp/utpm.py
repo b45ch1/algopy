@@ -297,7 +297,7 @@ class UTPM(GradedRing):
     def __neg__(self):
         return UTPM(-self.tc)
 
-    def dot(self,rhs):
+    def dot_old(self,rhs):
         D,P = self.tc.shape[:2]
         
         if len(self.shape) == 1 and len(rhs.shape) == 1:
@@ -325,13 +325,51 @@ class UTPM(GradedRing):
                     retval.tc[d,p,...] += numpy.dot(self.tc[c,p,...], rhs.tc[d-c,p,...])
         return retval
 
+    def dot(self,rhs):
+        """
+        retval = self.dot(rhs)
+        
+        computes z = dot(x,y)
+        """
+        
+        self_shp = self.data.shape
+        rhs_shp = rhs.data.shape
+        
+        assert self_shp[:2] == rhs_shp[:2]
+        
+        if  len(rhs_shp[2:]) == 1:
+            retval_shp = self_shp[:-1]
+            
+        else:
+            retval_shp = self_shp[:2] + self_shp[2:-1] + rhs_shp[2:][:-2] + rhs_shp[2:][-1:]
+        
+            # print '---------'
+            # print self_shp[2:-1]
+            # print rhs_shp[2:][:-2]
+            # print rhs_shp[2:][-1:]
+
+        # print 'self_shp = ', self_shp
+        # print 'rhs_shp = ', rhs_shp
+        # print 'retval_shp = ', retval_shp
+            
+        retval = self.__class__(self.__class__.__zeros__(retval_shp))
+        
+        self.__class__.cls_dot(retval.data, self.data, rhs.data)
+        
+        return retval
+
+
     @classmethod
-    def cls_dot(cls, retval, lhs, rhs):
+    def cls_dot(cls, z_data, x_data, y_data):
         """
         z = dot(x,y)
         """
         D,P = x_data.shape[:2]
         
+        print 'x_data.shape=', x_data.shape
+        print 'y_data.shape=', y_data.shape
+        print 'z_data.shape=', z_data.shape
+
         for d in range(D):
             for p in range(P):
                 for c in range(d+1):
