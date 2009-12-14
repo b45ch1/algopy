@@ -506,9 +506,7 @@ class TestMatPoly(TestCase):
 
         for p in range(P):
             assert_array_almost_equal(Id, Id2.data[0,p], decimal = 12)
-
-
-        #print Id2
+        
         assert_array_almost_equal(numpy.zeros((D-1,P,N,N)), Id2.data[1:], decimal=10)
         
         
@@ -642,8 +640,13 @@ class ODOE_example_for_ICCS2010_conference(TestCase):
         J = F.FtoJT().T
         Q,R = J.qr()
 
-        #Id = numpy.eye(P)
-        #D = (R.T).solve(Id)
+        Id = numpy.eye(P)
+        D = (R.T).rsolve(Id)
+        C = D.solve(R)
+        Lam,U = C.eig()
+
+        print Lam
+
 
 class TestCombineBlocks(TestCase):
     def test_convert(self):
