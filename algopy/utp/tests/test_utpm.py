@@ -245,7 +245,7 @@ class TestMatPoly(TestCase):
         assert_array_almost_equal( aA.dot(ax).data, ax.rdot(aA).data)
         assert_array_almost_equal( ax.dot(ay).data, ay.rdot(ax).data)
     
-    def test_dot_non_UTPM_y(self):
+    def test_dot_non_UTPM(self):
         D,P,N,M = 2,3,4,5
         RX = 2 * numpy.random.rand(D,P,N,M)
         RY = 3 * numpy.random.rand(D,P,M,N)
