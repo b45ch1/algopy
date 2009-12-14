@@ -658,6 +658,9 @@ class ODOE_example_for_ICCS2010_conference(TestCase):
         C = D.solve(R)
         Lam,U = C.eig()
 
+        l11 = Lam.max()
+
+
 
 
 class TestCombineBlocks(TestCase):
