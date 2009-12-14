@@ -491,8 +491,8 @@ class TestMatPoly(TestCase):
         x2 = A.dot(y)
         assert_array_almost_equal(x.tc, x2.tc, decimal = 12)
         
-    def test_solve_non_UTPM_A(self):
-        (D,P,N,M) = 3,3,30,4
+    def test_rsolve_non_UTPM_A(self):
+        (D,P,N) = 2,3,2
         A  = UTPM(numpy.random.rand(D,P,N,N))
         Id = numpy.zeros((N,N))
         
@@ -501,10 +501,15 @@ class TestMatPoly(TestCase):
                 A[n,n] += (N + 1)
                 Id[n,n] = 1
         
-        # y = x.solve(A)
+        y = A.rsolve(Id)
+        Id2 = A.dot(y)
 
-        # x2 = A.dot(y)
-        # assert_array_almost_equal(x.tc, x2.tc, decimal = 12)        
+        for p in range(P):
+            assert_array_almost_equal(Id, Id2.data[0,p], decimal = 12)
+
+
+        #print Id2
+        assert_array_almost_equal(numpy.zeros((D-1,P,N,N)), Id2.data[1:], decimal=10)
         
         
         

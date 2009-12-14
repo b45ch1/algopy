@@ -532,7 +532,29 @@ class UTPM(GradedRing):
             D,P = x_shp[:2]
             y = self.__class__(self.__class__.__zeros__((D,P,M) + x_shp[3:]))
             self.__class__.cls_solve_non_UTPM_A(y.data, A, self.data)
+            
+        return y
 
+    def rsolve(self, x):
+
+        if isinstance(x, UTPM):
+            A_shp = numpy.shape(self.data)
+            x_shp = numpy.shape(x.data)
+
+            assert A_shp[:2] == x_shp[:2]
+            if A_shp[2] != x_shp[2]:
+                print ValueError('A.data.shape = %s does not match x.data.shape = %s'%(str(A.data.shape), str(self.data.shape)))
+
+            D, P, M = A_shp[:3]
+            y = self.__class__(self.__class__.__zeros__((D,P,M) + x_shp[3:]))
+            UTPM.cls_solve(y.data, A.data, self.data)
+
+        else:
+            x_shp = numpy.shape(x)
+            A_shp = numpy.shape(self.data)
+            D,P,M = A_shp[:3]
+            y = self.__class__(self.__class__.__zeros__((D,P,M) + x_shp[1:]))
+            self.__class__.cls_solve_non_UTPM_x(y.data, self.data, x)
 
         return y
 
@@ -592,7 +614,37 @@ class UTPM(GradedRing):
                 for k in range(1,d+1):
                     tmp[:,:] -= numpy.dot(A_data[...],y_data[d-k,p,:,:])
                 y_data[d,p,:,:] = numpy.linalg.solve(A_data[:,:],tmp)
-        
+
+    @classmethod
+    def cls_solve_non_UTPM_x(cls, y_data, A_data, x_data):
+        """
+        solves the linear system of equations for y::
+
+            A y = x
+
+        where x is simple (N,K) float array
+        """
+
+        x_shp = numpy.shape(x_data)
+        A_shp = numpy.shape(A_data)
+        D,P,M,N = A_shp
+        M,K = x_shp
+
+        assert M==N
+
+        # d = 0:  base point
+        for p in range(P):
+            y_data[0,p,...] = numpy.linalg.solve(A_data[0,p,...], x_data[...])
+
+        # d = 1,...,D-1
+        tmp = numpy.zeros((M,K),dtype=float)
+        for d in range(1, D):
+            for p in range(P):
+                tmp[:,:] = 0.
+                for k in range(1,d+1):
+                    tmp[:,:] -= numpy.dot(A_data[k,p,:,:],y_data[d-k,p,:,:])
+                y_data[d,p,:,:] = numpy.linalg.solve(A_data[0,p,:,:],tmp)
+    
 
     @classmethod
     def __zeros_like__(cls, data):
