@@ -325,6 +325,19 @@ class UTPM(GradedRing):
                     retval.tc[d,p,...] += numpy.dot(self.tc[c,p,...], rhs.tc[d-c,p,...])
         return retval
 
+    @classmethod
+    def cls_dot(cls, retval, lhs, rhs):
+        """
+        z = dot(x,y)
+        """
+        D,P = x_data.shape[:2]
+        
+        for d in range(D):
+            for p in range(P):
+                for c in range(d+1):
+                    z_data[d,p,...] += numpy.dot(x_data[c,p,...], y_data[d-c,p,...])
+        
+
     def inv(self):
         retval = UTPM(numpy.zeros(numpy.shape(self.tc)))
         (D,P,N,M) = numpy.shape(retval.tc)
@@ -347,8 +360,15 @@ class UTPM(GradedRing):
         is implemented here as y = x.solve(A)
         """
         retval = UTPM( numpy.zeros( numpy.shape(self.tc)))
+        
+        if numpy.ndim(retval.tc) != 4:
+            raise NotImplementedError('Expecting retval.tc.ndim = 4 but provided retval.tc.shape=%s'%(str(retval.tc)))
+        
         (D,P,N,M) = numpy.shape(retval.tc)
-        assert M == 1
+
+        if M != 1:
+            raise NotImplementedError('Sorry, solving extended linear systems not supported (yet)')
+        
         tmp = numpy.zeros((N,M),dtype=float)
         for d in range(D):
             for p in range(P):
@@ -357,6 +377,44 @@ class UTPM(GradedRing):
                     tmp[:,:] -= numpy.dot(A.tc[k,p,:,:],retval.tc[d-k,p,:,:])
                 retval.tc[d,p,:,:] = numpy.linalg.solve(A.tc[0,p,:,:],tmp)
         return retval
+
+    def solve2(self, A):
+        A_shp = numpy.shape(A.data)
+        x_shp = numpy.shape(self.data)
+
+        assert A_shp[:2] == x_shp[:2]
+        if A_shp[2] != x_shp[2]:
+            print ValueError('A.data.shape = %s does not match x.data.shape = %s'%(str(A.data.shape), str(self.data.shape)))
+
+        D, P, M = A_shp[:3]
+
+        y = self.__class__(self.__class__.__zeros__((D,P,M) + x_shp[3:]))
+
+        UTPM.cls_solve(y.data, A.data, self.data)
+
+        return y
+
+    @classmethod
+    def cls_solve(cls, y_data, A_data, x_data):
+        """
+        solves the linear system of equations for y::
+            
+            A y = x
+        
+        """
+        
+        A_shp = numpy.shape(A_data)
+        D,P = A_shp[:2]
+
+        # d = 0:  base point
+        for p in range(P):
+            y_data[0,p,...] = numpy.linalg.solve(A_data[0,p,...], x_data[0,p,...])
+
+        # d = 1,...,D-1
+        for d in range(1,D):
+            pass
+            #tmp = x_data[d] - numpy.sum([
+        
 
     @classmethod
     def __zeros_like__(cls, data):
