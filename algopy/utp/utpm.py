@@ -368,8 +368,34 @@ class UTPM(GradedRing):
         self.__class__.cls_dot(retval.data, self.data, rhs.data)
         
         return retval
-
-
+        
+        
+    def rdot(self, lhs):
+        """
+        
+        computes z = dot(x,y)
+                   = y.rdot(x)
+                   
+        i.e.:
+            x.dot(y) == y.rdot(x)
+        """
+        
+        self_shp = self.data.shape
+        lhs_shp = lhs.data.shape
+        
+        if  len(self_shp[2:]) == 1:
+            retval_shp = lhs_shp[:-1]
+            
+        else:
+            retval_shp = lhs_shp[:2] + lhs_shp[2:-1] + self_shp[2:][:-2] + self_shp[2:][-1:]
+            
+        retval = self.__class__(self.__class__.__zeros__(retval_shp))
+        
+        self.__class__.cls_dot(retval.data, lhs.data, self.data)
+        
+        return retval
+        
+        
     @classmethod
     def cls_dot(cls, z_data, x_data, y_data):
         """
@@ -377,15 +403,48 @@ class UTPM(GradedRing):
         """
         D,P = x_data.shape[:2]
         
-        print 'x_data.shape=', x_data.shape
-        print 'y_data.shape=', y_data.shape
-        print 'z_data.shape=', z_data.shape
+        # print 'x_data.shape=', x_data.shape
+        # print 'y_data.shape=', y_data.shape
+        # print 'z_data.shape=', z_data.shape
 
         for d in range(D):
             for p in range(P):
                 for c in range(d+1):
-                    z_data[d,p,...] += numpy.dot(x_data[c,p,...], y_data[d-c,p,...])
+                    z_data[d,p,...] += numpy.dot(x_data[c,p,...], y_data[d-c,p,...])        
         
+        
+
+
+                    
+    @classmethod
+    def cls_dot_non_UTPM_y(cls, z_data, x_data, y_data):
+        """
+        z = dot(x,y)
+        """
+        D,P = x_data.shape[:2]
+        
+        # print 'x_data.shape=', x_data.shape
+        # print 'y_data.shape=', y_data.shape
+        # print 'z_data.shape=', z_data.shape
+
+        for d in range(D):
+            for p in range(P):
+                z_data[d,p,...] = numpy.dot(x_data[d,p,...], y_data[...])
+                
+    @classmethod
+    def cls_dot_non_UTPM_x(cls, z_data, x_data, y_data):
+        """
+        z = dot(x,y)
+        """
+        D,P = x_data.shape[:2]
+        
+        # print 'x_data.shape=', x_data.shape
+        # print 'y_data.shape=', y_data.shape
+        # print 'z_data.shape=', z_data.shape
+
+        for d in range(D):
+            for p in range(P):
+                z_data[d,p,...] = numpy.dot(x_data[...], y_data[c,p,...])
 
     def inv(self):
         retval = UTPM(numpy.zeros(numpy.shape(self.tc)))
