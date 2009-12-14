@@ -428,18 +428,29 @@ class UTPM(GradedRing):
         return retval
 
     def solve(self, A):
-        A_shp = numpy.shape(A.data)
-        x_shp = numpy.shape(self.data)
+        
+        if isinstance(A, UTPM):
+            A_shp = numpy.shape(A.data)
+            x_shp = numpy.shape(self.data)
+    
+            assert A_shp[:2] == x_shp[:2]
+            if A_shp[2] != x_shp[2]:
+                print ValueError('A.data.shape = %s does not match x.data.shape = %s'%(str(A.data.shape), str(self.data.shape)))
+    
+            D, P, M = A_shp[:3]
+    
+            y = self.__class__(self.__class__.__zeros__((D,P,M) + x_shp[3:]))
+    
+            UTPM.cls_solve(y.data, A.data, self.data)
+        
+        else:
+            A_shp = numpy.shape(A)
+            x_shp = numpy.shape(self.data)
+            M = A_shp[0]
+            D,P = x_shp[:2]
+            y = self.__class__(self.__class__.__zeros__((D,P,M) + x_shp[3:]))
+            self.__class__.cls_solve_non_UTPM_A(y.data, A, self.data)
 
-        assert A_shp[:2] == x_shp[:2]
-        if A_shp[2] != x_shp[2]:
-            print ValueError('A.data.shape = %s does not match x.data.shape = %s'%(str(A.data.shape), str(self.data.shape)))
-
-        D, P, M = A_shp[:3]
-
-        y = self.__class__(self.__class__.__zeros__((D,P,M) + x_shp[3:]))
-
-        UTPM.cls_solve(y.data, A.data, self.data)
 
         return y
 
@@ -469,6 +480,36 @@ class UTPM(GradedRing):
                 for k in range(1,d+1):
                     tmp[:,:] -= numpy.dot(A_data[k,p,:,:],y_data[d-k,p,:,:])
                 y_data[d,p,:,:] = numpy.linalg.solve(A_data[0,p,:,:],tmp)
+                
+    @classmethod
+    def cls_solve_non_UTPM_A(cls, y_data, A_data, x_data):
+        """
+        solves the linear system of equations for y::
+            
+            A y = x
+        
+        when A is a simple (N,N) float array
+        """
+        
+        x_shp = numpy.shape(x_data)
+        A_shp = numpy.shape(A_data)
+        M,N = A_shp
+        D,P,M,K = x_shp
+        
+        assert M == N
+
+        # d = 0:  base point
+        for p in range(P):
+            y_data[0,p,:,:] = numpy.linalg.solve(A_data[:,:], x_data[0,p,:,:])
+
+        # d = 1,...,D-1
+        tmp = numpy.zeros((M,K),dtype=float)
+        for d in range(1, D):
+            for p in range(P):
+                tmp[:,:] = x_data[d,p,:,:]
+                for k in range(1,d+1):
+                    tmp[:,:] -= numpy.dot(A_data[...],y_data[d-k,p,:,:])
+                y_data[d,p,:,:] = numpy.linalg.solve(A_data[:,:],tmp)
         
 
     @classmethod
