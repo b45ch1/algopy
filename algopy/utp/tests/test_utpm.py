@@ -539,7 +539,6 @@ class TestMatPoly(TestCase):
         assert_array_almost_equal(Q.dot(L.dot(Q.T)).data, A.data, decimal = 12)
 
 
-
 class TestCombineBlocks(TestCase):
     def test_convert(self):
         X1 = 2 * numpy.random.rand(2,2,2,2)
