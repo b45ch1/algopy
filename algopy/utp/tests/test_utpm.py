@@ -244,7 +244,30 @@ class TestMatPoly(TestCase):
         assert_array_almost_equal( aY.dot(aX).data, aX.rdot(aY).data)
         assert_array_almost_equal( aA.dot(ax).data, ax.rdot(aA).data)
         assert_array_almost_equal( ax.dot(ay).data, ay.rdot(ax).data)
+    
+    def test_dot_non_UTPM_y(self):
+        D,P,N,M = 2,3,4,5
+        RX = 2 * numpy.random.rand(D,P,N,M)
+        RY = 3 * numpy.random.rand(D,P,M,N)
+        RA = 3 * numpy.random.rand(D,P,M,N)
+        Rx = 2 * numpy.random.rand(D,P,N)
+        Ry = 2 * numpy.random.rand(D,P,N)
         
+        X = RX[0,0]
+        Y = RY[0,0]
+        A = RA[0,0]
+        x = Rx[0,0]
+        y = Ry[0,0]
+
+        aX = UTPM(RX)
+        aY = UTPM(RY)
+        aA = UTPM(RA)
+        ax = UTPM(Rx)
+        ay = UTPM(Ry)
+        
+        assert_array_almost_equal(dot(aX,aY).data[0,0], dot(aX, Y).data[0,0])
+        assert_array_almost_equal(dot(aX,aY).data[0,0], dot(X, aY).data[0,0])
+
 
     def test_scalar_operations(self):
         D,P,N,M = 2,3,4,5
