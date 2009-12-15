@@ -639,7 +639,7 @@ class PushForward(TestCase):
 
 class Pullback(TestCase):
     def test_qr_pullback(self):
-        (D,P,M,N) = 5,3,5,3
+        (D,P,M,N) = 2,1,3,2
         
         A_data = numpy.random.rand(D,P,M,N)
         # make A_data sufficiently regular

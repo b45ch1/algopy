@@ -871,12 +871,12 @@ class UTPM(GradedRing):
                 L_data[D,p,:] = numpy.diag(dL[p])
     
     @classmethod
-    def cls_mul_non_UTPM_x(z_data, x_data, y_data):
+    def cls_mul_non_UTPM_x(cls, z_data, x_data, y_data):
         """
         z = x * y
         """
         
-        D,P = numpy.shape(y_data)
+        D,P = numpy.shape(y_data)[:2]
         
         for d in range(D):
             for p in range(P):
@@ -885,23 +885,65 @@ class UTPM(GradedRing):
     @classmethod            
     def cls_qr_pullback(cls, Abar_data, Qbar_data, Rbar_data, A_data, Q_data, R_data):
         A_shp = A_data.shape
-        D,P = A_shp[:2]
+        D,P,M,N = A_shp
+
+        # allocate temporary storage
+        F = numpy.zeros((D,P,N,M))
+        G = numpy.zeros((D,P,N,N))
+        H = numpy.zeros((D,P,N,N))
+        K = numpy.zeros((D,P,N,N))
+
+        PR  = numpy.array([[ r < c for c in range(N)] for r in range(N)],dtype=float)
+        PRD = numpy.array([[ r <= c for c in range(N)] for r in range(N)],dtype=float)
+        
         # STEP 1:
-        F = numpy.zeros(A_shp)
-        cls.cls_dot(F, Q_data, Rbar_data)
+        cls.cls_solve( F, R_data, Qbar_data.transpose((0,1,3,2)))
+        Abar_data += F.transpose((0,1,3,2))
         
-        tmp = numpy.zeros(Qbar_data.shape)
-        cls.cls_dot(tmp, F, Rbar_data.transpose(0,1,3,2))
-        Qbar_data -= tmp
+        cls.cls_dot(G, Qbar_data.transpose((0,1,3,2)), Q_data)
+        cls.cls_solve( H, R_data, G)
         
+        G[...] = 0
+        cls.cls_mul_non_UTPM_x(G, PRD, H.transpose((0,1,3,2)))
+        Rbar_data += G
+
         # STEP 2:
-        Abar_data += F
-        
+        G[...] = 0
+        H[...] = 0
+        cls.cls_dot(G,  Rbar_data, R_data.transpose((0,1,3,2)))
+        H += G
+        H -= G.transpose((0,1,3,2))
+        cls.cls_mul_non_UTPM_x(K, PR, H)
+
         # STEP 3:
-        PR = numpy.array([[ r < c for c in range(N)] for r in range(N)],dtype=float)
+        G[...] = 0
+        H[...] = 0
+
+        cls.cls_solve( G, R_data, K)
+        H += G
+        H += Rbar_data.transpose((0,1,3,2))
+
+        F[...] = 0
+        cls.cls_dot(F, H, Q_data.transpose((0,1,3,2)))
+
+        Abar_data += F.transpose((0,1,3,2))
         
-        K = numpy.zeros(R_data.shape)
-        cls.cls_dot(K, Qbar_data.transpose(0,1,3,2), Q_data)
+        
+        #F = numpy.zeros(A_shp)
+        #cls.cls_dot(F, Q_data, Rbar_data)
+        
+        #tmp = numpy.zeros(Qbar_data.shape)
+        #cls.cls_dot(tmp, F, Rbar_data.transpose(0,1,3,2))
+        #Qbar_data -= tmp
+        
+        ## STEP 2:
+        #Abar_data += F
+        
+        ## STEP 3:
+        #PR = numpy.array([[ r < c for c in range(N)] for r in range(N)],dtype=float)
+        
+        #K = numpy.zeros(R_data.shape)
+        #cls.cls_dot(K, Qbar_data.transpose(0,1,3,2), Q_data)
         
          
                 
