@@ -869,6 +869,41 @@ class UTPM(GradedRing):
             # STEP 7:
             for p in range(P):
                 L_data[D,p,:] = numpy.diag(dL[p])
+    
+    @classmethod
+    def cls_mul_non_UTPM_x(z_data, x_data, y_data):
+        """
+        z = x * y
+        """
+        
+        D,P = numpy.shape(y_data)
+        
+        for d in range(D):
+            for p in range(P):
+                z_data[d,p] = x_data * y_data[d,p]
+                
+    @classmethod            
+    def cls_qr_pullback(cls, Abar_data, Qbar_data, Rbar_data, A_data, Q_data, R_data):
+        A_shp = A_data.shape
+        D,P = A_shp[:2]
+        # STEP 1:
+        F = numpy.zeros(A_shp)
+        cls.cls_dot(F, Q_data, Rbar_data)
+        
+        tmp = numpy.zeros(Qbar_data.shape)
+        cls.cls_dot(tmp, F, Rbar_data.transpose(0,1,3,2))
+        Qbar_data -= tmp
+        
+        # STEP 2:
+        Abar_data += F
+        
+        # STEP 3:
+        PR = numpy.array([[ r < c for c in range(N)] for r in range(N)],dtype=float)
+        
+        K = numpy.zeros(R_data.shape)
+        cls.cls_dot(K, Qbar_data.transpose(0,1,3,2), Q_data)
+        
+         
                 
 
     def trace(self):

@@ -135,7 +135,7 @@ class TestFunctionOfJacobian(TestCase):
         assert_almost_equal(ybar1,ybar2)
         
 
-class TestMatPoly(TestCase):
+class PushForward(TestCase):
     def test_UTPM_in_a_stupid_way(self):
         """
         this checks _only_ if calling the operations is ok
@@ -636,6 +636,30 @@ class TestMatPoly(TestCase):
         
         assert_array_almost_equal(Q.dot(L.dot(Q.T)).data, A.data, decimal = 10)
 
+
+class Pullback(TestCase):
+    def test_qr_pullback(self):
+        (D,P,M,N) = 5,3,5,3
+        
+        A_data = numpy.random.rand(D,P,M,N)
+        # make A_data sufficiently regular
+        for p in range(P):
+            for n in range(N):
+                A_data[0,p,n,n] += (N + 1)
+        
+        A = UTPM(A_data)
+
+        Q,R = A.qr()
+        
+        assert_array_equal( Q.data.shape, [D,P,M,N])
+        assert_array_equal( R.data.shape, [D,P,N,N])
+        assert_array_almost_equal( (Q.dot(R)).data, A.data, decimal = 14)
+        
+        Qbar_data = numpy.random.rand(*Q.data.shape)
+        Rbar_data = numpy.random.rand(*R.data.shape)
+        Abar_data = numpy.zeros(A.data.shape)
+        
+        UTPM.cls_qr_pullback(Abar_data, Qbar_data, Rbar_data, A.data, Q.data, R.data)
 
 
 class ODOE_example_for_ICCS2010_conference(TestCase):
