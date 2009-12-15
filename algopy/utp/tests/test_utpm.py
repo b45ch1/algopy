@@ -661,7 +661,19 @@ class Pullback(TestCase):
         
         UTPM.cls_qr_pullback(Abar_data, Qbar_data, Rbar_data, A.data, Q.data, R.data)
 
+        Abar = Abar_data[0,0]
+        Adot = A_data[1,0]
 
+        Qbar = Qbar_data[0,0]
+        Qdot = Q.data[1,0]
+
+        Rbar = Rbar_data[0,0]
+        Rdot = R.data[1,0]
+
+        print numpy.dot(Abar.T,Adot) -  numpy.dot(Qbar.T,Qdot) - numpy.dot(Rbar.T,Rdot)
+
+
+        
 class ODOE_example_for_ICCS2010_conference(TestCase):
     def test_forward(self):
         D,Nx,Ny,NF = 2,3,3,20

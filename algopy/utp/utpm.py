@@ -927,26 +927,6 @@ class UTPM(GradedRing):
         cls.cls_dot(F, H, Q_data.transpose((0,1,3,2)))
 
         Abar_data += F.transpose((0,1,3,2))
-        
-        
-        #F = numpy.zeros(A_shp)
-        #cls.cls_dot(F, Q_data, Rbar_data)
-        
-        #tmp = numpy.zeros(Qbar_data.shape)
-        #cls.cls_dot(tmp, F, Rbar_data.transpose(0,1,3,2))
-        #Qbar_data -= tmp
-        
-        ## STEP 2:
-        #Abar_data += F
-        
-        ## STEP 3:
-        #PR = numpy.array([[ r < c for c in range(N)] for r in range(N)],dtype=float)
-        
-        #K = numpy.zeros(R_data.shape)
-        #cls.cls_dot(K, Qbar_data.transpose(0,1,3,2), Q_data)
-        
-         
-                
 
     def trace(self):
         """ returns a new UTPM in standard format, i.e. the matrices are 1x1 matrices"""
