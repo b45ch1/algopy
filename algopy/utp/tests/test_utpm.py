@@ -133,9 +133,25 @@ class TestFunctionOfJacobian(TestCase):
 
         assert_almost_equal(xbar1,xbar2)
         assert_almost_equal(ybar1,ybar2)
-        
+ 
 
-class PushForward(TestCase):
+class PushForward_UTPM_data(TestCase):
+    def test_cls_idiv(self):
+        # UTPM.cls_idiv
+        X_data = 2 * numpy.random.rand(2,2,2,2)
+        Z_data = 3 * numpy.random.rand(2,2,2,2)
+        Z2_data = Z_data.copy()
+        
+        UTPM.cls_idiv(Z_data, X_data)
+        
+        X = UTPM(X_data)
+        Z = UTPM(Z2_data)
+        
+        Z/=X
+        
+        assert_array_almost_equal(Z_data, Z.data)
+
+class PushForward_UTPM_objects(TestCase):
     def test_UTPM_in_a_stupid_way(self):
         """
         this checks _only_ if calling the operations is ok
@@ -670,7 +686,11 @@ class Pullback(TestCase):
         Rbar = Rbar_data[0,0]
         Rdot = R.data[1,0]
 
-        print numpy.dot(Abar.T,Adot) -  numpy.dot(Qbar.T,Qdot) - numpy.dot(Rbar.T,Rdot)
+        # print numpy.dot(Abar.T,Adot) -  numpy.dot(Qbar.T,Qdot) - numpy.dot(Rbar.T,Rdot)
+        
+        
+    def test_eig_pullback(self):
+        pass
 
 
         

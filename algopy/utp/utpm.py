@@ -245,6 +245,15 @@ class UTPM(GradedRing):
         retval = self.clone()
         retval.__imul__(rhs)
         return retval
+    
+    @classmethod    
+    def cls_idiv(cls, z_data, x_data):
+        (D,P) = z_data.shape[:2]
+        tmp_data = z_data.copy()
+        for d in range(D):
+            tmp_data[d,:,...] = 1./ x_data[0,:,...] * ( z_data[d,:,...] - numpy.sum(tmp_data[:d,:,...] * x_data[d:0:-1,:,...], axis=0))
+        z_data[...] = tmp_data[...]
+        
 
     def __div__(self,rhs):
         retval = self.clone()
@@ -881,6 +890,22 @@ class UTPM(GradedRing):
         for d in range(D):
             for p in range(P):
                 z_data[d,p] = x_data * y_data[d,p]
+                
+    @classmethod            
+    def cls_eig_pullback(cls, Abar_data, Qbar_data, lambar_data, A_data, Q_data, lam_data):
+        A_shp = A_data.shape
+        D,P,M,N = A_shp
+        
+        assert M == N
+        
+        H = numpy.zeros(A_shp)
+        
+        # for m in range(N):
+            # for n in range(N):
+                # H[:,:,m,n] = 1./( 
+        
+        
+        
                 
     @classmethod            
     def cls_qr_pullback(cls, Abar_data, Qbar_data, Rbar_data, A_data, Q_data, R_data):
