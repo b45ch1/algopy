@@ -262,7 +262,6 @@ class UTPM(GradedRing):
         (D,P) = z_data.shape[:2]
         for d in range(D):
             z_data[d,:,...] = 1./ y_data[0,:,...] * ( x_data[d,:,...] - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
-        
 
     def __div__(self,rhs):
         retval = self.clone()
@@ -907,13 +906,25 @@ class UTPM(GradedRing):
         
         assert M == N
         
+        # allocating temporary storage
         H = numpy.zeros(A_shp)
         
-        # for m in range(N):
-            # for n in range(N):
-                # H[:,:,m,n] = 1./( 
+        Id = numpy.zeros((D,P,1))
+        Id[0,:,0] = numpy.eye(P)
         
+        Lam_data = numpy.zeros((D,P,N,N))
+        # FIXME: replace this for loop by cls_diag
+        for n in range(N):
+            Lam_data[:,:,n,n] = lam_data[:,:,n]
         
+        for m in range(N):
+            for n in range(N):
+                if n == m:
+                    continue
+                tmp = lam_data[:,:,n] -   lam_data[:,:,m]
+                cls.cls_div(H[:,:,m,n], Id, tmp)
+        
+        print Lam_data
         
                 
     @classmethod            

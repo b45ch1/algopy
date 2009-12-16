@@ -707,7 +707,35 @@ class Pullback(TestCase):
         
         
     def test_eig_pullback(self):
-        pass
+        (D,P,N) = 2,1,3
+        A_data = numpy.zeros((D,P,N,N))
+        for d in range(D):
+            for p in range(P):
+                tmp = numpy.random.rand(N,N)
+                A_data[d,p,:,:] = numpy.dot(tmp.T,tmp)
+
+                if d == 0:
+                    A_data[d,p,:,:] += N * numpy.diag(numpy.random.rand(N))
+
+        A = UTPM(A_data)
+        
+        l,Q = A.eig()
+        
+        L_data = numpy.zeros((D,P,N,N))
+        for d in range(D):
+            for p in range(P):
+                for n in range(N):
+                    L_data[d,p,n,n] = l.data[d,p,n]
+        
+        L = UTPM(L_data)
+        
+        assert_array_almost_equal(Q.dot(L.dot(Q.T)).data, A.data, decimal = 13)
+        
+        lbar_data = numpy.zeros((D,P,N))
+        Qbar_data = numpy.zeros((D,P,N,N))
+        Abar_data = numpy.zeros((D,P,N,N))
+        
+        UTPM.cls_eig_pullback( Abar_data, Qbar_data, lbar_data, A.data, Q.data, l.data)
 
 
         
