@@ -137,7 +137,6 @@ class TestFunctionOfJacobian(TestCase):
 
 class PushForward_UTPM_data(TestCase):
     def test_cls_idiv(self):
-        # UTPM.cls_idiv
         X_data = 2 * numpy.random.rand(2,2,2,2)
         Z_data = 3 * numpy.random.rand(2,2,2,2)
         Z2_data = Z_data.copy()
@@ -150,6 +149,24 @@ class PushForward_UTPM_data(TestCase):
         Z/=X
         
         assert_array_almost_equal(Z_data, Z.data)
+        
+    def test_cls_div(self):
+        X_data = 2 * numpy.random.rand(2,2,2,2)
+        Y_data = 3 * numpy.random.rand(2,2,2,2)
+        Z_data = numpy.zeros((2,2,2,2))
+        
+        X = UTPM(X_data)
+        Y = UTPM(Y_data)
+        
+        Z = X/Y
+        
+        UTPM.cls_div(Z_data, X_data, Y_data)
+        
+        assert_array_almost_equal(Z_data, Z.data)
+        
+        
+        
+        
 
 class PushForward_UTPM_objects(TestCase):
     def test_UTPM_in_a_stupid_way(self):

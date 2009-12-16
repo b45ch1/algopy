@@ -254,6 +254,15 @@ class UTPM(GradedRing):
             tmp_data[d,:,...] = 1./ x_data[0,:,...] * ( z_data[d,:,...] - numpy.sum(tmp_data[:d,:,...] * x_data[d:0:-1,:,...], axis=0))
         z_data[...] = tmp_data[...]
         
+    @classmethod
+    def cls_div(cls, z_data, x_data, y_data):
+        """
+        z = x/y
+        """
+        (D,P) = z_data.shape[:2]
+        for d in range(D):
+            z_data[d,:,...] = 1./ y_data[0,:,...] * ( x_data[d,:,...] - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
+        
 
     def __div__(self,rhs):
         retval = self.clone()
