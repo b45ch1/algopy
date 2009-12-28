@@ -59,7 +59,24 @@ def solve(A,x):
         return numpy.linalg.solve(A,x)
 
 
-def vdot(x,y):
+def vdot(x,y, z = None):
+    """
+    vectorized dot
+    
+    z = vdot(x,y)
+    
+    Rationale:
+        
+        given two iteratable containers (list,array,...) x and y
+        this function computes::
+        
+            z[i] = numpy.dot(x[i],y[i])
+            
+        if z == None, this function allocates the necessary memory
+    
+    Warning: the naming is inconsistent with numpy.vdot
+    Warning: this is a preliminary version that is likely to be changed
+    """
     x_shp = numpy.shape(x)
     y_shp = numpy.shape(y)
 
