@@ -691,7 +691,7 @@ class Test_QR_Decomposition(TestCase):
         
         
     def test_pullback(self):
-        (D,P,M,N) = 2,1,2,2
+        (D,P,M,N) = 2,1,10,10
         
         A_data = numpy.random.rand(D,P,M,N)
         
@@ -732,8 +732,51 @@ class Test_QR_Decomposition(TestCase):
         
         assert_almost_equal(numpy.trace(numpy.dot(Abar.T,Adot)), numpy.trace(numpy.dot(Qbar.T,Qdot) + numpy.dot(Rbar.T,Rdot)))
         
+    def test_pullback_rectangular_A(self):
+        (D,P,M,N) = 2,1,10,3
         
-    
+        A_data = numpy.random.rand(D,P,M,N)
+        
+        # make A_data sufficiently regular
+        for p in range(P):
+            for n in range(N):
+                A_data[0,p,n,n] += (N + 1)
+        
+        A = UTPM(A_data)
+
+        # STEP 1: push forward
+        Q,R = A.qr()
+        
+        # STEP 2: pullback
+        
+        Qbar_data = numpy.random.rand(*Q.data.shape)
+        Rbar_data = numpy.random.rand(*R.data.shape)
+        
+        for r in range(N):
+            for c in range(N):
+                Rbar_data[:,:,r,c] *= (c>r)
+                
+        
+        Qbar = UTPM(Qbar_data)
+        Rbar = UTPM(Rbar_data)
+        
+        Abar = UTPM.qr_pullback(Qbar, Rbar, A, Q, R)
+        
+        
+        Abar = Abar.data[0,0]
+        Adot = A.data[1,0]
+
+        Qbar = Qbar.data[0,0]
+        Qdot = Q.data[1,0]
+
+        Rbar = Rbar.data[0,0]
+        Rdot = R.data[1,0]
+        
+        print Abar.shape
+        print Qbar.shape
+        print Rbar.shape
+        
+        print numpy.trace(numpy.dot(Abar.T,Adot) - numpy.dot(Qbar.T,Qdot) - numpy.dot(Rbar.T,Rdot))
 
 class Test_Eigenvalue_Decomposition(TestCase):
     

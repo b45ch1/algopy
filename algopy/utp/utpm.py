@@ -989,8 +989,9 @@ class UTPM(GradedRing):
         
         V = (Qbar.T).dot(Q) - R.dot(Rbar.T)
         tmp = (V.T - V) * PL
-        tmp = tmp.dot( (R.T).inv())
-        return Q.dot(Rbar + tmp)
+        RTinv = (R.T).inv()
+        tmp = tmp.dot(RTinv)
+        return Q.dot(Rbar + tmp) + (Qbar - Q.dot(Q.T).dot(Qbar)).dot(RTinv) 
         
 
     @classmethod
