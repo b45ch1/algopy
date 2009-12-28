@@ -730,7 +730,7 @@ class Test_QR_Decomposition(TestCase):
         Rbar = Rbar.data[0,0]
         Rdot = R.data[1,0]
         
-        print numpy.dot(Abar.T,Adot) -  numpy.dot(Qbar.T,Qdot) - numpy.dot(Rbar.T,Rdot)
+        assert_almost_equal(numpy.trace(numpy.dot(Abar.T,Adot)), numpy.trace(numpy.dot(Qbar.T,Qdot) + numpy.dot(Rbar.T,Rdot)))
         
         
     
