@@ -272,10 +272,14 @@ class UTPM(GradedRing):
         z_data[...] = tmp_data[...]
         
     @classmethod
-    def cls_div(cls, z_data, x_data, y_data):
+    def cls_div(cls, x_data, y_data, out = None):
         """
         z = x/y
         """
+        z_data = out
+        if out == None:
+            return NotImplementedError('')
+        
         (D,P) = z_data.shape[:2]
         for d in range(D):
             z_data[d,:,...] = 1./ y_data[0,:,...] * ( x_data[d,:,...] - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
@@ -434,7 +438,7 @@ class UTPM(GradedRing):
                 
             retval = self.__class__(self.__class__.__zeros__(retval_shp))
             
-            self.__class__.cls_dot(retval.data, self.data, rhs.data)
+            self.__class__.cls_dot( self.data, rhs.data, out = retval.data)
             
         else:
             self_shp = self.data.shape
@@ -474,7 +478,7 @@ class UTPM(GradedRing):
                 
             retval = self.__class__(self.__class__.__zeros__(retval_shp))
             
-            self.__class__.cls_dot(retval.data, lhs.data, self.data)
+            self.__class__.cls_dot( lhs.data, self.data, out = retval.data)
             
             
         else:
@@ -492,17 +496,23 @@ class UTPM(GradedRing):
             # print 'retval_shp=', retval_shp
             retval = self.__class__(self.__class__.__zeros__(retval_shp))
             
-            self.__class__.cls_dot_non_UTPM_x(retval.data, lhs, self.data)            
+            self.__class__.cls_dot_non_UTPM_x(retval.data, lhs, self.data)
             
             
         return retval
         
         
     @classmethod
-    def cls_dot(cls, z_data, x_data, y_data):
+    def cls_dot(cls, x_data, y_data, out = None):
         """
         z = dot(x,y)
         """
+        
+        if out == None:
+            raise NotImplementedError('should implement that')
+            
+        z_data = out
+            
         D,P = x_data.shape[:2]
         
         # print 'x_data.shape=', x_data.shape
@@ -512,7 +522,7 @@ class UTPM(GradedRing):
         for d in range(D):
             for p in range(P):
                 for c in range(d+1):
-                    z_data[d,p,...] += numpy.dot(x_data[c,p,...], y_data[d-c,p,...])        
+                    z_data[d,p,...] += numpy.dot(x_data[c,p,...], y_data[d-c,p,...])
         
 
     @classmethod
@@ -591,7 +601,7 @@ class UTPM(GradedRing):
     
             y = self.__class__(self.__class__.__zeros__((D,P,M) + x_shp[3:]))
     
-            UTPM.cls_solve(y.data, A.data, self.data)
+            UTPM.cls_solve(A.data, self.data, out = y.data)
         
         else:
             A_shp = numpy.shape(A)
@@ -599,7 +609,7 @@ class UTPM(GradedRing):
             M = A_shp[0]
             D,P = x_shp[:2]
             y = self.__class__(self.__class__.__zeros__((D,P,M) + x_shp[3:]))
-            self.__class__.cls_solve_non_UTPM_A(y.data, A, self.data)
+            self.__class__.cls_solve_non_UTPM_A(A, self.data, out = y.data)
             
         return y
 
@@ -615,25 +625,30 @@ class UTPM(GradedRing):
 
             D, P, M = A_shp[:3]
             y = self.__class__(self.__class__.__zeros__((D,P,M) + x_shp[3:]))
-            UTPM.cls_solve(y.data, A.data, self.data)
+            UTPM.cls_solve(A.data, self.data, out = y.data)
 
         else:
             x_shp = numpy.shape(x)
             A_shp = numpy.shape(self.data)
             D,P,M = A_shp[:3]
             y = self.__class__(self.__class__.__zeros__((D,P,M) + x_shp[1:]))
-            self.__class__.cls_solve_non_UTPM_x(y.data, self.data, x)
+            self.__class__.cls_solve_non_UTPM_x(self.data, x, out = y.data)
 
         return y
 
     @classmethod
-    def cls_solve(cls, y_data, A_data, x_data):
+    def cls_solve(cls, A_data, x_data, out = None):
         """
         solves the linear system of equations for y::
             
             A y = x
         
         """
+        
+        if out == None:
+            raise NotImplementedError('should implement that')
+            
+        y_data = out
         
         x_shp = numpy.shape(x_data)
         A_shp = numpy.shape(A_data)
@@ -653,8 +668,11 @@ class UTPM(GradedRing):
                     tmp[:,:] -= numpy.dot(A_data[k,p,:,:],y_data[d-k,p,:,:])
                 y_data[d,p,:,:] = numpy.linalg.solve(A_data[0,p,:,:],tmp)
                 
+        return out
+                
+                
     @classmethod
-    def cls_solve_non_UTPM_A(cls, y_data, A_data, x_data):
+    def cls_solve_non_UTPM_A(cls, A_data, x_data, out = None):
         """
         solves the linear system of equations for y::
             
@@ -662,6 +680,11 @@ class UTPM(GradedRing):
         
         when A is a simple (N,N) float array
         """
+        
+        if out == None:
+            raise NotImplementedError('should implement that')
+            
+        y_data = out
         
         x_shp = numpy.shape(x_data)
         A_shp = numpy.shape(A_data)
@@ -682,9 +705,11 @@ class UTPM(GradedRing):
                 for k in range(1,d+1):
                     tmp[:,:] -= numpy.dot(A_data[...],y_data[d-k,p,:,:])
                 y_data[d,p,:,:] = numpy.linalg.solve(A_data[:,:],tmp)
+                
+        return out
 
     @classmethod
-    def cls_solve_non_UTPM_x(cls, y_data, A_data, x_data):
+    def cls_solve_non_UTPM_x(cls, A_data, x_data, out = None):
         """
         solves the linear system of equations for y::
 
@@ -692,6 +717,11 @@ class UTPM(GradedRing):
 
         where x is simple (N,K) float array
         """
+        
+        if out == None:
+            raise NotImplementedError('should implement that')
+            
+        y_data = out
 
         x_shp = numpy.shape(x_data)
         A_shp = numpy.shape(A_data)
@@ -712,6 +742,9 @@ class UTPM(GradedRing):
                 for k in range(1,d+1):
                     tmp[:,:] -= numpy.dot(A_data[k,p,:,:],y_data[d-k,p,:,:])
                 y_data[d,p,:,:] = numpy.linalg.solve(A_data[0,p,:,:],tmp)
+                
+                
+        return out
     
 
     @classmethod
@@ -905,10 +938,14 @@ class UTPM(GradedRing):
                 L_data[D,p,:] = numpy.diag(dL[p])
     
     @classmethod
-    def cls_mul_non_UTPM_x(cls, z_data, x_data, y_data):
+    def cls_mul_non_UTPM_x(cls, x_data, y_data, out = None):
         """
         z = x * y
         """
+        
+        if out == None:
+            raise NotImplementedError('need to implement that...')
+        z_data = out
         
         D,P = numpy.shape(y_data)[:2]
         
@@ -916,7 +953,7 @@ class UTPM(GradedRing):
             for p in range(P):
                 z_data[d,p] = x_data * y_data[d,p]
                 
-    @classmethod            
+    @classmethod
     def cls_eig_pullback(cls, Abar_data, Qbar_data, lambar_data, A_data, Q_data, lam_data):
         A_shp = A_data.shape
         D,P,M,N = A_shp
@@ -939,56 +976,88 @@ class UTPM(GradedRing):
                 if n == m:
                     continue
                 tmp = lam_data[:,:,n] -   lam_data[:,:,m]
-                cls.cls_div(H[:,:,m,n], Id, tmp)
+                cls.cls_div(Id, tmp, out = H[:,:,m,n])
         
-        print Lam_data
         
                 
-    @classmethod            
-    def cls_qr_pullback(cls, Abar_data, Qbar_data, Rbar_data, A_data, Q_data, R_data):
+    @classmethod
+    def cls_qr_pullback(cls,Qbar_data, Rbar_data, A_data, Q_data, R_data, out = None):
+        
+        if out == None:
+            raise NotImplementedError('need to implement that...')
+            
+        Abar_data = out
+        
         A_shp = A_data.shape
         D,P,M,N = A_shp
-
-        # allocate temporary storage
-        F = numpy.zeros((D,P,N,M))
-        G = numpy.zeros((D,P,N,N))
-        H = numpy.zeros((D,P,N,N))
-        K = numpy.zeros((D,P,N,N))
-
-        PR  = numpy.array([[ r < c for c in range(N)] for r in range(N)],dtype=float)
-        PRD = numpy.array([[ r <= c for c in range(N)] for r in range(N)],dtype=float)
         
-        # STEP 1:
-        cls.cls_solve( F, R_data, Qbar_data.transpose((0,1,3,2)))
-        Abar_data += F.transpose((0,1,3,2))
         
-        cls.cls_dot(G, Qbar_data.transpose((0,1,3,2)), Q_data)
-        cls.cls_solve( H, R_data, G)
+        if M < N:
+            raise ValueError('supplied matrix has more columns that rows')
+
+        # allocate temporary storage and temporary matrices
+        tmp1 = numpy.zeros((D,P,N,N))
+        tmp2 = numpy.zeros((D,P,N,N))
+        tmp3 = numpy.zeros((D,P,M,N))
+        PL  = numpy.array([[ c < r for c in range(N)] for r in range(N)],dtype=float)
         
-        G[...] = 0
-        cls.cls_mul_non_UTPM_x(G, PRD, H.transpose((0,1,3,2)))
-        Rbar_data += G
+        # STEP 1: compute V
+        cls.cls_dot( Qbar_data.transpose((0,1,3,2)), Q_data, out = tmp1)
+        cls.cls_dot( R_data, Rbar_data.transpose((0,1,3,2)), out = tmp2)
+        tmp1[...] -= tmp2[...]
+        
+        # STEP 2: compute PL * (V.T - V)
+        tmp2[...]  = tmp1.transpose((0,1,3,2))
+        tmp2[...] -= tmp1[...]
+        cls.cls_mul_non_UTPM_x(PL, tmp2, out = tmp1)
+        
+        # STEP 3: compute PL * (V.T - V) R^{-T}
+        cls.cls_solve(R_data, tmp1.transpose((0,1,3,2)), out = tmp2)
+        tmp2 = tmp2.transpose((0,1,3,2))
+        
+        # STEP 4: compute Rbar + PL * (V.T - V) R^{-T}
+        tmp1[...]  = Rbar_data[...]
+        tmp1[...] += tmp2
+        
+        # STEP 5: compute Q ( Rbar + PL * (V.T - V) R^{-T} )
+        cls.cls_dot( Q_data, tmp1, out = tmp3)
+        
+        Abar_data += tmp3
+        
+        return out
+        
+        
+        # # STEP 1:
+        # cls.cls_solve( F, R_data, Qbar_data.transpose((0,1,3,2)))
+        # Abar_data += F.transpose((0,1,3,2))
+        
+        # cls.cls_dot(G, Qbar_data.transpose((0,1,3,2)), Q_data)
+        # cls.cls_solve( H, R_data, G)
+        
+        # G[...] = 0
+        # cls.cls_mul_non_UTPM_x(G, PRD, H.transpose((0,1,3,2)))
+        # Rbar_data += G
 
-        # STEP 2:
-        G[...] = 0
-        H[...] = 0
-        cls.cls_dot(G,  Rbar_data, R_data.transpose((0,1,3,2)))
-        H += G
-        H -= G.transpose((0,1,3,2))
-        cls.cls_mul_non_UTPM_x(K, PR, H)
+        # # STEP 2:
+        # G[...] = 0
+        # H[...] = 0
+        # cls.cls_dot(G,  Rbar_data, R_data.transpose((0,1,3,2)))
+        # H += G
+        # H -= G.transpose((0,1,3,2))
+        # cls.cls_mul_non_UTPM_x(K, PR, H)
 
-        # STEP 3:
-        G[...] = 0
-        H[...] = 0
+        # # STEP 3:
+        # G[...] = 0
+        # H[...] = 0
 
-        cls.cls_solve( G, R_data, K)
-        H += G
-        H += Rbar_data.transpose((0,1,3,2))
+        # cls.cls_solve( G, R_data, K)
+        # H += G
+        # H += Rbar_data.transpose((0,1,3,2))
 
-        F[...] = 0
-        cls.cls_dot(F, H, Q_data.transpose((0,1,3,2)))
+        # F[...] = 0
+        # cls.cls_dot(F, H, Q_data.transpose((0,1,3,2)))
 
-        Abar_data += F.transpose((0,1,3,2))
+        # Abar_data += F.transpose((0,1,3,2))
 
     def trace(self):
         """ returns a new UTPM in standard format, i.e. the matrices are 1x1 matrices"""
