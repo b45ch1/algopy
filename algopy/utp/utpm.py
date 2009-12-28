@@ -978,8 +978,21 @@ class UTPM(GradedRing):
                 tmp = lam_data[:,:,n] -   lam_data[:,:,m]
                 cls.cls_div(Id, tmp, out = H[:,:,m,n])
         
+    
+    @classmethod
+    def qr_pullback(cls, Qbar, Rbar, A, Q, R):
         
-                
+        A_shp = A.shape
+        M,N = A_shp
+        
+        PL  = numpy.array([[ c < r for c in range(N)] for r in range(N)],dtype=float)
+        
+        V = (Qbar.T).dot(Q) - R.dot(Rbar.T)
+        tmp = (V.T - V) * PL
+        tmp = tmp.dot( (R.T).inv())
+        return Q.dot(Rbar + tmp)
+        
+
     @classmethod
     def cls_qr_pullback(cls,Qbar_data, Rbar_data, A_data, Q_data, R_data, out = None):
         
@@ -1025,39 +1038,7 @@ class UTPM(GradedRing):
         Abar_data += tmp3
         
         return out
-        
-        
-        # # STEP 1:
-        # cls.cls_solve( F, R_data, Qbar_data.transpose((0,1,3,2)))
-        # Abar_data += F.transpose((0,1,3,2))
-        
-        # cls.cls_dot(G, Qbar_data.transpose((0,1,3,2)), Q_data)
-        # cls.cls_solve( H, R_data, G)
-        
-        # G[...] = 0
-        # cls.cls_mul_non_UTPM_x(G, PRD, H.transpose((0,1,3,2)))
-        # Rbar_data += G
 
-        # # STEP 2:
-        # G[...] = 0
-        # H[...] = 0
-        # cls.cls_dot(G,  Rbar_data, R_data.transpose((0,1,3,2)))
-        # H += G
-        # H -= G.transpose((0,1,3,2))
-        # cls.cls_mul_non_UTPM_x(K, PR, H)
-
-        # # STEP 3:
-        # G[...] = 0
-        # H[...] = 0
-
-        # cls.cls_solve( G, R_data, K)
-        # H += G
-        # H += Rbar_data.transpose((0,1,3,2))
-
-        # F[...] = 0
-        # cls.cls_dot(F, H, Q_data.transpose((0,1,3,2)))
-
-        # Abar_data += F.transpose((0,1,3,2))
 
     def trace(self):
         """ returns a new UTPM in standard format, i.e. the matrices are 1x1 matrices"""
