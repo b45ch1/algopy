@@ -262,6 +262,23 @@ class UTPM(GradedRing):
         retval = self.clone()
         retval.__imul__(rhs)
         return retval
+    
+    @classmethod    
+    def cls_idiv(cls, z_data, x_data):
+        (D,P) = z_data.shape[:2]
+        tmp_data = z_data.copy()
+        for d in range(D):
+            tmp_data[d,:,...] = 1./ x_data[0,:,...] * ( z_data[d,:,...] - numpy.sum(tmp_data[:d,:,...] * x_data[d:0:-1,:,...], axis=0))
+        z_data[...] = tmp_data[...]
+        
+    @classmethod
+    def cls_div(cls, z_data, x_data, y_data):
+        """
+        z = x/y
+        """
+        (D,P) = z_data.shape[:2]
+        for d in range(D):
+            z_data[d,:,...] = 1./ y_data[0,:,...] * ( x_data[d,:,...] - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
 
     def __div__(self,rhs):
         retval = self.clone()
@@ -898,6 +915,34 @@ class UTPM(GradedRing):
         for d in range(D):
             for p in range(P):
                 z_data[d,p] = x_data * y_data[d,p]
+                
+    @classmethod            
+    def cls_eig_pullback(cls, Abar_data, Qbar_data, lambar_data, A_data, Q_data, lam_data):
+        A_shp = A_data.shape
+        D,P,M,N = A_shp
+        
+        assert M == N
+        
+        # allocating temporary storage
+        H = numpy.zeros(A_shp)
+        
+        Id = numpy.zeros((D,P,1))
+        Id[0,:,0] = numpy.eye(P)
+        
+        Lam_data = numpy.zeros((D,P,N,N))
+        # FIXME: replace this for loop by cls_diag
+        for n in range(N):
+            Lam_data[:,:,n,n] = lam_data[:,:,n]
+        
+        for m in range(N):
+            for n in range(N):
+                if n == m:
+                    continue
+                tmp = lam_data[:,:,n] -   lam_data[:,:,m]
+                cls.cls_div(H[:,:,m,n], Id, tmp)
+        
+        print Lam_data
+        
                 
     @classmethod            
     def cls_qr_pullback(cls, Abar_data, Qbar_data, Rbar_data, A_data, Q_data, R_data):

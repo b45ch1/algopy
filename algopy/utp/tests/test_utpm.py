@@ -133,9 +133,42 @@ class TestFunctionOfJacobian(TestCase):
 
         assert_almost_equal(xbar1,xbar2)
         assert_almost_equal(ybar1,ybar2)
+ 
+
+class PushForward_UTPM_data(TestCase):
+    def test_cls_idiv(self):
+        X_data = 2 * numpy.random.rand(2,2,2,2)
+        Z_data = 3 * numpy.random.rand(2,2,2,2)
+        Z2_data = Z_data.copy()
+        
+        UTPM.cls_idiv(Z_data, X_data)
+        
+        X = UTPM(X_data)
+        Z = UTPM(Z2_data)
+        
+        Z/=X
+        
+        assert_array_almost_equal(Z_data, Z.data)
+        
+    def test_cls_div(self):
+        X_data = 2 * numpy.random.rand(2,2,2,2)
+        Y_data = 3 * numpy.random.rand(2,2,2,2)
+        Z_data = numpy.zeros((2,2,2,2))
+        
+        X = UTPM(X_data)
+        Y = UTPM(Y_data)
+        
+        Z = X/Y
+        
+        UTPM.cls_div(Z_data, X_data, Y_data)
+        
+        assert_array_almost_equal(Z_data, Z.data)
+        
+        
+        
         
 
-class PushForward(TestCase):
+class PushForward_UTPM_objects(TestCase):
     def test_UTPM_in_a_stupid_way(self):
         """
         this checks _only_ if calling the operations is ok
@@ -670,7 +703,39 @@ class Pullback(TestCase):
         Rbar = Rbar_data[0,0]
         Rdot = R.data[1,0]
 
-        print numpy.dot(Abar.T,Adot) -  numpy.dot(Qbar.T,Qdot) - numpy.dot(Rbar.T,Rdot)
+        # print numpy.dot(Abar.T,Adot) -  numpy.dot(Qbar.T,Qdot) - numpy.dot(Rbar.T,Rdot)
+        
+        
+    def test_eig_pullback(self):
+        (D,P,N) = 2,1,3
+        A_data = numpy.zeros((D,P,N,N))
+        for d in range(D):
+            for p in range(P):
+                tmp = numpy.random.rand(N,N)
+                A_data[d,p,:,:] = numpy.dot(tmp.T,tmp)
+
+                if d == 0:
+                    A_data[d,p,:,:] += N * numpy.diag(numpy.random.rand(N))
+
+        A = UTPM(A_data)
+        
+        l,Q = A.eig()
+        
+        L_data = numpy.zeros((D,P,N,N))
+        for d in range(D):
+            for p in range(P):
+                for n in range(N):
+                    L_data[d,p,n,n] = l.data[d,p,n]
+        
+        L = UTPM(L_data)
+        
+        assert_array_almost_equal(Q.dot(L.dot(Q.T)).data, A.data, decimal = 13)
+        
+        lbar_data = numpy.zeros((D,P,N))
+        Qbar_data = numpy.zeros((D,P,N,N))
+        Abar_data = numpy.zeros((D,P,N,N))
+        
+        UTPM.cls_eig_pullback( Abar_data, Qbar_data, lbar_data, A.data, Q.data, l.data)
 
 
         
