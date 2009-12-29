@@ -457,7 +457,7 @@ class PushForward_UTPM_objects(TestCase):
         AZ = AX * AY
         AZ = AX / AY
         AZ = UTPM.dot(AX,AY)
-        AZ = AX.inv()
+        AZ = UTPM.inv(AX)
         AZ = AX.trace()
         AZ = AX.T
         AX = AX.set_zero()
@@ -474,7 +474,7 @@ class PushForward_UTPM_objects(TestCase):
         AY = UTPM(Y)
 
         assert_array_almost_equal( UTPM.dot(AX,AY).tc, dot(AX,AY).tc)
-        assert_array_almost_equal( AX.inv().tc,  inv(AX).tc)
+        assert_array_almost_equal( UTPM.inv(AX).tc,  inv(AX).tc)
         assert_array_almost_equal( AX.trace().tc,  trace(AX).tc)
         
     def test_operations_on_scalar_UTPM(self):
@@ -770,7 +770,7 @@ class PushForward_UTPM_objects(TestCase):
     def test_inv(self):
         (D,P,N,M) = 2,3,5,1
         A = UTPM(numpy.random.rand(D,P,N,N))
-        Ainv = A.inv()
+        Ainv = UTPM.inv(A)
         
         Id = numpy.zeros((D,P,N,N))
         Id[0,:,:,:] = numpy.eye(N)

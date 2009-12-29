@@ -35,7 +35,7 @@ def trace(x):
         
 def inv(x):
     if isinstance(x, UTPM):
-        return x.inv()
+        return UTPM.inv(x)
     else:
         return numpy.linalg.inv(x)
         
@@ -479,22 +479,26 @@ class UTPM(GradedRing):
             raise NotImplementedError('should implement that')
             
         return out
-        
-    def inv(self):
-        retval = UTPM(numpy.zeros(numpy.shape(self.tc)))
-        (D,P,N,M) = numpy.shape(retval.tc)
+    
+    @classmethod
+    def inv(cls, A, out = None):
+        if out == None:
+            out = cls(cls.__zeros__(A.data.shape))
+        else:
+            raise NotImplementedError('')
+        (D,P,N,M) = out.data.shape
 
         # tc[0] element
         for p in range(P):
-            retval.tc[0,p,:,:] = numpy.linalg.inv(self.tc[0,p,:,:])
+            out.data[0,p,:,:] = numpy.linalg.inv(A.data[0,p,:,:])
 
         # tc[d] elements
         for d in range(1,D):
             for p in range(P):
                 for c in range(1,d+1):
-                    retval.tc[d,p,:,:] += numpy.dot(self.tc[c,p,:,:], retval.tc[d-c,p,:,:],)
-                retval.tc[d,p,:,:] =  numpy.dot(-retval.tc[0,p,:,:], retval.tc[d,p,:,:],)
-        return retval
+                    out.data[d,p,:,:] += numpy.dot(A.data[c,p,:,:], out.data[d-c,p,:,:],)
+                out.data[d,p,:,:] =  numpy.dot(-out.data[0,p,:,:], out.data[d,p,:,:],)
+        return out
 
     @classmethod
     def solve(cls, A, x, out = None):
@@ -1025,7 +1029,7 @@ class UTPM(GradedRing):
         
         V = cls.dot(Qbar.T, Q) - cls.dot(R, Rbar.T)
         tmp = (V.T - V) * PL
-        RTinv = (R.T).inv()
+        RTinv = UTPM.inv(R.T)
         tmp = cls.dot(tmp, RTinv)
         return cls.dot(Q, Rbar + tmp) + cls.dot((Qbar - cls.dot(Q, cls.dot(Q.T,Qbar))),RTinv)
         
