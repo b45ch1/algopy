@@ -785,7 +785,7 @@ class PushForward_UTPM_objects(TestCase):
             for n in range(N):
                 A.data[0,p,n,n] += (N + 1)
         
-        y = x.solve(A)
+        y = UTPM.solve(A,x)
         x2 = UTPM.dot(A, y)
         assert_array_almost_equal(x.tc, x2.tc, decimal = 12)
         
@@ -799,7 +799,7 @@ class PushForward_UTPM_objects(TestCase):
                 A[n,n] += (N + 1)
                 Id[n,n] = 1
         
-        y = A.rsolve(Id)
+        y = UTPM.solve(A,Id)
         Id2 = UTPM.dot(A, y)
 
         for p in range(P):
@@ -869,8 +869,8 @@ class ODOE_example_for_ICCS2010_conference(TestCase):
         Q,R = UTPM.qr(J)
 
         Id = numpy.eye(P)
-        D = (R.T).rsolve(Id)
-        C = D.solve(R)
+        D = UTPM.solve(R.T,Id)
+        C = UTPM.solve(D,R)
         l,U = UTPM.eig(C)
 
         l11 = l.max()

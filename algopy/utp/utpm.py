@@ -350,74 +350,6 @@ class UTPM(GradedRing):
         self.__class__._max( self.data, axis = axis, out = retval.data)
         return retval
 
-
-    def inv(self):
-        retval = UTPM(numpy.zeros(numpy.shape(self.tc)))
-        (D,P,N,M) = numpy.shape(retval.tc)
-
-        # tc[0] element
-        for p in range(P):
-            retval.tc[0,p,:,:] = numpy.linalg.inv(self.tc[0,p,:,:])
-
-        # tc[d] elements
-        for d in range(1,D):
-            for p in range(P):
-                for c in range(1,d+1):
-                    retval.tc[d,p,:,:] += numpy.dot(self.tc[c,p,:,:], retval.tc[d-c,p,:,:],)
-                retval.tc[d,p,:,:] =  numpy.dot(-retval.tc[0,p,:,:], retval.tc[d,p,:,:],)
-        return retval
-
-
-    def solve(self, A):
-        
-        if isinstance(A, UTPM):
-            A_shp = numpy.shape(A.data)
-            x_shp = numpy.shape(self.data)
-    
-            assert A_shp[:2] == x_shp[:2]
-            if A_shp[2] != x_shp[2]:
-                print ValueError('A.data.shape = %s does not match x.data.shape = %s'%(str(A.data.shape), str(self.data.shape)))
-    
-            D, P, M = A_shp[:3]
-    
-            y = self.__class__(self.__class__.__zeros__((D,P,M) + x_shp[3:]))
-    
-            UTPM._solve(A.data, self.data, out = y.data)
-        
-        else:
-            A_shp = numpy.shape(A)
-            x_shp = numpy.shape(self.data)
-            M = A_shp[0]
-            D,P = x_shp[:2]
-            y = self.__class__(self.__class__.__zeros__((D,P,M) + x_shp[3:]))
-            self.__class__._solve_non_UTPM_A(A, self.data, out = y.data)
-            
-        return y
-
-    def rsolve(self, x):
-
-        if isinstance(x, UTPM):
-            A_shp = numpy.shape(self.data)
-            x_shp = numpy.shape(x.data)
-
-            assert A_shp[:2] == x_shp[:2]
-            if A_shp[2] != x_shp[2]:
-                print ValueError('A.data.shape = %s does not match x.data.shape = %s'%(str(A.data.shape), str(self.data.shape)))
-
-            D, P, M = A_shp[:3]
-            y = self.__class__(self.__class__.__zeros__((D,P,M) + x_shp[3:]))
-            UTPM._solve(A.data, self.data, out = y.data)
-
-        else:
-            x_shp = numpy.shape(x)
-            A_shp = numpy.shape(self.data)
-            D,P,M = A_shp[:3]
-            y = self.__class__(self.__class__.__zeros__((D,P,M) + x_shp[1:]))
-            self.__class__._solve_non_UTPM_x(self.data, x, out = y.data)
-
-        return y
-        
-        
     def trace(self):
         """ returns a new UTPM in standard format, i.e. the matrices are 1x1 matrices"""
         D,P = self.tc.shape[:2]
@@ -548,6 +480,64 @@ class UTPM(GradedRing):
             
         return out
         
+    def inv(self):
+        retval = UTPM(numpy.zeros(numpy.shape(self.tc)))
+        (D,P,N,M) = numpy.shape(retval.tc)
+
+        # tc[0] element
+        for p in range(P):
+            retval.tc[0,p,:,:] = numpy.linalg.inv(self.tc[0,p,:,:])
+
+        # tc[d] elements
+        for d in range(1,D):
+            for p in range(P):
+                for c in range(1,d+1):
+                    retval.tc[d,p,:,:] += numpy.dot(self.tc[c,p,:,:], retval.tc[d-c,p,:,:],)
+                retval.tc[d,p,:,:] =  numpy.dot(-retval.tc[0,p,:,:], retval.tc[d,p,:,:],)
+        return retval
+
+    @classmethod
+    def solve(cls, A, x, out = None):
+        """
+        solves for y in: A y = x
+        
+        """
+        if isinstance(A, UTPM) and isinstance(x, UTPM):
+            A_shp = numpy.shape(A.data)
+            x_shp = numpy.shape(x.data)
+    
+            assert A_shp[:2] == x_shp[:2]
+            if A_shp[2] != x_shp[2]:
+                print ValueError('A.data.shape = %s does not match x.data.shape = %s'%(str(A_shp), str(x_shp)))
+    
+            D, P, M = A_shp[:3]
+            
+            if out == None:
+                out = cls(cls.__zeros__((D,P,M) + x_shp[3:]))
+    
+            UTPM._solve(A.data, x.data, out = out.data)
+        
+        elif not isinstance(A, UTPM) and isinstance(x, UTPM):
+            A_shp = numpy.shape(A)
+            x_shp = numpy.shape(x.data)
+            M = A_shp[0]
+            D,P = x_shp[:2]
+            out = cls(cls.__zeros__((D,P,M) + x_shp[3:]))
+            cls._solve_non_UTPM_A(A, x.data, out = out.data)
+            
+        elif isinstance(A, UTPM) and not isinstance(x, UTPM):
+            A_shp = numpy.shape(A.data)
+            x_shp = numpy.shape(x)
+            D,P,M = A_shp[:3]
+            out = cls(cls.__zeros__((D,P,M) + x_shp[1:]))
+            cls._solve_non_UTPM_x(A.data, x, out = out.data)
+            
+        else:
+            raise NotImplementedError('should implement that')
+            
+        return out
+
+
     @classmethod
     def qr(cls, A, out = None):
         D,P,M,N = numpy.shape(A.data)
