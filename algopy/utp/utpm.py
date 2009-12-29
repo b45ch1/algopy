@@ -53,7 +53,7 @@ def dot(x,y, out = None):
         
 def solve(A,x):
     if isinstance(x, UTPM):
-        return x.inv(A)
+        raise NotImplementedError('should implement that...')
     
     elif isinstance(A, UTPM):
         raise NotImplementedError('should implement that...')
@@ -367,29 +367,6 @@ class UTPM(GradedRing):
                 retval.tc[d,p,:,:] =  numpy.dot(-retval.tc[0,p,:,:], retval.tc[d,p,:,:],)
         return retval
 
-    def solve_old(self,A):
-        """
-        A y = x  <=> y = solve(A,x)
-        is implemented here as y = x.solve(A)
-        """
-        retval = UTPM( numpy.zeros( numpy.shape(self.tc)))
-        
-        if numpy.ndim(retval.tc) != 4:
-            raise NotImplementedError('Expecting retval.tc.ndim = 4 but provided retval.tc.shape=%s'%(str(retval.tc)))
-        
-        (D,P,N,M) = numpy.shape(retval.tc)
-
-        if M != 1:
-            raise NotImplementedError('Sorry, solving extended linear systems not supported (yet)')
-        
-        tmp = numpy.zeros((N,M),dtype=float)
-        for d in range(D):
-            for p in range(P):
-                tmp[:,:] = self.tc[d,p,:,:]
-                for k in range(1,d+1):
-                    tmp[:,:] -= numpy.dot(A.tc[k,p,:,:],retval.tc[d-k,p,:,:])
-                retval.tc[d,p,:,:] = numpy.linalg.solve(A.tc[0,p,:,:],tmp)
-        return retval
 
     def solve(self, A):
         
@@ -570,7 +547,39 @@ class UTPM(GradedRing):
             raise NotImplementedError('should implement that')
             
         return out
+        
+    @classmethod
+    def qr(cls, A, out = None):
+        D,P,M,N = numpy.shape(A.data)
+        K = min(M,N)
+        
+        if out == None:
+            Q = cls(cls.__zeros__((D,P,M,K)))
+            R = cls(cls.__zeros__((D,P,K,N)))
 
+        UTPM._qr(Q.data, R.data, out = A.data)
+
+        return Q,R
+        
+    @classmethod
+    def eig(cls, A, out = None):
+        """
+        computes the eigenvalue decomposition A = Q^T L Q
+        
+        (l,Q) = UTPM.eig(A, out=None)
+        
+        """
+        
+        D,P,M,N = numpy.shape(A.data)
+        
+        if out == None:
+            Q = cls(cls.__zeros__((D,P,N,N)))
+            L = cls(cls.__zeros__((D,P,N)))
+        
+        UTPM._eig(Q.data, L.data, A.data)
+      
+        return L,Q
+    
     @classmethod
     def _max(cls, x_data, axis = None, out = None):
 
@@ -794,38 +803,6 @@ class UTPM(GradedRing):
     @classmethod
     def __zeros__(cls, shp):
         return numpy.zeros(shp)
-
-    @classmethod
-    def qr(cls, A, out = None):
-        D,P,M,N = numpy.shape(A.data)
-        K = min(M,N)
-        
-        if out == None:
-            Q = cls(cls.__zeros__((D,P,M,K)))
-            R = cls(cls.__zeros__((D,P,K,N)))
-
-        UTPM._qr(Q.data, R.data, out = A.data)
-
-        return Q,R
-        
-    @classmethod
-    def eig(cls, A, out = None):
-        """
-        computes the eigenvalue decomposition A = Q^T L Q
-        
-        (l,Q) = UTPM.eig(A, out=None)
-        
-        """
-        
-        D,P,M,N = numpy.shape(A.data)
-        
-        if out == None:
-            Q = cls(cls.__zeros__((D,P,N,N)))
-            L = cls(cls.__zeros__((D,P,N)))
-        
-        UTPM._eig(Q.data, L.data, A.data)
-      
-        return L,Q
 
     @classmethod
     def _qr(cls, Q_data, R_data, out = None):
