@@ -1080,17 +1080,17 @@ class UTPM(GradedRing):
         PL  = numpy.array([[ c < r for c in range(N)] for r in range(N)],dtype=float)
         
         # STEP 1: compute V
-        cls._dot( Qbar_data.transpose((0,1,3,2)), Q_data, out = tmp1)
-        cls._dot( R_data, Rbar_data.transpose((0,1,3,2)), out = tmp2)
+        cls._dot( cls._transpose(Qbar_data), Q_data, out = tmp1)
+        cls._dot( R_data, cls._transpose(Rbar_data), out = tmp2)
         tmp1[...] -= tmp2[...]
         
         # STEP 2: compute PL * (V.T - V)
-        tmp2[...]  = tmp1.transpose((0,1,3,2))
+        tmp2[...]  = cls._transpose(tmp1)
         tmp2[...] -= tmp1[...]
         cls._mul_non_UTPM_x(PL, tmp2, out = tmp1)
         
         # STEP 3: compute PL * (V.T - V) R^{-T}
-        cls._solve(R_data, tmp1.transpose((0,1,3,2)), out = tmp2)
+        cls._solve(R_data, cls._transpose(tmp1), out = tmp2)
         tmp2 = tmp2.transpose((0,1,3,2))
         
         # STEP 4: compute Rbar + PL * (V.T - V) R^{-T}
@@ -1102,11 +1102,11 @@ class UTPM(GradedRing):
         
         if M > N:
             # STEP 6: compute (Qbar - Q Q^T Qbar) R^{-T}
-            cls._dot( Q_data.transpose((0,1,3,2)), Qbar_data, out = tmp1)
+            cls._dot( cls._transpose(Q_data), Qbar_data, out = tmp1)
             cls._dot( Q_data, tmp1, out = tmp3)
             tmp3 *= -1.
             tmp3 += Qbar_data
-            cls._solve(R_data, cls._transpose(tmp3), out = tmp4.transpose((0,1,3,2)))
+            cls._solve(R_data, cls._transpose(tmp3), out = cls._transpose(tmp4))
             Abar_data += tmp4
         
         return out
