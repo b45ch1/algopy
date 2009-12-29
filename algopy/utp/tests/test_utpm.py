@@ -46,11 +46,7 @@ class Test_Eigenvalue_Decomposition(TestCase):
         
         l,Q = A.eig()
         
-        L_data = numpy.zeros((D,P,N,N))
-        for d in range(D):
-            for p in range(P):
-                for n in range(N):
-                    L_data[d,p,n,n] = l.data[d,p,n]
+        L_data = UTPM.cls_diag(l.data)
         
         L = UTPM(L_data)
         
@@ -62,16 +58,17 @@ class Test_Eigenvalue_Decomposition(TestCase):
         
         UTPM.cls_eig_pullback( Qbar_data, lbar_data, A.data, Q.data, l.data, out = Abar_data)
         
-        # Abar = Abar_data[0,0]
-        # Adot = A.data[1,0]
-
-        # Qbar = Qbar_data[0,0]
-        # Qdot = Q.data[1,0]
-
-        # Rbar = Rbar_data[0,0]
-        # Rdot = R.data[1,0]
+        Abar = Abar_data[0,0]
+        Adot = A.data[1,0]
         
-        # assert_almost_equal(numpy.trace(numpy.dot(Abar.T,Adot)), numpy.trace(numpy.dot(Qbar.T,Qdot) + numpy.dot(Rbar.T,Rdot)))
+        Lbar = UTPM.cls_diag(lbar_data)[0,0]
+        Ldot = UTPM.cls_diag(l.data)[1,0]
+        
+        Qbar = Qbar_data[0,0]
+        Qdot = Q.data[1,0]
+
+        assert_almost_equal(numpy.trace(numpy.dot(Abar.T, Adot)), numpy.trace( numpy.dot(Lbar.T, Ldot) + numpy.dot(Qbar.T, Qdot)))
+        
         
 class Test_QR_Decomposition(TestCase):
     def test_push_forward(self):
