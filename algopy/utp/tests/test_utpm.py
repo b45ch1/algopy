@@ -651,45 +651,6 @@ class Test_QR_Decomposition(TestCase):
         # print 'zero?\n',dot(Q, R) - A
         assert_array_almost_equal( (Q.dot(R)).data, A.data, decimal = 14)
     
-    # def test_pullback(self):
-    #     (D,P,M,N) = 2,1,3,2
-        
-    #     A_data = numpy.random.rand(D,P,M,N)
-    #     # make A_data sufficiently regular
-    #     for p in range(P):
-    #         for n in range(N):
-    #             A_data[0,p,n,n] += (N + 1)
-        
-    #     A = UTPM(A_data)
-
-    #     Q,R = A.qr()
-        
-    #     assert_array_equal( Q.data.shape, [D,P,M,N])
-    #     assert_array_equal( R.data.shape, [D,P,N,N])
-    #     assert_array_almost_equal( (Q.dot(R)).data, A.data, decimal = 14)
-        
-    #     Qbar_data = numpy.random.rand(*Q.data.shape)
-    #     Rbar_data = numpy.random.rand(*R.data.shape)
-    #     Abar_data = numpy.zeros(A.data.shape)
-        
-    #     print Abar_data
-        
-    #     UTPM.cls_qr_pullback(Qbar_data, Rbar_data, A.data, Q.data, R.data, out = Abar_data )
-
-    #     print Abar_data
-
-        # Abar = Abar_data[0,0]
-        # Adot = A_data[1,0]
-
-        # Qbar = Qbar_data[0,0]
-        # Qdot = Q.data[1,0]
-
-        # Rbar = Rbar_data[0,0]
-        # Rdot = R.data[1,0]
-
-        # print numpy.dot(Abar.T,Adot) -  numpy.dot(Qbar.T,Qdot) - numpy.dot(Rbar.T,Rdot)
-        
-        
     def test_pullback(self):
         (D,P,M,N) = 2,1,10,10
         
@@ -772,11 +733,79 @@ class Test_QR_Decomposition(TestCase):
         Rbar = Rbar.data[0,0]
         Rdot = R.data[1,0]
         
-        print Abar.shape
-        print Qbar.shape
-        print Rbar.shape
+        assert_almost_equal(numpy.trace(numpy.dot(Abar.T,Adot)), numpy.trace(numpy.dot(Qbar.T,Qdot) + numpy.dot(Rbar.T,Rdot)))
         
-        print numpy.trace(numpy.dot(Abar.T,Adot) - numpy.dot(Qbar.T,Qdot) - numpy.dot(Rbar.T,Rdot))
+    def test_pullback_cls(self):
+        (D,P,M,N) = 2,1,2,2
+        
+        A_data = numpy.random.rand(D,P,M,N)
+        # make A_data sufficiently regular
+        for p in range(P):
+            for n in range(N):
+                A_data[0,p,n,n] += (N + 1)
+        
+        A = UTPM(A_data)
+
+        Q,R = A.qr()
+        
+        assert_array_equal( Q.data.shape, [D,P,M,N])
+        assert_array_equal( R.data.shape, [D,P,N,N])
+        assert_array_almost_equal( (Q.dot(R)).data, A.data, decimal = 14)
+        
+        Qbar_data = numpy.random.rand(*Q.data.shape)
+        Rbar_data = numpy.random.rand(*R.data.shape)
+        Abar_data = numpy.zeros(A.data.shape)
+        
+        
+        UTPM.cls_qr_pullback(Qbar_data, Rbar_data, A.data, Q.data, R.data, out = Abar_data )
+
+
+        Abar = Abar_data[0,0]
+        Adot = A_data[1,0]
+
+        Qbar = Qbar_data[0,0]
+        Qdot = Q.data[1,0]
+
+        Rbar = Rbar_data[0,0]
+        Rdot = R.data[1,0]
+
+        assert_almost_equal(numpy.trace(numpy.dot(Abar.T,Adot)), numpy.trace(numpy.dot(Qbar.T,Qdot) + numpy.dot(Rbar.T,Rdot)))
+        
+    def test_pullback_rectangular_A_cls(self):
+        (D,P,M,N) = 2,1,5,2
+        
+        A_data = numpy.random.rand(D,P,M,N)
+        # make A_data sufficiently regular
+        for p in range(P):
+            for n in range(N):
+                A_data[0,p,n,n] += (N + 1)
+        
+        A = UTPM(A_data)
+
+        Q,R = A.qr()
+        
+        assert_array_equal( Q.data.shape, [D,P,M,N])
+        assert_array_equal( R.data.shape, [D,P,N,N])
+        assert_array_almost_equal( (Q.dot(R)).data, A.data, decimal = 14)
+        
+        Qbar_data = numpy.random.rand(*Q.data.shape)
+        Rbar_data = numpy.random.rand(*R.data.shape)
+        Abar_data = numpy.zeros(A.data.shape)
+        
+        
+        UTPM.cls_qr_pullback(Qbar_data, Rbar_data, A.data, Q.data, R.data, out = Abar_data )
+
+
+        Abar = Abar_data[0,0]
+        Adot = A_data[1,0]
+
+        Qbar = Qbar_data[0,0]
+        Qdot = Q.data[1,0]
+
+        Rbar = Rbar_data[0,0]
+        Rdot = R.data[1,0]
+
+        assert_almost_equal(numpy.trace(numpy.dot(Abar.T,Adot)), numpy.trace(numpy.dot(Qbar.T,Qdot) + numpy.dot(Rbar.T,Rdot)))
 
 class Test_Eigenvalue_Decomposition(TestCase):
     

@@ -512,6 +512,7 @@ class UTPM(GradedRing):
             raise NotImplementedError('should implement that')
             
         z_data = out
+        z_data[...] = 0.
             
         D,P = x_data.shape[:2]
         
@@ -991,7 +992,7 @@ class UTPM(GradedRing):
         tmp = (V.T - V) * PL
         RTinv = (R.T).inv()
         tmp = tmp.dot(RTinv)
-        return Q.dot(Rbar + tmp) + (Qbar - Q.dot(Q.T).dot(Qbar)).dot(RTinv) 
+        return Q.dot(Rbar + tmp) + (Qbar - Q.dot(Q.T).dot(Qbar)).dot(RTinv)
         
 
     @classmethod
@@ -1013,6 +1014,7 @@ class UTPM(GradedRing):
         tmp1 = numpy.zeros((D,P,N,N))
         tmp2 = numpy.zeros((D,P,N,N))
         tmp3 = numpy.zeros((D,P,M,N))
+        tmp4 = numpy.zeros((D,P,M,N))
         PL  = numpy.array([[ c < r for c in range(N)] for r in range(N)],dtype=float)
         
         # STEP 1: compute V
@@ -1030,13 +1032,20 @@ class UTPM(GradedRing):
         tmp2 = tmp2.transpose((0,1,3,2))
         
         # STEP 4: compute Rbar + PL * (V.T - V) R^{-T}
-        tmp1[...]  = Rbar_data[...]
-        tmp1[...] += tmp2
+        tmp2[...] += Rbar_data[...]
         
         # STEP 5: compute Q ( Rbar + PL * (V.T - V) R^{-T} )
-        cls.cls_dot( Q_data, tmp1, out = tmp3)
-        
+        cls.cls_dot( Q_data, tmp2, out = tmp3)
         Abar_data += tmp3
+        
+        if M > N:
+            # STEP 6: compute (Qbar - Q Q^T Qbar) R^{-T}
+            cls.cls_dot( Q_data.transpose((0,1,3,2)), Qbar_data, out = tmp1)
+            cls.cls_dot( Q_data, tmp1, out = tmp3)
+            tmp3 *= -1.
+            tmp3 += Qbar_data
+            cls.cls_solve(R_data, tmp3.transpose((0,1,3,2)), out = tmp4.transpose((0,1,3,2)))
+            Abar_data += tmp4
         
         return out
 
