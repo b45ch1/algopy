@@ -134,7 +134,6 @@ class Test_QR_Decomposition(TestCase):
         
         Abar = UTPM.qr_pullback(Qbar, Rbar, A, Q, R)
         
-        
         Abar = Abar.data[0,0]
         Adot = A.data[1,0]
 
@@ -823,21 +822,6 @@ class PushForward_UTPM_objects(TestCase):
         
         assert_array_almost_equal(numpy.zeros((D-1,P,N,N)), Id2.data[1:], decimal=10)
         
-        
-        
-    def test_dot2(self):
-        (D,P,M,N,K) = 3,3,4,5,6
-        X = UTPM(numpy.random.rand(D,P,M,K))
-        Y = UTPM(numpy.random.rand(D,P,K,N))
-        
-        Z = X.dot_old(Y)
-        Z2 = X.dot(Y)
-        
-        assert_array_almost_equal(Z.data,Z2.data)
-        
-
-
-
 
     def test_vdot(self):
         (D,P,N,M) = 4,3,2,5
@@ -881,13 +865,8 @@ class PushForward_UTPM_objects(TestCase):
             A[2]*B[1]*C[0] + A[2]*B[0]*C[1]
         R = truncated_triple_dot(A,B,C, 3)
         
-        assert_array_almost_equal(R,S)        
+        assert_array_almost_equal(R,S)
         
-        
-
-
-
-
         
 class ODOE_example_for_ICCS2010_conference(TestCase):
     def test_forward(self):
@@ -907,9 +886,11 @@ class ODOE_example_for_ICCS2010_conference(TestCase):
         Id = numpy.eye(P)
         D = (R.T).rsolve(Id)
         C = D.solve(R)
-        Lam,U = C.eig()
+        l,U = C.eig()
 
-        l11 = Lam.max()
+        l11 = l.max()
+        
+        print l11
 
 
 

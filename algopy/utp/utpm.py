@@ -4,7 +4,7 @@ The algebraic class is
 
 M[t]/<t^D>
 
-where M is the ring of matrices and t in R.
+where M is the ring of matrices and t an external parameter
 
 """
 
@@ -31,7 +31,7 @@ def trace(x):
     if isinstance(x, UTPM):
         return x.trace()
     else:
-        return numpy.trace(x)              
+        return numpy.trace(x)
         
 def inv(x):
     if isinstance(x, UTPM):
@@ -57,7 +57,13 @@ def solve(A,x):
     
     else:
         return numpy.linalg.solve(A,x)
-
+        
+def eig(A):
+    if isinstance(A, UTPM):
+        return A.eig()
+    
+    else:
+        return numpy.linalg.eig(A)
 
 def vdot(x,y, z = None):
     """
@@ -341,34 +347,6 @@ class UTPM(GradedRing):
         self.__class__.cls_max( self.data, axis = axis, out = retval.data)
         return retval
 
-    def dot_old(self,rhs):
-        D,P = self.tc.shape[:2]
-        
-        if len(self.shape) == 1 and len(rhs.shape) == 1:
-            tc = numpy.zeros((D,P,1))
-            
-        elif len(self.shape) == 2 and len(rhs.shape) == 1 :
-            tc = numpy.zeros((D,P,self.shape[0]))
-            
-        elif  len(self.shape) == 1 and len(rhs.shape) == 2:
-            tc = numpy.zeros((D,P,rhs.shape[1]))
-
-        elif  len(self.shape) == 2 and len(rhs.shape) == 2:
-            tc = numpy.zeros((D,P, self.shape[0],rhs.shape[1]))
-            
-        elif self.ndim == 0 and rhs.ndim == 0:
-            tc = numpy.zeros((D,P))
-            
-        else:
-            raise NotImplementedError('you tried to dot(%s,%s)'%(str(self.shape),str(rhs.shape))) 
-            
-        retval = UTPM(tc)
-        for d in range(D):
-            for p in range(P):
-                for c in range(d+1):
-                    retval.tc[d,p,...] += numpy.dot(self.tc[c,p,...], rhs.tc[d-c,p,...])
-        return retval
-
     def dot(self,rhs):
         """
         retval = self.dot(rhs)
@@ -387,18 +365,8 @@ class UTPM(GradedRing):
                 
             else:
                 retval_shp = self_shp[:2] + self_shp[2:-1] + rhs_shp[2:][:-2] + rhs_shp[2:][-1:]
-            
-                # print '---------'
-                # print self_shp[2:-1]
-                # print rhs_shp[2:][:-2]
-                # print rhs_shp[2:][-1:]
-    
-            # print 'self_shp = ', self_shp
-            # print 'rhs_shp = ', rhs_shp
-            # print 'retval_shp = ', retval_shp
                 
             retval = self.__class__(self.__class__.__zeros__(retval_shp))
-            
             self.__class__.cls_dot( self.data, rhs.data, out = retval.data)
             
         else:
