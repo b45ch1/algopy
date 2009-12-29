@@ -1017,12 +1017,8 @@ class UTPM(GradedRing):
         Id = numpy.zeros((D,P,1))
         Id[0,:,0] = numpy.eye(P)
         
-        Lam_data    = numpy.zeros((D,P,N,N))
-        Lambar_data = numpy.zeros((D,P,N,N))
-        # FIXME: replace this for loop by cls_diag
-        for n in range(N):
-            Lam_data[:,:,n,n] = lam_data[:,:,n]
-            Lambar_data[:,:,n,n] = lambar_data[:,:,n]
+        Lam_data    = cls._diag(lam_data)
+        Lambar_data = cls._diag(lambar_data)
         
         # STEP 1: compute H
         for m in range(N):
@@ -1033,13 +1029,13 @@ class UTPM(GradedRing):
                 cls.cls_div(Id, tmp, out = H[:,:,m,n])
         
         # STEP 2: compute Lbar +  H * Q^T Qbar
-        cls.cls_dot(Q_data.transpose((0,1,3,2)), Qbar_data, out = tmp1)
+        cls.cls_dot(cls._transpose(Q_data), Qbar_data, out = tmp1)
         tmp1[...] *= H[...]
         tmp1[...] += Lambar_data[...]
         
         # STEP 3: compute Q ( Lbar +  H * Q^T Qbar ) Q^T
         cls.cls_dot(Q_data, tmp1, out = tmp2)
-        cls.cls_dot(tmp2, Q_data.transpose((0,1,3,2)), out = tmp1)
+        cls.cls_dot(tmp2, cls._transpose(Q_data), out = tmp1)
         
         Abar_data += tmp1
         
@@ -1124,7 +1120,7 @@ class UTPM(GradedRing):
         return numpy.transpose(a_data, (0,1,3,2))
         
     @classmethod
-    def cls_diag(cls, v_data, k = 0, out = None):
+    def _diag(cls, v_data, k = 0, out = None):
         """Extract a diagonal or construct  diagonal UTPM data"""
         
         if numpy.ndim(v_data) == 3:

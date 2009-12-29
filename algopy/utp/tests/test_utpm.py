@@ -46,7 +46,7 @@ class Test_Eigenvalue_Decomposition(TestCase):
         
         l,Q = UTPM.eig(A)
         
-        L_data = UTPM.cls_diag(l.data)
+        L_data = UTPM._diag(l.data)
         
         L = UTPM(L_data)
         
@@ -61,8 +61,8 @@ class Test_Eigenvalue_Decomposition(TestCase):
         Abar = Abar_data[0,0]
         Adot = A.data[1,0]
         
-        Lbar = UTPM.cls_diag(lbar_data)[0,0]
-        Ldot = UTPM.cls_diag(l.data)[1,0]
+        Lbar = UTPM._diag(lbar_data)[0,0]
+        Ldot = UTPM._diag(l.data)[1,0]
         
         Qbar = Qbar_data[0,0]
         Qdot = Q.data[1,0]
@@ -429,20 +429,17 @@ class Test_push_forward_class_functions(TestCase):
         D,P,N = 2,3,4
         x = numpy.random.rand(D,P,N)
         
-        X = UTPM.cls_diag(x)
+        X = UTPM._diag(x)
         
         for n in range(N):
             assert_almost_equal( x[...,n], X[...,n,n])
             
-    def test_transposee(self):
+    def test__transpose(self):
         D,P,M,N = 2,3,4,5
         X_data = numpy.random.rand(D,P,N,M)
         Y_data = UTPM._transpose(X_data)
         
         assert_array_almost_equal(X_data.transpose((0,1,3,2)), Y_data)
-        
-        
-        
         
 
 class PushForward_UTPM_objects(TestCase):
