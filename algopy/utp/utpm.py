@@ -461,7 +461,17 @@ class UTPM(GradedRing):
             
             
         return retval
-
+        
+    def eig(self):
+        
+        D,P,M,N = numpy.shape(self.data)
+        
+        Q = self.__class__(self.__class__.__zeros__((D,P,N,N)))
+        L = self.__class__(self.__class__.__zeros__((D,P,N)))
+        
+        UTPM.cls_eig(Q.data, L.data, self.data)
+      
+        return L,Q
 
     def inv(self):
         retval = UTPM(numpy.zeros(numpy.shape(self.tc)))
@@ -919,22 +929,6 @@ class UTPM(GradedRing):
             # STEP 6:
             for p in range(P):
                 Q_data[D,p,:,:] = numpy.dot(H[p] - numpy.dot(Q_data[0,p],R_data[D,p]), Rinv[p]) #numpy.dot(Q_data[0,p,:,:],K[p,:,:])
-
-
-
-    def eig(self):
-        
-        D,P,M,N = numpy.shape(self.data)
-        
-        Q = self.__class__(self.__class__.__zeros__((D,P,N,N)))
-        L = self.__class__(self.__class__.__zeros__((D,P,N)))
-        
-        UTPM.cls_eig(Q.data, L.data, self.data)
-      
-        return L,Q
-
-
-        
         
     @classmethod
     def cls_eig(cls, Q_data, L_data, A_data):
@@ -1165,7 +1159,17 @@ class UTPM(GradedRing):
         """Extract a diagonal or construct  diagonal UTPM data"""
         
         if numpy.ndim(v_data) == 3:
-            pass
+            D,P,N = v_data.shape
+            if out == None:
+                out = numpy.zeros((D,P,N,N),dtype=float)
+            else:
+                out[...] = 0.
+                
+            for d in range(D):
+                for p in range(P):
+                    out[d,p] = numpy.diag(v_data[d,p])
+                        
+            return out
             
         else:
             raise NotImplementedError('should implement that')

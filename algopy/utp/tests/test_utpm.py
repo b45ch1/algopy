@@ -369,7 +369,7 @@ class TestFunctionOfJacobian(TestCase):
         x.tc[0,:] = x0
         x.tc[1,0] = 1
         y.tc[0,:] = y0
-        y.tc[1,1] = 1        
+        y.tc[1,1] = 1
         
         # forward
         f = x*y*x
@@ -427,6 +427,16 @@ class Test_push_forward_class_functions(TestCase):
         UTPM.cls_div(X_data, Y_data, out = Z_data)
         
         assert_array_almost_equal(Z_data, Z.data)
+        
+        
+    def test_diag(self):
+        D,P,N = 2,3,4
+        x = numpy.random.rand(D,P,N)
+        
+        X = UTPM.cls_diag(x)
+        
+        for n in range(N):
+            assert_almost_equal( x[...,n], X[...,n,n])
         
         
         
