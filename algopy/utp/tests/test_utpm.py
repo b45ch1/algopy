@@ -4,6 +4,266 @@ import numpy
 from algopy.utp.utpm import *
 
 
+class Test_Eigenvalue_Decomposition(TestCase):
+    
+    def test_push_forward(self):
+        (D,P,N) = 3,3,5
+        A_data = numpy.zeros((D,P,N,N))
+        for d in range(D):
+            for p in range(P):
+                tmp = numpy.random.rand(N,N)
+                A_data[d,p,:,:] = numpy.dot(tmp.T,tmp)
+
+                if d == 0:
+                    A_data[d,p,:,:] += N * numpy.eye(N)
+
+        A = UTPM(A_data)
+        
+        l,Q = A.eig()
+        
+        L_data = numpy.zeros((D,P,N,N))
+        for d in range(D):
+            for p in range(P):
+                for n in range(N):
+                    L_data[d,p,n,n] = l.data[d,p,n]
+        
+        L = UTPM(L_data)
+        
+        assert_array_almost_equal(Q.dot(L.dot(Q.T)).data, A.data, decimal = 10)
+        
+    def test_pullback(self):
+        (D,P,N) = 2,1,3
+        A_data = numpy.zeros((D,P,N,N))
+        for d in range(D):
+            for p in range(P):
+                tmp = numpy.random.rand(N,N)
+                A_data[d,p,:,:] = numpy.dot(tmp.T,tmp)
+
+                if d == 0:
+                    A_data[d,p,:,:] += N * numpy.diag(numpy.random.rand(N))
+
+        A = UTPM(A_data)
+        
+        l,Q = A.eig()
+        
+        L_data = numpy.zeros((D,P,N,N))
+        for d in range(D):
+            for p in range(P):
+                for n in range(N):
+                    L_data[d,p,n,n] = l.data[d,p,n]
+        
+        L = UTPM(L_data)
+        
+        assert_array_almost_equal(Q.dot(L.dot(Q.T)).data, A.data, decimal = 13)
+        
+        lbar_data = numpy.random.rand(*(D,P,N))
+        Qbar_data = numpy.random.rand(*(D,P,N,N))
+        Abar_data = numpy.zeros((D,P,N,N))
+        
+        UTPM.cls_eig_pullback( Qbar_data, lbar_data, A.data, Q.data, l.data, out = Abar_data)
+        
+        # Abar = Abar_data[0,0]
+        # Adot = A.data[1,0]
+
+        # Qbar = Qbar_data[0,0]
+        # Qdot = Q.data[1,0]
+
+        # Rbar = Rbar_data[0,0]
+        # Rdot = R.data[1,0]
+        
+        # assert_almost_equal(numpy.trace(numpy.dot(Abar.T,Adot)), numpy.trace(numpy.dot(Qbar.T,Qdot) + numpy.dot(Rbar.T,Rdot)))
+        
+class Test_QR_Decomposition(TestCase):
+    def test_push_forward(self):
+        (D,P,N) = 6,3,20
+        A_data = numpy.random.rand(D,P,N,N)
+        
+        # make A_data sufficiently regular
+        for p in range(P):
+            for n in range(N):
+                A_data[0,p,n,n] += (N + 1)
+        A_data_old = A_data.copy()
+        A = UTPM(A_data)
+
+        Q,R = A.qr()
+        assert_array_almost_equal( (Q.dot(R)).data, A_data_old, decimal = 12)
+        
+    def test_push_forward_rectangular_A(self):
+        (D,P,M,N) = 5,3,5,3
+        A_data = numpy.random.rand(D,P,M,N)
+        
+        # make A_data sufficiently regular
+        for p in range(P):
+            for n in range(N):
+                A_data[0,p,n,n] += (N + 1)
+        
+        A = UTPM(A_data)
+
+        Q,R = A.qr()
+        
+        assert_array_equal( Q.data.shape, [D,P,M,N])
+        assert_array_equal( R.data.shape, [D,P,N,N])
+        
+        # print 'zero?\n',dot(Q, R) - A
+        assert_array_almost_equal( (Q.dot(R)).data, A.data, decimal = 14)
+    
+    def test_pullback(self):
+        (D,P,M,N) = 2,1,10,10
+        
+        A_data = numpy.random.rand(D,P,M,N)
+        
+        # make A_data sufficiently regular
+        for p in range(P):
+            for n in range(N):
+                A_data[0,p,n,n] += (N + 1)
+        
+        A = UTPM(A_data)
+
+        # STEP 1: push forward
+        Q,R = A.qr()
+        
+        # STEP 2: pullback
+        
+        Qbar_data = numpy.random.rand(*Q.data.shape)
+        Rbar_data = numpy.random.rand(*R.data.shape)
+        
+        for r in range(N):
+            for c in range(N):
+                Rbar_data[:,:,r,c] *= (c>r)
+                
+        
+        Qbar = UTPM(Qbar_data)
+        Rbar = UTPM(Rbar_data)
+        
+        Abar = UTPM.qr_pullback(Qbar, Rbar, A, Q, R)
+        
+        
+        Abar = Abar.data[0,0]
+        Adot = A.data[1,0]
+
+        Qbar = Qbar.data[0,0]
+        Qdot = Q.data[1,0]
+
+        Rbar = Rbar.data[0,0]
+        Rdot = R.data[1,0]
+        
+        assert_almost_equal(numpy.trace(numpy.dot(Abar.T,Adot)), numpy.trace(numpy.dot(Qbar.T,Qdot) + numpy.dot(Rbar.T,Rdot)))
+        
+    def test_pullback_rectangular_A(self):
+        (D,P,M,N) = 2,1,10,3
+        
+        A_data = numpy.random.rand(D,P,M,N)
+        
+        # make A_data sufficiently regular
+        for p in range(P):
+            for n in range(N):
+                A_data[0,p,n,n] += (N + 1)
+        
+        A = UTPM(A_data)
+
+        # STEP 1: push forward
+        Q,R = A.qr()
+        
+        # STEP 2: pullback
+        
+        Qbar_data = numpy.random.rand(*Q.data.shape)
+        Rbar_data = numpy.random.rand(*R.data.shape)
+        
+        for r in range(N):
+            for c in range(N):
+                Rbar_data[:,:,r,c] *= (c>r)
+                
+        
+        Qbar = UTPM(Qbar_data)
+        Rbar = UTPM(Rbar_data)
+        
+        Abar = UTPM.qr_pullback(Qbar, Rbar, A, Q, R)
+        
+        
+        Abar = Abar.data[0,0]
+        Adot = A.data[1,0]
+
+        Qbar = Qbar.data[0,0]
+        Qdot = Q.data[1,0]
+
+        Rbar = Rbar.data[0,0]
+        Rdot = R.data[1,0]
+        
+        assert_almost_equal(numpy.trace(numpy.dot(Abar.T,Adot)), numpy.trace(numpy.dot(Qbar.T,Qdot) + numpy.dot(Rbar.T,Rdot)))
+        
+    def test_pullback_cls(self):
+        (D,P,M,N) = 2,1,2,2
+        
+        A_data = numpy.random.rand(D,P,M,N)
+        # make A_data sufficiently regular
+        for p in range(P):
+            for n in range(N):
+                A_data[0,p,n,n] += (N + 1)
+        
+        A = UTPM(A_data)
+
+        Q,R = A.qr()
+        
+        assert_array_equal( Q.data.shape, [D,P,M,N])
+        assert_array_equal( R.data.shape, [D,P,N,N])
+        assert_array_almost_equal( (Q.dot(R)).data, A.data, decimal = 14)
+        
+        Qbar_data = numpy.random.rand(*Q.data.shape)
+        Rbar_data = numpy.random.rand(*R.data.shape)
+        Abar_data = numpy.zeros(A.data.shape)
+        
+        
+        UTPM.cls_qr_pullback(Qbar_data, Rbar_data, A.data, Q.data, R.data, out = Abar_data )
+
+
+        Abar = Abar_data[0,0]
+        Adot = A_data[1,0]
+
+        Qbar = Qbar_data[0,0]
+        Qdot = Q.data[1,0]
+
+        Rbar = Rbar_data[0,0]
+        Rdot = R.data[1,0]
+
+        assert_almost_equal(numpy.trace(numpy.dot(Abar.T,Adot)), numpy.trace(numpy.dot(Qbar.T,Qdot) + numpy.dot(Rbar.T,Rdot)))
+        
+    def test_pullback_rectangular_A_cls(self):
+        (D,P,M,N) = 2,1,5,2
+        
+        A_data = numpy.random.rand(D,P,M,N)
+        # make A_data sufficiently regular
+        for p in range(P):
+            for n in range(N):
+                A_data[0,p,n,n] += (N + 1)
+        
+        A = UTPM(A_data)
+
+        Q,R = A.qr()
+        
+        assert_array_equal( Q.data.shape, [D,P,M,N])
+        assert_array_equal( R.data.shape, [D,P,N,N])
+        assert_array_almost_equal( (Q.dot(R)).data, A.data, decimal = 14)
+        
+        Qbar_data = numpy.random.rand(*Q.data.shape)
+        Rbar_data = numpy.random.rand(*R.data.shape)
+        Abar_data = numpy.zeros(A.data.shape)
+        
+        
+        UTPM.cls_qr_pullback(Qbar_data, Rbar_data, A.data, Q.data, R.data, out = Abar_data )
+
+
+        Abar = Abar_data[0,0]
+        Adot = A_data[1,0]
+
+        Qbar = Qbar_data[0,0]
+        Qdot = Q.data[1,0]
+
+        Rbar = Rbar_data[0,0]
+        Rdot = R.data[1,0]
+
+        assert_almost_equal(numpy.trace(numpy.dot(Abar.T,Adot)), numpy.trace(numpy.dot(Qbar.T,Qdot) + numpy.dot(Rbar.T,Rdot)))
+
+
 class TestFunctionOfJacobian(TestCase):
     def test_FtoJT(self):
         (D,P,N) = 2,5,5
@@ -617,253 +877,8 @@ class PushForward_UTPM_objects(TestCase):
         assert_array_almost_equal(R,S)        
         
         
-class Test_QR_Decomposition(TestCase):
-    def test_push_forward(self):
-        (D,P,N) = 6,3,20
-        A_data = numpy.random.rand(D,P,N,N)
-        
-        # make A_data sufficiently regular
-        for p in range(P):
-            for n in range(N):
-                A_data[0,p,n,n] += (N + 1)
-        A_data_old = A_data.copy()
-        A = UTPM(A_data)
-
-        Q,R = A.qr()
-        assert_array_almost_equal( (Q.dot(R)).data, A_data_old, decimal = 12)
-        
-    def test_push_forward_rectangular_A(self):
-        (D,P,M,N) = 5,3,5,3
-        A_data = numpy.random.rand(D,P,M,N)
-        
-        # make A_data sufficiently regular
-        for p in range(P):
-            for n in range(N):
-                A_data[0,p,n,n] += (N + 1)
-        
-        A = UTPM(A_data)
-
-        Q,R = A.qr()
-        
-        assert_array_equal( Q.data.shape, [D,P,M,N])
-        assert_array_equal( R.data.shape, [D,P,N,N])
-        
-        # print 'zero?\n',dot(Q, R) - A
-        assert_array_almost_equal( (Q.dot(R)).data, A.data, decimal = 14)
-    
-    def test_pullback(self):
-        (D,P,M,N) = 2,1,10,10
-        
-        A_data = numpy.random.rand(D,P,M,N)
-        
-        # make A_data sufficiently regular
-        for p in range(P):
-            for n in range(N):
-                A_data[0,p,n,n] += (N + 1)
-        
-        A = UTPM(A_data)
-
-        # STEP 1: push forward
-        Q,R = A.qr()
-        
-        # STEP 2: pullback
-        
-        Qbar_data = numpy.random.rand(*Q.data.shape)
-        Rbar_data = numpy.random.rand(*R.data.shape)
-        
-        for r in range(N):
-            for c in range(N):
-                Rbar_data[:,:,r,c] *= (c>r)
-                
-        
-        Qbar = UTPM(Qbar_data)
-        Rbar = UTPM(Rbar_data)
-        
-        Abar = UTPM.qr_pullback(Qbar, Rbar, A, Q, R)
-        
-        
-        Abar = Abar.data[0,0]
-        Adot = A.data[1,0]
-
-        Qbar = Qbar.data[0,0]
-        Qdot = Q.data[1,0]
-
-        Rbar = Rbar.data[0,0]
-        Rdot = R.data[1,0]
-        
-        assert_almost_equal(numpy.trace(numpy.dot(Abar.T,Adot)), numpy.trace(numpy.dot(Qbar.T,Qdot) + numpy.dot(Rbar.T,Rdot)))
-        
-    def test_pullback_rectangular_A(self):
-        (D,P,M,N) = 2,1,10,3
-        
-        A_data = numpy.random.rand(D,P,M,N)
-        
-        # make A_data sufficiently regular
-        for p in range(P):
-            for n in range(N):
-                A_data[0,p,n,n] += (N + 1)
-        
-        A = UTPM(A_data)
-
-        # STEP 1: push forward
-        Q,R = A.qr()
-        
-        # STEP 2: pullback
-        
-        Qbar_data = numpy.random.rand(*Q.data.shape)
-        Rbar_data = numpy.random.rand(*R.data.shape)
-        
-        for r in range(N):
-            for c in range(N):
-                Rbar_data[:,:,r,c] *= (c>r)
-                
-        
-        Qbar = UTPM(Qbar_data)
-        Rbar = UTPM(Rbar_data)
-        
-        Abar = UTPM.qr_pullback(Qbar, Rbar, A, Q, R)
-        
-        
-        Abar = Abar.data[0,0]
-        Adot = A.data[1,0]
-
-        Qbar = Qbar.data[0,0]
-        Qdot = Q.data[1,0]
-
-        Rbar = Rbar.data[0,0]
-        Rdot = R.data[1,0]
-        
-        assert_almost_equal(numpy.trace(numpy.dot(Abar.T,Adot)), numpy.trace(numpy.dot(Qbar.T,Qdot) + numpy.dot(Rbar.T,Rdot)))
-        
-    def test_pullback_cls(self):
-        (D,P,M,N) = 2,1,2,2
-        
-        A_data = numpy.random.rand(D,P,M,N)
-        # make A_data sufficiently regular
-        for p in range(P):
-            for n in range(N):
-                A_data[0,p,n,n] += (N + 1)
-        
-        A = UTPM(A_data)
-
-        Q,R = A.qr()
-        
-        assert_array_equal( Q.data.shape, [D,P,M,N])
-        assert_array_equal( R.data.shape, [D,P,N,N])
-        assert_array_almost_equal( (Q.dot(R)).data, A.data, decimal = 14)
-        
-        Qbar_data = numpy.random.rand(*Q.data.shape)
-        Rbar_data = numpy.random.rand(*R.data.shape)
-        Abar_data = numpy.zeros(A.data.shape)
-        
-        
-        UTPM.cls_qr_pullback(Qbar_data, Rbar_data, A.data, Q.data, R.data, out = Abar_data )
 
 
-        Abar = Abar_data[0,0]
-        Adot = A_data[1,0]
-
-        Qbar = Qbar_data[0,0]
-        Qdot = Q.data[1,0]
-
-        Rbar = Rbar_data[0,0]
-        Rdot = R.data[1,0]
-
-        assert_almost_equal(numpy.trace(numpy.dot(Abar.T,Adot)), numpy.trace(numpy.dot(Qbar.T,Qdot) + numpy.dot(Rbar.T,Rdot)))
-        
-    def test_pullback_rectangular_A_cls(self):
-        (D,P,M,N) = 2,1,5,2
-        
-        A_data = numpy.random.rand(D,P,M,N)
-        # make A_data sufficiently regular
-        for p in range(P):
-            for n in range(N):
-                A_data[0,p,n,n] += (N + 1)
-        
-        A = UTPM(A_data)
-
-        Q,R = A.qr()
-        
-        assert_array_equal( Q.data.shape, [D,P,M,N])
-        assert_array_equal( R.data.shape, [D,P,N,N])
-        assert_array_almost_equal( (Q.dot(R)).data, A.data, decimal = 14)
-        
-        Qbar_data = numpy.random.rand(*Q.data.shape)
-        Rbar_data = numpy.random.rand(*R.data.shape)
-        Abar_data = numpy.zeros(A.data.shape)
-        
-        
-        UTPM.cls_qr_pullback(Qbar_data, Rbar_data, A.data, Q.data, R.data, out = Abar_data )
-
-
-        Abar = Abar_data[0,0]
-        Adot = A_data[1,0]
-
-        Qbar = Qbar_data[0,0]
-        Qdot = Q.data[1,0]
-
-        Rbar = Rbar_data[0,0]
-        Rdot = R.data[1,0]
-
-        assert_almost_equal(numpy.trace(numpy.dot(Abar.T,Adot)), numpy.trace(numpy.dot(Qbar.T,Qdot) + numpy.dot(Rbar.T,Rdot)))
-
-class Test_Eigenvalue_Decomposition(TestCase):
-    
-    def test_push_forward(self):
-        (D,P,N) = 3,3,5
-        A_data = numpy.zeros((D,P,N,N))
-        for d in range(D):
-            for p in range(P):
-                tmp = numpy.random.rand(N,N)
-                A_data[d,p,:,:] = numpy.dot(tmp.T,tmp)
-
-                if d == 0:
-                    A_data[d,p,:,:] += N * numpy.eye(N)
-
-        A = UTPM(A_data)
-        
-        l,Q = A.eig()
-        
-        L_data = numpy.zeros((D,P,N,N))
-        for d in range(D):
-            for p in range(P):
-                for n in range(N):
-                    L_data[d,p,n,n] = l.data[d,p,n]
-        
-        L = UTPM(L_data)
-        
-        assert_array_almost_equal(Q.dot(L.dot(Q.T)).data, A.data, decimal = 10)
-        
-    def test_eig_pullback(self):
-        (D,P,N) = 2,1,3
-        A_data = numpy.zeros((D,P,N,N))
-        for d in range(D):
-            for p in range(P):
-                tmp = numpy.random.rand(N,N)
-                A_data[d,p,:,:] = numpy.dot(tmp.T,tmp)
-
-                if d == 0:
-                    A_data[d,p,:,:] += N * numpy.diag(numpy.random.rand(N))
-
-        A = UTPM(A_data)
-        
-        l,Q = A.eig()
-        
-        L_data = numpy.zeros((D,P,N,N))
-        for d in range(D):
-            for p in range(P):
-                for n in range(N):
-                    L_data[d,p,n,n] = l.data[d,p,n]
-        
-        L = UTPM(L_data)
-        
-        assert_array_almost_equal(Q.dot(L.dot(Q.T)).data, A.data, decimal = 13)
-        
-        lbar_data = numpy.zeros((D,P,N))
-        Qbar_data = numpy.zeros((D,P,N,N))
-        Abar_data = numpy.zeros((D,P,N,N))
-        
-        UTPM.cls_eig_pullback( Abar_data, Qbar_data, lbar_data, A.data, Q.data, l.data)
 
 
         

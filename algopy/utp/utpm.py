@@ -236,7 +236,7 @@ class UTPM(GradedRing):
     def __setitem__(self, sl, rhs):
         if isinstance(rhs, UTPM):
             if type(sl) == int or sl == Ellipsis:
-                sl = (sl,)            
+                sl = (sl,)
             return self.tc.__setitem__((slice(None),slice(None)) + sl, rhs.tc)
         else:
             raise NotImplementedError('rhs must be of the type algopy.UTPM!')
@@ -263,26 +263,7 @@ class UTPM(GradedRing):
         retval.__imul__(rhs)
         return retval
     
-    @classmethod    
-    def cls_idiv(cls, z_data, x_data):
-        (D,P) = z_data.shape[:2]
-        tmp_data = z_data.copy()
-        for d in range(D):
-            tmp_data[d,:,...] = 1./ x_data[0,:,...] * ( z_data[d,:,...] - numpy.sum(tmp_data[:d,:,...] * x_data[d:0:-1,:,...], axis=0))
-        z_data[...] = tmp_data[...]
-        
-    @classmethod
-    def cls_div(cls, x_data, y_data, out = None):
-        """
-        z = x/y
-        """
-        z_data = out
-        if out == None:
-            return NotImplementedError('')
-        
-        (D,P) = z_data.shape[:2]
-        for d in range(D):
-            z_data[d,:,...] = 1./ y_data[0,:,...] * ( x_data[d,:,...] - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
+
 
     def __div__(self,rhs):
         retval = self.clone()
@@ -359,26 +340,6 @@ class UTPM(GradedRing):
         retval = self.__class__(self.__class__.__zeros__(retval_shp))
         self.__class__.cls_max( self.data, axis = axis, out = retval.data)
         return retval
-        
-
-    @classmethod
-    def cls_max(cls, x_data, axis = None, out = None):
-
-        if out == None:
-            raise NotImplementedError('should implement that')
-        
-        x_shp = x_data.shape
-
-        D,P = x_shp[:2]
-        shp = x_shp[2:]
-
-        if len(shp) > 1:
-            raise NotImplementedError('should implement that')
-        
-        for p in range(P):
-            out[:,p] = x_data[:,p,numpy.argmax(x_data[0,p])]
-        
-        
 
     def dot_old(self,rhs):
         D,P = self.tc.shape[:2]
@@ -500,53 +461,7 @@ class UTPM(GradedRing):
             
             
         return retval
-        
-        
-    @classmethod
-    def cls_dot(cls, x_data, y_data, out = None):
-        """
-        z = dot(x,y)
-        """
-        
-        if out == None:
-            raise NotImplementedError('should implement that')
-            
-        z_data = out
-        z_data[...] = 0.
-            
-        D,P = x_data.shape[:2]
-        
-        # print 'x_data.shape=', x_data.shape
-        # print 'y_data.shape=', y_data.shape
-        # print 'z_data.shape=', z_data.shape
 
-        for d in range(D):
-            for p in range(P):
-                for c in range(d+1):
-                    z_data[d,p,...] += numpy.dot(x_data[c,p,...], y_data[d-c,p,...])
-        
-
-    @classmethod
-    def cls_dot_non_UTPM_y(cls, z_data, x_data, y_data):
-        """
-        z = dot(x,y)
-        """
-        D,P = x_data.shape[:2]
-
-        for d in range(D):
-            for p in range(P):
-                z_data[d,p,...] = numpy.dot(x_data[d,p,...], y_data[...])
-                
-    @classmethod
-    def cls_dot_non_UTPM_x(cls, z_data, x_data, y_data):
-        """
-        z = dot(x,y)
-        """
-        D,P = y_data.shape[:2]
-
-        for d in range(D):
-            for p in range(P):
-                z_data[d,p,...] = numpy.dot(x_data[...], y_data[d,p,...])
 
     def inv(self):
         retval = UTPM(numpy.zeros(numpy.shape(self.tc)))
@@ -636,6 +551,170 @@ class UTPM(GradedRing):
             self.__class__.cls_solve_non_UTPM_x(self.data, x, out = y.data)
 
         return y
+        
+        
+    def trace(self):
+        """ returns a new UTPM in standard format, i.e. the matrices are 1x1 matrices"""
+        D,P = self.tc.shape[:2]
+        retval = numpy.zeros((D,P))
+        for d in range(D):
+            for p in range(P):
+                retval[d,p] = numpy.trace(self.tc[d,p,...])
+        return UTPM(retval)
+        
+    def FtoJT(self):
+        """
+        Combines several directional derivatives and combines them to a transposed Jacobian JT, i.e.
+        x.tc.shape = (D,P,shp)
+        y = x.FtoJT()
+        y.tc.shape = (D-1, (P,1) + shp)
+        """
+        D,P = self.tc.shape[:2]
+        shp = self.tc.shape[2:]
+        return UTPM(self.tc[1:,...].reshape((D-1,1) + (P,) + shp))
+        
+    def JTtoF(self):
+        """
+        inverse operation of FtoJT
+        x.tc.shape = (D,1, P,shp)
+        y = x.JTtoF()
+        y.tc.shape = (D+1, P, shp)
+        """
+        D = self.tc.shape[0]
+        P = self.tc.shape[2]
+        shp = self.tc.shape[3:]
+        tmp = numpy.zeros((D+1,P) + shp)
+        tmp[0:D,...] = self.tc.reshape((D,P) + shp)
+        return UTPM(tmp)        
+
+    def clone(self):
+        return UTPM(self.tc.copy(), shift = self.shift)
+
+    def get_shape(self):
+        return numpy.shape(self.tc[0,0,...])
+    shape = property(get_shape)
+    
+    def get_ndim(self):
+        return numpy.ndim(self.tc[0,0,...])
+    ndim = property(get_ndim)
+    
+    def reshape(self, dims):
+        return UTPM(self.tc.reshape(self.tc.shape[0:2] + dims))
+
+    def get_transpose(self):
+        return self.transpose()
+    def set_transpose(self,x):
+        raise NotImplementedError('???')
+    T = property(get_transpose, set_transpose)
+
+    def transpose(self, axes = None):
+        if axes != None:
+            raise NotImplementedError('should implement that...')
+        Nshp = len(self.shape)
+        axes_ids = tuple(range(2,2+Nshp)[::-1])
+        return UTPM( numpy.transpose(self.tc,axes=(0,1) + axes_ids))
+
+    def set_zero(self):
+        self.tc[...] = 0.
+        return self
+
+    def zeros_like(self):
+        return UTPM(numpy.zeros_like(self.tc))
+        
+
+    def __str__(self):
+        return str(self.tc)
+
+    def __repr__(self):
+        return self.__str__()
+
+
+    @classmethod
+    def cls_max(cls, x_data, axis = None, out = None):
+
+        if out == None:
+            raise NotImplementedError('should implement that')
+        
+        x_shp = x_data.shape
+
+        D,P = x_shp[:2]
+        shp = x_shp[2:]
+
+        if len(shp) > 1:
+            raise NotImplementedError('should implement that')
+        
+        for p in range(P):
+            out[:,p] = x_data[:,p,numpy.argmax(x_data[0,p])]
+            
+    
+    @classmethod
+    def cls_idiv(cls, z_data, x_data):
+        (D,P) = z_data.shape[:2]
+        tmp_data = z_data.copy()
+        for d in range(D):
+            tmp_data[d,:,...] = 1./ x_data[0,:,...] * ( z_data[d,:,...] - numpy.sum(tmp_data[:d,:,...] * x_data[d:0:-1,:,...], axis=0))
+        z_data[...] = tmp_data[...]
+        
+    @classmethod
+    def cls_div(cls, x_data, y_data, out = None):
+        """
+        z = x/y
+        """
+        z_data = out
+        if out == None:
+            return NotImplementedError('')
+        
+        (D,P) = z_data.shape[:2]
+        for d in range(D):
+            z_data[d,:,...] = 1./ y_data[0,:,...] * ( x_data[d,:,...] - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
+            
+    @classmethod
+    def cls_dot(cls, x_data, y_data, out = None):
+        """
+        z = dot(x,y)
+        """
+        
+        if out == None:
+            raise NotImplementedError('should implement that')
+            
+        z_data = out
+        z_data[...] = 0.
+            
+        D,P = x_data.shape[:2]
+        
+        # print 'x_data.shape=', x_data.shape
+        # print 'y_data.shape=', y_data.shape
+        # print 'z_data.shape=', z_data.shape
+
+        for d in range(D):
+            for p in range(P):
+                for c in range(d+1):
+                    z_data[d,p,...] += numpy.dot(x_data[c,p,...], y_data[d-c,p,...])
+        
+
+    @classmethod
+    def cls_dot_non_UTPM_y(cls, z_data, x_data, y_data):
+        """
+        z = dot(x,y)
+        """
+        D,P = x_data.shape[:2]
+
+        for d in range(D):
+            for p in range(P):
+                z_data[d,p,...] = numpy.dot(x_data[d,p,...], y_data[...])
+                
+    @classmethod
+    def cls_dot_non_UTPM_x(cls, z_data, x_data, y_data):
+        """
+        z = dot(x,y)
+        """
+        D,P = y_data.shape[:2]
+
+        for d in range(D):
+            for p in range(P):
+                z_data[d,p,...] = numpy.dot(x_data[...], y_data[d,p,...])
+
+
 
     @classmethod
     def cls_solve(cls, A_data, x_data, out = None):
@@ -955,7 +1034,13 @@ class UTPM(GradedRing):
                 z_data[d,p] = x_data * y_data[d,p]
                 
     @classmethod
-    def cls_eig_pullback(cls, Abar_data, Qbar_data, lambar_data, A_data, Q_data, lam_data):
+    def cls_eig_pullback(cls, Qbar_data, lambar_data, A_data, Q_data, lam_data, out = None):
+        
+        if out == None:
+            raise NotImplementedError('need to implement that...')
+            
+        Abar_data = out
+
         A_shp = A_data.shape
         D,P,M,N = A_shp
         
@@ -963,21 +1048,39 @@ class UTPM(GradedRing):
         
         # allocating temporary storage
         H = numpy.zeros(A_shp)
+        tmp1 = numpy.zeros((D,P,N,N), dtype=float)
+        tmp2 = numpy.zeros((D,P,N,N), dtype=float)
         
         Id = numpy.zeros((D,P,1))
         Id[0,:,0] = numpy.eye(P)
         
-        Lam_data = numpy.zeros((D,P,N,N))
+        Lam_data    = numpy.zeros((D,P,N,N))
+        Lambar_data = numpy.zeros((D,P,N,N))
         # FIXME: replace this for loop by cls_diag
         for n in range(N):
             Lam_data[:,:,n,n] = lam_data[:,:,n]
+            Lambar_data[:,:,n,n] = lambar_data[:,:,n]
         
+        # STEP 1: compute H
         for m in range(N):
             for n in range(N):
                 if n == m:
                     continue
                 tmp = lam_data[:,:,n] -   lam_data[:,:,m]
                 cls.cls_div(Id, tmp, out = H[:,:,m,n])
+        
+        # STEP 2: compute Lbar +  H * Q^T Qbar
+        cls.cls_dot(Q_data.transpose((0,1,3,2)), Qbar_data, out = tmp1)
+        tmp1[...] *= H[...]
+        tmp1[...] += Lambar_data[...]
+        
+        # STEP 3: compute Q ( Lbar +  H * Q^T Qbar ) Q^T
+        cls.cls_dot(Q_data, tmp1, out = tmp2)
+        cls.cls_dot(tmp2, Q_data.transpose((0,1,3,2)), out = tmp1)
+        
+        Abar_data += tmp1
+        
+        return out
         
     
     @classmethod
@@ -1048,79 +1151,25 @@ class UTPM(GradedRing):
             Abar_data += tmp4
         
         return out
-
-
-    def trace(self):
-        """ returns a new UTPM in standard format, i.e. the matrices are 1x1 matrices"""
-        D,P = self.tc.shape[:2]
-        retval = numpy.zeros((D,P))
-        for d in range(D):
-            for p in range(P):
-                retval[d,p] = numpy.trace(self.tc[d,p,...])
-        return UTPM(retval)
         
-    def FtoJT(self):
-        """
-        Combines several directional derivatives and combines them to a transposed Jacobian JT, i.e.
-        x.tc.shape = (D,P,shp)
-        y = x.FtoJT()
-        y.tc.shape = (D-1, (P,1) + shp)
-        """
-        D,P = self.tc.shape[:2]
-        shp = self.tc.shape[2:]
-        return UTPM(self.tc[1:,...].reshape((D-1,1) + (P,) + shp))
-        
-    def JTtoF(self):
-        """
-        inverse operation of FtoJT
-        x.tc.shape = (D,1, P,shp)
-        y = x.JTtoF()
-        y.tc.shape = (D+1, P, shp)
-        """
-        D = self.tc.shape[0]
-        P = self.tc.shape[2]
-        shp = self.tc.shape[3:]
-        tmp = numpy.zeros((D+1,P) + shp)
-        tmp[0:D,...] = self.tc.reshape((D,P) + shp)
-        return UTPM(tmp)        
-
-    def clone(self):
-        return UTPM(self.tc.copy(), shift = self.shift)
-
-    def get_shape(self):
-        return numpy.shape(self.tc[0,0,...])
-    shape = property(get_shape)
-    
-    def get_ndim(self):
-        return numpy.ndim(self.tc[0,0,...])
-    ndim = property(get_ndim)
-    
-    def reshape(self, dims):
-        return UTPM(self.tc.reshape(self.tc.shape[0:2] + dims))
-
-    def get_transpose(self):
-        return self.transpose()
-    def set_transpose(self,x):
-        raise NotImplementedError('???')
-    T = property(get_transpose, set_transpose)
-
-    def transpose(self, axes = None):
+    @classmethod
+    def cls_transpose(cls, a_data, axes = None):
+        """Permute the dimensions of UTPM data"""
         if axes != None:
-            raise NotImplementedError('should implement that...')
-        Nshp = len(self.shape)
-        axes_ids = tuple(range(2,2+Nshp)[::-1])
-        return UTPM( numpy.transpose(self.tc,axes=(0,1) + axes_ids))
+            raise NotImplementedError('should implement that')
+        
+        return numpy.transpose(a_data, (0,1,3,2))
+        
+    @classmethod
+    def cls_diag(cls, v_data, k = 0, out = None):
+        """Extract a diagonal or construct  diagonal UTPM data"""
+        
+        if numpy.ndim(v_data) == 3:
+            pass
+            
+        else:
+            raise NotImplementedError('should implement that')
+        
 
-    def set_zero(self):
-        self.tc[...] = 0.
-        return self
 
-    def zeros_like(self):
-        return UTPM(numpy.zeros_like(self.tc))
-
-    def __str__(self):
-        return str(self.tc)
-
-    def __repr__(self):
-        return self.__str__()
 
