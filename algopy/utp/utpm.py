@@ -1116,7 +1116,7 @@ class UTPM(GradedRing):
         return out
         
     @classmethod
-    def cls_transpose(cls, a_data, axes = None):
+    def _transpose(cls, a_data, axes = None):
         """Permute the dimensions of UTPM data"""
         if axes != None:
             raise NotImplementedError('should implement that')

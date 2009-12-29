@@ -433,6 +433,13 @@ class Test_push_forward_class_functions(TestCase):
         
         for n in range(N):
             assert_almost_equal( x[...,n], X[...,n,n])
+            
+    def test_transposee(self):
+        D,P,M,N = 2,3,4,5
+        X_data = numpy.random.rand(D,P,N,M)
+        Y_data = UTPM._transpose(X_data)
+        
+        assert_array_almost_equal(X_data.transpose((0,1,3,2)), Y_data)
         
         
         
