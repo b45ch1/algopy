@@ -347,7 +347,7 @@ class UTPM(GradedRing):
         self_shp = self.data.shape 
         retval_shp = self_shp[:2]
         retval = self.__class__(self.__class__.__zeros__(retval_shp))
-        self.__class__.cls_max( self.data, axis = axis, out = retval.data)
+        self.__class__._max( self.data, axis = axis, out = retval.data)
         return retval
 
 
@@ -405,7 +405,7 @@ class UTPM(GradedRing):
     
             y = self.__class__(self.__class__.__zeros__((D,P,M) + x_shp[3:]))
     
-            UTPM.cls_solve(A.data, self.data, out = y.data)
+            UTPM._solve(A.data, self.data, out = y.data)
         
         else:
             A_shp = numpy.shape(A)
@@ -413,7 +413,7 @@ class UTPM(GradedRing):
             M = A_shp[0]
             D,P = x_shp[:2]
             y = self.__class__(self.__class__.__zeros__((D,P,M) + x_shp[3:]))
-            self.__class__.cls_solve_non_UTPM_A(A, self.data, out = y.data)
+            self.__class__._solve_non_UTPM_A(A, self.data, out = y.data)
             
         return y
 
@@ -429,14 +429,14 @@ class UTPM(GradedRing):
 
             D, P, M = A_shp[:3]
             y = self.__class__(self.__class__.__zeros__((D,P,M) + x_shp[3:]))
-            UTPM.cls_solve(A.data, self.data, out = y.data)
+            UTPM._solve(A.data, self.data, out = y.data)
 
         else:
             x_shp = numpy.shape(x)
             A_shp = numpy.shape(self.data)
             D,P,M = A_shp[:3]
             y = self.__class__(self.__class__.__zeros__((D,P,M) + x_shp[1:]))
-            self.__class__.cls_solve_non_UTPM_x(self.data, x, out = y.data)
+            self.__class__._solve_non_UTPM_x(self.data, x, out = y.data)
 
         return y
         
@@ -537,7 +537,7 @@ class UTPM(GradedRing):
                 out_shp = x_shp[:2] + x_shp[2:-1] + y_shp[2:][:-2] + y_shp[2:][-1:]
                 
             out = cls(cls.__zeros__(out_shp))
-            cls.cls_dot( x.data, y.data, out = out.data)
+            cls._dot( x.data, y.data, out = out.data)
             
         elif isinstance(x, UTPM) and not isinstance(y, UTPM):
             x_shp = x.data.shape
@@ -550,7 +550,7 @@ class UTPM(GradedRing):
                 out_shp = x_shp[:2] + x_shp[2:-1] + y_shp[:-2] + y_shp[-1:]
                 
             out = cls(cls.__zeros__(out_shp))
-            cls.cls_dot_non_UTPM_y(x.data, y, out = out.data)
+            cls._dot_non_UTPM_y(x.data, y, out = out.data)
             
         elif not isinstance(x, UTPM) and isinstance(y, UTPM):
             x_shp = x.shape
@@ -563,7 +563,7 @@ class UTPM(GradedRing):
                 out_shp = y_shp[:2] + x_shp[:-1] + y_shp[2:][:-2] + y_shp[2:][-1:]
 
             out = cls(cls.__zeros__(out_shp))
-            cls.cls_dot_non_UTPM_x(x, y.data, out = out.data)
+            cls._dot_non_UTPM_x(x, y.data, out = out.data)
             
             
         else:
@@ -572,7 +572,7 @@ class UTPM(GradedRing):
         return out
 
     @classmethod
-    def cls_max(cls, x_data, axis = None, out = None):
+    def _max(cls, x_data, axis = None, out = None):
 
         if out == None:
             raise NotImplementedError('should implement that')
@@ -590,7 +590,7 @@ class UTPM(GradedRing):
             
     
     @classmethod
-    def cls_idiv(cls, z_data, x_data):
+    def _idiv(cls, z_data, x_data):
         (D,P) = z_data.shape[:2]
         tmp_data = z_data.copy()
         for d in range(D):
@@ -598,7 +598,7 @@ class UTPM(GradedRing):
         z_data[...] = tmp_data[...]
         
     @classmethod
-    def cls_div(cls, x_data, y_data, out = None):
+    def _div(cls, x_data, y_data, out = None):
         """
         z = x/y
         """
@@ -611,7 +611,7 @@ class UTPM(GradedRing):
             z_data[d,:,...] = 1./ y_data[0,:,...] * ( x_data[d,:,...] - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
             
     @classmethod
-    def cls_dot(cls, x_data, y_data, out = None):
+    def _dot(cls, x_data, y_data, out = None):
         """
         z = dot(x,y)
         """
@@ -637,7 +637,7 @@ class UTPM(GradedRing):
         return out
 
     @classmethod
-    def cls_dot_non_UTPM_y(cls, x_data, y_data, out = None):
+    def _dot_non_UTPM_y(cls, x_data, y_data, out = None):
         """
         z = dot(x,y)
         """
@@ -657,7 +657,7 @@ class UTPM(GradedRing):
         return out
                 
     @classmethod
-    def cls_dot_non_UTPM_x(cls, x_data, y_data, out = None):
+    def _dot_non_UTPM_x(cls, x_data, y_data, out = None):
         """
         z = dot(x,y)
         """
@@ -677,7 +677,7 @@ class UTPM(GradedRing):
         return out
 
     @classmethod
-    def cls_solve(cls, A_data, x_data, out = None):
+    def _solve(cls, A_data, x_data, out = None):
         """
         solves the linear system of equations for y::
             
@@ -712,7 +712,7 @@ class UTPM(GradedRing):
                 
                 
     @classmethod
-    def cls_solve_non_UTPM_A(cls, A_data, x_data, out = None):
+    def _solve_non_UTPM_A(cls, A_data, x_data, out = None):
         """
         solves the linear system of equations for y::
             
@@ -749,7 +749,7 @@ class UTPM(GradedRing):
         return out
 
     @classmethod
-    def cls_solve_non_UTPM_x(cls, A_data, x_data, out = None):
+    def _solve_non_UTPM_x(cls, A_data, x_data, out = None):
         """
         solves the linear system of equations for y::
 
@@ -802,7 +802,7 @@ class UTPM(GradedRing):
         Q = self.__class__(self.__class__.__zeros__((D,P,M,K)))
         R = self.__class__(self.__class__.__zeros__((D,P,K,N)))
 
-        UTPM.cls_qr(Q.data, R.data, self.data)
+        UTPM._qr(Q.data, R.data, self.data)
 
         return Q,R
         
@@ -821,12 +821,12 @@ class UTPM(GradedRing):
             Q = cls(cls.__zeros__((D,P,N,N)))
             L = cls(cls.__zeros__((D,P,N)))
         
-        UTPM.cls_eig(Q.data, L.data, A.data)
+        UTPM._eig(Q.data, L.data, A.data)
       
         return L,Q
 
     @classmethod
-    def cls_qr(cls, Q_data, R_data, A_data):
+    def _qr(cls, Q_data, R_data, A_data):
         """
         computes the qr decomposition (Q,R) = qr(A)    <===>    QR = A
         
@@ -900,7 +900,7 @@ class UTPM(GradedRing):
                 Q_data[D,p,:,:] = numpy.dot(H[p] - numpy.dot(Q_data[0,p],R_data[D,p]), Rinv[p]) #numpy.dot(Q_data[0,p,:,:],K[p,:,:])
         
     @classmethod
-    def cls_eig(cls, Q_data, L_data, A_data):
+    def _eig(cls, Q_data, L_data, A_data):
         """
         computes the eigenvalue decompositon
 
@@ -981,7 +981,7 @@ class UTPM(GradedRing):
                 L_data[D,p,:] = numpy.diag(dL[p])
     
     @classmethod
-    def cls_mul_non_UTPM_x(cls, x_data, y_data, out = None):
+    def _mul_non_UTPM_x(cls, x_data, y_data, out = None):
         """
         z = x * y
         """
@@ -997,7 +997,7 @@ class UTPM(GradedRing):
                 z_data[d,p] = x_data * y_data[d,p]
                 
     @classmethod
-    def cls_eig_pullback(cls, Qbar_data, lambar_data, A_data, Q_data, lam_data, out = None):
+    def _eig_pullback(cls, Qbar_data, lambar_data, A_data, Q_data, lam_data, out = None):
         
         if out == None:
             raise NotImplementedError('need to implement that...')
@@ -1026,16 +1026,16 @@ class UTPM(GradedRing):
                 if n == m:
                     continue
                 tmp = lam_data[:,:,n] -   lam_data[:,:,m]
-                cls.cls_div(Id, tmp, out = H[:,:,m,n])
+                cls._div(Id, tmp, out = H[:,:,m,n])
         
         # STEP 2: compute Lbar +  H * Q^T Qbar
-        cls.cls_dot(cls._transpose(Q_data), Qbar_data, out = tmp1)
+        cls._dot(cls._transpose(Q_data), Qbar_data, out = tmp1)
         tmp1[...] *= H[...]
         tmp1[...] += Lambar_data[...]
         
         # STEP 3: compute Q ( Lbar +  H * Q^T Qbar ) Q^T
-        cls.cls_dot(Q_data, tmp1, out = tmp2)
-        cls.cls_dot(tmp2, cls._transpose(Q_data), out = tmp1)
+        cls._dot(Q_data, tmp1, out = tmp2)
+        cls._dot(tmp2, cls._transpose(Q_data), out = tmp1)
         
         Abar_data += tmp1
         
@@ -1058,7 +1058,7 @@ class UTPM(GradedRing):
         
 
     @classmethod
-    def cls_qr_pullback(cls,Qbar_data, Rbar_data, A_data, Q_data, R_data, out = None):
+    def _qr_pullback(cls,Qbar_data, Rbar_data, A_data, Q_data, R_data, out = None):
         
         if out == None:
             raise NotImplementedError('need to implement that...')
@@ -1080,33 +1080,33 @@ class UTPM(GradedRing):
         PL  = numpy.array([[ c < r for c in range(N)] for r in range(N)],dtype=float)
         
         # STEP 1: compute V
-        cls.cls_dot( Qbar_data.transpose((0,1,3,2)), Q_data, out = tmp1)
-        cls.cls_dot( R_data, Rbar_data.transpose((0,1,3,2)), out = tmp2)
+        cls._dot( Qbar_data.transpose((0,1,3,2)), Q_data, out = tmp1)
+        cls._dot( R_data, Rbar_data.transpose((0,1,3,2)), out = tmp2)
         tmp1[...] -= tmp2[...]
         
         # STEP 2: compute PL * (V.T - V)
         tmp2[...]  = tmp1.transpose((0,1,3,2))
         tmp2[...] -= tmp1[...]
-        cls.cls_mul_non_UTPM_x(PL, tmp2, out = tmp1)
+        cls._mul_non_UTPM_x(PL, tmp2, out = tmp1)
         
         # STEP 3: compute PL * (V.T - V) R^{-T}
-        cls.cls_solve(R_data, tmp1.transpose((0,1,3,2)), out = tmp2)
+        cls._solve(R_data, tmp1.transpose((0,1,3,2)), out = tmp2)
         tmp2 = tmp2.transpose((0,1,3,2))
         
         # STEP 4: compute Rbar + PL * (V.T - V) R^{-T}
         tmp2[...] += Rbar_data[...]
         
         # STEP 5: compute Q ( Rbar + PL * (V.T - V) R^{-T} )
-        cls.cls_dot( Q_data, tmp2, out = tmp3)
+        cls._dot( Q_data, tmp2, out = tmp3)
         Abar_data += tmp3
         
         if M > N:
             # STEP 6: compute (Qbar - Q Q^T Qbar) R^{-T}
-            cls.cls_dot( Q_data.transpose((0,1,3,2)), Qbar_data, out = tmp1)
-            cls.cls_dot( Q_data, tmp1, out = tmp3)
+            cls._dot( Q_data.transpose((0,1,3,2)), Qbar_data, out = tmp1)
+            cls._dot( Q_data, tmp1, out = tmp3)
             tmp3 *= -1.
             tmp3 += Qbar_data
-            cls.cls_solve(R_data, tmp3.transpose((0,1,3,2)), out = tmp4.transpose((0,1,3,2)))
+            cls._solve(R_data, cls._transpose(tmp3), out = tmp4.transpose((0,1,3,2)))
             Abar_data += tmp4
         
         return out

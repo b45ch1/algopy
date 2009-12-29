@@ -56,7 +56,7 @@ class Test_Eigenvalue_Decomposition(TestCase):
         Qbar_data = numpy.random.rand(*(D,P,N,N))
         Abar_data = numpy.zeros((D,P,N,N))
         
-        UTPM.cls_eig_pullback( Qbar_data, lbar_data, A.data, Q.data, l.data, out = Abar_data)
+        UTPM._eig_pullback( Qbar_data, lbar_data, A.data, Q.data, l.data, out = Abar_data)
         
         Abar = Abar_data[0,0]
         Adot = A.data[1,0]
@@ -209,7 +209,7 @@ class Test_QR_Decomposition(TestCase):
         Abar_data = numpy.zeros(A.data.shape)
         
         
-        UTPM.cls_qr_pullback(Qbar_data, Rbar_data, A.data, Q.data, R.data, out = Abar_data )
+        UTPM._qr_pullback(Qbar_data, Rbar_data, A.data, Q.data, R.data, out = Abar_data )
 
 
         Abar = Abar_data[0,0]
@@ -245,7 +245,7 @@ class Test_QR_Decomposition(TestCase):
         Abar_data = numpy.zeros(A.data.shape)
         
         
-        UTPM.cls_qr_pullback(Qbar_data, Rbar_data, A.data, Q.data, R.data, out = Abar_data )
+        UTPM._qr_pullback(Qbar_data, Rbar_data, A.data, Q.data, R.data, out = Abar_data )
 
 
         Abar = Abar_data[0,0]
@@ -396,12 +396,12 @@ class Test_push_forward_class_functions(TestCase):
     Test the push forward class functions that operate directly on data.
     """
     
-    def test_cls_idiv(self):
+    def test__idiv(self):
         X_data = 2 * numpy.random.rand(2,2,2,2)
         Z_data = 3 * numpy.random.rand(2,2,2,2)
         Z2_data = Z_data.copy()
         
-        UTPM.cls_idiv(Z_data, X_data)
+        UTPM._idiv(Z_data, X_data)
         
         X = UTPM(X_data)
         Z = UTPM(Z2_data)
@@ -410,7 +410,7 @@ class Test_push_forward_class_functions(TestCase):
         
         assert_array_almost_equal(Z_data, Z.data)
         
-    def test_cls_div(self):
+    def test__div(self):
         X_data = 2 * numpy.random.rand(2,2,2,2)
         Y_data = 3 * numpy.random.rand(2,2,2,2)
         Z_data = numpy.zeros((2,2,2,2))
@@ -420,7 +420,7 @@ class Test_push_forward_class_functions(TestCase):
         
         Z = X/Y
         
-        UTPM.cls_div(X_data, Y_data, out = Z_data)
+        UTPM._div(X_data, Y_data, out = Z_data)
         
         assert_array_almost_equal(Z_data, Z.data)
         
