@@ -63,7 +63,7 @@ def solve(A,x):
         
 def eig(A):
     if isinstance(A, UTPM):
-        return A.eig()
+        return UTPM.eig(A)
     
     else:
         return numpy.linalg.eig(A)
@@ -350,17 +350,6 @@ class UTPM(GradedRing):
         self.__class__.cls_max( self.data, axis = axis, out = retval.data)
         return retval
 
-        
-    def eig(self):
-        
-        D,P,M,N = numpy.shape(self.data)
-        
-        Q = self.__class__(self.__class__.__zeros__((D,P,N,N)))
-        L = self.__class__(self.__class__.__zeros__((D,P,N)))
-        
-        UTPM.cls_eig(Q.data, L.data, self.data)
-      
-        return L,Q
 
     def inv(self):
         retval = UTPM(numpy.zeros(numpy.shape(self.tc)))
@@ -816,6 +805,25 @@ class UTPM(GradedRing):
         UTPM.cls_qr(Q.data, R.data, self.data)
 
         return Q,R
+        
+    @classmethod
+    def eig(cls, A, out = None):
+        """
+        computes the eigenvalue decomposition A = Q^T L Q
+        
+        (l,Q) = UTPM.eig(A, out=None)
+        
+        """
+        
+        D,P,M,N = numpy.shape(A.data)
+        
+        if out == None:
+            Q = cls(cls.__zeros__((D,P,N,N)))
+            L = cls(cls.__zeros__((D,P,N)))
+        
+        UTPM.cls_eig(Q.data, L.data, A.data)
+      
+        return L,Q
 
     @classmethod
     def cls_qr(cls, Q_data, R_data, A_data):

@@ -19,7 +19,7 @@ class Test_Eigenvalue_Decomposition(TestCase):
 
         A = UTPM(A_data)
         
-        l,Q = A.eig()
+        l,Q = UTPM.eig(A)
         
         L_data = numpy.zeros((D,P,N,N))
         for d in range(D):
@@ -44,7 +44,7 @@ class Test_Eigenvalue_Decomposition(TestCase):
 
         A = UTPM(A_data)
         
-        l,Q = A.eig()
+        l,Q = UTPM.eig(A)
         
         L_data = UTPM.cls_diag(l.data)
         
@@ -867,7 +867,7 @@ class ODOE_example_for_ICCS2010_conference(TestCase):
         Id = numpy.eye(P)
         D = (R.T).rsolve(Id)
         C = D.solve(R)
-        l,U = C.eig()
+        l,U = UTPM.eig(C)
 
         l11 = l.max()
         
