@@ -82,7 +82,7 @@ class Test_QR_Decomposition(TestCase):
         A_data_old = A_data.copy()
         A = UTPM(A_data)
 
-        Q,R = A.qr()
+        Q,R = UTPM.qr(A)
         assert_array_almost_equal( ( UTPM.dot(Q,R)).data, A_data_old, decimal = 12)
         
     def test_push_forward_rectangular_A(self):
@@ -96,7 +96,7 @@ class Test_QR_Decomposition(TestCase):
         
         A = UTPM(A_data)
 
-        Q,R = A.qr()
+        Q,R = UTPM.qr(A)
         
         assert_array_equal( Q.data.shape, [D,P,M,N])
         assert_array_equal( R.data.shape, [D,P,N,N])
@@ -117,7 +117,7 @@ class Test_QR_Decomposition(TestCase):
         A = UTPM(A_data)
 
         # STEP 1: push forward
-        Q,R = A.qr()
+        Q,R = UTPM.qr(A)
         
         # STEP 2: pullback
         
@@ -158,7 +158,7 @@ class Test_QR_Decomposition(TestCase):
         A = UTPM(A_data)
 
         # STEP 1: push forward
-        Q,R = A.qr()
+        Q,R = UTPM.qr(A)
         
         # STEP 2: pullback
         
@@ -198,7 +198,7 @@ class Test_QR_Decomposition(TestCase):
         
         A = UTPM(A_data)
 
-        Q,R = A.qr()
+        Q,R = UTPM.qr(A)
         
         assert_array_equal( Q.data.shape, [D,P,M,N])
         assert_array_equal( R.data.shape, [D,P,N,N])
@@ -234,7 +234,7 @@ class Test_QR_Decomposition(TestCase):
         
         A = UTPM(A_data)
 
-        Q,R = A.qr()
+        Q,R = UTPM.qr(A)
         
         assert_array_equal( Q.data.shape, [D,P,M,N])
         assert_array_equal( R.data.shape, [D,P,N,N])
@@ -866,7 +866,7 @@ class ODOE_example_for_ICCS2010_conference(TestCase):
             F[nf] =  numpy.sum([ (nf+1.)**n * x[n]*y[-n] for n in range(Nx)])
         
         J = F.FtoJT().T
-        Q,R = J.qr()
+        Q,R = UTPM.qr(J)
 
         Id = numpy.eye(P)
         D = (R.T).rsolve(Id)

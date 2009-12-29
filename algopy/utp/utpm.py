@@ -795,14 +795,16 @@ class UTPM(GradedRing):
     def __zeros__(cls, shp):
         return numpy.zeros(shp)
 
-    def qr(self):
-        D,P,M,N = numpy.shape(self.data)
+    @classmethod
+    def qr(cls, A, out = None):
+        D,P,M,N = numpy.shape(A.data)
         K = min(M,N)
         
-        Q = self.__class__(self.__class__.__zeros__((D,P,M,K)))
-        R = self.__class__(self.__class__.__zeros__((D,P,K,N)))
+        if out == None:
+            Q = cls(cls.__zeros__((D,P,M,K)))
+            R = cls(cls.__zeros__((D,P,K,N)))
 
-        UTPM._qr(Q.data, R.data, self.data)
+        UTPM._qr(Q.data, R.data, out = A.data)
 
         return Q,R
         
@@ -826,7 +828,7 @@ class UTPM(GradedRing):
         return L,Q
 
     @classmethod
-    def _qr(cls, Q_data, R_data, A_data):
+    def _qr(cls, Q_data, R_data, out = None):
         """
         computes the qr decomposition (Q,R) = qr(A)    <===>    QR = A
         
@@ -840,6 +842,10 @@ class UTPM(GradedRing):
             where K = min(M,N)
         
         """
+        
+        if out == None:
+            raise NotImplementedError('need to implement that...')
+        A_data = out
         
         # input checks
         DT,P,M,N = numpy.shape(A_data)
