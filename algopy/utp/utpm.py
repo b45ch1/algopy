@@ -39,11 +39,14 @@ def inv(x):
     else:
         return numpy.linalg.inv(x)
         
-def dot(x,y):
-    if isinstance(x, UTPM):
-        return x.dot(y)
-    elif isinstance(y, UTPM):
-        return y.rdot(x)
+def dot(x,y, out = None):
+    
+    if out != None:
+        raise NotImplementedError('should implement that...')
+    
+    if isinstance(x, UTPM) or isinstance(y, UTPM):
+        return UTPM.dot(x,y)
+        
     else:
         return numpy.dot(x,y)
         
@@ -347,88 +350,110 @@ class UTPM(GradedRing):
         self.__class__.cls_max( self.data, axis = axis, out = retval.data)
         return retval
 
-    def dot(self,rhs):
+    @classmethod
+    def dot(cls, x, y, out = None):
         """
-        retval = self.dot(rhs)
+        out = dot(x,y)
         
-        computes z = dot(x,y)
         """
+
         
-        if isinstance(rhs, UTPM):
-            self_shp = self.data.shape
-            rhs_shp = rhs.data.shape
+        # retval = out
+        # self = x
+        # rhs = y
+        
+        if isinstance(x, UTPM) and isinstance(y, UTPM):
+            x_shp = x.data.shape
+            y_shp = y.data.shape
             
-            assert self_shp[:2] == rhs_shp[:2]
+            assert x_shp[:2] == y_shp[:2]
             
-            if  len(rhs_shp[2:]) == 1:
-                retval_shp = self_shp[:-1]
+            if  len(y_shp[2:]) == 1:
+                out_shp = x_shp[:-1]
                 
             else:
-                retval_shp = self_shp[:2] + self_shp[2:-1] + rhs_shp[2:][:-2] + rhs_shp[2:][-1:]
+                out_shp = x_shp[:2] + x_shp[2:-1] + y_shp[2:][:-2] + y_shp[2:][-1:]
                 
-            retval = self.__class__(self.__class__.__zeros__(retval_shp))
-            self.__class__.cls_dot( self.data, rhs.data, out = retval.data)
+            out = cls(cls.__zeros__(out_shp))
+            cls.cls_dot( x.data, y.data, out = out.data)
+            
+        elif isinstance(x, UTPM) and not isinstance(y, UTPM):
+            x_shp = x.data.shape
+            y_shp = y.shape
+            
+            if  len(y_shp) == 1:
+                out_shp = x_shp[:-1]
+                
+            else:
+                out_shp = x_shp[:2] + x_shp[2:-1] + y_shp[:-2] + y_shp[-1:]
+                
+            out = cls(cls.__zeros__(out_shp))
+            cls.cls_dot_non_UTPM_y(x.data, y, out = out.data)
+            
+        elif not isinstance(x, UTPM) and isinstance(y, UTPM):
+            x_shp = x.shape
+            y_shp = y.data.shape
+            
+            if  len(y_shp[2:]) == 1:
+                out_shp = y_shp[:2] + x_shp[:-1]
+                
+            else:
+                out_shp = y_shp[:2] + x_shp[:-1] + y_shp[2:][:-2] + y_shp[2:][-1:]
+
+            out = cls(cls.__zeros__(out_shp))
+            cls.cls_dot_non_UTPM_x(x, y.data, out = out.data)
+            
             
         else:
-            self_shp = self.data.shape
-            rhs_shp = rhs.shape
+            raise NotImplementedError('should implement that')
             
-            if  len(rhs_shp) == 1:
-                retval_shp = self_shp[:-1]
-                
-            else:
-                retval_shp = self_shp[:2] + self_shp[2:-1] + rhs_shp[:-2] + rhs_shp[-1:]
-                
-            retval = self.__class__(self.__class__.__zeros__(retval_shp))
-            self.__class__.cls_dot_non_UTPM_y(retval.data, self.data, rhs)
-            
-        return retval
+        return out
         
         
-    def rdot(self, lhs):
-        """
+    # def rdot(self, lhs):
+    #     """
         
-        computes z = dot(x,y)
-                   = y.rdot(x)
+    #     computes z = dot(x,y)
+    #                = y.rdot(x)
                    
-        i.e.:
-            x.dot(y) == y.rdot(x)
-        """
+    #     i.e.:
+    #         x.dot(y) == y.rdot(x)
+    #     """
         
-        if isinstance(lhs, UTPM):
-            self_shp = self.data.shape
-            lhs_shp = lhs.data.shape
+    #     if isinstance(lhs, UTPM):
+    #         self_shp = self.data.shape
+    #         lhs_shp = lhs.data.shape
             
-            if  len(self_shp[2:]) == 1:
-                retval_shp = lhs_shp[:-1]
+    #         if  len(self_shp[2:]) == 1:
+    #             retval_shp = lhs_shp[:-1]
                 
-            else:
-                retval_shp = lhs_shp[:2] + lhs_shp[2:-1] + self_shp[2:][:-2] + self_shp[2:][-1:]
+    #         else:
+    #             retval_shp = lhs_shp[:2] + lhs_shp[2:-1] + self_shp[2:][:-2] + self_shp[2:][-1:]
                 
-            retval = self.__class__(self.__class__.__zeros__(retval_shp))
+    #         retval = self.__class__(self.__class__.__zeros__(retval_shp))
             
-            self.__class__.cls_dot( lhs.data, self.data, out = retval.data)
+    #         self.__class__.cls_dot( lhs.data, self.data, out = retval.data)
             
             
-        else:
-            self_shp = self.data.shape
-            lhs_shp = lhs.shape
+    #     else:
+    #         self_shp = self.data.shape
+    #         lhs_shp = lhs.shape
             
-            if  len(self_shp[2:]) == 1:
-                retval_shp = self_shp[:2] + lhs_shp[:-1]
+    #         if  len(self_shp[2:]) == 1:
+    #             retval_shp = self_shp[:2] + lhs_shp[:-1]
                 
-            else:
-                retval_shp = self_shp[:2] + lhs_shp[:-1] + self_shp[2:][:-2] + self_shp[2:][-1:]
+    #         else:
+    #             retval_shp = self_shp[:2] + lhs_shp[:-1] + self_shp[2:][:-2] + self_shp[2:][-1:]
                 
-            # print 'self_shp=',self_shp
-            # print 'lhs_shp=', lhs_shp
-            # print 'retval_shp=', retval_shp
-            retval = self.__class__(self.__class__.__zeros__(retval_shp))
+    #         # print 'self_shp=',self_shp
+    #         # print 'lhs_shp=', lhs_shp
+    #         # print 'retval_shp=', retval_shp
+    #         retval = self.__class__(self.__class__.__zeros__(retval_shp))
             
-            self.__class__.cls_dot_non_UTPM_x(retval.data, lhs, self.data)
+    #         self.__class__.cls_dot_non_UTPM_x(retval.data, lhs, self.data)
             
             
-        return retval
+    #     return retval
         
     def eig(self):
         
@@ -668,31 +693,49 @@ class UTPM(GradedRing):
             for p in range(P):
                 for c in range(d+1):
                     z_data[d,p,...] += numpy.dot(x_data[c,p,...], y_data[d-c,p,...])
-        
+                    
+                    
+        return out
 
     @classmethod
-    def cls_dot_non_UTPM_y(cls, z_data, x_data, y_data):
+    def cls_dot_non_UTPM_y(cls, x_data, y_data, out = None):
         """
         z = dot(x,y)
         """
+        
+        if out == None:
+            raise NotImplementedError('should implement that')
+            
+        z_data = out
+        z_data[...] = 0.
+        
         D,P = x_data.shape[:2]
 
         for d in range(D):
             for p in range(P):
                 z_data[d,p,...] = numpy.dot(x_data[d,p,...], y_data[...])
                 
+        return out
+                
     @classmethod
-    def cls_dot_non_UTPM_x(cls, z_data, x_data, y_data):
+    def cls_dot_non_UTPM_x(cls, x_data, y_data, out = None):
         """
         z = dot(x,y)
         """
+        
+        if out == None:
+            raise NotImplementedError('should implement that')
+            
+        z_data = out
+        z_data[...] = 0.
+        
         D,P = y_data.shape[:2]
 
         for d in range(D):
             for p in range(P):
                 z_data[d,p,...] = numpy.dot(x_data[...], y_data[d,p,...])
 
-
+        return out
 
     @classmethod
     def cls_solve(cls, A_data, x_data, out = None):
@@ -1053,11 +1096,11 @@ class UTPM(GradedRing):
         
         PL  = numpy.array([[ c < r for c in range(N)] for r in range(N)],dtype=float)
         
-        V = (Qbar.T).dot(Q) - R.dot(Rbar.T)
+        V = cls.dot(Qbar.T, Q) - cls.dot(R, Rbar.T)
         tmp = (V.T - V) * PL
         RTinv = (R.T).inv()
-        tmp = tmp.dot(RTinv)
-        return Q.dot(Rbar + tmp) + (Qbar - Q.dot(Q.T).dot(Qbar)).dot(RTinv)
+        tmp = cls.dot(tmp, RTinv)
+        return cls.dot(Q, Rbar + tmp) + cls.dot((Qbar - cls.dot(Q, cls.dot(Q.T,Qbar))),RTinv)
         
 
     @classmethod
