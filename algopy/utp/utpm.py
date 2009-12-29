@@ -350,59 +350,6 @@ class UTPM(GradedRing):
         self.__class__.cls_max( self.data, axis = axis, out = retval.data)
         return retval
 
-    @classmethod
-    def dot(cls, x, y, out = None):
-        """
-        out = dot(x,y)
-        
-        """
-        
-        if isinstance(x, UTPM) and isinstance(y, UTPM):
-            x_shp = x.data.shape
-            y_shp = y.data.shape
-            
-            assert x_shp[:2] == y_shp[:2]
-            
-            if  len(y_shp[2:]) == 1:
-                out_shp = x_shp[:-1]
-                
-            else:
-                out_shp = x_shp[:2] + x_shp[2:-1] + y_shp[2:][:-2] + y_shp[2:][-1:]
-                
-            out = cls(cls.__zeros__(out_shp))
-            cls.cls_dot( x.data, y.data, out = out.data)
-            
-        elif isinstance(x, UTPM) and not isinstance(y, UTPM):
-            x_shp = x.data.shape
-            y_shp = y.shape
-            
-            if  len(y_shp) == 1:
-                out_shp = x_shp[:-1]
-                
-            else:
-                out_shp = x_shp[:2] + x_shp[2:-1] + y_shp[:-2] + y_shp[-1:]
-                
-            out = cls(cls.__zeros__(out_shp))
-            cls.cls_dot_non_UTPM_y(x.data, y, out = out.data)
-            
-        elif not isinstance(x, UTPM) and isinstance(y, UTPM):
-            x_shp = x.shape
-            y_shp = y.data.shape
-            
-            if  len(y_shp[2:]) == 1:
-                out_shp = y_shp[:2] + x_shp[:-1]
-                
-            else:
-                out_shp = y_shp[:2] + x_shp[:-1] + y_shp[2:][:-2] + y_shp[2:][-1:]
-
-            out = cls(cls.__zeros__(out_shp))
-            cls.cls_dot_non_UTPM_x(x, y.data, out = out.data)
-            
-            
-        else:
-            raise NotImplementedError('should implement that')
-            
-        return out
         
     def eig(self):
         
@@ -579,7 +526,61 @@ class UTPM(GradedRing):
 
     def __repr__(self):
         return self.__str__()
+        
+        
+    @classmethod
+    def dot(cls, x, y, out = None):
+        """
+        out = dot(x,y)
+        
+        """
+        
+        if isinstance(x, UTPM) and isinstance(y, UTPM):
+            x_shp = x.data.shape
+            y_shp = y.data.shape
+            
+            assert x_shp[:2] == y_shp[:2]
+            
+            if  len(y_shp[2:]) == 1:
+                out_shp = x_shp[:-1]
+                
+            else:
+                out_shp = x_shp[:2] + x_shp[2:-1] + y_shp[2:][:-2] + y_shp[2:][-1:]
+                
+            out = cls(cls.__zeros__(out_shp))
+            cls.cls_dot( x.data, y.data, out = out.data)
+            
+        elif isinstance(x, UTPM) and not isinstance(y, UTPM):
+            x_shp = x.data.shape
+            y_shp = y.shape
+            
+            if  len(y_shp) == 1:
+                out_shp = x_shp[:-1]
+                
+            else:
+                out_shp = x_shp[:2] + x_shp[2:-1] + y_shp[:-2] + y_shp[-1:]
+                
+            out = cls(cls.__zeros__(out_shp))
+            cls.cls_dot_non_UTPM_y(x.data, y, out = out.data)
+            
+        elif not isinstance(x, UTPM) and isinstance(y, UTPM):
+            x_shp = x.shape
+            y_shp = y.data.shape
+            
+            if  len(y_shp[2:]) == 1:
+                out_shp = y_shp[:2] + x_shp[:-1]
+                
+            else:
+                out_shp = y_shp[:2] + x_shp[:-1] + y_shp[2:][:-2] + y_shp[2:][-1:]
 
+            out = cls(cls.__zeros__(out_shp))
+            cls.cls_dot_non_UTPM_x(x, y.data, out = out.data)
+            
+            
+        else:
+            raise NotImplementedError('should implement that')
+            
+        return out
 
     @classmethod
     def cls_max(cls, x_data, axis = None, out = None):
