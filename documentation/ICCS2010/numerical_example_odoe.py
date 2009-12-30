@@ -5,7 +5,7 @@ from algopy.utp.utpm import *
 # Nm = number of measurements
 # P  = number of vectorized operations at once (SPMD)
 
-D,Nq,Np,Nm = 2,3,3,20
+D,Nq,Np,Nm = 2,3,3,10
 P = Np
 q = UTPM(numpy.random.rand(D,P,Nq))
 p = UTPM(numpy.random.rand(D,P,Np))
@@ -13,11 +13,10 @@ p = UTPM(numpy.random.rand(D,P,Np))
 F = UTPM(numpy.zeros((D,P,Nm)))
 
 for nm in range(Nm):
-    F[nm] =  numpy.sum([ (nm+1.)**n * q[n]*p[-n] for n in range(Nq)])
+    F[nm] =  numpy.sum([ (nm+1.)*n * q[n]*p[-n] for n in range(Nq)])
 
 J = F.FtoJT().T
 Q,R = UTPM.qr(J)
-
 Id = numpy.eye(P)
 D = UTPM.solve(R.T,Id)
 C = UTPM.solve(D,R)

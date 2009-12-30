@@ -557,6 +557,41 @@ class Test_Eigenvalue_Decomposition(TestCase):
 
         assert_array_almost_equal(UTPM.dot(Q, UTPM.dot(L,Q.T)).data, A.data, decimal = 12)
 
+    def test_pullback(self):
+        (D,P,N) = 2,1,10
+        A_data = numpy.zeros((D,P,N,N))
+        for d in range(D):
+            for p in range(P):
+                tmp = numpy.random.rand(N,N)
+                A_data[d,p,:,:] = numpy.dot(tmp.T,tmp)
+
+                if d == 0:
+                    A_data[d,p,:,:] += N * numpy.diag(numpy.random.rand(N))
+
+        A = UTPM(A_data)
+        l,Q = UTPM.eig(A)
+
+        L_data = UTPM._diag(l.data)
+        L = UTPM(L_data)
+
+        assert_array_almost_equal(UTPM.dot(Q, UTPM.dot(L,Q.T)).data, A.data, decimal = 13)
+
+        lbar = UTPM(numpy.random.rand(*(D,P,N)))
+        Qbar = UTPM(numpy.random.rand(*(D,P,N,N)))
+
+        Abar = UTPM.eig_pullback( Qbar, lbar, A, Q, l)
+
+        Abar = Abar.data[0,0]
+        Adot = A.data[1,0]
+
+        Lbar = UTPM._diag(lbar.data)[0,0]
+        Ldot = UTPM._diag(l.data)[1,0]
+
+        Qbar = Qbar.data[0,0]
+        Qdot = Q.data[1,0]
+
+        assert_almost_equal(numpy.trace(numpy.dot(Abar.T, Adot)), numpy.trace( numpy.dot(Lbar.T, Ldot) + numpy.dot(Qbar.T, Qdot)))
+
 
 
 class TestFunctionOfJacobian(TestCase):

@@ -537,7 +537,8 @@ class UTPM(GradedRing):
         UTPM._qr(Q.data, R.data, out = A.data)
 
         return Q,R
-        
+
+       
     @classmethod
     def eig(cls, A, out = None):
         """
@@ -556,6 +557,20 @@ class UTPM(GradedRing):
         UTPM._eig(Q.data, L.data, A.data)
       
         return L,Q
+
+    @classmethod
+    def eig_pullback(cls, Qbar, lbar, A, Q, l, out = None):
+        D,P,M,N = numpy.shape(A.data)
+        
+        if out == None:
+            out = cls(cls.__zeros__((D,P,M,N)))
+        Abar = out
+        
+        UTPM._eig_pullback( Qbar.data, lbar.data, A.data, Q.data, l.data, out = Abar.data)
+        return out
+
+
+    
     
     @classmethod
     def _max(cls, x_data, axis = None, out = None):
