@@ -575,7 +575,7 @@ class Test_Eigenvalue_Decomposition(TestCase):
         assert_array_almost_equal(UTPM.dot(Q, UTPM.dot(L,Q.T)).data, A.data, decimal = 12)
 
     def test_pullback(self):
-        (D,P,N) = 2,1,10
+        (D,P,N) = 2,3,10
         A_data = numpy.zeros((D,P,N,N))
         for d in range(D):
             for p in range(P):

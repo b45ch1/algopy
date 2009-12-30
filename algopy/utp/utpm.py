@@ -592,8 +592,8 @@ class RawAlgorithmsMixIn:
         tmp1 = numpy.zeros((D,P,N,N), dtype=float)
         tmp2 = numpy.zeros((D,P,N,N), dtype=float)
 
-        Id = numpy.zeros((D,P,1))
-        Id[0,:,0] = numpy.eye(P)
+        Id = numpy.zeros((D,P))
+        Id[0,:] = 1
 
         Lam_data    = cls._diag(lam_data)
         Lambar_data = cls._diag(lambar_data)
