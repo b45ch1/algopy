@@ -533,12 +533,23 @@ class UTPM(GradedRing):
         if out == None:
             Q = cls(cls.__zeros__((D,P,M,K)))
             R = cls(cls.__zeros__((D,P,K,N)))
-
+        
         UTPM._qr(Q.data, R.data, out = A.data)
-
+        
         return Q,R
+        
+    @classmethod
+    def qr_pullback(cls, Qbar, Rbar, A, Q, R, out = None):
+        D,P,M,N = numpy.shape(A.data)
+        
+        if out == None:
+            out = cls(cls.__zeros__((D,P,M,N)))
+        Abar = out
+        
+        UTPM._qr_pullback( Qbar.data, Rbar.data, A.data, Q.data, R.data, out = Abar.data)
+        return out
 
-       
+    
     @classmethod
     def eig(cls, A, out = None):
         """
@@ -1016,21 +1027,7 @@ class UTPM(GradedRing):
         
         return out
         
-    
-    @classmethod
-    def qr_pullback(cls, Qbar, Rbar, A, Q, R):
-        
-        A_shp = A.shape
-        M,N = A_shp
-        
-        PL  = numpy.array([[ c < r for c in range(N)] for r in range(N)],dtype=float)
-        
-        V = cls.dot(Qbar.T, Q) - cls.dot(R, Rbar.T)
-        tmp = (V.T - V) * PL
-        RTinv = UTPM.inv(R.T)
-        tmp = cls.dot(tmp, RTinv)
-        return cls.dot(Q, Rbar + tmp) + cls.dot((Qbar - cls.dot(Q, cls.dot(Q.T,Qbar))),RTinv)
-        
+       
 
     @classmethod
     def _qr_pullback(cls,Qbar_data, Rbar_data, A_data, Q_data, R_data, out = None):
