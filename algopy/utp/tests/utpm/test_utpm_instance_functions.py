@@ -312,9 +312,16 @@ class Test_Push_Forward(TestCase):
 
     def test_transpose(self):
         D,P,N,M = 2,3,4,5
-        X  = numpy.zeros((D,P,N,M))
-        AX = UTPM(X)
-        assert_array_equal(AX.T.data.shape, (D,P,M,N))
+        X  = UTPM(numpy.random.rand(*(D,P,N,M)))
+        Y = X.T
+
+        Y.data[0,0,1,0] += 123
+        Z = Y.T
+        assert_array_equal(Y.data.shape, (D,P,M,N))
+
+        #check that no copy is made
+        assert_array_almost_equal(Z.data, X.data)
+
 
 
     def test_diag(self):

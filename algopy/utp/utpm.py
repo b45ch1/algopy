@@ -388,11 +388,7 @@ class UTPM(GradedRing):
     T = property(get_transpose, set_transpose)
 
     def transpose(self, axes = None):
-        if axes != None:
-            raise NotImplementedError('should implement that...')
-        Nshp = len(self.shape)
-        axes_ids = tuple(range(2,2+Nshp)[::-1])
-        return UTPM( numpy.transpose(self.data,axes=(0,1) + axes_ids))
+        return UTPM( UTPM._transpose(self.data))
 
     def set_zero(self):
         self.data[...] = 0.
@@ -1091,9 +1087,11 @@ class UTPM(GradedRing):
         """Permute the dimensions of UTPM data"""
         if axes != None:
             raise NotImplementedError('should implement that')
-        
-        return numpy.transpose(a_data, (0,1,3,2))
-        
+
+        Nshp = len(a_data.shape)
+        axes_ids = tuple(range(2,Nshp)[::-1])
+        return numpy.transpose(a_data,axes=(0,1) + axes_ids)
+   
     @classmethod
     def _diag(cls, v_data, k = 0, out = None):
         """Extract a diagonal or construct  diagonal UTPM data"""
