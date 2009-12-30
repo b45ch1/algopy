@@ -209,27 +209,10 @@ class UTPM(GradedRing):
     A disadvantage of this arrangement is: it seems unnatural. It is easier to regard each direction separately.
     """
     
-    def __init__(self, X, Xdot = None, shift = 0):
+    def __init__(self, X, Xdot = None):
         """ INPUT:	shape([X]) = (D,P,N,M)
-        
-        shift>0 is necessary for the reverse mode.
-        Example:
-        In the forward mode compute
-            y(t) = d/dt x(t)
-        In the reverse mode compute
-        
-            ybar(t) d y(t) = ybar(t) d/dt d y(t)
-            
-        I.e. that means that ybar_shift(t) = ybar(t) d/dt is another adjoint operator.
-        Multiplying with this operator, i.e. 
-            ybar(t) = [yb0,yb1]
-            y(t)    = [y0,y1,y2]
-            
-            ybar_shift(t) * d y(t) = [yb0 * dy1, yb0 * dy2 + yb1 * dy1]
-        
         """
         Ndim = numpy.ndim(X)
-        self.shift = shift
         if Ndim >= 2:
             self.tc = numpy.asarray(X)
             self.data = self.tc
@@ -316,9 +299,9 @@ class UTPM(GradedRing):
         else:
             for d in range(D)[::-1]:
                 for p in range(P):
-                    self.tc[d,p,...] *= rhs.tc[self.shift,p,...]
+                    self.tc[d,p,...] *= rhs.tc[0,p,...]
                     for c in range(d):
-                        self.tc[d,p,...] += self.tc[c,p,...] * rhs.tc[d-c + self.shift,p,...]
+                        self.tc[d,p,...] += self.tc[c,p,...] * rhs.tc[d-c,p,...]
         return self
         
     def __idiv__(self,rhs):
@@ -385,7 +368,7 @@ class UTPM(GradedRing):
         return UTPM(tmp)        
 
     def clone(self):
-        return UTPM(self.tc.copy(), shift = self.shift)
+        return UTPM(self.tc.copy())
 
     def get_shape(self):
         return numpy.shape(self.tc[0,0,...])

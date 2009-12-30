@@ -3,7 +3,7 @@ import numpy
 
 from algopy.utp.utpm import *
 
-class PushForward_UTPM_objects(TestCase):
+class Test_Push_Forward(TestCase):
     def test_UTPM_in_a_stupid_way(self):
         """
         this checks _only_ if calling the operations is ok
@@ -24,7 +24,7 @@ class PushForward_UTPM_objects(TestCase):
         AX = AX.set_zero()
 
 
-    def test_generic_calling(self):
+    def test_numpy_overrides(self):
         """
         this checks _only_ if calling the operations is ok
         """
@@ -34,9 +34,9 @@ class PushForward_UTPM_objects(TestCase):
         AX = UTPM(X)
         AY = UTPM(Y)
 
-        assert_array_almost_equal( UTPM.dot(AX,AY).tc, dot(AX,AY).tc)
-        assert_array_almost_equal( UTPM.inv(AX).tc,  inv(AX).tc)
-        assert_array_almost_equal( AX.trace().tc,  trace(AX).tc)
+        assert_array_almost_equal( UTPM.dot(AX,AY).data, dot(AX,AY).data)
+        assert_array_almost_equal( UTPM.inv(AX).data,  inv(AX).data)
+        assert_array_almost_equal( AX.trace().data,  trace(AX).data)
 
     def test_operations_on_scalar_UTPM(self):
         D,P = 2,1
@@ -67,11 +67,11 @@ class PushForward_UTPM_objects(TestCase):
         aZ4 = aX / aY
         aZ5 = UTPM.dot(aX,aY)
 
-        assert_array_almost_equal(aZ1.tc, Z1)
-        assert_array_almost_equal(aZ2.tc, Z2)
-        assert_array_almost_equal(aZ3.tc, Z3)
-        assert_array_almost_equal(aZ4.tc, Z4)
-        assert_array_almost_equal(aZ5.tc, Z3)
+        assert_array_almost_equal(aZ1.data, Z1)
+        assert_array_almost_equal(aZ2.data, Z2)
+        assert_array_almost_equal(aZ3.data, Z3)
+        assert_array_almost_equal(aZ4.data, Z4)
+        assert_array_almost_equal(aZ5.data, Z3)
 
 
     def test_dot_output_shapes(self):
@@ -88,10 +88,10 @@ class PushForward_UTPM_objects(TestCase):
         ax = UTPM(x)
         ay = UTPM(y)
 
-        assert_array_equal( UTPM.dot(aX,aY).tc.shape, (D,P,N,N))
-        assert_array_equal( UTPM.dot(aY,aX).tc.shape, (D,P,M,M))
-        assert_array_equal( UTPM.dot(aA,ax).tc.shape, (D,P,M))
-        assert_array_equal( UTPM.dot(ax,ay).tc.shape, (D,P))
+        assert_array_equal( UTPM.dot(aX,aY).data.shape, (D,P,N,N))
+        assert_array_equal( UTPM.dot(aY,aX).data.shape, (D,P,M,M))
+        assert_array_equal( UTPM.dot(aA,ax).data.shape, (D,P,M))
+        assert_array_equal( UTPM.dot(ax,ay).data.shape, (D,P))
 
 
     def test_dot_non_UTPM(self):
@@ -172,19 +172,19 @@ class PushForward_UTPM_objects(TestCase):
                 Z7[d,p,...] *= 2
                 Z8[d,p,...] /= 2
 
-        assert_array_almost_equal(AY1.tc, Z1 )
-        assert_array_almost_equal(AY2.tc, Z2 )
-        assert_array_almost_equal(AY3.tc, Z3 )
-        # assert_array_almost_equal(AY4.tc, Z4 )
-        assert_array_almost_equal(AY5.tc, Z5 )
-        assert_array_almost_equal(AY6.tc, Z6 )
-        assert_array_almost_equal(AY7.tc, Z7 )
-        assert_array_almost_equal(AY8.tc, Z8 )
+        assert_array_almost_equal(AY1.data, Z1 )
+        assert_array_almost_equal(AY2.data, Z2 )
+        assert_array_almost_equal(AY3.data, Z3 )
+        # assert_array_almost_equal(AY4.data, Z4 )
+        assert_array_almost_equal(AY5.data, Z5 )
+        assert_array_almost_equal(AY6.data, Z6 )
+        assert_array_almost_equal(AY7.data, Z7 )
+        assert_array_almost_equal(AY8.data, Z8 )
 
-        assert_array_almost_equal(AX1.tc, AY5.tc )
-        assert_array_almost_equal(AX2.tc, AY6.tc )
-        assert_array_almost_equal(AX3.tc, AY7.tc )
-        assert_array_almost_equal(AX4.tc, AY8.tc )
+        assert_array_almost_equal(AX1.data, AY5.data )
+        assert_array_almost_equal(AX2.data, AY6.data )
+        assert_array_almost_equal(AX3.data, AY7.data )
+        assert_array_almost_equal(AX4.data, AY8.data )
 
 
     def test_array_operations(self):
@@ -212,10 +212,10 @@ class PushForward_UTPM_objects(TestCase):
         AX3 *= Y
         AX4 /= Y
 
-        assert_array_almost_equal(AX1.tc, AY5.tc )
-        assert_array_almost_equal(AX2.tc, AY6.tc )
-        assert_array_almost_equal(AX3.tc, AY7.tc )
-        assert_array_almost_equal(AX4.tc, AY8.tc )
+        assert_array_almost_equal(AX1.data, AY5.data )
+        assert_array_almost_equal(AX2.data, AY6.data )
+        assert_array_almost_equal(AX3.data, AY7.data )
+        assert_array_almost_equal(AX4.data, AY8.data )
 
     def test_max(self):
         D,P,N = 2,3,4
@@ -232,8 +232,8 @@ class PushForward_UTPM_objects(TestCase):
         X  = numpy.zeros((2,3,4,5))
         Y  = X + 1
         AX = UTPM(X)
-        AX.tc[...] = 1.
-        assert_array_almost_equal(AX.tc, Y)
+        AX.data[...] = 1.
+        assert_array_almost_equal(AX.data, Y)
 
     def test_getitem_single_element_of_vector(self):
         X  = numpy.zeros((2,3,4))
@@ -241,7 +241,7 @@ class PushForward_UTPM_objects(TestCase):
         X2[:,:,0] += 1
         AX = UTPM(X)
         AY = AX[0]
-        AY.tc[:,:] += 1
+        AY.data[:,:] += 1
         assert_array_almost_equal(X,X2)
 
 
@@ -251,7 +251,7 @@ class PushForward_UTPM_objects(TestCase):
         X2[:,:,0,0] += 1
         AX = UTPM(X)
         AY = AX[0,0]
-        AY.tc[:,:] += 1
+        AY.data[:,:] += 1
         assert_array_almost_equal(X,X2)
 
     def test_getitem_slice(self):
@@ -260,7 +260,7 @@ class PushForward_UTPM_objects(TestCase):
         X2[:,:,0:2,1:3] += 1
         AX = UTPM(X)
         AY = AX[0:2,1:3]
-        AY.tc[:,:] += 1.
+        AY.data[:,:] += 1.
         assert_array_almost_equal(X,X2)
 
     def test_setitem(self):
@@ -297,24 +297,24 @@ class PushForward_UTPM_objects(TestCase):
         AX = UTPM(X)
         AY = AX.clone()
 
-        AX.tc[...] += 13
-        assert_equal(AY.tc.flags['OWNDATA'],True)
-        assert_array_almost_equal( AX.tc, AY.tc + 13)
+        AX.data[...] += 13
+        assert_equal(AY.data.flags['OWNDATA'],True)
+        assert_array_almost_equal( AX.data, AY.data + 13)
 
     def test_reshape(self):
         D,P,N,M = 2,3,4,5
         X  = numpy.zeros((D,P,N,M))
         AX = UTPM(X)
         AY = AX.reshape((5,4))
-        assert_array_equal(AY.tc.shape, (2,3,5,4))
-        assert AY.tc.flags['OWNDATA']==False
+        assert_array_equal(AY.data.shape, (2,3,5,4))
+        assert AY.data.flags['OWNDATA']==False
 
 
     def test_transpose(self):
         D,P,N,M = 2,3,4,5
         X  = numpy.zeros((D,P,N,M))
         AX = UTPM(X)
-        assert_array_equal(AX.T.tc.shape, (D,P,M,N))
+        assert_array_equal(AX.T.data.shape, (D,P,M,N))
 
     def test_trace(self):
         N1 = 2
@@ -325,8 +325,8 @@ class PushForward_UTPM_objects(TestCase):
         x = x.reshape((N1,N2,N3,N4))
         AX = UTPM(x)
         AY = AX.T
-        AY.tc[0,0,2,0] = 1234
-        assert AX.tc[0,0,0,2] == AY.tc[0,0,2,0]
+        AY.data[0,0,2,0] = 1234
+        assert AX.data[0,0,0,2] == AY.data[0,0,2,0]
 
     def test_inv(self):
         (D,P,N,M) = 2,3,5,1
@@ -335,7 +335,7 @@ class PushForward_UTPM_objects(TestCase):
 
         Id = numpy.zeros((D,P,N,N))
         Id[0,:,:,:] = numpy.eye(N)
-        assert_array_almost_equal(UTPM.dot(A, Ainv).tc, Id)
+        assert_array_almost_equal(UTPM.dot(A, Ainv).data, Id)
 
     def test_solve(self):
         (D,P,N,M) = 3,3,30,1
@@ -348,7 +348,7 @@ class PushForward_UTPM_objects(TestCase):
 
         y = UTPM.solve(A,x)
         x2 = UTPM.dot(A, y)
-        assert_array_almost_equal(x.tc, x2.tc, decimal = 12)
+        assert_array_almost_equal(x.data, x2.data, decimal = 12)
 
     def test_rsolve_non_UTPM_A(self):
         (D,P,N) = 2,3,2
@@ -542,10 +542,9 @@ class Test_Eigenvalue_Decomposition(TestCase):
                 A_data[d,p,:,:] = numpy.dot(tmp.T,tmp)
 
                 if d == 0:
-                    A_data[d,p,:,:] += N * numpy.eye(N)
+                    A_data[d,p,:,:] += N * numpy.diag([n+1 for n in range(N)])
 
         A = UTPM(A_data)
-
         l,Q = UTPM.eig(A)
 
         L_data = numpy.zeros((D,P,N,N))
@@ -556,7 +555,7 @@ class Test_Eigenvalue_Decomposition(TestCase):
 
         L = UTPM(L_data)
 
-        assert_array_almost_equal(UTPM.dot(Q, UTPM.dot(L,Q.T)).data, A.data, decimal = 10)
+        assert_array_almost_equal(UTPM.dot(Q, UTPM.dot(L,Q.T)).data, A.data, decimal = 12)
 
 
 
@@ -564,10 +563,10 @@ class TestFunctionOfJacobian(TestCase):
     def test_FtoJT(self):
         (D,P,N) = 2,5,5
         x = UTPM(numpy.random.rand(D,P,N))
-        z = x.tc[1:,...].reshape((D-1,1,P,N))
+        z = x.data[1:,...].reshape((D-1,1,P,N))
         y = x.FtoJT()
-        assert_array_equal(y.tc.shape, [1,1,5,5])
-        assert_array_almost_equal(y.tc, z)
+        assert_array_equal(y.data.shape, [1,1,5,5])
+        assert_array_almost_equal(y.data, z)
 
     def test_JTtoF(self):
         (D,P,N) = 2,5,5
@@ -575,119 +574,10 @@ class TestFunctionOfJacobian(TestCase):
         y = x.FtoJT()
         z = y.JTtoF()
 
-        assert_array_equal(x.tc.shape, z.tc.shape)
+        assert_array_equal(x.data.shape, z.data.shape)
 
-        assert_array_almost_equal(x.tc[1:,...], z.tc[:-1,...])
-
-    def test_shifted_multiplication_from_left(self):
-        D,P,N = 3,1,1
-        x = numpy.zeros((D,P,N))
-        x[:,0,0] = [1,11,13]
-        xbar = numpy.zeros((D-1,P,N))
-        xbar[:,0,0] = [5,7]
-
-        x = UTPM(x)
-        xbar = UTPM(xbar,shift=1)
-
-        zbar = xbar * x
-        assert_array_almost_equal(zbar.tc[:,0,0], [55,142])
+        assert_array_almost_equal(x.data[1:,...], z.data[:-1,...])
 
 
-    def test_first_order_J(self):
-        """
-        function:
-            f = x * y
-        gradient:
-            g = [ y, x]
-
-        analytical pull back:
-            gbar.T d g = gbar1 dy  +  gbar2 dx
-
-        numerical:
-            gbar^T d d/dt f = gbar d/dt (1 d f)
-
-        """
-
-
-        D,P = 2,2
-        x = UTPM(numpy.zeros((D,P)))
-        y = UTPM(numpy.zeros((D,P)))
-
-        x0,y0 = 3,5
-
-        x.tc[0,:] = x0
-        x.tc[1,0] = 1
-        y.tc[0,:] = y0
-        y.tc[1,1] = 1
-
-        # forward
-        f = x*y
-
-        # reverse
-        gbar = UTPM(numpy.random.rand(D-1,1,P), shift=1)
-        fbar = gbar
-        fbar.tc = fbar.tc.reshape((D-1,P))
-
-        xbar1 = numpy.dot(fbar.tc[0,:],y.tc[1,:])
-        ybar1 = numpy.dot(fbar.tc[0,:], x.tc[1,:])
-
-        xbar3 = (fbar * y).tc[0,:].sum()
-        ybar3 = (fbar * x).tc[0,:].sum()
-
-        # analytical solution
-        xbar2 = fbar.tc[0,1]
-        ybar2 = fbar.tc[0,0]
-
-        assert_almost_equal(xbar1,xbar2)
-        assert_almost_equal(ybar1,ybar2)
-        assert_almost_equal(ybar1,ybar3)
-        assert_almost_equal(ybar1,ybar3)
-
-
-    def test_first_order_J2(self):
-        """
-        function:
-            f = x**2 * y
-        gradient:
-            g = [2 x y, x**2]
-
-        analytical pull back:
-            gbar.T d g = (gbar1 2 x) dy + ( gbar1 2 y + 2 gbar2 x) dx
-
-        """
-
-        D,P = 2,2
-        x = UTPM(numpy.zeros((D,P)))
-        y = UTPM(numpy.zeros((D,P)))
-
-        x0,y0 = 3,5
-
-        x.tc[0,:] = x0
-        x.tc[1,0] = 1
-        y.tc[0,:] = y0
-        y.tc[1,1] = 1
-
-        # forward
-        f = x*y*x
-
-        # reverse of g = d/dt f
-        gbar = UTPM(numpy.random.rand(D-1,1,P), shift=1)
-        fbar = gbar
-        fbar.tc = fbar.tc.reshape((D-1,P))
-
-        # reverse of f
-        xbar = 2 * x * y
-        ybar = x * x
-
-        # compute d d/dt f
-        xbar1 = (fbar * xbar).tc[0,:].sum()
-        ybar1 = (fbar * ybar).tc[0,:].sum()
-
-        # analytical solution
-        xbar2 = fbar.tc[0,0] * 2 * y0 + fbar.tc[0,1] * 2 * x0
-        ybar2 = fbar.tc[0,0] * 2 * x0
-
-        assert_almost_equal(xbar1,xbar2)
-        assert_almost_equal(ybar1,ybar2)
 if __name__ == "__main__":
     run_module_suite()
