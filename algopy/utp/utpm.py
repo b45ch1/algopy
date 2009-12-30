@@ -194,15 +194,14 @@ class RawAlgorithmsMixIn:
 
 
     @classmethod
-    def _argmax(cls, a_data, axis = None, out = None):
-        if out != None:
-            raise NotImplementedError('should implement that')
+    def _argmax(cls, a_data, axis = None):
 
         if axis != None:
             raise NotImplementedError('should implement that')
 
         a_shp = a_data.shape
-        return numpy.argmax(a_data[0].reshape((P,numpy.prod(a_shp[1:]))), axis = 1)
+        D,P = a_shp[:2]
+        return numpy.argmax(a_data[0].reshape((P,numpy.prod(a_shp[2:]))), axis = 1)
 
 
     @classmethod
@@ -882,15 +881,11 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         return out
 
     @classmethod
-    def argmax(cls, a, axis = None, out = None):
-        if out != None:
-            raise NotImplementedError('should implement that')
-
+    def argmax(cls, a, axis = None):
         if axis != None:
             raise NotImplementedError('should implement that')
 
-        cls._argmax( a.data, axis = axis, out = out)
-        return out
+        return cls._argmax( a.data, axis = axis)
 
     def trace(self):
         """ returns a new UTPM in standard format, i.e. the matrices are 1x1 matrices"""

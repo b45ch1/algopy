@@ -226,6 +226,14 @@ class Test_Push_Forward(TestCase):
         #print axmax
         #print  AX.data[:,:,-1]
         assert_array_almost_equal(axmax.data, AX.data[:,:,-1])
+
+    def test_argmax(self):
+        D,P,N,M = 2,3,4,5
+        X = numpy.array([ dpn for dpn in range(D*P*N*M)],dtype = float)
+        X = X.reshape((D,P,N,M))
+        AX = UTPM(X)
+        amax = UTPM.argmax(AX)
+        assert_array_equal(amax, [19,19,19])
         
 
     def test_constructor_stores_reference_of_tc_and_does_not_copy(self):
