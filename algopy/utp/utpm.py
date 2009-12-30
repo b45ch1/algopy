@@ -172,7 +172,543 @@ def combine_blocks(in_X):
 
     return UTPM(tc)
 
-class UTPM(GradedRing):
+
+
+class RawAlgorithmsMixIn:
+    @classmethod
+    def _max(cls, x_data, axis = None, out = None):
+
+        if out == None:
+            raise NotImplementedError('should implement that')
+
+        x_shp = x_data.shape
+
+        D,P = x_shp[:2]
+        shp = x_shp[2:]
+
+        if len(shp) > 1:
+            raise NotImplementedError('should implement that')
+
+        for p in range(P):
+            out[:,p] = x_data[:,p,numpy.argmax(x_data[0,p])]
+
+
+    @classmethod
+    def _idiv(cls, z_data, x_data):
+        (D,P) = z_data.shape[:2]
+        tmp_data = z_data.copy()
+        for d in range(D):
+            tmp_data[d,:,...] = 1./ x_data[0,:,...] * ( z_data[d,:,...] - numpy.sum(tmp_data[:d,:,...] * x_data[d:0:-1,:,...], axis=0))
+        z_data[...] = tmp_data[...]
+
+    @classmethod
+    def _div(cls, x_data, y_data, out = None):
+        """
+        z = x/y
+        """
+        z_data = out
+        if out == None:
+            return NotImplementedError('')
+
+        (D,P) = z_data.shape[:2]
+        for d in range(D):
+            z_data[d,:,...] = 1./ y_data[0,:,...] * ( x_data[d,:,...] - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
+
+    @classmethod
+    def _dot(cls, x_data, y_data, out = None):
+        """
+        z = dot(x,y)
+        """
+
+        if out == None:
+            raise NotImplementedError('should implement that')
+
+        z_data = out
+        z_data[...] = 0.
+
+        D,P = x_data.shape[:2]
+
+        # print 'x_data.shape=', x_data.shape
+        # print 'y_data.shape=', y_data.shape
+        # print 'z_data.shape=', z_data.shape
+
+        for d in range(D):
+            for p in range(P):
+                for c in range(d+1):
+                    z_data[d,p,...] += numpy.dot(x_data[c,p,...], y_data[d-c,p,...])
+
+
+        return out
+
+    @classmethod
+    def _dot_non_UTPM_y(cls, x_data, y_data, out = None):
+        """
+        z = dot(x,y)
+        """
+
+        if out == None:
+            raise NotImplementedError('should implement that')
+
+        z_data = out
+        z_data[...] = 0.
+
+        D,P = x_data.shape[:2]
+
+        for d in range(D):
+            for p in range(P):
+                z_data[d,p,...] = numpy.dot(x_data[d,p,...], y_data[...])
+
+        return out
+
+    @classmethod
+    def _dot_non_UTPM_x(cls, x_data, y_data, out = None):
+        """
+        z = dot(x,y)
+        """
+
+        if out == None:
+            raise NotImplementedError('should implement that')
+
+        z_data = out
+        z_data[...] = 0.
+
+        D,P = y_data.shape[:2]
+
+        for d in range(D):
+            for p in range(P):
+                z_data[d,p,...] = numpy.dot(x_data[...], y_data[d,p,...])
+
+        return out
+
+    @classmethod
+    def _solve(cls, A_data, x_data, out = None):
+        """
+        solves the linear system of equations for y::
+
+            A y = x
+
+        """
+
+        if out == None:
+            raise NotImplementedError('should implement that')
+
+        y_data = out
+
+        x_shp = numpy.shape(x_data)
+        A_shp = numpy.shape(A_data)
+        D,P,M,N = A_shp
+        D,P,M,K = x_shp
+
+        # d = 0:  base point
+        for p in range(P):
+            y_data[0,p,...] = numpy.linalg.solve(A_data[0,p,...], x_data[0,p,...])
+
+        # d = 1,...,D-1
+        tmp = numpy.zeros((M,K),dtype=float)
+        for d in range(1, D):
+            for p in range(P):
+                tmp[:,:] = x_data[d,p,:,:]
+                for k in range(1,d+1):
+                    tmp[:,:] -= numpy.dot(A_data[k,p,:,:],y_data[d-k,p,:,:])
+                y_data[d,p,:,:] = numpy.linalg.solve(A_data[0,p,:,:],tmp)
+
+        return out
+
+
+    @classmethod
+    def _solve_non_UTPM_A(cls, A_data, x_data, out = None):
+        """
+        solves the linear system of equations for y::
+
+            A y = x
+
+        when A is a simple (N,N) float array
+        """
+
+        if out == None:
+            raise NotImplementedError('should implement that')
+
+        y_data = out
+
+        x_shp = numpy.shape(x_data)
+        A_shp = numpy.shape(A_data)
+        M,N = A_shp
+        D,P,M,K = x_shp
+
+        assert M == N
+
+        # d = 0:  base point
+        for p in range(P):
+            y_data[0,p,:,:] = numpy.linalg.solve(A_data[:,:], x_data[0,p,:,:])
+
+        # d = 1,...,D-1
+        tmp = numpy.zeros((M,K),dtype=float)
+        for d in range(1, D):
+            for p in range(P):
+                tmp[:,:] = x_data[d,p,:,:]
+                for k in range(1,d+1):
+                    tmp[:,:] -= numpy.dot(A_data[...],y_data[d-k,p,:,:])
+                y_data[d,p,:,:] = numpy.linalg.solve(A_data[:,:],tmp)
+
+        return out
+
+    @classmethod
+    def _solve_non_UTPM_x(cls, A_data, x_data, out = None):
+        """
+        solves the linear system of equations for y::
+
+            A y = x
+
+        where x is simple (N,K) float array
+        """
+
+        if out == None:
+            raise NotImplementedError('should implement that')
+
+        y_data = out
+
+        x_shp = numpy.shape(x_data)
+        A_shp = numpy.shape(A_data)
+        D,P,M,N = A_shp
+        M,K = x_shp
+
+        assert M==N
+
+        # d = 0:  base point
+        for p in range(P):
+            y_data[0,p,...] = numpy.linalg.solve(A_data[0,p,...], x_data[...])
+
+        # d = 1,...,D-1
+        tmp = numpy.zeros((M,K),dtype=float)
+        for d in range(1, D):
+            for p in range(P):
+                tmp[:,:] = 0.
+                for k in range(1,d+1):
+                    tmp[:,:] -= numpy.dot(A_data[k,p,:,:],y_data[d-k,p,:,:])
+                y_data[d,p,:,:] = numpy.linalg.solve(A_data[0,p,:,:],tmp)
+
+
+        return out
+
+
+    @classmethod
+    def __zeros_like__(cls, data):
+        return numpy.zeros_like(data)
+
+    @classmethod
+    def __zeros__(cls, shp):
+        return numpy.zeros(shp)
+
+    @classmethod
+    def _qr(cls, Q_data, R_data, out = None):
+        """
+        computes the qr decomposition (Q,R) = qr(A)    <===>    QR = A
+
+        INPUTS:
+            A_data      (D,P,M,N) array             regular matrix
+
+        OUTPUTS:
+            Q_data      (D,P,M,K) array             orthogonal vectors Q_1,...,Q_K
+            R_data      (D,P,K,N) array             upper triagonal matrix
+
+            where K = min(M,N)
+
+        """
+
+        if out == None:
+            raise NotImplementedError('need to implement that...')
+        A_data = out
+
+        # input checks
+        DT,P,M,N = numpy.shape(A_data)
+        K = min(M,N)
+
+        if Q_data.shape != (DT,P,M,K):
+            raise ValueError('expected Q_data.shape = %s but provided %s'%(str((DT,P,M,K)),str(Q_data.shape)))
+        assert R_data.shape == (DT,P,K,N)
+
+        if not M >= N:
+            raise NotImplementedError('A_data.shape = (DT,P,M,N) = %s but require (for now) that M>=N')
+
+        # INIT: compute the base point
+        for p in range(P):
+            Q_data[0,p,:,:], R_data[0,p,:,:] = numpy.linalg.qr(A_data[0,p,:,:])
+
+        dF = numpy.zeros((P,M,N))
+        dG = numpy.zeros((P,K,K))
+        X  = numpy.zeros((P,K,K))
+
+        PL = numpy.array([[ r > c for c in range(N)] for r in range(K)],dtype=float)
+
+        Rinv = numpy.zeros((P,K,N))
+        for p in range(P):
+            Rinv[p] = numpy.linalg.inv(R_data[0,p])
+
+        # ITERATE: compute the derivatives
+        for D in range(1,DT):
+            # STEP 1:
+            dF[...] = 0.
+            dG[...] = 0
+            X[...]  = 0
+
+            for d in range(1,D):
+                for p in range(P):
+                    dF[p] += numpy.dot(Q_data[d,p,:,:], R_data[D-d,p,:,:])
+                    dG[p] -= numpy.dot(Q_data[d,p,:,:].T, Q_data[D-d,p,:,:])
+
+            # STEP 2:
+            H = A_data[D,:,:,:] - dF[:,:,:]
+            S = - 0.5 * dG
+
+            # STEP 3:
+            for p in range(P):
+                X[p,:,:] = PL * (numpy.dot( numpy.dot(Q_data[0,p,:,:].T, H[p,:,:,]), numpy.linalg.inv(R_data[0,p,:,:])) - S[p,:,:])
+                X[p,:,:] = X[p,:,:] - X[p,:,:].T
+
+            # STEP 4:
+            K = S + X
+
+            # STEP 5:
+            for p in range(P):
+                R_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:].T, H[p,:,:]) - numpy.dot(K[p,:,:],R_data[0,p,:,:])
+                R_data[D,p,:,:] = R_data[D,p,:,:] - PL * R_data[D,p,:,:]
+
+            # STEP 6:
+            for p in range(P):
+                Q_data[D,p,:,:] = numpy.dot(H[p] - numpy.dot(Q_data[0,p],R_data[D,p]), Rinv[p]) #numpy.dot(Q_data[0,p,:,:],K[p,:,:])
+
+    @classmethod
+    def _eig(cls, Q_data, L_data, A_data):
+        """
+        computes the eigenvalue decompositon
+
+        L,Q = eig(A)
+
+        for symmetric matrix A with distinct eigenvalues, i.e.
+        where L is a diagonal matrix of ordered eigenvalues l_1 > l_2 > ...> l_N
+        and Q a matrix of corresponding orthogonal eigenvectors
+
+        """
+        # input checks
+        DT,P,M,N = numpy.shape(A_data)
+
+        assert M == N
+
+        if Q_data.shape != (DT,P,N,N):
+            raise ValueError('expected Q_data.shape = %s but provided %s'%(str((DT,P,M,K)),str(Q_data.shape)))
+
+        if L_data.shape != (DT,P,N):
+            raise ValueError('expected L_data.shape = %s but provided %s'%(str((DT,P,N)),str(L_data.shape)))
+
+
+        # INIT: compute the base point
+        for p in range(P):
+            L_data[0,p,:], Q_data[0,p,:,:] = numpy.linalg.eig(A_data[0,p,:,:])
+
+        Id = numpy.zeros((P,N,N))
+        for p in range(P):
+            Id[p] = numpy.eye(N)
+
+        # save zero'th coefficient of L_data as diagonal matrix
+        L = numpy.zeros((P,N,N))
+        for p in range(P):
+            L[p] = numpy.diag(L_data[0,p])
+
+        dG = numpy.zeros((P,N,N))
+
+        # ITERATE: compute derivatives
+        for D in range(1,DT):
+            # print 'D=',D
+            dG[...] = 0.
+
+            dL = numpy.zeros((P,N,N))
+
+            # STEP 1:
+            dF = truncated_triple_dot(Q_data.transpose(0,1,3,2), A_data, Q_data, D)
+
+            for d in range(1,D):
+                dG += vdot(Q_data[d,...].transpose(0,2,1), Q_data[D-d,...])
+
+            # STEP 2:
+            S = -0.5 * dG
+
+            # STEP 3:
+            K = dF + vdot(vdot(Q_data.transpose(0,1,3,2)[0], A_data[D]),Q_data[0]) + \
+                vdot(S, L) + vdot(L,S)
+
+            # STEP 4:
+            dL = Id * K
+
+            # STEP 5:
+            H = numpy.zeros((P,N,N),dtype=float)
+            for p in range(P):
+                for r in range(N):
+                    for c in range(N):
+                        if c == r:
+                            continue
+                        H[p,r,c] = 1./( L[p,c,c] - L[p,r,r])
+
+            # STEP 6:
+            tmp0 = K - dL
+            tmp1 = H * tmp0
+            tmp2 = tmp1 + S
+            Q_data[D] = vdot(Q_data[0], tmp2)
+
+            # STEP 7:
+            for p in range(P):
+                L_data[D,p,:] = numpy.diag(dL[p])
+
+    @classmethod
+    def _mul_non_UTPM_x(cls, x_data, y_data, out = None):
+        """
+        z = x * y
+        """
+
+        if out == None:
+            raise NotImplementedError('need to implement that...')
+        z_data = out
+
+        D,P = numpy.shape(y_data)[:2]
+
+        for d in range(D):
+            for p in range(P):
+                z_data[d,p] = x_data * y_data[d,p]
+
+    @classmethod
+    def _eig_pullback(cls, Qbar_data, lambar_data, A_data, Q_data, lam_data, out = None):
+
+        if out == None:
+            raise NotImplementedError('need to implement that...')
+
+        Abar_data = out
+
+        A_shp = A_data.shape
+        D,P,M,N = A_shp
+
+        assert M == N
+
+        # allocating temporary storage
+        H = numpy.zeros(A_shp)
+        tmp1 = numpy.zeros((D,P,N,N), dtype=float)
+        tmp2 = numpy.zeros((D,P,N,N), dtype=float)
+
+        Id = numpy.zeros((D,P,1))
+        Id[0,:,0] = numpy.eye(P)
+
+        Lam_data    = cls._diag(lam_data)
+        Lambar_data = cls._diag(lambar_data)
+
+        # STEP 1: compute H
+        for m in range(N):
+            for n in range(N):
+                if n == m:
+                    continue
+                tmp = lam_data[:,:,n] -   lam_data[:,:,m]
+                cls._div(Id, tmp, out = H[:,:,m,n])
+
+        # STEP 2: compute Lbar +  H * Q^T Qbar
+        cls._dot(cls._transpose(Q_data), Qbar_data, out = tmp1)
+        tmp1[...] *= H[...]
+        tmp1[...] += Lambar_data[...]
+
+        # STEP 3: compute Q ( Lbar +  H * Q^T Qbar ) Q^T
+        cls._dot(Q_data, tmp1, out = tmp2)
+        cls._dot(tmp2, cls._transpose(Q_data), out = tmp1)
+
+        Abar_data += tmp1
+
+        return out
+
+
+
+    @classmethod
+    def _qr_pullback(cls,Qbar_data, Rbar_data, A_data, Q_data, R_data, out = None):
+
+        if out == None:
+            raise NotImplementedError('need to implement that...')
+
+        Abar_data = out
+
+        A_shp = A_data.shape
+        D,P,M,N = A_shp
+
+
+        if M < N:
+            raise ValueError('supplied matrix has more columns that rows')
+
+        # allocate temporary storage and temporary matrices
+        tmp1 = numpy.zeros((D,P,N,N))
+        tmp2 = numpy.zeros((D,P,N,N))
+        tmp3 = numpy.zeros((D,P,M,N))
+        tmp4 = numpy.zeros((D,P,M,N))
+        PL  = numpy.array([[ c < r for c in range(N)] for r in range(N)],dtype=float)
+
+        # STEP 1: compute V
+        cls._dot( cls._transpose(Qbar_data), Q_data, out = tmp1)
+        cls._dot( R_data, cls._transpose(Rbar_data), out = tmp2)
+        tmp1[...] -= tmp2[...]
+
+        # STEP 2: compute PL * (V.T - V)
+        tmp2[...]  = cls._transpose(tmp1)
+        tmp2[...] -= tmp1[...]
+        cls._mul_non_UTPM_x(PL, tmp2, out = tmp1)
+
+        # STEP 3: compute PL * (V.T - V) R^{-T}
+        cls._solve(R_data, cls._transpose(tmp1), out = tmp2)
+        tmp2 = tmp2.transpose((0,1,3,2))
+
+        # STEP 4: compute Rbar + PL * (V.T - V) R^{-T}
+        tmp2[...] += Rbar_data[...]
+
+        # STEP 5: compute Q ( Rbar + PL * (V.T - V) R^{-T} )
+        cls._dot( Q_data, tmp2, out = tmp3)
+        Abar_data += tmp3
+
+        if M > N:
+            # STEP 6: compute (Qbar - Q Q^T Qbar) R^{-T}
+            cls._dot( cls._transpose(Q_data), Qbar_data, out = tmp1)
+            cls._dot( Q_data, tmp1, out = tmp3)
+            tmp3 *= -1.
+            tmp3 += Qbar_data
+            cls._solve(R_data, cls._transpose(tmp3), out = cls._transpose(tmp4))
+            Abar_data += tmp4
+
+        return out
+
+    @classmethod
+    def _transpose(cls, a_data, axes = None):
+        """Permute the dimensions of UTPM data"""
+        if axes != None:
+            raise NotImplementedError('should implement that')
+
+        Nshp = len(a_data.shape)
+        axes_ids = tuple(range(2,Nshp)[::-1])
+        return numpy.transpose(a_data,axes=(0,1) + axes_ids)
+
+    @classmethod
+    def _diag(cls, v_data, k = 0, out = None):
+        """Extract a diagonal or construct  diagonal UTPM data"""
+
+        if numpy.ndim(v_data) == 3:
+            D,P,N = v_data.shape
+            if out == None:
+                out = numpy.zeros((D,P,N,N),dtype=float)
+            else:
+                out[...] = 0.
+
+            for d in range(D):
+                for p in range(P):
+                    out[d,p] = numpy.diag(v_data[d,p])
+
+            return out
+
+        else:
+            raise NotImplementedError('should implement that')
+
+
+    
+
+class UTPM(GradedRing, RawAlgorithmsMixIn):
     """
     UTPM == Univariate Taylor Polynomial of Matrices
     This class implements univariate Taylor arithmetic on matrices, i.e.
@@ -582,536 +1118,4 @@ class UTPM(GradedRing):
         return cls(cls._diag(v.data))
     
     
-    @classmethod
-    def _max(cls, x_data, axis = None, out = None):
-
-        if out == None:
-            raise NotImplementedError('should implement that')
-        
-        x_shp = x_data.shape
-
-        D,P = x_shp[:2]
-        shp = x_shp[2:]
-
-        if len(shp) > 1:
-            raise NotImplementedError('should implement that')
-        
-        for p in range(P):
-            out[:,p] = x_data[:,p,numpy.argmax(x_data[0,p])]
-            
-    
-    @classmethod
-    def _idiv(cls, z_data, x_data):
-        (D,P) = z_data.shape[:2]
-        tmp_data = z_data.copy()
-        for d in range(D):
-            tmp_data[d,:,...] = 1./ x_data[0,:,...] * ( z_data[d,:,...] - numpy.sum(tmp_data[:d,:,...] * x_data[d:0:-1,:,...], axis=0))
-        z_data[...] = tmp_data[...]
-        
-    @classmethod
-    def _div(cls, x_data, y_data, out = None):
-        """
-        z = x/y
-        """
-        z_data = out
-        if out == None:
-            return NotImplementedError('')
-        
-        (D,P) = z_data.shape[:2]
-        for d in range(D):
-            z_data[d,:,...] = 1./ y_data[0,:,...] * ( x_data[d,:,...] - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
-            
-    @classmethod
-    def _dot(cls, x_data, y_data, out = None):
-        """
-        z = dot(x,y)
-        """
-        
-        if out == None:
-            raise NotImplementedError('should implement that')
-            
-        z_data = out
-        z_data[...] = 0.
-            
-        D,P = x_data.shape[:2]
-        
-        # print 'x_data.shape=', x_data.shape
-        # print 'y_data.shape=', y_data.shape
-        # print 'z_data.shape=', z_data.shape
-
-        for d in range(D):
-            for p in range(P):
-                for c in range(d+1):
-                    z_data[d,p,...] += numpy.dot(x_data[c,p,...], y_data[d-c,p,...])
-                    
-                    
-        return out
-
-    @classmethod
-    def _dot_non_UTPM_y(cls, x_data, y_data, out = None):
-        """
-        z = dot(x,y)
-        """
-        
-        if out == None:
-            raise NotImplementedError('should implement that')
-            
-        z_data = out
-        z_data[...] = 0.
-        
-        D,P = x_data.shape[:2]
-
-        for d in range(D):
-            for p in range(P):
-                z_data[d,p,...] = numpy.dot(x_data[d,p,...], y_data[...])
-                
-        return out
-                
-    @classmethod
-    def _dot_non_UTPM_x(cls, x_data, y_data, out = None):
-        """
-        z = dot(x,y)
-        """
-        
-        if out == None:
-            raise NotImplementedError('should implement that')
-            
-        z_data = out
-        z_data[...] = 0.
-        
-        D,P = y_data.shape[:2]
-
-        for d in range(D):
-            for p in range(P):
-                z_data[d,p,...] = numpy.dot(x_data[...], y_data[d,p,...])
-
-        return out
-
-    @classmethod
-    def _solve(cls, A_data, x_data, out = None):
-        """
-        solves the linear system of equations for y::
-            
-            A y = x
-        
-        """
-        
-        if out == None:
-            raise NotImplementedError('should implement that')
-            
-        y_data = out
-        
-        x_shp = numpy.shape(x_data)
-        A_shp = numpy.shape(A_data)
-        D,P,M,N = A_shp
-        D,P,M,K = x_shp
-
-        # d = 0:  base point
-        for p in range(P):
-            y_data[0,p,...] = numpy.linalg.solve(A_data[0,p,...], x_data[0,p,...])
-
-        # d = 1,...,D-1
-        tmp = numpy.zeros((M,K),dtype=float)
-        for d in range(1, D):
-            for p in range(P):
-                tmp[:,:] = x_data[d,p,:,:]
-                for k in range(1,d+1):
-                    tmp[:,:] -= numpy.dot(A_data[k,p,:,:],y_data[d-k,p,:,:])
-                y_data[d,p,:,:] = numpy.linalg.solve(A_data[0,p,:,:],tmp)
-                
-        return out
-                
-                
-    @classmethod
-    def _solve_non_UTPM_A(cls, A_data, x_data, out = None):
-        """
-        solves the linear system of equations for y::
-            
-            A y = x
-        
-        when A is a simple (N,N) float array
-        """
-        
-        if out == None:
-            raise NotImplementedError('should implement that')
-            
-        y_data = out
-        
-        x_shp = numpy.shape(x_data)
-        A_shp = numpy.shape(A_data)
-        M,N = A_shp
-        D,P,M,K = x_shp
-        
-        assert M == N
-
-        # d = 0:  base point
-        for p in range(P):
-            y_data[0,p,:,:] = numpy.linalg.solve(A_data[:,:], x_data[0,p,:,:])
-
-        # d = 1,...,D-1
-        tmp = numpy.zeros((M,K),dtype=float)
-        for d in range(1, D):
-            for p in range(P):
-                tmp[:,:] = x_data[d,p,:,:]
-                for k in range(1,d+1):
-                    tmp[:,:] -= numpy.dot(A_data[...],y_data[d-k,p,:,:])
-                y_data[d,p,:,:] = numpy.linalg.solve(A_data[:,:],tmp)
-                
-        return out
-
-    @classmethod
-    def _solve_non_UTPM_x(cls, A_data, x_data, out = None):
-        """
-        solves the linear system of equations for y::
-
-            A y = x
-
-        where x is simple (N,K) float array
-        """
-        
-        if out == None:
-            raise NotImplementedError('should implement that')
-            
-        y_data = out
-
-        x_shp = numpy.shape(x_data)
-        A_shp = numpy.shape(A_data)
-        D,P,M,N = A_shp
-        M,K = x_shp
-
-        assert M==N
-
-        # d = 0:  base point
-        for p in range(P):
-            y_data[0,p,...] = numpy.linalg.solve(A_data[0,p,...], x_data[...])
-
-        # d = 1,...,D-1
-        tmp = numpy.zeros((M,K),dtype=float)
-        for d in range(1, D):
-            for p in range(P):
-                tmp[:,:] = 0.
-                for k in range(1,d+1):
-                    tmp[:,:] -= numpy.dot(A_data[k,p,:,:],y_data[d-k,p,:,:])
-                y_data[d,p,:,:] = numpy.linalg.solve(A_data[0,p,:,:],tmp)
-                
-                
-        return out
-    
-
-    @classmethod
-    def __zeros_like__(cls, data):
-        return numpy.zeros_like(data)
-        
-    @classmethod
-    def __zeros__(cls, shp):
-        return numpy.zeros(shp)
-
-    @classmethod
-    def _qr(cls, Q_data, R_data, out = None):
-        """
-        computes the qr decomposition (Q,R) = qr(A)    <===>    QR = A
-        
-        INPUTS:
-            A_data      (D,P,M,N) array             regular matrix
-            
-        OUTPUTS:
-            Q_data      (D,P,M,K) array             orthogonal vectors Q_1,...,Q_K
-            R_data      (D,P,K,N) array             upper triagonal matrix
-            
-            where K = min(M,N)
-        
-        """
-        
-        if out == None:
-            raise NotImplementedError('need to implement that...')
-        A_data = out
-        
-        # input checks
-        DT,P,M,N = numpy.shape(A_data)
-        K = min(M,N)
-        
-        if Q_data.shape != (DT,P,M,K):
-            raise ValueError('expected Q_data.shape = %s but provided %s'%(str((DT,P,M,K)),str(Q_data.shape)))
-        assert R_data.shape == (DT,P,K,N)
-        
-        if not M >= N:
-            raise NotImplementedError('A_data.shape = (DT,P,M,N) = %s but require (for now) that M>=N')
-        
-        # INIT: compute the base point
-        for p in range(P):
-            Q_data[0,p,:,:], R_data[0,p,:,:] = numpy.linalg.qr(A_data[0,p,:,:])
-        
-        dF = numpy.zeros((P,M,N))
-        dG = numpy.zeros((P,K,K))
-        X  = numpy.zeros((P,K,K))
-
-        PL = numpy.array([[ r > c for c in range(N)] for r in range(K)],dtype=float)
-        
-        Rinv = numpy.zeros((P,K,N))
-        for p in range(P):
-            Rinv[p] = numpy.linalg.inv(R_data[0,p])
-        
-        # ITERATE: compute the derivatives
-        for D in range(1,DT):
-            # STEP 1:
-            dF[...] = 0.
-            dG[...] = 0
-            X[...]  = 0
-
-            for d in range(1,D):
-                for p in range(P):
-                    dF[p] += numpy.dot(Q_data[d,p,:,:], R_data[D-d,p,:,:])
-                    dG[p] -= numpy.dot(Q_data[d,p,:,:].T, Q_data[D-d,p,:,:])
-                    
-            # STEP 2:
-            H = A_data[D,:,:,:] - dF[:,:,:]
-            S = - 0.5 * dG
-            
-            # STEP 3:
-            for p in range(P):
-                X[p,:,:] = PL * (numpy.dot( numpy.dot(Q_data[0,p,:,:].T, H[p,:,:,]), numpy.linalg.inv(R_data[0,p,:,:])) - S[p,:,:])
-                X[p,:,:] = X[p,:,:] - X[p,:,:].T
-                
-            # STEP 4:
-            K = S + X
-            
-            # STEP 5:
-            for p in range(P):
-                R_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:].T, H[p,:,:]) - numpy.dot(K[p,:,:],R_data[0,p,:,:])
-                R_data[D,p,:,:] = R_data[D,p,:,:] - PL * R_data[D,p,:,:]
-                
-            # STEP 6:
-            for p in range(P):
-                Q_data[D,p,:,:] = numpy.dot(H[p] - numpy.dot(Q_data[0,p],R_data[D,p]), Rinv[p]) #numpy.dot(Q_data[0,p,:,:],K[p,:,:])
-        
-    @classmethod
-    def _eig(cls, Q_data, L_data, A_data):
-        """
-        computes the eigenvalue decompositon
-
-        L,Q = eig(A)
-
-        for symmetric matrix A with distinct eigenvalues, i.e. 
-        where L is a diagonal matrix of ordered eigenvalues l_1 > l_2 > ...> l_N
-        and Q a matrix of corresponding orthogonal eigenvectors
-
-        """
-        # input checks
-        DT,P,M,N = numpy.shape(A_data)
-        
-        assert M == N
-
-        if Q_data.shape != (DT,P,N,N):
-            raise ValueError('expected Q_data.shape = %s but provided %s'%(str((DT,P,M,K)),str(Q_data.shape)))
-
-        if L_data.shape != (DT,P,N):
-            raise ValueError('expected L_data.shape = %s but provided %s'%(str((DT,P,N)),str(L_data.shape)))
-
-
-        # INIT: compute the base point
-        for p in range(P):
-            L_data[0,p,:], Q_data[0,p,:,:] = numpy.linalg.eig(A_data[0,p,:,:])
-
-        Id = numpy.zeros((P,N,N))
-        for p in range(P):
-            Id[p] = numpy.eye(N)
-
-        # save zero'th coefficient of L_data as diagonal matrix
-        L = numpy.zeros((P,N,N))
-        for p in range(P):
-            L[p] = numpy.diag(L_data[0,p])
-            
-        dG = numpy.zeros((P,N,N))
-
-        # ITERATE: compute derivatives
-        for D in range(1,DT):
-            # print 'D=',D
-            dG[...] = 0.
-            
-            dL = numpy.zeros((P,N,N))
-
-            # STEP 1:
-            dF = truncated_triple_dot(Q_data.transpose(0,1,3,2), A_data, Q_data, D)
-                
-            for d in range(1,D):
-                dG += vdot(Q_data[d,...].transpose(0,2,1), Q_data[D-d,...])
-
-            # STEP 2:
-            S = -0.5 * dG
-
-            # STEP 3:
-            K = dF + vdot(vdot(Q_data.transpose(0,1,3,2)[0], A_data[D]),Q_data[0]) + \
-                vdot(S, L) + vdot(L,S)
-                
-            # STEP 4:
-            dL = Id * K
-                
-            # STEP 5:
-            H = numpy.zeros((P,N,N),dtype=float)
-            for p in range(P):
-                for r in range(N):
-                    for c in range(N):
-                        if c == r:
-                            continue
-                        H[p,r,c] = 1./( L[p,c,c] - L[p,r,r])
-                        
-            # STEP 6:
-            tmp0 = K - dL
-            tmp1 = H * tmp0
-            tmp2 = tmp1 + S
-            Q_data[D] = vdot(Q_data[0], tmp2)
-            
-            # STEP 7:
-            for p in range(P):
-                L_data[D,p,:] = numpy.diag(dL[p])
-    
-    @classmethod
-    def _mul_non_UTPM_x(cls, x_data, y_data, out = None):
-        """
-        z = x * y
-        """
-        
-        if out == None:
-            raise NotImplementedError('need to implement that...')
-        z_data = out
-        
-        D,P = numpy.shape(y_data)[:2]
-        
-        for d in range(D):
-            for p in range(P):
-                z_data[d,p] = x_data * y_data[d,p]
-                
-    @classmethod
-    def _eig_pullback(cls, Qbar_data, lambar_data, A_data, Q_data, lam_data, out = None):
-        
-        if out == None:
-            raise NotImplementedError('need to implement that...')
-            
-        Abar_data = out
-
-        A_shp = A_data.shape
-        D,P,M,N = A_shp
-        
-        assert M == N
-        
-        # allocating temporary storage
-        H = numpy.zeros(A_shp)
-        tmp1 = numpy.zeros((D,P,N,N), dtype=float)
-        tmp2 = numpy.zeros((D,P,N,N), dtype=float)
-        
-        Id = numpy.zeros((D,P,1))
-        Id[0,:,0] = numpy.eye(P)
-        
-        Lam_data    = cls._diag(lam_data)
-        Lambar_data = cls._diag(lambar_data)
-        
-        # STEP 1: compute H
-        for m in range(N):
-            for n in range(N):
-                if n == m:
-                    continue
-                tmp = lam_data[:,:,n] -   lam_data[:,:,m]
-                cls._div(Id, tmp, out = H[:,:,m,n])
-        
-        # STEP 2: compute Lbar +  H * Q^T Qbar
-        cls._dot(cls._transpose(Q_data), Qbar_data, out = tmp1)
-        tmp1[...] *= H[...]
-        tmp1[...] += Lambar_data[...]
-        
-        # STEP 3: compute Q ( Lbar +  H * Q^T Qbar ) Q^T
-        cls._dot(Q_data, tmp1, out = tmp2)
-        cls._dot(tmp2, cls._transpose(Q_data), out = tmp1)
-        
-        Abar_data += tmp1
-        
-        return out
-        
-       
-
-    @classmethod
-    def _qr_pullback(cls,Qbar_data, Rbar_data, A_data, Q_data, R_data, out = None):
-        
-        if out == None:
-            raise NotImplementedError('need to implement that...')
-            
-        Abar_data = out
-        
-        A_shp = A_data.shape
-        D,P,M,N = A_shp
-        
-        
-        if M < N:
-            raise ValueError('supplied matrix has more columns that rows')
-
-        # allocate temporary storage and temporary matrices
-        tmp1 = numpy.zeros((D,P,N,N))
-        tmp2 = numpy.zeros((D,P,N,N))
-        tmp3 = numpy.zeros((D,P,M,N))
-        tmp4 = numpy.zeros((D,P,M,N))
-        PL  = numpy.array([[ c < r for c in range(N)] for r in range(N)],dtype=float)
-        
-        # STEP 1: compute V
-        cls._dot( cls._transpose(Qbar_data), Q_data, out = tmp1)
-        cls._dot( R_data, cls._transpose(Rbar_data), out = tmp2)
-        tmp1[...] -= tmp2[...]
-        
-        # STEP 2: compute PL * (V.T - V)
-        tmp2[...]  = cls._transpose(tmp1)
-        tmp2[...] -= tmp1[...]
-        cls._mul_non_UTPM_x(PL, tmp2, out = tmp1)
-        
-        # STEP 3: compute PL * (V.T - V) R^{-T}
-        cls._solve(R_data, cls._transpose(tmp1), out = tmp2)
-        tmp2 = tmp2.transpose((0,1,3,2))
-        
-        # STEP 4: compute Rbar + PL * (V.T - V) R^{-T}
-        tmp2[...] += Rbar_data[...]
-        
-        # STEP 5: compute Q ( Rbar + PL * (V.T - V) R^{-T} )
-        cls._dot( Q_data, tmp2, out = tmp3)
-        Abar_data += tmp3
-        
-        if M > N:
-            # STEP 6: compute (Qbar - Q Q^T Qbar) R^{-T}
-            cls._dot( cls._transpose(Q_data), Qbar_data, out = tmp1)
-            cls._dot( Q_data, tmp1, out = tmp3)
-            tmp3 *= -1.
-            tmp3 += Qbar_data
-            cls._solve(R_data, cls._transpose(tmp3), out = cls._transpose(tmp4))
-            Abar_data += tmp4
-        
-        return out
-        
-    @classmethod
-    def _transpose(cls, a_data, axes = None):
-        """Permute the dimensions of UTPM data"""
-        if axes != None:
-            raise NotImplementedError('should implement that')
-
-        Nshp = len(a_data.shape)
-        axes_ids = tuple(range(2,Nshp)[::-1])
-        return numpy.transpose(a_data,axes=(0,1) + axes_ids)
-   
-    @classmethod
-    def _diag(cls, v_data, k = 0, out = None):
-        """Extract a diagonal or construct  diagonal UTPM data"""
-        
-        if numpy.ndim(v_data) == 3:
-            D,P,N = v_data.shape
-            if out == None:
-                out = numpy.zeros((D,P,N,N),dtype=float)
-            else:
-                out[...] = 0.
-                
-            for d in range(D):
-                for p in range(P):
-                    out[d,p] = numpy.diag(v_data[d,p])
-                        
-            return out
-            
-        else:
-            raise NotImplementedError('should implement that')
-        
-
-
 
