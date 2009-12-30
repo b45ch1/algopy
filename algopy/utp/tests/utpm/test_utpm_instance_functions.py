@@ -222,8 +222,7 @@ class Test_Push_Forward(TestCase):
         X = numpy.array([ dpn for dpn in range(D*P*N)],dtype = float)
         X = X.reshape((D,P,N))
         AX = UTPM(X)
-
-        axmax = AX.max()
+        axmax = UTPM.max(AX)
         #print axmax
         #print  AX.data[:,:,-1]
         assert_array_almost_equal(axmax.data, AX.data[:,:,-1])

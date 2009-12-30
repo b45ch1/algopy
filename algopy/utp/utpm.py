@@ -855,19 +855,19 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
     def __neg__(self):
         return UTPM(-self.data)
 
-
-    def max(self, axis = None, out = None):
+    @classmethod
+    def max(cls, a, axis = None, out = None):
         if out != None:
             raise NotImplementedError('should implement that')
 
         if axis != None:
             raise NotImplementedError('should implement that')
         
-        self_shp = self.data.shape 
-        retval_shp = self_shp[:2]
-        retval = self.__class__(self.__class__.__zeros__(retval_shp))
-        self.__class__._max( self.data, axis = axis, out = retval.data)
-        return retval
+        a_shp = a.data.shape
+        out_shp = a_shp[:2]
+        out = cls(cls.__zeros__(out_shp))
+        cls._max( a.data, axis = axis, out = out.data)
+        return out
 
     def trace(self):
         """ returns a new UTPM in standard format, i.e. the matrices are 1x1 matrices"""
