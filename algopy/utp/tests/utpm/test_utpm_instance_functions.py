@@ -507,7 +507,7 @@ class Test_QR_Decomposition(TestCase):
             assert_almost_equal(numpy.trace(numpy.dot(Ab.T,Ad)), numpy.trace(numpy.dot(Qb.T,Qd) + numpy.dot(Rb.T,Rd)))
 
     def test_pullback_rectangular_A(self):
-        (D,P,M,N) = 2,1,10,3
+        (D,P,M,N) = 2,7,10,3
 
         A_data = numpy.random.rand(D,P,M,N)
 
@@ -536,17 +536,16 @@ class Test_QR_Decomposition(TestCase):
 
         Abar = UTPM.qr_pullback(Qbar, Rbar, A, Q, R)
 
+        for p in range(P):
+            Ab = Abar.data[0,p]
+            Ad = A.data[1,p]
 
-        Abar = Abar.data[0,0]
-        Adot = A.data[1,0]
+            Qb = Qbar.data[0,p]
+            Qd = Q.data[1,p]
 
-        Qbar = Qbar.data[0,0]
-        Qdot = Q.data[1,0]
-
-        Rbar = Rbar.data[0,0]
-        Rdot = R.data[1,0]
-
-        assert_almost_equal(numpy.trace(numpy.dot(Abar.T,Adot)), numpy.trace(numpy.dot(Qbar.T,Qdot) + numpy.dot(Rbar.T,Rdot)))
+            Rb = Rbar.data[0,p]
+            Rd = R.data[1,p]
+            assert_almost_equal(numpy.trace(numpy.dot(Ab.T,Ad)), numpy.trace(numpy.dot(Qb.T,Qd) + numpy.dot(Rb.T,Rd)))
 
 
 class Test_Eigenvalue_Decomposition(TestCase):
