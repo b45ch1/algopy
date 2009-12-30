@@ -24,7 +24,7 @@ C = UTPM.solve(D,R)
 l,U = UTPM.eig(C)
 
 print l
-l11 = UTPM.max(l)
+arg = UTPM.argmax(l)
 
-print l11
+print l[0]
  
