@@ -6,7 +6,8 @@ Rationale:
     It is not (yet) geared towards end users.
     The ultimative goal is to provide high performance algorithms
     that can be used to differentiate dynamic systems  (ODEs, DAEs, PDEs)
-    and static systems (linear/nonlinear systems of equations).
+    and static systems (linear/nonlinear systems of equations). Most algorithms
+    are implemented as Single Program Multiple Data (SPMD). 
     
     ALGOPY focuses on the algebraic differentiation of elementary operations,
     e.g. C = dot(A,B) where A,B,C are matrices, y = sin(x), z = x*y, etc.
