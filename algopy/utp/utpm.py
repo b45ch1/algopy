@@ -194,6 +194,18 @@ class RawAlgorithmsMixIn:
 
 
     @classmethod
+    def _argmax(cls, a_data, axis = None, out = None):
+        if out != None:
+            raise NotImplementedError('should implement that')
+
+        if axis != None:
+            raise NotImplementedError('should implement that')
+
+        a_shp = a_data.shape
+        return numpy.argmax(a_data[0].reshape((P,numpy.prod(a_shp[1:]))), axis = 1)
+
+
+    @classmethod
     def _idiv(cls, z_data, x_data):
         (D,P) = z_data.shape[:2]
         tmp_data = z_data.copy()
@@ -867,6 +879,17 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         out_shp = a_shp[:2]
         out = cls(cls.__zeros__(out_shp))
         cls._max( a.data, axis = axis, out = out.data)
+        return out
+
+    @classmethod
+    def argmax(cls, a, axis = None, out = None):
+        if out != None:
+            raise NotImplementedError('should implement that')
+
+        if axis != None:
+            raise NotImplementedError('should implement that')
+
+        cls._argmax( a.data, axis = axis, out = out)
         return out
 
     def trace(self):

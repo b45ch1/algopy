@@ -226,6 +226,7 @@ class Test_Push_Forward(TestCase):
         #print axmax
         #print  AX.data[:,:,-1]
         assert_array_almost_equal(axmax.data, AX.data[:,:,-1])
+        
 
     def test_constructor_stores_reference_of_tc_and_does_not_copy(self):
         X  = numpy.zeros((2,3,4,5))
