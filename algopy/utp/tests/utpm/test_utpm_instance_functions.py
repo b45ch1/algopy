@@ -316,6 +316,17 @@ class Test_Push_Forward(TestCase):
         AX = UTPM(X)
         assert_array_equal(AX.T.data.shape, (D,P,M,N))
 
+
+    def test_diag(self):
+        D,P,N = 2,3,4
+        x = UTPM(numpy.random.rand(D,P,N))
+
+        X = UTPM.diag(x)
+
+        for n in range(N):
+            assert_almost_equal( x.data[...,n], X.data[...,n,n])
+        
+
     def test_trace(self):
         N1 = 2
         N2 = 3

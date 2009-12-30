@@ -36,16 +36,6 @@ class Test_push_forward_class_functions(TestCase):
 
         assert_array_almost_equal(Z_data, Z.data)
 
-
-    def test__diag(self):
-        D,P,N = 2,3,4
-        x = numpy.random.rand(D,P,N)
-
-        X = UTPM._diag(x)
-
-        for n in range(N):
-            assert_almost_equal( x[...,n], X[...,n,n])
-
     def test__transpose(self):
         D,P,M,N = 2,3,4,5
         X_data = numpy.random.rand(D,P,N,M)

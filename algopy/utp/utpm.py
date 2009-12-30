@@ -580,7 +580,10 @@ class UTPM(GradedRing):
         UTPM._eig_pullback( Qbar.data, lbar.data, A.data, Q.data, l.data, out = Abar.data)
         return out
 
-
+    @classmethod
+    def diag(cls, v, k = 0, out = None):
+        """Extract a diagonal or construct  diagonal UTPM instance"""
+        return cls(cls._diag(v.data))
     
     
     @classmethod
