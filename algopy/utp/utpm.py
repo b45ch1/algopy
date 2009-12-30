@@ -139,7 +139,7 @@ def combine_blocks(in_X):
     expects an array or list consisting of entries of type UTPM, e.g.
     in_X = [[UTPM1,UTPM2],[UTPM3,UTPM4]]
     and returns
-    UTPM([[UTPM1.tc,UTPM2.tc],[UTPM3.tc,UTPM4.tc]])
+    UTPM([[UTPM1.data,UTPM2.data],[UTPM3.data,UTPM4.data]])
 
     """
 
@@ -151,8 +151,8 @@ def combine_blocks(in_X):
 
     for r in range(Rb):
         for c in range(Cb):
-            D = max(D, in_X[r,c].tc.shape[0])
-            P = max(P, in_X[r,c].tc.shape[1])
+            D = max(D, in_X[r,c].data.shape[0])
+            P = max(P, in_X[r,c].data.shape[1])
 
     # find the sizes of the blocks
     rows = []
@@ -168,7 +168,7 @@ def combine_blocks(in_X):
     tc = numpy.zeros((D, P, rowsums[-1],colsums[-1]))
     for r in range(Rb):
         for c in range(Cb):
-            tc[:,:,rowsums[r]:rowsums[r+1], colsums[c]:colsums[c+1]] = in_X[r,c].tc[:,:,:,:]
+            tc[:,:,rowsums[r]:rowsums[r+1], colsums[c]:colsums[c+1]] = in_X[r,c].data[:,:,:,:]
 
     return UTPM(tc)
 
@@ -204,7 +204,7 @@ class UTPM(GradedRing):
     [[ u_D1 + v_D1, ..., u_DNdir + v_DNdir]]
 
     For ufuncs this arrangement is advantageous, because in this order, memory chunks of size Ndir are used and the operation on each element is the same. This is desireable to avoid cache misses.
-    See for example __mul__: there, operations of self.tc[:d+1,:,:,:]* rhs.tc[d::-1,:,:,:] has to be performed. One can see, that contiguous memory blocks are used for such operations.
+    See for example __mul__: there, operations of self.data[:d+1,:,:,:]* rhs.data[d::-1,:,:,:] has to be performed. One can see, that contiguous memory blocks are used for such operations.
 
     A disadvantage of this arrangement is: it seems unnatural. It is easier to regard each direction separately.
     """
@@ -214,40 +214,40 @@ class UTPM(GradedRing):
         """
         Ndim = numpy.ndim(X)
         if Ndim >= 2:
-            self.tc = numpy.asarray(X)
-            self.data = self.tc
+            self.data = numpy.asarray(X)
+            self.data = self.data
         else:
             raise NotImplementedError
             
     def __getitem__(self, sl):
         if type(sl) == int or sl == Ellipsis:
             sl = (sl,)
-        tmp = self.tc.__getitem__((slice(None),slice(None)) + sl)
+        tmp = self.data.__getitem__((slice(None),slice(None)) + sl)
         return UTPM(tmp)
         
     def __setitem__(self, sl, rhs):
         if isinstance(rhs, UTPM):
             if type(sl) == int or sl == Ellipsis:
                 sl = (sl,)
-            return self.tc.__setitem__((slice(None),slice(None)) + sl, rhs.tc)
+            return self.data.__setitem__((slice(None),slice(None)) + sl, rhs.data)
         else:
             raise NotImplementedError('rhs must be of the type algopy.UTPM!')
         
     def __add__(self,rhs):
         if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
-            retval = UTPM(numpy.copy(self.tc))
-            retval.tc[0,:] += rhs
+            retval = UTPM(numpy.copy(self.data))
+            retval.data[0,:] += rhs
             return retval
         else:
-            return UTPM(self.tc + rhs.tc)
+            return UTPM(self.data + rhs.data)
 
     def __sub__(self,rhs):
         if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
-            retval = UTPM(numpy.copy(self.tc))
-            retval.tc[0,:] -= rhs
+            retval = UTPM(numpy.copy(self.data))
+            retval.data[0,:] -= rhs
             return retval
         else:
-            return UTPM(self.tc - rhs.tc)
+            return UTPM(self.data - rhs.data)
             
 
     def __mul__(self,rhs):
@@ -273,51 +273,51 @@ class UTPM(GradedRing):
 
     def __rdiv__(self, rhs):
         tmp = self.zeros_like()
-        tmp.tc[0,:,:,:] = rhs
+        tmp.data[0,:,:,:] = rhs
         return tmp/self
         
     def __iadd__(self,rhs):
         if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
-            self.tc[0,...] += rhs
+            self.data[0,...] += rhs
         else:
-            self.tc[...] += rhs.tc[...]
+            self.data[...] += rhs.data[...]
         return self
         
     def __isub__(self,rhs):
         if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
-            self.tc[0,...] -= rhs
+            self.data[0,...] -= rhs
         else:
-            self.tc[...] -= rhs.tc[...]
+            self.data[...] -= rhs.data[...]
         return self
         
     def __imul__(self,rhs):
-        (D,P) = self.tc.shape[:2]
+        (D,P) = self.data.shape[:2]
         if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
             for d in range(D):
                 for p in range(P):
-                    self.tc[d,p,...] *= rhs
+                    self.data[d,p,...] *= rhs
         else:
             for d in range(D)[::-1]:
                 for p in range(P):
-                    self.tc[d,p,...] *= rhs.tc[0,p,...]
+                    self.data[d,p,...] *= rhs.data[0,p,...]
                     for c in range(d):
-                        self.tc[d,p,...] += self.tc[c,p,...] * rhs.tc[d-c,p,...]
+                        self.data[d,p,...] += self.data[c,p,...] * rhs.data[d-c,p,...]
         return self
         
     def __idiv__(self,rhs):
-        (D,P) = self.tc.shape[:2]
+        (D,P) = self.data.shape[:2]
         if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
-            self.tc[...] /= rhs
+            self.data[...] /= rhs
         else:
             retval = self.clone()
             for d in range(D):
-                retval.tc[d,:,...] = 1./ rhs.tc[0,:,...] * ( self.tc[d,:,...] - numpy.sum(retval.tc[:d,:,...] * rhs.tc[d:0:-1,:,...], axis=0))
-            self.tc[...] = retval.tc[...]
+                retval.data[d,:,...] = 1./ rhs.data[0,:,...] * ( self.data[d,:,...] - numpy.sum(retval.data[:d,:,...] * rhs.data[d:0:-1,:,...], axis=0))
+            self.data[...] = retval.data[...]
         return self
 
 
     def __neg__(self):
-        return UTPM(-self.tc)
+        return UTPM(-self.data)
 
 
     def max(self, axis = None, out = None):
@@ -335,51 +335,51 @@ class UTPM(GradedRing):
 
     def trace(self):
         """ returns a new UTPM in standard format, i.e. the matrices are 1x1 matrices"""
-        D,P = self.tc.shape[:2]
+        D,P = self.data.shape[:2]
         retval = numpy.zeros((D,P))
         for d in range(D):
             for p in range(P):
-                retval[d,p] = numpy.trace(self.tc[d,p,...])
+                retval[d,p] = numpy.trace(self.data[d,p,...])
         return UTPM(retval)
         
     def FtoJT(self):
         """
         Combines several directional derivatives and combines them to a transposed Jacobian JT, i.e.
-        x.tc.shape = (D,P,shp)
+        x.data.shape = (D,P,shp)
         y = x.FtoJT()
-        y.tc.shape = (D-1, (P,1) + shp)
+        y.data.shape = (D-1, (P,1) + shp)
         """
-        D,P = self.tc.shape[:2]
-        shp = self.tc.shape[2:]
-        return UTPM(self.tc[1:,...].reshape((D-1,1) + (P,) + shp))
+        D,P = self.data.shape[:2]
+        shp = self.data.shape[2:]
+        return UTPM(self.data[1:,...].reshape((D-1,1) + (P,) + shp))
         
     def JTtoF(self):
         """
         inverse operation of FtoJT
-        x.tc.shape = (D,1, P,shp)
+        x.data.shape = (D,1, P,shp)
         y = x.JTtoF()
-        y.tc.shape = (D+1, P, shp)
+        y.data.shape = (D+1, P, shp)
         """
-        D = self.tc.shape[0]
-        P = self.tc.shape[2]
-        shp = self.tc.shape[3:]
+        D = self.data.shape[0]
+        P = self.data.shape[2]
+        shp = self.data.shape[3:]
         tmp = numpy.zeros((D+1,P) + shp)
-        tmp[0:D,...] = self.tc.reshape((D,P) + shp)
+        tmp[0:D,...] = self.data.reshape((D,P) + shp)
         return UTPM(tmp)        
 
     def clone(self):
-        return UTPM(self.tc.copy())
+        return UTPM(self.data.copy())
 
     def get_shape(self):
-        return numpy.shape(self.tc[0,0,...])
+        return numpy.shape(self.data[0,0,...])
     shape = property(get_shape)
     
     def get_ndim(self):
-        return numpy.ndim(self.tc[0,0,...])
+        return numpy.ndim(self.data[0,0,...])
     ndim = property(get_ndim)
     
     def reshape(self, dims):
-        return UTPM(self.tc.reshape(self.tc.shape[0:2] + dims))
+        return UTPM(self.data.reshape(self.data.shape[0:2] + dims))
 
     def get_transpose(self):
         return self.transpose()
@@ -392,18 +392,18 @@ class UTPM(GradedRing):
             raise NotImplementedError('should implement that...')
         Nshp = len(self.shape)
         axes_ids = tuple(range(2,2+Nshp)[::-1])
-        return UTPM( numpy.transpose(self.tc,axes=(0,1) + axes_ids))
+        return UTPM( numpy.transpose(self.data,axes=(0,1) + axes_ids))
 
     def set_zero(self):
-        self.tc[...] = 0.
+        self.data[...] = 0.
         return self
 
     def zeros_like(self):
-        return UTPM(numpy.zeros_like(self.tc))
+        return UTPM(numpy.zeros_like(self.data))
         
 
     def __str__(self):
-        return str(self.tc)
+        return str(self.data)
 
     def __repr__(self):
         return self.__str__()
