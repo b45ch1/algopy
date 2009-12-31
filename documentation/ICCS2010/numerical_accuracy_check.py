@@ -13,7 +13,12 @@ import algopy.utp.utpm as utpm
 # compute push forward of the QR decomposition
 # --------------------------------------------
 D,P,M,N = 5,5,100,5
+print ''
+print '-----------------------------------------------------------------------------------------------------------'
 print 'testing SPMD (%d datasets) differentiated QR decomposition for matrix A.shape = (%d,%d) up to %d\'th order'%(P,M,N,D)
+print '-----------------------------------------------------------------------------------------------------------'
+print ''
+
 
 A = utpm.UTPM(numpy.random.rand(D,P,M,N))
 
@@ -49,8 +54,11 @@ print 'measured runtime ratio push_forward/normal: ', runtime_push_forward/runti
 # compute push forward of the eigenvalue decomposition
 # ----------------------------------------------------
 D,P,N = 5,5,8
+print ''
+print '-----------------------------------------------------------------------------------------------------------'
 print 'testing SPMD (%d datasets) differentiated eig decomposition for matrix A.shape = (%d,%d) up to %d\'th order'%(P,N,N,D)
-
+print '-----------------------------------------------------------------------------------------------------------'
+print ''
 
 # create symmetric matrix
 A = utpm.UTPM(numpy.random.rand(D,P,N,N))
