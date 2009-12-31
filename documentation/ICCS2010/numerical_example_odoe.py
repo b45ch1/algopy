@@ -25,6 +25,5 @@ l,U = UTPM.eig(C)
 
 print l
 arg = UTPM.argmax(l)
-
-print l[0]
+print l[arg]
  
