@@ -50,13 +50,15 @@ runtime_normal = toc - tic
 print 'measured runtime ratio push_forward/normal: ', runtime_push_forward/runtime_normal
 
 
-# ----------------------------------------------------
-# compute push forward of the eigenvalue decomposition
-# ----------------------------------------------------
+
+
+
+
+
 D,P,N = 5,5,8
 print ''
 print '-----------------------------------------------------------------------------------------------------------'
-print 'testing SPMD (%d datasets) differentiated eig decomposition for matrix A.shape = (%d,%d) up to %d\'th order'%(P,N,N,D)
+print 'testing SPMD (%d datasets) push forward eig decomposition for matrix A.shape = (%d,%d) up to %d\'th order'%(P,N,N,D)
 print '-----------------------------------------------------------------------------------------------------------'
 print ''
 
@@ -90,3 +92,94 @@ toc = time.time()
 runtime_normal = toc - tic
 
 print 'measured runtime ratio push_forward/normal: ', runtime_push_forward/runtime_normal
+
+
+
+
+
+
+D,P,M,N = 2,1,50,8
+print ''
+print '--------------------------------------------------------------------------------------------------------------------'
+print 'testing SPMD (%d datasets) pullback qr decomposition for matrix A.shape = (%d,%d) up to first order'%(P,M,N)
+print '--------------------------------------------------------------------------------------------------------------------'
+print ''
+
+# create symmetric matrix
+A = utpm.UTPM(numpy.random.rand(D,P,M,N))
+
+# compute push forward
+tic = time.time()
+Q,R = utpm.UTPM.qr(A)
+toc = time.time()
+runtime_push_forward = toc - tic
+
+# compute pullback
+Qbar = utpm.UTPM(numpy.random.rand(D,P,M,N))
+Rbar = utpm.UTPM(numpy.random.rand(D,P,N,N))
+tic = time.time()
+Abar = utpm.UTPM.qr_pullback(Qbar, Rbar, A, Q, R)
+toc = time.time()
+runtime_pullback = toc - tic
+
+# check correctness of the pullback
+# using the formula  < fbar, fdot > = < xbar, xdot>
+# without using exact interpolation it is not possible to test the correctness of the pullback
+# to higher order than one
+Ab = Abar.data[0,0]
+Ad = A.data[1,0]
+
+Rb = Rbar.data[0,0]
+Rd = R.data[1,0]
+
+Qb = Qbar.data[0,0]
+Qd = Q.data[1,0]
+
+print ' (Abar, Adot) - (Rbar, Rdot) - (Qbar, Qdot) = %e'%( numpy.trace( numpy.dot(Ab.T, Ad)) - numpy.trace( numpy.dot(Rb.T, Rd) + numpy.dot(Qb.T, Qd)))
+
+
+
+
+
+
+# ------------------------------------------------
+# compute pullback of the eigenvalue decomposition
+# ------------------------------------------------
+D,P,N = 2,1,8
+print ''
+print '--------------------------------------------------------------------------------------------------------------------'
+print 'testing SPMD (%d datasets) pullback eigenvalue decomposition for matrix A.shape = (%d,%d) up to first order'%(P,N,N)
+print '--------------------------------------------------------------------------------------------------------------------'
+print ''
+
+# create symmetric matrix
+A = utpm.UTPM(numpy.random.rand(D,P,N,N))
+A = utpm.UTPM.dot(A.T,A)
+
+# compute push forward
+tic = time.time()
+l,Q = utpm.UTPM.eig(A)
+toc = time.time()
+runtime_push_forward = toc - tic
+
+# compute pullback
+Qbar = utpm.UTPM(numpy.random.rand(D,P,N,N))
+lbar = utpm.UTPM(numpy.random.rand(D,P,N))
+tic = time.time()
+Abar = utpm.UTPM.eig_pullback( Qbar, lbar, A, Q, l)
+toc = time.time()
+runtime_pullback = toc - tic
+
+# check correctness of the pullback
+# using the formula  < fbar, fdot > = < xbar, xdot>
+# without using exact interpolation it is not possible to test the correctness of the pullback
+# to higher order than one
+Ab = Abar.data[0,0]
+Ad = A.data[1,0]
+
+Lb = numpy.diag( lbar.data[0,0])
+Ld = numpy.diag( l.data[1,0] )
+
+Qb = Qbar.data[0,0]
+Qd = Q.data[1,0]
+print ' (Abar, Adot) - (Lbar, Ldot) - (Qbar, Qdot) = %e'%( numpy.trace( numpy.dot(Ab.T, Ad)) - numpy.trace( numpy.dot(Lb.T, Ld) + numpy.dot(Qb.T, Qd)))
