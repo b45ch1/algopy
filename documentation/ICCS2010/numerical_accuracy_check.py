@@ -8,17 +8,12 @@ import algopy.utp.utpm as utpm
 # N is the number of columsn of the matrix A
 
 
-
-# --------------------------------------------
-# compute push forward of the QR decomposition
-# --------------------------------------------
 D,P,M,N = 5,5,100,5
 print ''
 print '-----------------------------------------------------------------------------------------------------------'
 print 'testing SPMD (%d datasets) differentiated QR decomposition for matrix A.shape = (%d,%d) up to %d\'th order'%(P,M,N,D)
 print '-----------------------------------------------------------------------------------------------------------'
 print ''
-
 
 A = utpm.UTPM(numpy.random.rand(D,P,M,N))
 
@@ -98,6 +93,8 @@ print 'measured runtime ratio push_forward/normal: ', runtime_push_forward/runti
 
 
 
+
+
 D,P,M,N = 2,1,50,8
 print ''
 print '--------------------------------------------------------------------------------------------------------------------'
@@ -142,9 +139,8 @@ print ' (Abar, Adot) - (Rbar, Rdot) - (Qbar, Qdot) = %e'%( numpy.trace( numpy.do
 
 
 
-# ------------------------------------------------
-# compute pullback of the eigenvalue decomposition
-# ------------------------------------------------
+
+
 D,P,N = 2,1,8
 print ''
 print '--------------------------------------------------------------------------------------------------------------------'
