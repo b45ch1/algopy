@@ -21,11 +21,17 @@ Q,R = UTPM.qr(J)
 Id = numpy.eye(P)
 D = UTPM.solve(R.T,Id)
 C = UTPM.solve(D,R)
-l,U = UTPM.eig(C)
+l,Q = UTPM.eig(C)
 
 arg = UTPM.argmax(l)
 
 # STEP 2: compute pullback
-#Cbar = UTPM.eig_pullback(
+lbar = UTPM(numpy.zeros(l.data.shape))
+lbar.data[0,0, arg] = 1.
+Qbar = UTPM(numpy.zeros(C.data.shape))
+
+Cbar = UTPM.eig_pullback(lbar, Qbar, C, l, Q)
+
+print Cbar
 
  

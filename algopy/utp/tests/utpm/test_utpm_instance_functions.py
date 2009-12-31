@@ -376,7 +376,7 @@ class Test_Push_Forward(TestCase):
         x2 = UTPM.dot(A, y)
         assert_array_almost_equal(x.data, x2.data, decimal = 12)
 
-    def test_rsolve_non_UTPM_A(self):
+    def test_solve_non_UTPM_A(self):
         (D,P,N) = 2,3,2
         A  = UTPM(numpy.random.rand(D,P,N,N))
         Id = numpy.zeros((N,N))
@@ -438,6 +438,17 @@ class Test_Push_Forward(TestCase):
         R = truncated_triple_dot(A,B,C, 3)
 
         assert_array_almost_equal(R,S)
+
+class Test_Pullbacks(TestCase):
+    def test_solve_pullback(self):
+        (D,P,N) = 6,3,20
+        A = UTPM(numpy.random.rand(D,P,N,N))
+        x = UTPM(numpy.random.rand(D,P,N,1))
+        
+        y = UTPM.solve(A,x)
+
+        assert False
+        
 
 class Test_QR_Decomposition(TestCase):
     def test_push_forward(self):

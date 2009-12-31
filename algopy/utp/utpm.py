@@ -305,9 +305,10 @@ class RawAlgorithmsMixIn:
 
         y_data = out
 
-        x_shp = numpy.shape(x_data)
-        A_shp = numpy.shape(A_data)
+        x_shp = x_data.shape
+        A_shp = A_data.shape
         D,P,M,N = A_shp
+
         D,P,M,K = x_shp
 
         # d = 0:  base point
@@ -1040,8 +1041,8 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         
         """
         if isinstance(A, UTPM) and isinstance(x, UTPM):
-            A_shp = numpy.shape(A.data)
-            x_shp = numpy.shape(x.data)
+            A_shp = A.data.shape
+            x_shp = x.data.shape
     
             assert A_shp[:2] == x_shp[:2]
             if A_shp[2] != x_shp[2]:
@@ -1073,6 +1074,15 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
             raise NotImplementedError('should implement that')
             
         return out
+
+    @classmethod
+    def solve_pullback(cls, ybar, A, x, out = None):
+
+        if out != None:
+            raise NotImplementedError('should implement that')
+        
+        Abar = cls(cls.__zeros__(A.data.shape))
+        xbar = cls(cls.__zeros__(x.data.shape))
 
 
     @classmethod
