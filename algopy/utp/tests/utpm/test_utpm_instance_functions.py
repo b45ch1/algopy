@@ -604,7 +604,7 @@ class Test_Eigenvalue_Decomposition(TestCase):
         lbar = UTPM(numpy.random.rand(*(D,P,N)))
         Qbar = UTPM(numpy.random.rand(*(D,P,N,N)))
 
-        Abar = UTPM.eig_pullback( Qbar, lbar, A, Q, l)
+        Abar = UTPM.eig_pullback( lbar, Qbar, A, l, Q)
 
         Abar = Abar.data[0,0]
         Adot = A.data[1,0]

@@ -162,7 +162,7 @@ runtime_push_forward = toc - tic
 Qbar = utpm.UTPM(numpy.random.rand(D,P,N,N))
 lbar = utpm.UTPM(numpy.random.rand(D,P,N))
 tic = time.time()
-Abar = utpm.UTPM.eig_pullback( Qbar, lbar, A, Q, l)
+Abar = utpm.UTPM.eig_pullback( lbar, Qbar, A, l, Q)
 toc = time.time()
 runtime_pullback = toc - tic
 

@@ -489,7 +489,7 @@ class RawAlgorithmsMixIn:
                 Q_data[D,p,:,:] = numpy.dot(H[p] - numpy.dot(Q_data[0,p],R_data[D,p]), Rinv[p]) #numpy.dot(Q_data[0,p,:,:],K[p,:,:])
 
     @classmethod
-    def _eig(cls, Q_data, L_data, A_data):
+    def _eig(cls, L_data, Q_data, A_data):
         """
         computes the eigenvalue decompositon
 
@@ -586,7 +586,7 @@ class RawAlgorithmsMixIn:
                 z_data[d,p] = x_data * y_data[d,p]
 
     @classmethod
-    def _eig_pullback(cls, Qbar_data, lambar_data, A_data, Q_data, lam_data, out = None):
+    def _eig_pullback(cls, lambar_data, Qbar_data, A_data, lam_data, Q_data, out = None):
 
         if out == None:
             raise NotImplementedError('need to implement that...')
@@ -633,7 +633,7 @@ class RawAlgorithmsMixIn:
 
 
     @classmethod
-    def _qr_pullback(cls,Qbar_data, Rbar_data, A_data, Q_data, R_data, out = None):
+    def _qr_pullback(cls, Qbar_data, Rbar_data, A_data, Q_data, R_data, out = None):
 
         if out == None:
             raise NotImplementedError('need to implement that...')
@@ -1112,22 +1112,22 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         D,P,M,N = numpy.shape(A.data)
         
         if out == None:
+            l = cls(cls.__zeros__((D,P,N)))
             Q = cls(cls.__zeros__((D,P,N,N)))
-            L = cls(cls.__zeros__((D,P,N)))
         
-        UTPM._eig(Q.data, L.data, A.data)
+        UTPM._eig( l.data, Q.data, A.data)
       
-        return L,Q
+        return l,Q
 
     @classmethod
-    def eig_pullback(cls, Qbar, lbar, A, Q, l, out = None):
+    def eig_pullback(cls, lbar, Qbar,  A, l, Q,  out = None):
         D,P,M,N = numpy.shape(A.data)
         
         if out == None:
             out = cls(cls.__zeros__((D,P,M,N)))
         Abar = out
         
-        UTPM._eig_pullback( Qbar.data, lbar.data, A.data, Q.data, l.data, out = Abar.data)
+        UTPM._eig_pullback( lbar.data,  Qbar.data, A.data,  l.data, Q.data, out = Abar.data)
         return out
 
     @classmethod
