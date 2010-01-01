@@ -31,7 +31,7 @@ lbar.data[0,0, arg] = 1.
 Qbar = UTPM(numpy.zeros(C.data.shape))
 
 Cbar = UTPM.eig_pullback(lbar, Qbar, C, l, Q)
-#Dbar, Rbar = UTPM.
+#Dbar, Rbar = UTPM.solve_pullback(
 print Cbar
 
  

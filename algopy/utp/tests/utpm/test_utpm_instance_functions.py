@@ -468,10 +468,9 @@ class Test_Push_Forward(TestCase):
 
 class Test_Pullbacks(TestCase):
     def test_solve_pullback(self):
-        (D,P,N) = 2,1,3
+        (D,P,N,K) = 2,5,3,4
         A = UTPM(numpy.random.rand(D,P,N,N))
-        #A.data[1:] = 0.
-        x = UTPM(numpy.random.rand(D,P,N,1))
+        x = UTPM(numpy.random.rand(D,P,N,K))
         
         y = UTPM.solve(A,x)
 
