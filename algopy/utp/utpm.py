@@ -17,7 +17,7 @@ from algopy.base_type import GradedRing
 # override numpy definitions
 def shape(x):
     if isinstance(x, UTPM):
-        return x.shape
+        return UTPM.shape(x)
     else:
         return numpy.shape(x)
         
@@ -401,6 +401,61 @@ class RawAlgorithmsMixIn:
 
 
         return out
+
+    @classmethod
+    def _ndim(cls, a_data):
+        return a_data[0,0].ndim
+
+    @classmethod
+    def _shape(cls, a_data):
+        return a_data[0,0].shape
+        
+    @classmethod
+    def _reshape(cls, a_data, newshape, order = 'C'):
+
+        if order != 'C':
+            raise NotImplementedError('should implement that')
+
+        return numpy.reshape(a_data, a_data.shape[:2] + newshape)
+
+    @classmethod
+    def _iouter(cls, x_data, y_data, out_data):
+        """
+        computes dyadic product and adds it to out
+        out += x y^T
+        """
+        
+        print x_data.shape
+        print y_data.shape
+
+        print cls._shape(x_data)
+        print cls._shape(y_data)
+
+        if len(cls._shape(x_data)) == 1:
+            x_data = cls._reshape(x_data, cls._shape(x_data) + (1,))
+        
+        if len(cls._shape(y_data)) == 1:
+            y_data = cls._reshape(y_data, cls._shape(y_data) + (1,))
+
+        print x_data.shape
+        print cls._transpose(y_data).shape
+        print out_data.shape
+        cls._dot(x_data, cls._transpose(y_data), out = out_data)
+
+        return out_data
+
+    @classmethod
+    def _solve_pullback(cls, ybar_data, A_data, x_data, out = None):
+        
+        if out == None:
+            raise NotImplementedError('should implement that')
+        
+        Abar_data = out[0]
+        xbar_data = out[1]
+
+        cls._solve( cls._transpose(A_data), ybar_data, out = xbar_data)
+
+        print xbar_data
 
 
     @classmethod
@@ -1083,6 +1138,11 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         
         Abar = cls(cls.__zeros__(A.data.shape))
         xbar = cls(cls.__zeros__(x.data.shape))
+        
+        cls._solve_pullback(ybar.data, A.data, x.data, out = (Abar.data, xbar.data))
+        
+
+        return Abar, xbar
 
 
     @classmethod
@@ -1145,5 +1205,17 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         """Extract a diagonal or construct  diagonal UTPM instance"""
         return cls(cls._diag(v.data))
     
-    
+    @classmethod
+    def iouter(cls, x, y, out):
+        cls._iouter(x.data, y.data, out.data)
+        return out
+
+    @classmethod
+    def reshape(cls, a, newshape, order = 'C'):
+
+        if order != 'C':
+            raise NotImplementedError('should implement that')
+        
+        return cls(cls._reshape(a.data, newshape, order = order))
+
 
