@@ -19,7 +19,8 @@ for nm in range(Nm):
 J = F.FtoJT().T
 Q,R = UTPM.qr(J)
 Id = numpy.eye(P)
-D = UTPM.solve(R.T,Id)
+RT = R.T
+D = UTPM.solve(RT,Id)
 C = UTPM.solve(D,R)
 l,Q = UTPM.eig(C)
 
@@ -31,7 +32,7 @@ lbar.data[0,0, arg] = 1.
 Qbar = UTPM(numpy.zeros(C.data.shape))
 
 Cbar = UTPM.eig_pullback(lbar, Qbar, C, l, Q)
-#Dbar, Rbar = UTPM.solve_pullback(
-print Cbar
+Dbar, Rbar = UTPM.solve_pullback( Cbar, D, R, C)
 
+RTbar, Idbar = UTPM.solve_pullback( Dbar, RT, Id, D)
  

@@ -1138,6 +1138,17 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
 
         if out != None:
             raise NotImplementedError('should implement that')
+
+        D,P = y.data.shape[:2]
+        
+        if not isinstance(x, UTPM):
+            tmp = x
+            x = UTPM(numpy.zeros( (D,P) + x.shape))
+            for p in range(P):
+                x.data[0,p] = tmp[...]
+
+        if not isinstance(A, UTPM):
+            raise NotImplementedError('should implement that')
         
         Abar = cls(cls.__zeros__(A.data.shape))
         xbar = cls(cls.__zeros__(x.data.shape))
