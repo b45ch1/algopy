@@ -292,6 +292,27 @@ class RawAlgorithmsMixIn:
         return out
 
     @classmethod
+    def _solve_pullback(cls, ybar_data, A_data, x_data, y_data, out = None):
+
+        if out == None:
+            raise NotImplementedError('should implement that')
+
+        Abar_data = out[0]
+        xbar_data = out[1]
+
+        tmp = numpy.zeros(xbar_data.shape)
+        
+        cls._solve( A_data.transpose((0,1,3,2)), ybar_data, out = tmp)
+
+        xbar_data += tmp
+
+        #tmp *= -1.
+        #cls._iouter(tmp, y_data, Abar_data)
+
+        return out
+
+    
+    @classmethod
     def _solve(cls, A_data, x_data, out = None):
         """
         solves the linear system of equations for y::
@@ -424,12 +445,6 @@ class RawAlgorithmsMixIn:
         computes dyadic product and adds it to out
         out += x y^T
         """
-        
-        print x_data.shape
-        print y_data.shape
-
-        print cls._shape(x_data)
-        print cls._shape(y_data)
 
         if len(cls._shape(x_data)) == 1:
             x_data = cls._reshape(x_data, cls._shape(x_data) + (1,))
@@ -437,25 +452,13 @@ class RawAlgorithmsMixIn:
         if len(cls._shape(y_data)) == 1:
             y_data = cls._reshape(y_data, cls._shape(y_data) + (1,))
 
-        print x_data.shape
-        print cls._transpose(y_data).shape
-        print out_data.shape
-        cls._dot(x_data, cls._transpose(y_data), out = out_data)
+        tmp = cls.__zeros__(out_data.shape)
+        cls._dot(x_data, cls._transpose(y_data), out = tmp)
+
+        out_data += tmp
 
         return out_data
 
-    @classmethod
-    def _solve_pullback(cls, ybar_data, A_data, x_data, out = None):
-        
-        if out == None:
-            raise NotImplementedError('should implement that')
-        
-        Abar_data = out[0]
-        xbar_data = out[1]
-
-        cls._solve( cls._transpose(A_data), ybar_data, out = xbar_data)
-
-        print xbar_data
 
 
     @classmethod
@@ -1131,7 +1134,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         return out
 
     @classmethod
-    def solve_pullback(cls, ybar, A, x, out = None):
+    def solve_pullback(cls, ybar, A, x, y, out = None):
 
         if out != None:
             raise NotImplementedError('should implement that')
@@ -1139,7 +1142,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         Abar = cls(cls.__zeros__(A.data.shape))
         xbar = cls(cls.__zeros__(x.data.shape))
         
-        cls._solve_pullback(ybar.data, A.data, x.data, out = (Abar.data, xbar.data))
+        cls._solve_pullback(ybar.data, A.data, x.data, y.data, out = (Abar.data, xbar.data))
         
 
         return Abar, xbar

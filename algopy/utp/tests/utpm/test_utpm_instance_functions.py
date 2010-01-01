@@ -455,28 +455,42 @@ class Test_Push_Forward(TestCase):
         y = UTPM(numpy.random.rand(D,P,N))
         z = UTPM(numpy.random.rand(D,P,N))
 
-        out = UTPM(numpy.zeros((D,P,N,N)))
+        A = UTPM(numpy.random.rand(*(D,P,N,N)))
+        B = UTPM(A.data.copy())
 
-        UTPM.iouter(x,y,out)
+        UTPM.iouter(x,y,A)
 
-        r1 = UTPM.dot(out,z)
-        r2 = x * UTPM.dot(y,z)
+        r1 = UTPM.dot(A,z)
+        r2 = UTPM.dot(B, z) + x * UTPM.dot(y,z)
 
         assert_array_almost_equal(r2.data, r1.data)
 
 
-#class Test_Pullbacks(TestCase):
-    #def test_solve_pullback(self):
-        #(D,P,N) = 2,1,3
-        #A = UTPM(numpy.random.rand(D,P,N,N))
-        #x = UTPM(numpy.random.rand(D,P,N,1))
+class Test_Pullbacks(TestCase):
+    def test_solve_pullback(self):
+        (D,P,N) = 2,1,3
+        A = UTPM(numpy.random.rand(D,P,N,N))
+        A.data[1:] = 0.
+        x = UTPM(numpy.random.rand(D,P,N,1))
         
-        #y = UTPM.solve(A,x)
+        y = UTPM.solve(A,x)
 
-        #ybar = UTPM(numpy.random.rand(*y.data.shape))
-        #Abar, xbar = UTPM.solve_pullback(ybar, A, x)
-
+        assert_array_almost_equal( x.data, UTPM.dot(A,y).data)
         
+        ybar = UTPM(numpy.random.rand(*y.data.shape))
+        Abar, xbar = UTPM.solve_pullback(ybar, A, x, y)
+
+        for p in range(P):
+            Ab = Abar.data[0,p]
+            Ad = A.data[1,p]
+
+            xb = xbar.data[0,p]
+            xd = x.data[1,p]
+
+            yb = ybar.data[0,p]
+            yd = y.data[1,p]
+
+            assert_almost_equal(numpy.trace(numpy.dot(xb.T,xd)), numpy.trace(numpy.dot(yb.T,yd)))
         
 
 class Test_QR_Decomposition(TestCase):
