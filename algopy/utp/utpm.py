@@ -306,8 +306,8 @@ class RawAlgorithmsMixIn:
 
         xbar_data += tmp
 
-        #tmp *= -1.
-        #cls._iouter(tmp, y_data, Abar_data)
+        tmp *= -1.
+        cls._iouter(tmp, y_data, Abar_data)
 
         return out
 

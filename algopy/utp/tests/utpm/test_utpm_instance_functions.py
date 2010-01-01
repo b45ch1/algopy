@@ -470,7 +470,7 @@ class Test_Pullbacks(TestCase):
     def test_solve_pullback(self):
         (D,P,N) = 2,1,3
         A = UTPM(numpy.random.rand(D,P,N,N))
-        A.data[1:] = 0.
+        #A.data[1:] = 0.
         x = UTPM(numpy.random.rand(D,P,N,1))
         
         y = UTPM.solve(A,x)
@@ -490,7 +490,7 @@ class Test_Pullbacks(TestCase):
             yb = ybar.data[0,p]
             yd = y.data[1,p]
 
-            assert_almost_equal(numpy.trace(numpy.dot(xb.T,xd)), numpy.trace(numpy.dot(yb.T,yd)))
+            assert_almost_equal( numpy.trace(numpy.dot(Ab.T,Ad)) + numpy.trace(numpy.dot(xb.T,xd)), numpy.trace(numpy.dot(yb.T,yd)))
         
 
 class Test_QR_Decomposition(TestCase):
