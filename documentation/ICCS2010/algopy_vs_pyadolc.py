@@ -5,41 +5,47 @@ import numpy
 import numpy.testing
 from algopy.utp.utpm import UTPM
 from time import time
+import os
 
-repetitions = 4
+repetitions = 100
 D_list = [2]
-N_list = [2**i for i in range(0,5)]
+N_list = [2**i for i in range(0,8)]
 P_list = [1]
 
 runtime_ratios_push_forward = numpy.zeros(( len(D_list), len(P_list), len(N_list), repetitions),dtype=float)
 
-for r in range(repetitions):
-    for np,P in enumerate(P_list):
-        for nn,N in enumerate(N_list):
-            for nd,D in enumerate(D_list):
+runtime_ratios_pullback = runtime_ratios_push_forward.copy()
 
-                print 'running runtime tests for A.shape = (D,P,N,N) = %d, %d, %d, %d'%(D,P,N,N)
 
-                A_data = numpy.random.rand(N,N,P,D)
-                Qbar_data = numpy.random.rand(1,N,N,P,D)
-                Rbar_data = numpy.random.rand(1,N,N,P,D)
 
-                #----------------------------------------------
-                # STEP 1:
-                # QR decomposition by Givens Rotations
-                # using pyadolc for the differentiation
-                #----------------------------------------------
+for np,P in enumerate(P_list):
+    for nn,N in enumerate(N_list):
+        for nd,D in enumerate(D_list):
+
+            print 'running runtime tests for A.shape = (D,P,N,N) = %d, %d, %d, %d'%(D,P,N,N)
+            A_data = numpy.random.rand(N,N,P,D)
+            Qbar_data = numpy.random.rand(1,N,N,P,D)
+            Rbar_data = numpy.random.rand(1,N,N,P,D)
+
+            #----------------------------------------------
+            # STEP 1:
+            # QR decomposition by Givens Rotations
+            # using pyadolc for the differentiation
+            #----------------------------------------------
+            A = A_data[:,:,0,0]
+            # trace QR decomposition with adolc
+            AP = AdolcProgram()
+            AP.trace_on(1)
+            aA = adouble(A)
+            AP.independent(aA)
+            aQ, aR = qr(aA)
+            AP.dependent(aQ)
+            AP.dependent(aR)
+            AP.trace_off()
+
+            for r in range(repetitions):
+
                 A = A_data[:,:,0,0]
-                # trace QR decomposition with adolc
-                AP = AdolcProgram()
-                AP.trace_on(1)
-                aA = adouble(A)
-                AP.independent(aA)
-                aQ, aR = qr(aA)
-                AP.dependent(aQ)
-                AP.dependent(aR)
-                AP.trace_off()
-
                 # compute push forward
                 VA = A_data[:,:,:,1:]
                 tic = time()
@@ -89,12 +95,37 @@ for r in range(repetitions):
                 print 'relative runtime of the pullback: algopy/pyadolc =',pullback_ratio
 
                 runtime_ratios_push_forward[nd,np,nn,r] = push_forward_ratio
+                runtime_ratios_pullback[nd,np,nn,r] = pullback_ratio
 
 # Plot runtime ratios
 import pylab
 pylab.figure()
-print runtime_ratios_push_forward.shape
-pylab.plot(N_list, numpy.mean(runtime_ratios_push_forward[0,0,:,:],axis=1))
+pylab.title('Runtime Comparison QR-decomposition Push Forward ALGOPY vs PYADOLC')
+
+stds =  numpy.std(runtime_ratios_push_forward[0,0,:,:],axis=1)
+ms = numpy.mean(runtime_ratios_push_forward[0,0,:,:],axis=1)
+pylab.errorbar(N_list, ms , yerr = stds )
+pylab.loglog([],[])
+#pylab.loglog(N_list, numpy.mean(runtime_ratios_push_forward[0,0,:,:],axis=1))
+pylab.xlabel(r'$N$')
+pylab.ylabel(r'runtime ratio algopy/pyadolc ')
+pylab.grid()
+pylab.savefig(os.path.join(os.path.dirname(__file__),'algopy_vs_pyadolc_push_forward.eps'))
+pylab.savefig(os.path.join(os.path.dirname(__file__),'algopy_vs_pyadolc_push_forward.png'))
+
+pylab.figure()
+pylab.title('Runtime Comparison QR-decomposition Pullback ALGOPY vs PYADOLC')
+stds =  numpy.std(runtime_ratios_pullback[0,0,:,:],axis=1)
+ms = numpy.mean(runtime_ratios_pullback[0,0,:,:],axis=1)
+pylab.errorbar(N_list, ms , yerr = stds )
+pylab.loglog([],[])
+pylab.xlabel(r'$N$')
+pylab.ylabel(r'runtime ratio algopy/pyadolc ')
+pylab.grid()
+pylab.savefig(os.path.join(os.path.dirname(__file__),'algopy_vs_pyadolc_pullback.eps'))
+pylab.savefig(os.path.join(os.path.dirname(__file__),'algopy_vs_pyadolc_pullback.png'))
+
+
 pylab.show()
 
 
