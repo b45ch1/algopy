@@ -40,5 +40,7 @@ Rbar = RTbar.T
 Qbar = UTPM(numpy.zeros(Q.data.shape))
 Jbar = UTPM.qr_pullback(Qbar, Rbar, J, Q, R)
 
-print Jbar
+Fbar = Jbar.T.JTtoF()
+
+print Fbar
  
