@@ -488,6 +488,7 @@ class RawAlgorithmsMixIn:
         DT,P,M,N = numpy.shape(A_data)
         K = min(M,N)        
         
+        # check if the output array is provided
         if out == None:
             raise NotImplementedError('need to implement that...')
         Q_data = out[0]
@@ -500,9 +501,9 @@ class RawAlgorithmsMixIn:
 
         if not M >= N:
             raise NotImplementedError('A_data.shape = (DT,P,M,N) = %s but require (for now) that M>=N')        
-
-
-
+                
+        
+        # check if work arrays are provided, if not allocate them
         if work == None:
             dF = numpy.zeros((P,M,N))
             dG = numpy.zeros((P,K,K))
@@ -512,7 +513,6 @@ class RawAlgorithmsMixIn:
             
         else:
             raise NotImplementedError('need to implement that...')
-
 
 
         # INIT: compute the base point
