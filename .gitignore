@@ -21,6 +21,7 @@ trash
 *.eps
 *~
 *.log
+*.tap
 
 SConstruct
 
