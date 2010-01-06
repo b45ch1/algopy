@@ -470,7 +470,7 @@ class RawAlgorithmsMixIn:
         return numpy.zeros(shp)
 
     @classmethod
-    def _qr(cls, Q_data, R_data, out = None):
+    def _qr(cls,  A_data, out = None,  work = None):
         """
         computes the qr decomposition (Q,R) = qr(A)    <===>    QR = A
 
@@ -484,33 +484,42 @@ class RawAlgorithmsMixIn:
             where K = min(M,N)
 
         """
-
+        
+        DT,P,M,N = numpy.shape(A_data)
+        K = min(M,N)        
+        
         if out == None:
             raise NotImplementedError('need to implement that...')
-        A_data = out
-
+        Q_data = out[0]
+        R_data = out[1]
+        
         # input checks
-        DT,P,M,N = numpy.shape(A_data)
-        K = min(M,N)
-
         if Q_data.shape != (DT,P,M,K):
             raise ValueError('expected Q_data.shape = %s but provided %s'%(str((DT,P,M,K)),str(Q_data.shape)))
         assert R_data.shape == (DT,P,K,N)
 
         if not M >= N:
-            raise NotImplementedError('A_data.shape = (DT,P,M,N) = %s but require (for now) that M>=N')
+            raise NotImplementedError('A_data.shape = (DT,P,M,N) = %s but require (for now) that M>=N')        
+
+
+
+        if work == None:
+            dF = numpy.zeros((P,M,N))
+            dG = numpy.zeros((P,K,K))
+            X  = numpy.zeros((P,K,K))
+            PL = numpy.array([[ r > c for c in range(N)] for r in range(K)],dtype=float)
+            Rinv = numpy.zeros((P,K,N))
+            
+        else:
+            raise NotImplementedError('need to implement that...')
+
+
 
         # INIT: compute the base point
         for p in range(P):
             Q_data[0,p,:,:], R_data[0,p,:,:] = numpy.linalg.qr(A_data[0,p,:,:])
 
-        dF = numpy.zeros((P,M,N))
-        dG = numpy.zeros((P,K,K))
-        X  = numpy.zeros((P,K,K))
 
-        PL = numpy.array([[ r > c for c in range(N)] for r in range(K)],dtype=float)
-
-        Rinv = numpy.zeros((P,K,N))
         for p in range(P):
             Rinv[p] = numpy.linalg.inv(R_data[0,p])
 
@@ -1160,15 +1169,19 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
 
 
     @classmethod
-    def qr(cls, A, out = None):
+    def qr(cls, A, out = None, work = None):
         D,P,M,N = numpy.shape(A.data)
         K = min(M,N)
         
         if out == None:
             Q = cls(cls.__zeros__((D,P,M,K)))
             R = cls(cls.__zeros__((D,P,K,N)))
+            
+        else:
+            Q = out[0]
+            R = out[1]
         
-        UTPM._qr(Q.data, R.data, out = A.data)
+        UTPM._qr(A.data, out = (Q.data, R.data))
         
         return Q,R
         
@@ -1178,6 +1191,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         
         if out == None:
             out = cls(cls.__zeros__((D,P,M,N)))
+            
         Abar = out
         
         UTPM._qr_pullback( Qbar.data, Rbar.data, A.data, Q.data, R.data, out = Abar.data)
