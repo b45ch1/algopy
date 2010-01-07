@@ -24,20 +24,6 @@ class Test_Push_Forward(TestCase):
         AX = AX.set_zero()
 
 
-    def test_numpy_overrides(self):
-        """
-        this checks _only_ if calling the operations is ok
-        """
-        X = 2 * numpy.random.rand(2,2,2,2)
-        Y = 3 * numpy.random.rand(2,2,2,2)
-
-        AX = UTPM(X)
-        AY = UTPM(Y)
-
-        assert_array_almost_equal( UTPM.dot(AX,AY).data, dot(AX,AY).data)
-        assert_array_almost_equal( UTPM.inv(AX).data,  inv(AX).data)
-        assert_array_almost_equal( AX.trace().data,  trace(AX).data)
-
     def test_operations_on_scalar_UTPM(self):
         D,P = 2,1
         X = 3 * numpy.random.rand(D,P)
@@ -114,17 +100,17 @@ class Test_Push_Forward(TestCase):
         ax = UTPM(Rx)
         ay = UTPM(Ry)
 
-        assert_array_almost_equal(dot(aX,aY).data[0,0], dot(aX, Y).data[0,0])
-        assert_array_almost_equal(dot(aX,aY).data[0,0], dot(X, aY).data[0,0])
+        assert_array_almost_equal(UTPM.dot(aX,aY).data[0,0], UTPM.dot(aX, Y).data[0,0])
+        assert_array_almost_equal(UTPM.dot(aX,aY).data[0,0], UTPM.dot(X, aY).data[0,0])
 
-        assert_array_almost_equal(dot(aA,ax).data[0,0], dot(aA, x).data[0,0])
-        assert_array_almost_equal(dot(aA,ax).data[0,0], dot(A, ax).data[0,0])
+        assert_array_almost_equal(UTPM.dot(aA,ax).data[0,0], UTPM.dot(aA, x).data[0,0])
+        assert_array_almost_equal(UTPM.dot(aA,ax).data[0,0], UTPM.dot(A, ax).data[0,0])
 
-        assert_array_almost_equal(dot(aA,aX).data[0,0], dot(aA, X).data[0,0])
-        assert_array_almost_equal(dot(aA,aX).data[0,0], dot(A, aX).data[0,0])
+        assert_array_almost_equal(UTPM.dot(aA,aX).data[0,0], UTPM.dot(aA, X).data[0,0])
+        assert_array_almost_equal(UTPM.dot(aA,aX).data[0,0], UTPM.dot(A, aX).data[0,0])
 
-        assert_array_almost_equal(dot(ax,ay).data[0,0], dot(ax, y).data[0,0])
-        assert_array_almost_equal(dot(ax,ay).data[0,0], dot(x, ay).data[0,0])
+        assert_array_almost_equal(UTPM.dot(ax,ay).data[0,0], UTPM.dot(ax, y).data[0,0])
+        assert_array_almost_equal(UTPM.dot(ax,ay).data[0,0], UTPM.dot(x, ay).data[0,0])
 
 
 
@@ -395,49 +381,7 @@ class Test_Push_Forward(TestCase):
         assert_array_almost_equal(numpy.zeros((D-1,P,N,N)), Id2.data[1:], decimal=10)
 
 
-    def test_vdot(self):
-        (D,P,N,M) = 4,3,2,5
-        A = numpy.array([ i for i in range(D*P*N*M)],dtype=float)
-        A = A.reshape((D,P,N,M))
-        B = A.transpose((0,1,3,2)).copy()
 
-        R  = vdot(A[0],B[0])
-        R2 = numpy.zeros((P,N,N))
-        for p in range(P):
-            R2[p,:,:] = numpy.dot(A[0,p],B[0,p])
-
-        S  = vdot(A,B)
-        S2 = numpy.zeros((D,P,N,N))
-        for d in range(D):
-            for p in range(P):
-                S2[d,p,:,:] = numpy.dot(A[d,p],B[d,p])
-
-        assert_array_almost_equal(R,R2)
-        assert_array_almost_equal(S,S2)
-
-
-    def test_triple_truncated_dot(self):
-        D,P,N,M = 3,1,1,1
-        A = numpy.random.rand(D,P,N,M)
-        B = numpy.random.rand(D,P,N,M)
-        C = numpy.random.rand(D,P,N,M)
-
-        S = A[0]*B[1]*C[1] + A[1]*B[0]*C[1] + A[1]*B[1]*C[0]
-        R = truncated_triple_dot(A,B,C,2)
-
-        assert_array_almost_equal(R,S)
-
-        D,P,N,M = 4,1,1,1
-        A = numpy.random.rand(D,P,N,M)
-        B = numpy.random.rand(D,P,N,M)
-        C = numpy.random.rand(D,P,N,M)
-
-        S = A[0]*B[1]*C[2] + A[0]*B[2]*C[1] + \
-            A[1]*B[0]*C[2] + A[1]*B[1]*C[1] + A[1]*B[2]*C[0] +\
-            A[2]*B[1]*C[0] + A[2]*B[0]*C[1]
-        R = truncated_triple_dot(A,B,C, 3)
-
-        assert_array_almost_equal(R,S)
 
     def test_shape(self):
         D,P,N,M,L = 3,4,5,6,7

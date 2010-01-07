@@ -51,6 +51,9 @@ class Function:
     CGraph.__init__(self):
         Function.cgraph = self
     """
+    
+    
+    
     def __init__(self, args, function_type='var'):
 
         # register all supported elementary functions here
