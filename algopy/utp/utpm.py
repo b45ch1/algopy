@@ -557,7 +557,7 @@ class RawAlgorithmsMixIn:
                 Q_data[D,p,:,:] = numpy.dot(H[p] - numpy.dot(Q_data[0,p],R_data[D,p]), Rinv[p]) #numpy.dot(Q_data[0,p,:,:],K[p,:,:])
 
     @classmethod
-    def _eig(cls, L_data, Q_data, A_data):
+    def _eigh(cls, L_data, Q_data, A_data):
         """
         computes the eigenvalue decompositon
 
@@ -582,7 +582,7 @@ class RawAlgorithmsMixIn:
 
         # INIT: compute the base point
         for p in range(P):
-            L_data[0,p,:], Q_data[0,p,:,:] = numpy.linalg.eig(A_data[0,p,:,:])
+            L_data[0,p,:], Q_data[0,p,:,:] = numpy.linalg.eigh(A_data[0,p,:,:])
 
         Id = numpy.zeros((P,N,N))
         for p in range(P):
@@ -654,7 +654,7 @@ class RawAlgorithmsMixIn:
                 z_data[d,p] = x_data * y_data[d,p]
 
     @classmethod
-    def _eig_pullback(cls, lambar_data, Qbar_data, A_data, lam_data, Q_data, out = None):
+    def _eigh_pullback(cls, lambar_data, Qbar_data, A_data, lam_data, Q_data, out = None):
 
         if out == None:
             raise NotImplementedError('need to implement that...')
@@ -1199,9 +1199,10 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
 
     
     @classmethod
-    def eig(cls, A, out = None):
+    def eigh(cls, A, out = None):
         """
         computes the eigenvalue decomposition A = Q^T L Q
+        of a symmetrical matrix A with distinct eigenvalues
         
         (l,Q) = UTPM.eig(A, out=None)
         
@@ -1213,19 +1214,19 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
             l = cls(cls.__zeros__((D,P,N)))
             Q = cls(cls.__zeros__((D,P,N,N)))
         
-        UTPM._eig( l.data, Q.data, A.data)
+        UTPM._eigh( l.data, Q.data, A.data)
       
         return l,Q
 
     @classmethod
-    def eig_pullback(cls, lbar, Qbar,  A, l, Q,  out = None):
+    def eigh_pullback(cls, lbar, Qbar,  A, l, Q,  out = None):
         D,P,M,N = numpy.shape(A.data)
         
         if out == None:
             out = cls(cls.__zeros__((D,P,M,N)))
         Abar = out
         
-        UTPM._eig_pullback( lbar.data,  Qbar.data, A.data,  l.data, Q.data, out = Abar.data)
+        UTPM._eigh_pullback( lbar.data,  Qbar.data, A.data,  l.data, Q.data, out = Abar.data)
         return out
 
     @classmethod

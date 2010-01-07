@@ -623,15 +623,9 @@ class Test_Eigenvalue_Decomposition(TestCase):
                     A_data[d,p,:,:] += N * numpy.diag([n+1 for n in range(N)])
 
         A = UTPM(A_data)
-        l,Q = UTPM.eig(A)
-
-        L_data = numpy.zeros((D,P,N,N))
-        for d in range(D):
-            for p in range(P):
-                for n in range(N):
-                    L_data[d,p,n,n] = l.data[d,p,n]
-
-        L = UTPM(L_data)
+        l,Q = UTPM.eigh(A)
+        
+        L = UTPM.diag(l)
 
         assert_array_almost_equal(UTPM.dot(Q, UTPM.dot(L,Q.T)).data, A.data, decimal = 12)
 
@@ -647,7 +641,7 @@ class Test_Eigenvalue_Decomposition(TestCase):
                     A_data[d,p,:,:] += N * numpy.diag(numpy.random.rand(N))
 
         A = UTPM(A_data)
-        l,Q = UTPM.eig(A)
+        l,Q = UTPM.eigh(A)
 
         L_data = UTPM._diag(l.data)
         L = UTPM(L_data)
@@ -657,7 +651,7 @@ class Test_Eigenvalue_Decomposition(TestCase):
         lbar = UTPM(numpy.random.rand(*(D,P,N)))
         Qbar = UTPM(numpy.random.rand(*(D,P,N,N)))
 
-        Abar = UTPM.eig_pullback( lbar, Qbar, A, l, Q)
+        Abar = UTPM.eigh_pullback( lbar, Qbar, A, l, Q)
 
         Abar = Abar.data[0,0]
         Adot = A.data[1,0]
