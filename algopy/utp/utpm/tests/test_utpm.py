@@ -434,6 +434,44 @@ class Test_Pullbacks(TestCase):
             yd = y.data[1,p]
 
             assert_almost_equal( numpy.trace(numpy.dot(Ab.T,Ad)) + numpy.trace(numpy.dot(xb.T,xd)), numpy.trace(numpy.dot(yb.T,yd)))
+            
+            
+    def test_dot_pullback(self):
+        import adolc
+        import adolc.cgraph
+        
+        D,P,N,M,L = 3,4,5,6,7
+        A = numpy.random.rand(*(N,M))
+        B = numpy.random.rand(*(M,L))
+        
+        cg = adolc.cgraph.AdolcProgram()
+        cg.trace_on(1)
+        aA = adolc.adouble(A)
+        aB = adolc.adouble(B)
+        
+        cg.independent(aA)
+        cg.independent(aB)
+        
+        aC = numpy.dot(aA, aB)
+        
+        cg.dependent(aC)
+        cg.trace_off()
+        
+        VA = numpy.random.rand(N,M,P,D-1)
+        VB = numpy.random.rand(M,L,P,D-1)
+        
+        cg.forward([A,B],[VA,VB])
+        
+        WC = numpy.random.rand(1, N,L,P,D)
+        WA, WB = cg.reverse([WC])
+        
+        print WA,WB
+        assert False
+        
+
+        
+        
+        
         
 
 class Test_QR_Decomposition(TestCase):

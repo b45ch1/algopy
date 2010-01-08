@@ -65,23 +65,25 @@ Cbar = UTPM.eigh_pullback(lbar, Ubar, C, l, U)
 # print Cbar
 
 Ebar = UTPM.inv_pullback(Cbar, C, E)
-print Ebar
-# JTbar, Jbar = UTPM.dot_pullback(Ebar, J.T, J, E)
-# print JTbar, Jbar
-# Fbar = Jbar.T.JTtoF()
-# qbar = UTPM.dot(Fbar.T, G)
+JTbar, Jbar = UTPM.dot_pullback(Ebar, J.T, J, E)
 
-# print qbar
+Jbar += JTbar.T
+
+Fbar = Jbar.T.JTtoF()
+
+qbar = UTPM.dot(G.T,Fbar)
+
+print qbar.data[:,0] + qbar.data[:,1]
 
 
 
-# #############################################
-# # analytical solution
-# #############################################
-# c = numpy.max(numpy.linalg.eig( numpy.linalg.inv(numpy.dot(B0.T, B0)))[0])
-# dPhidq = - 2* c * q.data[0,0,0]**-3
+# # #############################################
+# # # analytical solution
+# # #############################################
+c = numpy.max(numpy.linalg.eig( numpy.linalg.inv(numpy.dot(B0.T, B0)))[0])
+dPhidq = - 2* c * q0**-3
 
-# # print dPhidq
+print dPhidq
 
 
 
