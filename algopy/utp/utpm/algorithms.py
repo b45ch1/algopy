@@ -185,6 +185,36 @@ class RawAlgorithmsMixIn:
                 z_data[d,p,...] = numpy.dot(x_data[...], y_data[d,p,...])
 
         return out
+        
+    @classmethod
+    def _dot_pullback(cls, zbar_data, x_data, y_data, z_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')        
+        
+        (xbar_data, ybar_data) = out
+        
+        xbar_data = cls._dot(zbar_data, cls._transpose(y_data), out = xbar_data)
+        ybar_data = cls._dot(cls._transpose(x_data), zbar_data, out = ybar_data)
+        return out
+        
+        
+        
+
+    @classmethod
+    def _inv_pullback(cls, ybar_data, x_data, y_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        
+        xbar_data = out
+        tmp1 = numpy.zeros(xbar_data.shape)
+        tmp2 = numpy.zeros(xbar_data.shape)
+        
+        tmp1 = cls._dot(ybar_data, cls._transpose(y_data), out = tmp1)
+        tmp2 = cls._dot(cls._transpose(y_data), tmp1, out = tmp2)
+
+        xbar_data -= tmp2
+        return out
+
 
     @classmethod
     def _solve_pullback(cls, ybar_data, A_data, x_data, y_data, out = None):

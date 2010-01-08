@@ -1,3 +1,8 @@
+"""
+This example shows that the push forward of the eigenvalue decomposition indeed
+fails for symmetric matrices with degenerated eigenvalues.
+"""
+
 import numpy
 from algopy.utp.utpm import *
 
@@ -13,27 +18,20 @@ A = UTPM.dot(UTPM.dot(V.T, A), V)
 
 
 A0 = A.data[0,0]
-l0,Q0 = numpy.linalg.eig(A0)
+l0,Q0 = numpy.linalg.eigh(A0)
 
-print l0
+print numpy.dot(Q0, Q0.T)
 
-# print numpy.dot(Q0.T, Q0)
-# print numpy.dot(Q0, Q0.T)
+L0 = numpy.diag(l0)
+B0 = numpy.dot(numpy.dot(Q0,L0), Q0.T)
 
-
-# print 
-
-
-# L0 = numpy.diag(l0)
-# B0 = numpy.dot(numpy.dot(Q0,L0), Q0.T)
-
-# print A.data[0,0] - B0
+print A.data[0,0] - B0
 
 
-# l,Q = UTPM.eig(A)
-# L = UTPM.diag(l)
+l,Q = UTPM.eigh(A)
+L = UTPM.diag(l)
 
 
-# B = UTPM.dot(Q, UTPM.dot(L,Q.T))
+B = UTPM.dot(Q, UTPM.dot(L,Q.T))
 
-# print A - B
+print A - B

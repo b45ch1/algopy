@@ -7,9 +7,9 @@ from algopy.utp.utpm import UTPM
 from time import time
 import os
 
-repetitions = 100
-D_list = [2]
-N_list = [2**i for i in range(0,5)]
+repetitions = 10
+D_list = [4]
+N_list = [2**i for i in range(0,8)]
 P_list = [1]
 
 runtime_ratios_push_forward = numpy.zeros(( len(D_list), len(P_list), len(N_list), repetitions),dtype=float)
@@ -100,32 +100,34 @@ for np,P in enumerate(P_list):
                 runtime_ratios_pullback[nd,np,nn,r] = pullback_ratio
 
 # Plot runtime ratios
-import pylab
+from prettyplotting import *
+
+# import pylab
 pylab.figure()
 pylab.title('Runtime Comparison QR-decomposition Push Forward ALGOPY vs PYADOLC')
 
 stds =  numpy.std(runtime_ratios_push_forward[0,0,:,:],axis=1)
 ms = numpy.mean(runtime_ratios_push_forward[0,0,:,:],axis=1)
 pylab.errorbar(N_list, ms , yerr = stds )
-#pylab.loglog([],[])
+pylab.loglog([],[])
 #pylab.loglog(N_list, numpy.mean(runtime_ratios_push_forward[0,0,:,:],axis=1))
 pylab.xlabel(r'$N$')
 pylab.ylabel(r'runtime ratio algopy/pyadolc ')
 pylab.grid()
 pylab.savefig(os.path.join(os.path.dirname(__file__),'algopy_vs_pyadolc_push_forward.eps'))
-pylab.savefig(os.path.join(os.path.dirname(__file__),'algopy_vs_pyadolc_push_forward.png'))
+# pylab.savefig(os.path.join(os.path.dirname(__file__),'algopy_vs_pyadolc_push_forward.png'))
 
 pylab.figure()
 pylab.title('Runtime Comparison QR-decomposition Pullback ALGOPY vs PYADOLC')
 stds =  numpy.std(runtime_ratios_pullback[0,0,:,:],axis=1)
 ms = numpy.mean(runtime_ratios_pullback[0,0,:,:],axis=1)
 pylab.errorbar(N_list, ms , yerr = stds )
-#pylab.loglog([],[])
+pylab.loglog([],[])
 pylab.xlabel(r'$N$')
 pylab.ylabel(r'runtime ratio algopy/pyadolc ')
 pylab.grid()
 pylab.savefig(os.path.join(os.path.dirname(__file__),'algopy_vs_pyadolc_pullback.eps'))
-pylab.savefig(os.path.join(os.path.dirname(__file__),'algopy_vs_pyadolc_pullback.png'))
+# pylab.savefig(os.path.join(os.path.dirname(__file__),'algopy_vs_pyadolc_pullback.png'))
 
 
 pylab.show()

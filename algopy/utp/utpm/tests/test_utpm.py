@@ -19,7 +19,7 @@ class Test_Push_Forward(TestCase):
         AZ = AX / AY
         AZ = UTPM.dot(AX,AY)
         AZ = UTPM.inv(AX)
-        AZ = AX.trace()
+        AZ = UTPM.trace(AX)
         AZ = AX.T
         AX = AX.set_zero()
 

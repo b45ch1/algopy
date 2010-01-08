@@ -183,13 +183,14 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
 
         return cls._argmax( a.data, axis = axis)
 
-    def trace(self):
+    @classmethod
+    def trace(cls, x):
         """ returns a new UTPM in standard format, i.e. the matrices are 1x1 matrices"""
-        D,P = self.data.shape[:2]
+        D,P = x.data.shape[:2]
         retval = numpy.zeros((D,P))
         for d in range(D):
             for p in range(P):
-                retval[d,p] = numpy.trace(self.data[d,p,...])
+                retval[d,p] = numpy.trace(x.data[d,p,...])
         return UTPM(retval)
         
     def FtoJT(self):
@@ -328,7 +329,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
                     out.data[d,p,:,:] += numpy.dot(A.data[c,p,:,:], out.data[d-c,p,:,:],)
                 out.data[d,p,:,:] =  numpy.dot(-out.data[0,p,:,:], out.data[d,p,:,:],)
         return out
-
+        
     @classmethod
     def solve(cls, A, x, out = None):
         """
@@ -369,7 +370,32 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
             raise NotImplementedError('should implement that')
             
         return out
+        
+    @classmethod
+    def dot_pullback(cls, zbar, x, y, z, out = None):
+        if out != None:
+            raise NotImplementedError('should implement that')
 
+        D,P = y.data.shape[:2]
+        
+        xbar = cls(cls.__zeros__(x.data.shape))
+        ybar = cls(cls.__zeros__(y.data.shape))
+        
+        cls._dot_pullback(zbar.data, x.data, y.data, z.data, out = (xbar.data, ybar.data))
+        return (xbar,ybar)
+        
+    @classmethod
+    def inv_pullback(cls, ybar, x, y, out = None):
+        if out != None:
+            raise NotImplementedError('should implement that')
+
+        D,P = y.data.shape[:2]
+        
+        xbar = cls(cls.__zeros__(x.data.shape))
+        cls._inv_pullback(ybar.data, x.data, y.data, out = xbar.data)
+        return xbar
+
+        
     @classmethod
     def solve_pullback(cls, ybar, A, x, y, out = None):
 
