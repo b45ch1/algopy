@@ -3,6 +3,9 @@ from numpy.testing import *
 from prettyplotting import *
 from algopy.utp.utpm import *
 
+# STEP 0: setting parameters and general problem definition
+############################################################
+
 # Np = number of parameters p
 # Nq = number of control variables q
 # Nm = number of measurements
@@ -21,16 +24,16 @@ p.data[1,:,:] = numpy.eye(P)
 
 B = UTPM(numpy.zeros((D,P,Nm, Np)))
 B0 = numpy.random.rand(Nm,Np)
-B.data[0,0] = B0 
+B.data[0,0] = B0
 B.data[0,1] = B0
 
+
 # STEP 1: compute push forward
+############################################################
+
 G = UTPM.dot(B, p)
 F  = G * q[0]
-
 J = F.FtoJT().T
-assert_array_almost_equal( J.data[0,0], B0)
-
 # Q,R = UTPM.qr(J)
 # Id = numpy.eye(P)
 # RT = R.T
@@ -38,18 +41,23 @@ assert_array_almost_equal( J.data[0,0], B0)
 # C = UTPM.solve(D,R)
 E = UTPM.dot(J.T,J)
 C = UTPM.inv(E)
-
-assert_array_almost_equal( C.data[0,0], q0**-2 * numpy.linalg.inv(numpy.dot(B0.T,B0)))
-
 l,U = UTPM.eigh(C)
-l0, U0 = numpy.linalg.eigh(q0**-2 * numpy.linalg.inv(numpy.dot(B0.T,B0)))
+arg = UTPM.argmax(l)
 
+# check correctness of the push forward
+tmp1 = q0**-2* numpy.linalg.inv(numpy.dot(B0.T,B0))
+l0, U0 = numpy.linalg.eigh( tmp1 )
+
+assert_array_almost_equal( J.data[0,0], B0)
+assert_array_almost_equal( C.data[0,0], tmp1)
 assert_array_almost_equal(l.data[0,0], l0)
 assert_array_almost_equal(U.data[0,0], U0)
 
-arg = UTPM.argmax(l)
+
 
 # STEP 2: compute pullback
+############################################################
+
 lbar = UTPM(numpy.zeros(l.data.shape))
 lbar.data[0,0, arg] = 1.
 Ubar = UTPM(numpy.zeros(U.data.shape))
@@ -64,7 +72,7 @@ Cbar = UTPM.eigh_pullback(lbar, Ubar, C, l, U)
 
 # print Cbar
 
-Ebar = UTPM.inv_pullback(Cbar, C, E)
+Ebar = UTPM.inv_pullback(Cbar, E, C)
 JTbar, Jbar = UTPM.dot_pullback(Ebar, J.T, J, E)
 
 Jbar += JTbar.T
@@ -77,9 +85,9 @@ print qbar.data[:,0] + qbar.data[:,1]
 
 
 
-# # #############################################
-# # # analytical solution
-# # #############################################
+#############################################
+# analytical solution
+#############################################
 c = numpy.max(numpy.linalg.eig( numpy.linalg.inv(numpy.dot(B0.T, B0)))[0])
 dPhidq = - 2* c * q0**-3
 
