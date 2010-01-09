@@ -36,11 +36,8 @@ F  = G * q[0]
 J = F.FtoJT().T
 
 Q,R = UTPM.qr(J)
-Id = numpy.eye(Np,dtype=float)
-Rinv = UTPM.inv(R)
-Rinv2 = UTPM.solve(Id,R)
-
-print Rinv - Rinv2
+Id = numpy.eye(Np)
+Rinv = UTPM.solve(R,Id)
 C2 = UTPM.dot(Rinv,Rinv.T)
 
 E = UTPM.dot(J.T,J)
@@ -71,9 +68,6 @@ Ubar = UTPM(numpy.zeros(U.data.shape))
 
 Cbar = UTPM.eigh_pullback(lbar, Ubar, C, l, U)
 
-# # Dbar, Rbar = UTPM.solve_pullback( Cbar, D, R, C)
-# # RTbar, Idbar = UTPM.solve_pullback( Dbar, RT, Id, D)
-# # Rbar = RTbar.T
 # # Qbar = UTPM(numpy.zeros(Q.data.shape))
 # # Jbar = UTPM.qr_pullback(Qbar, Rbar, J, Q, R)
 
