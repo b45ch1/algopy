@@ -436,42 +436,64 @@ class Test_Pullbacks(TestCase):
             assert_almost_equal( numpy.trace(numpy.dot(Ab.T,Ad)) + numpy.trace(numpy.dot(xb.T,xd)), numpy.trace(numpy.dot(yb.T,yd)))
             
             
+    # def test_dot_pullback(self):
+    #     import adolc
+    #     import adolc.cgraph
+        
+    #     D,P,N,M,L = 3,4,5,6,7
+    #     A = numpy.random.rand(*(N,M))
+    #     B = numpy.random.rand(*(M,L))
+        
+    #     cg = adolc.cgraph.AdolcProgram()
+    #     cg.trace_on(1)
+    #     aA = adolc.adouble(A)
+    #     aB = adolc.adouble(B)
+        
+    #     cg.independent(aA)
+    #     cg.independent(aB)
+        
+    #     aC = numpy.dot(aA, aB)
+        
+    #     cg.dependent(aC)
+    #     cg.trace_off()
+        
+    #     VA = numpy.random.rand(N,M,P,D-1)
+    #     VB = numpy.random.rand(M,L,P,D-1)
+        
+    #     cg.forward([A,B],[VA,VB])
+        
+    #     WC = numpy.random.rand(1, N,L,P,D)
+    #     WA, WB = cg.reverse([WC])
+        
+    #     # print WA,WB
+    #     # assert False
+        
     def test_dot_pullback(self):
-        import adolc
-        import adolc.cgraph
+        D,P,N,K,M = 3,4,5,6,7
+        X = UTPM(numpy.random.rand(D,P,N,K))
+        Y = UTPM(numpy.random.rand(D,P,K,M))
         
-        D,P,N,M,L = 3,4,5,6,7
-        A = numpy.random.rand(*(N,M))
-        B = numpy.random.rand(*(M,L))
+        Z = UTPM.dot(X,Y)
+        Zbar = UTPM(numpy.random.rand(D,P,N,M))
         
-        cg = adolc.cgraph.AdolcProgram()
-        cg.trace_on(1)
-        aA = adolc.adouble(A)
-        aB = adolc.adouble(B)
+        Xbar, Ybar = UTPM.dot_pullback(Zbar, X, Y, Z)
+       
+        Xbar2 = UTPM.dot(Zbar, Y.T)
+        Ybar2 = UTPM.dot(X.T, Zbar)
         
-        cg.independent(aA)
-        cg.independent(aB)
+        assert_array_almost_equal(Xbar2.data, Xbar.data)
         
-        aC = numpy.dot(aA, aB)
+    def test_inv_pullback(self):
+        D,P,N = 3,4,5
+        X = UTPM(numpy.random.rand(D,P,N,N))
+        Ybar = UTPM(numpy.random.rand(D,P,N,N))
         
-        cg.dependent(aC)
-        cg.trace_off()
+        Y = UTPM.inv(X)
         
-        VA = numpy.random.rand(N,M,P,D-1)
-        VB = numpy.random.rand(M,L,P,D-1)
+        Xbar = UTPM.inv_pullback(Ybar, X, Y)
         
-        cg.forward([A,B],[VA,VB])
-        
-        WC = numpy.random.rand(1, N,L,P,D)
-        WA, WB = cg.reverse([WC])
-        
-        print WA,WB
-        assert False
-        
-
-        
-        
-        
+        Xbar2 = -1*UTPM.dot(UTPM.dot(Y.T, Ybar), Y.T)
+        assert_array_almost_equal(Xbar.data, Xbar2.data)
         
 
 class Test_QR_Decomposition(TestCase):
