@@ -78,20 +78,21 @@ JTbar, Jbar = UTPM.dot_pullback(Ebar, J.T, J, E)
 Jbar += JTbar.T
 
 Fbar = Jbar.T.JTtoF()
+qbars = UTPM.dot(G.T,Fbar)
 
-qbar = UTPM.dot(G.T,Fbar)
-
-print qbar.data[:,0] + qbar.data[:,1]
-
-
+# accumulate over the different directions
+qbar = UTPM(numpy.zeros((D,1)))
+qbar.data[:,0] = qbars.data[:,0] + qbars.data[:,1]
 
 #############################################
-# analytical solution
+# compare with analytical solution
 #############################################
 c = numpy.max(numpy.linalg.eig( numpy.linalg.inv(numpy.dot(B0.T, B0)))[0])
 dPhidq = - 2* c * q0**-3
 
-print dPhidq
+assert_almost_equal( dPhidq, qbar.data[1,0])
+
+print 'symbolical - UTPM pullback = %e'%( numpy.abs(dPhidq - qbar.data[1,0]))
 
 
 
