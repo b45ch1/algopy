@@ -34,13 +34,20 @@ B.data[0,1] = B0
 G = UTPM.dot(B, p)
 F  = G * q[0]
 J = F.FtoJT().T
-# Q,R = UTPM.qr(J)
-# Id = numpy.eye(P)
-# RT = R.T
-# D = UTPM.solve(RT,Id)
-# C = UTPM.solve(D,R)
+
+Q,R = UTPM.qr(J)
+Id = numpy.eye(Np,dtype=float)
+Rinv = UTPM.inv(R)
+Rinv2 = UTPM.solve(Id,R)
+
+print Rinv - Rinv2
+C2 = UTPM.dot(Rinv,Rinv.T)
+
 E = UTPM.dot(J.T,J)
 C = UTPM.inv(E)
+
+print C - C2
+
 l,U = UTPM.eigh(C)
 arg = UTPM.argmax(l)
 

@@ -362,7 +362,7 @@ class Test_Push_Forward(TestCase):
         x2 = UTPM.dot(A, y)
         assert_array_almost_equal(x.data, x2.data, decimal = 12)
 
-    def test_solve_non_UTPM_A(self):
+    def test_solve_non_UTPM_x(self):
         (D,P,N) = 2,3,2
         A  = UTPM(numpy.random.rand(D,P,N,N))
         Id = numpy.zeros((N,N))
@@ -380,6 +380,18 @@ class Test_Push_Forward(TestCase):
 
         assert_array_almost_equal(numpy.zeros((D-1,P,N,N)), Id2.data[1:], decimal=10)
 
+    def test_solve_non_UTPM_x(self):
+        """
+        check that Id Y = X yields Y = inv(X)
+        """
+        (D,P,N) = 2,3,2
+        Id = numpy.eye(N)
+        X  = UTPM(numpy.random.rand(D,P,N,N))
+
+        Y  = UTPM.solve(X,Id)
+        Y2 = UTPM.inv(X)
+        
+        assert_array_almost_equal(Y.data, Y2.data)
 
 
 

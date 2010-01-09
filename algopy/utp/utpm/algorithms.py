@@ -295,18 +295,9 @@ class RawAlgorithmsMixIn:
 
         assert M == N
 
-        # d = 0:  base point
-        for p in range(P):
-            y_data[0,p,:,:] = numpy.linalg.solve(A_data[:,:], x_data[0,p,:,:])
-
-        # d = 1,...,D-1
-        tmp = numpy.zeros((M,K),dtype=float)
-        for d in range(1, D):
+        for d in range(D):
             for p in range(P):
-                tmp[:,:] = x_data[d,p,:,:]
-                for k in range(1,d+1):
-                    tmp[:,:] -= numpy.dot(A_data[...],y_data[d-k,p,:,:])
-                y_data[d,p,:,:] = numpy.linalg.solve(A_data[:,:],tmp)
+                y_data[d,p,...] = numpy.linalg.solve(A_data[:,:], x_data[d,p,...])
 
         return out
 
