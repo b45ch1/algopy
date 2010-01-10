@@ -11,7 +11,7 @@ from algopy.utp.utpm import *
 # Nm = number of measurements
 # P  = number of vectorized operations at once (SPMD)
 
-D,Nq,Np,Nm = 2,1,2,10
+D,Nq,Np,Nm = 2,1,11,30
 P = Np
 q = UTPM(numpy.zeros((D,P,Nq)))
 q0 = 1.
@@ -70,7 +70,7 @@ qbars = UTPM.dot(G.T,Fbar)
 
 # accumulate over the different directions
 qbar = UTPM(numpy.zeros((D,1)))
-qbar.data[:,0] = qbars.data[:,0] + qbars.data[:,1]
+qbar.data[:,0] = numpy.sum( qbars.data[:,:], axis=1)
 
 #############################################
 # compare with analytical solution
