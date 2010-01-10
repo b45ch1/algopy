@@ -36,13 +36,7 @@ J = F.FtoJT().T
 Q,R = UTPM.qr(J)
 Id = numpy.eye(Np)
 Rinv = UTPM.solve(R,Id)
-C2 = UTPM.dot(Rinv,Rinv.T)
-
-E = UTPM.dot(J.T,J)
-C = UTPM.inv(E)
-
-print C - C2
-
+C = UTPM.dot(Rinv,Rinv.T)
 l,U = UTPM.eigh(C)
 arg = UTPM.argmax(l)
 
@@ -65,20 +59,11 @@ lbar.data[0,0, arg] = 1.
 Ubar = UTPM(numpy.zeros(U.data.shape))
 
 Cbar = UTPM.eigh_pullback(lbar, Ubar, C, l, U)
-
-
-Ebar = UTPM.inv_pullback(Cbar, E, C)
-JTbar, Jbar = UTPM.dot_pullback(Ebar, J.T, J, E)
-
-
-Rinvbar, RinvTbar = UTPM.dot_pullback(Cbar, Rinv, Rinv.T, C2)
+Rinvbar, RinvTbar = UTPM.dot_pullback(Cbar, Rinv, Rinv.T, C)
 Rinvbar += RinvTbar.T
 Rbar, Idbar = UTPM.solve_pullback(Rinvbar, R, Id, Rinv)
 Qbar = UTPM(numpy.zeros(Q.data.shape))
-Jbar2 = UTPM.qr_pullback(Qbar, Rbar, J, Q, R)
-Jbar += JTbar.T
-
-print Jbar - Jbar2
+Jbar = UTPM.qr_pullback(Qbar, Rbar, J, Q, R)
 
 Fbar = Jbar.T.JTtoF()
 qbars = UTPM.dot(G.T,Fbar)
@@ -94,7 +79,6 @@ c = numpy.max(numpy.linalg.eig( numpy.linalg.inv(numpy.dot(B0.T, B0)))[0])
 dPhidq = - 2* c * q0**-3
 
 assert_almost_equal( dPhidq, qbar.data[1,0])
-
 print 'symbolical - UTPM pullback = %e'%( numpy.abs(dPhidq - qbar.data[1,0]))
 
 
