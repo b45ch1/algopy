@@ -18,14 +18,12 @@ q0 = 1.
 q.data[0,:,0] = q0
 p = UTPM(numpy.zeros((D,P,Np)))
 p0 = numpy.random.rand(Np)
-p.data[0,0,:] = p0
-p.data[0,1,:] = p0
+p.data[0,:,:] = p0
 p.data[1,:,:] = numpy.eye(P)
 
 B = UTPM(numpy.zeros((D,P,Nm, Np)))
 B0 = numpy.random.rand(Nm,Np)
-B.data[0,0] = B0
-B.data[0,1] = B0
+B.data[0,:] = B0
 
 
 # STEP 1: compute push forward
@@ -68,15 +66,19 @@ Ubar = UTPM(numpy.zeros(U.data.shape))
 
 Cbar = UTPM.eigh_pullback(lbar, Ubar, C, l, U)
 
-# # Qbar = UTPM(numpy.zeros(Q.data.shape))
-# # Jbar = UTPM.qr_pullback(Qbar, Rbar, J, Q, R)
-
-# print Cbar
 
 Ebar = UTPM.inv_pullback(Cbar, E, C)
 JTbar, Jbar = UTPM.dot_pullback(Ebar, J.T, J, E)
 
+
+Rinvbar, RinvTbar = UTPM.dot_pullback(Cbar, Rinv, Rinv.T, C2)
+Rinvbar += RinvTbar.T
+Rbar, Idbar = UTPM.solve_pullback(Rinvbar, R, Id, Rinv)
+Qbar = UTPM(numpy.zeros(Q.data.shape))
+Jbar2 = UTPM.qr_pullback(Qbar, Rbar, J, Q, R)
 Jbar += JTbar.T
+
+print Jbar - Jbar2
 
 Fbar = Jbar.T.JTtoF()
 qbars = UTPM.dot(G.T,Fbar)
