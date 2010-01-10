@@ -8,10 +8,10 @@ import algopy.utp.utpm as utpm
 # N is the number of columsn of the matrix A
 
 
-D,P,M,N = 5,5,100,5
+D,P,M,N = 5,4,100,5
 print ''
 print '-----------------------------------------------------------------------------------------------------------'
-print 'testing SPMD (%d datasets) differentiated QR decomposition for matrix A.shape = (%d,%d) up to %d\'th order'%(P,M,N,D)
+print 'testing SPMD (%d datasets) differentiated QR decomposition for matrix A.shape = (%d,%d) up to %d\'th order'%(P,M,N,D-1)
 print '-----------------------------------------------------------------------------------------------------------'
 print ''
 
@@ -35,12 +35,13 @@ print 'largest error for all QR decompositions and derivative degrees is: ',nump
 
 
 # check runtime
-tic = time.time()
+runtime_normal = 0.
 for p in range(P):
     A0 = numpy.ascontiguousarray(A.data[0,p])
+    tic = time.time()
     Q0,R0 = numpy.linalg.qr(A0)
-toc = time.time()
-runtime_normal = toc - tic
+    toc = time.time()
+    runtime_normal += toc - tic
 
 print 'measured runtime ratio push_forward/normal: ', runtime_push_forward/runtime_normal
 
@@ -50,10 +51,10 @@ print 'measured runtime ratio push_forward/normal: ', runtime_push_forward/runti
 
 
 
-D,P,N = 5,5,8
+D,P,N = 5,5,20
 print ''
 print '-----------------------------------------------------------------------------------------------------------'
-print 'testing SPMD (%d datasets) push forward eig decomposition for matrix A.shape = (%d,%d) up to %d\'th order'%(P,N,N,D)
+print 'testing SPMD (%d datasets) push forward eig decomposition for matrix A.shape = (%d,%d) up to %d\'th order'%(P,N,N,D-1)
 print '-----------------------------------------------------------------------------------------------------------'
 print ''
 
@@ -62,14 +63,14 @@ A = utpm.UTPM(numpy.random.rand(D,P,N,N))
 A = utpm.UTPM.dot(A.T,A)
 
 tic = time.time()
-l,Q = utpm.UTPM.eig(A)
+l,Q = utpm.UTPM.eigh(A)
 toc = time.time()
 runtime_push_forward = toc - tic
 
 # check that normal QR decomposition matches the push forward version
 for p in range(P):
     A0 = numpy.ascontiguousarray(A.data[0,p])
-    l0,Q0 = numpy.linalg.eig(A0)
+    l0,Q0 = numpy.linalg.eigh(A0)
     numpy.testing.assert_array_almost_equal(Q.data[0,p],Q0)
     numpy.testing.assert_array_almost_equal(l.data[0,p],l0)
 
@@ -79,12 +80,14 @@ B = utpm.UTPM.dot(utpm.UTPM.dot(Q,L), Q.T)
 print 'largest error for all eigenvalue decompositions and derivative degrees is: ',numpy.max(A.data - B.data)
 
 # check runtime
-tic = time.time()
+runtime_normal = 0.
+
 for p in range(P):
     A0 = numpy.ascontiguousarray(A.data[0,p])
+    tic = time.time()
     Q0,R0 = numpy.linalg.eig(A0)
-toc = time.time()
-runtime_normal = toc - tic
+    toc = time.time()
+    runtime_normal += toc - tic
 
 print 'measured runtime ratio push_forward/normal: ', runtime_push_forward/runtime_normal
 
@@ -154,7 +157,7 @@ A = utpm.UTPM.dot(A.T,A)
 
 # compute push forward
 tic = time.time()
-l,Q = utpm.UTPM.eig(A)
+l,Q = utpm.UTPM.eigh(A)
 toc = time.time()
 runtime_push_forward = toc - tic
 
@@ -162,7 +165,7 @@ runtime_push_forward = toc - tic
 Qbar = utpm.UTPM(numpy.random.rand(D,P,N,N))
 lbar = utpm.UTPM(numpy.random.rand(D,P,N))
 tic = time.time()
-Abar = utpm.UTPM.eig_pullback( lbar, Qbar, A, l, Q)
+Abar = utpm.UTPM.eigh_pullback( lbar, Qbar, A, l, Q)
 toc = time.time()
 runtime_pullback = toc - tic
 
