@@ -45,6 +45,9 @@ class CG:
 class Function:
     
     def __init__(self, x = None):
+        """
+        Creates a new function node that is an independent variable.
+        """
         self.x = x
         self.func = self.id
         self.args = None
@@ -60,6 +63,15 @@ class Function:
     
     @classmethod
     def create(cls, x, args, func):
+        """
+        Creates a new function node.
+        
+        INPUTS:
+            x           anything                            current value
+            args        tuple of Function objects           arguments of the new Function node
+            func        callable                            the function that can evaluate func(x)
+        
+        """
         
         f = Function()
         f.x = x
@@ -70,6 +82,13 @@ class Function:
         
     @classmethod
     def push_forward(cls, func, Fargs):
+        """
+        Computes the push forward of func
+        
+        INPUTS:
+            func            callable            func(Fargs[0].x,...,Fargs[-1].x)
+            Fargs           tuple               tuple of Function nodes
+        """
         if numpy.ndim(Fargs) > 0:
             args = tuple([ fa.x for fa in Fargs])
             out  = func(*args)
