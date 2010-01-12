@@ -498,5 +498,42 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
             raise NotImplementedError('should implement that')
         
         return cls(cls._reshape(a.data, newshape, order = order))
-
-
+    
+    @classmethod
+    def combine_blocks(cls, in_X):
+        """
+        expects an array or list consisting of entries of type UTPM, e.g.
+        in_X = [[UTPM1,UTPM2],[UTPM3,UTPM4]]
+        and returns
+        UTPM([[UTPM1.data,UTPM2.data],[UTPM3.data,UTPM4.data]])
+    
+        """
+    
+        in_X = numpy.array(in_X)
+        Rb,Cb = numpy.shape(in_X)
+    
+        # find the degree D and number of directions P
+        D = 0; 	P = 0;
+    
+        for r in range(Rb):
+            for c in range(Cb):
+                D = max(D, in_X[r,c].data.shape[0])
+                P = max(P, in_X[r,c].data.shape[1])
+    
+        # find the sizes of the blocks
+        rows = []
+        cols = []
+        for r in range(Rb):
+            rows.append(in_X[r,0].shape[0])
+        for c in range(Cb):
+            cols.append(in_X[0,c].shape[1])
+        rowsums = numpy.array([ numpy.sum(rows[:r]) for r in range(0,Rb+1)],dtype=int)
+        colsums = numpy.array([ numpy.sum(cols[:c]) for c in range(0,Cb+1)],dtype=int)
+    
+        # create new matrix where the blocks will be copied into
+        tc = numpy.zeros((D, P, rowsums[-1],colsums[-1]))
+        for r in range(Rb):
+            for c in range(Cb):
+                tc[:,:,rowsums[r]:rowsums[r+1], colsums[c]:colsums[c+1]] = in_X[r,c].data[:,:,:,:]
+    
+        return UTPM(tc) 
