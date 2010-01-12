@@ -1,5 +1,6 @@
 from numpy.testing import *
 from algopy.tracer.tracer import *
+from algopy.utp.utpm import UTPM
 
 import numpy
 
@@ -31,6 +32,16 @@ class Test_Function_on_UTPM(TestCase):
         D,P = 3,4
         x = UTPM(numpy.ones((D,P)))
         
+    def test_push_forward_add(self):
+        D,P,N,M = 2,3,4,5
+        x = UTPM(numpy.random.rand(D,P,N,M))
+        y = UTPM(numpy.random.rand(D,P,N,M))
+        fx = Function(x)
+        fy = Function(y)
+        
+        fz = Function.push_forward(UTPM.add, (fx,fy))
+        assert_almost_equal(fz.x.data, (x + y).data)        
+        
         
 
 class Test_CG(TestCase):
@@ -39,7 +50,8 @@ class Test_CG(TestCase):
         fx = Function(1.)
         fy = Function(2.)
         
-        Function.push_forward(numpy.add, (fx,fy))
+        fz = Function.push_forward(numpy.add, (fx,fy))
+        fz = Function.push_forward(numpy.multiply, (fz,fy))
         
         print cg
 

@@ -30,8 +30,16 @@ class CG:
         self.functionList.append(func)
         
     def __str__(self):
-        return 'vertices:\n' + str(self.functionList)
-
+        retval = ''
+        for f in self.functionList:
+            if f.args == None:
+                arg_IDS = None
+            else:
+                arg_IDS = [ af.ID for af in f.args]
+                
+            retval += '%s: IDs: %s <- %s  Values: %s <-  %s\n'%(str(f.func.__name__), str(f.ID), str(arg_IDS), str(f.x),str(f.args))
+        return retval
+        
     def push_forward(self,x_list):
         # populate independent arguments with new values
         for nf,f in enumerate(self.independentFunctionList):
@@ -48,21 +56,25 @@ class Function:
         """
         Creates a new function node that is an independent variable.
         """
-        self.x = x
-        self.func = self.id
-        self.args = None
         
-    def id(self):
-        return self.x
-
-    def __repr__(self):
-        return str(self)
-
-    def __str__(self):
-        return '%s(f)'%str(self.x)
+        if x != None:
+            cls = self.__class__
+            cls.create(x, None, cls.Id, self)    
     
+    
+    
+    cgraph = None
     @classmethod
-    def create(cls, x, args, func):
+    def get_ID(cls):
+        if cls.cgraph != None:
+            return cls.cgraph.functionCount
+        else:
+            return None
+    
+
+        
+    @classmethod
+    def create(cls, x, args, func, f = None):
         """
         Creates a new function node.
         
@@ -70,15 +82,30 @@ class Function:
             x           anything                            current value
             args        tuple of Function objects           arguments of the new Function node
             func        callable                            the function that can evaluate func(x)
+            
+        OPTIONAL:
+            f           Function instance
         
         """
-        
-        f = Function()
+        if f == None:
+            f = Function()
         f.x = x
         f.args = args
         f.func = func
+        f.ID = cls.get_ID()
         cls.cgraph.append(f)
         return f
+    
+    @classmethod    
+    def Id(cls, x):
+        return x
+
+    def __repr__(self):
+        return str(self)
+
+    def __str__(self):
+        return '%s'%str(self.x)
+
         
     @classmethod
     def push_forward(cls, func, Fargs):

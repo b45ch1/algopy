@@ -75,7 +75,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
             return self.data.__setitem__((slice(None),slice(None)) + sl, rhs.data)
         else:
             raise NotImplementedError('rhs must be of the type algopy.UTPM!')
-        
+    
     def __add__(self,rhs):
         if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
             retval = UTPM(numpy.copy(self.data))
@@ -159,7 +159,27 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
 
     def __neg__(self):
         return UTPM(-self.data)
+        
+    @classmethod
+    def add(cls, x, y , out = None):
+        return x + y
+        
+    @classmethod
+    def sub(cls, x, y , out = None):
+        return x - y
+        
+    @classmethod
+    def mul(cls, x, y , out = None):
+        return x * y
+        
+    @classmethod
+    def div(cls, x, y , out = None):
+        return x / y
 
+    @classmethod
+    def multiply(cls, x, y , out = None):
+        return x * y
+        
     @classmethod
     def max(cls, a, axis = None, out = None):
         if out != None:
