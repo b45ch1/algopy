@@ -44,9 +44,9 @@ class Test_Function_on_UTPM(TestCase):
         
         
 
-class Test_CG(TestCase):
+class Test_CGgraph(TestCase):
     def test_push_forward(self):
-        cg = CG()
+        cg = CGraph()
         fx = Function(1.)
         fy = Function(2.)
         

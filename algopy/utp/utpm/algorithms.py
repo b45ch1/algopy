@@ -189,7 +189,7 @@ class RawAlgorithmsMixIn:
     @classmethod
     def _dot_pullback(cls, zbar_data, x_data, y_data, z_data, out = None):
         if out == None:
-            raise NotImplementedError('should implement that')        
+            raise NotImplementedError('should implement that')
         
         (xbar_data, ybar_data) = out
         

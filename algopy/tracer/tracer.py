@@ -1,6 +1,6 @@
 import numpy
 
-class CG:
+class CGraph:
     """
     We implement the Computational Graph (CG) as Directed Acyclic Graph.
     The Graph of y = x1(x2+x3) looks like
