@@ -97,8 +97,6 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         retval = self.clone()
         retval.__imul__(rhs)
         return retval
-    
-
 
     def __div__(self,rhs):
         retval = self.clone()

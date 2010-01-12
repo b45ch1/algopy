@@ -1,59 +1,80 @@
 import numpy
+import string
 from algopy.utp.utpm import UTPM
 
 # override numpy definitions
-def shape(x):
-    if isinstance(x, UTPM):
-        return UTPM.shape(x)
+
+numpy_function_names = ['trace', 'dot']
+numpy_linalg_function_names = ['inv', 'solve', 'eig']
+
+function_template = string.Template('''
+def $function_name(*args):
+    if isinstance(args[0], numpy.ndarray):
+        return $namespace.__getattribute__('$function_name')(*args)
+    elif hasattr(args[0].__class__, '$function_name'):
+        return getattr(args[0].__class__, '$function_name')(*args)
     else:
-        return numpy.shape(x)
-        
-def size(x):
-    if isinstance(x, UTPM):
-        return x.size
-    else:
-        return numpy.size(x)
-        
-def trace(x):
-    if isinstance(x, UTPM):
-        return x.trace()
-    else:
-        return numpy.trace(x)
-        
-def inv(x):
-    if isinstance(x, UTPM):
-        return UTPM.inv(x)
-    else:
-        return numpy.linalg.inv(x)
-        
-def dot(x,y, out = None):
+        return $namespace.__getattribute__('$function_name')(*args)
+''')
+
+for function_name in numpy_function_names:
+    exec function_template.substitute(function_name=function_name, namespace='numpy')
     
-    if out != None:
-        raise NotImplementedError('should implement that...')
+for function_name in numpy_linalg_function_names:
+    exec function_template.substitute(function_name=function_name, namespace='numpy.linalg')
     
-    if isinstance(x, UTPM) or isinstance(y, UTPM):
-        return UTPM.dot(x,y)
+# def shape(x):
+    # if hasattr(x.__class__, 'shape'):
+        # return x.__class__.shape(x)
+    # else:
+        # return numpy.shape(x)
         
-    else:
-        return numpy.dot(x,y)
+# def size(x):
+    # if isinstance(x, UTPM):
+        # return x.size
+    # else:
+        # return numpy.size(x)
         
+# def trace(x):
+    # if isinstance(x, UTPM):
+        # return x.trace()
+    # else:
+        # return numpy.trace(x)
         
-def solve(A,x):
-    if isinstance(x, UTPM):
-        raise NotImplementedError('should implement that...')
+# def inv(x):
+    # if isinstance(x, UTPM):
+        # return UTPM.inv(x)
+    # else:
+        # return numpy.linalg.inv(x)
+        
+# def dot(x,y, out = None):
     
-    elif isinstance(A, UTPM):
-        raise NotImplementedError('should implement that...')
+    # if out != None:
+        # raise NotImplementedError('should implement that...')
     
-    else:
-        return numpy.linalg.solve(A,x)
+    # if isinstance(x, UTPM) or isinstance(y, UTPM):
+        # return UTPM.dot(x,y)
         
-def eig(A):
-    if isinstance(A, UTPM):
-        return UTPM.eig(A)
+    # else:
+        # return numpy.dot(x,y)
+        
+        
+# def solve(A,x):
+    # if isinstance(x, UTPM):
+        # raise NotImplementedError('should implement that...')
     
-    else:
-        return numpy.linalg.eig(A)
+    # elif isinstance(A, UTPM):
+        # raise NotImplementedError('should implement that...')
+    
+    # else:
+        # return numpy.linalg.solve(A,x)
+        
+# def eig(A):
+    # if isinstance(A, UTPM):
+        # return UTPM.eig(A)
+    
+    # else:
+        # return numpy.linalg.eig(A)
 
 
 
