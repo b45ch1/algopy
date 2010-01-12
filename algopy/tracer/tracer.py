@@ -32,10 +32,10 @@ class CG:
     def __str__(self):
         retval = ''
         for f in self.functionList:
-            if f.args == None:
-                arg_IDS = None
-            else:
+            if numpy.size(f.args)>1:
                 arg_IDS = [ af.ID for af in f.args]
+            else:
+                arg_IDS = f.args.ID
                 
             retval += '%s: IDs: %s <- %s  Values: %s <-  %s\n'%(str(f.func.__name__), str(f.ID), str(arg_IDS), str(f.x),str(f.args))
         return retval
@@ -43,11 +43,11 @@ class CG:
     def push_forward(self,x_list):
         # populate independent arguments with new values
         for nf,f in enumerate(self.independentFunctionList):
-            f.args = x_list[nf]
+            f.args.x = x_list[nf]
 
         # traverse the computational tree
         for f in self.functionList:
-            f.x = f.__class__.push_forward(f.func, f.args)
+            f.__class__.push_forward(f.func, f.args, Fout = f)
 
 
 class Function:
@@ -59,7 +59,7 @@ class Function:
         
         if x != None:
             cls = self.__class__
-            cls.create(x, None, cls.Id, self)    
+            cls.create(x, self, cls.Id, self)    
     
     
     
@@ -100,6 +100,7 @@ class Function:
     def Id(cls, x):
         return x
 
+
     def __repr__(self):
         return str(self)
 
@@ -108,7 +109,7 @@ class Function:
 
         
     @classmethod
-    def push_forward(cls, func, Fargs):
+    def push_forward(cls, func, Fargs, Fout = None):
         """
         Computes the push forward of func
         
@@ -122,7 +123,14 @@ class Function:
         else:
             arg = Fargs.x
             out  = func(arg)
-        return cls.create(out, Fargs, func)
+        
+        if Fout == None:
+            return cls.create(out, Fargs, func)
+        
+        else:
+            Fout.x = out
+            return Fout
+         
         
     
     def pullback():

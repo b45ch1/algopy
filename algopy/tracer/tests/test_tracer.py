@@ -52,8 +52,15 @@ class Test_CG(TestCase):
         
         fz = Function.push_forward(numpy.add, (fx,fy))
         fz = Function.push_forward(numpy.multiply, (fz,fy))
-        
-        print cg
 
+        cg.independentFunctionList = [fx,fy]
+        cg.dependentFunctionList = [fz]
+        
+        x = 32.23
+        y = 235.
+        cg.push_forward([x,y])
+        assert_array_almost_equal( cg.dependentFunctionList[0].x,  (x + y) * y)
+        
+        
 if __name__ == "__main__":
     run_module_suite()
