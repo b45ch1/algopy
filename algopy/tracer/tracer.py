@@ -48,6 +48,8 @@ class CG:
         # traverse the computational tree
         for f in self.functionList:
             f.__class__.push_forward(f.func, f.args, Fout = f)
+            
+         
 
 
 class Function:
@@ -71,8 +73,6 @@ class Function:
         else:
             return None
     
-
-        
     @classmethod
     def create(cls, x, args, func, f = None):
         """
@@ -130,8 +130,6 @@ class Function:
         else:
             Fout.x = out
             return Fout
-         
+
         
-    
-    def pullback():
-        pass
+        
