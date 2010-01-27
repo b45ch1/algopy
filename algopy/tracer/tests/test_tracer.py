@@ -111,22 +111,60 @@ class Test_CGgraph_on_UTPM(TestCase):
         assert_array_almost_equal(cg.dependentFunctionList[0].x.data, ((aX*aY * aX + aY)*aX*aY).data)
         
     def test_pullback(self):
+        """
+        z = x*y*x
+          
+        dz/dx = 2*x*y
+        dz/dy = x*x
+        """
         cg = CGraph()
         D,P,N,M = 1,1,1,1
-        aX = UTPM(numpy.random.rand(D,P,N,M))
-        aY = UTPM(numpy.random.rand(D,P,N,M))
-        fX = Function(aX)
-        fY = Function(aY)
-        fV1 = fX * fY
-        fV2 = (fV1 * fX + fY)*fV1
-        cg.independentFunctionList = [fX,fY]
-        cg.dependentFunctionList = [fV2]
-        cg.push_forward([aX,aY])
+        x = UTPM(numpy.random.rand(D,P,N,M))
+        y = UTPM(numpy.random.rand(D,P,N,M))
+        fx = Function(x)
+        fy = Function(y)
+        fv1 = fx * fy
+        cg.independentFunctionList = [fx,fy]
+        cg.dependentFunctionList = [fv1]
         
-        aV2bar = fV2.x.zeros_like()
-        cg.pullback([aV2bar])
+        v1bar = UTPM(numpy.ones((D,P,N,M)))
+        cg.pullback([v1bar])
         
-        print cg
+        # symbolic differentiation
+        dzdx = y
+        
+        print cg.independentFunctionList[0].xbar
+        print dzdx        
+        
+        
+    # def test_pullback2(self):
+        # """
+        # z = (x*y*x+y)*x*y
+          # =  x**3 * y**2 + x * y**2
+          
+        # dz/dx = 3 * x**2 * y**2 + y**2
+        # dz/dy = 2 * x**3 * y  + 2 * x * y 
+        # """
+        # cg = CGraph()
+        # D,P,N,M = 1,1,1,1
+        # aX = UTPM(numpy.random.rand(D,P,N,M))
+        # aY = UTPM(numpy.random.rand(D,P,N,M))
+        # fX = Function(aX)
+        # fY = Function(aY)
+        # fV1 = fX * fY
+        # fV2 = (fV1 * fX + fY)*fV1
+        # cg.independentFunctionList = [fX,fY]
+        # cg.dependentFunctionList = [fV2]
+        # # cg.push_forward([aX,aY])
+        
+        # aV2bar = UTPM(numpy.ones((D,P,N,M)))
+        # cg.pullback([aV2bar])
+        
+        # # symbolic differentiation
+        # dzdx = 3 * aX*aX * aY*aY + aY*aY
+        
+        # print cg.independentFunctionList[0].xbar
+        # print dzdx
 
 
 if __name__ == "__main__":

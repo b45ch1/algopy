@@ -2,6 +2,17 @@ import numpy
 
 from algopy.base_type import Algebra
 
+class NotSet:
+    def __init__(self, descr=None):
+        if descr == None:
+            descr = ''
+        self.descr = descr
+    def __str__(self):
+        return 'not set!'
+        
+def is_set(o):
+    return not isinstance(o, NotSet)
+        
 class CGraph:
     """
     The CGraph (short for Computational Graph) represents a computational
@@ -65,10 +76,13 @@ class CGraph:
         self.functionList.append(func)
         
     def __str__(self):
-        retval = ''
+        retval = '\n'
         for f in self.functionList:
             arg_IDS = [ af.ID for af in f.args]
-            retval += '%s: IDs: %s <- %s  Values: %s <-  %s\n'%(str(f.func.__name__), str(f.ID), str(arg_IDS), str(f.x),str(f.args))
+            retval += '%s: IDs: %s <- %s\n'%(str(f.func.__name__), str(f.ID), str(arg_IDS))
+            retval += 'x:    %s <-  %s\n'%( str(f.x),str(f.args))
+            if is_set(f.xbar):
+                retval += 'xbar: %s \n'%(str(f.xbar))
         
         retval += '\nIndependent Function List:\n'
         retval += str([f.ID for f in self.independentFunctionList])
@@ -119,11 +133,18 @@ class CGraph:
         for nf,f in enumerate(self.dependentFunctionList):
             f.xbar[...] = xbar_list[nf]
             
+            
+        print self
+        
         for f in self.functionList[::-1]:
+            print 'apply pullback of function ID = %d'%f.ID
             f.__class__.pullback(f)
+            print self
         
 
 class Function(Algebra):
+    
+    xbar = NotSet()
     
     def __init__(self, x = None):
         """
@@ -252,11 +273,11 @@ class Function(Algebra):
         out = f(*args)
         
         if not type(out) == tuple:
-            F.args[0].xbar[...] = out
+            F.args[0].xbar[...] += out
         
         else:
             for na in range(len(out)):
-                F.args[na].xbar[...] = out[na]
+                F.args[na].xbar[...] += out[na]
         
         return F
         

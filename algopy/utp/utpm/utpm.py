@@ -154,7 +154,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
                 retval.data[d,:,...] = 1./ rhs.data[0,:,...] * ( self.data[d,:,...] - numpy.sum(retval.data[:d,:,...] * rhs.data[d:0:-1,:,...], axis=0))
             self.data[...] = retval.data[...]
         return self
-
+        
 
     def __neg__(self):
         return UTPM(-self.data)
@@ -403,13 +403,8 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
     def Id_pullback(cls, ybar, x, y, out = None):
         if out != None:
             raise NotImplementedError('should implement that')
-            
-        D,P = y.data.shape[:2]
-        xbar = cls(cls.__zeros__(x.data.shape))
         
-        xbar.data += ybar.data
-        
-        return xbar  
+        return ybar
         
         
     @classmethod
@@ -422,8 +417,8 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         xbar = cls(cls.__zeros__(x.data.shape))
         ybar = cls(cls.__zeros__(y.data.shape))
         
-        xbar.data += zbar.data
-        ybar.data += zbar.data
+        xbar += zbar
+        ybar += zbar
 
         return (xbar,ybar)
         
@@ -437,8 +432,8 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         xbar = cls(cls.__zeros__(x.data.shape))
         ybar = cls(cls.__zeros__(y.data.shape))
         
-        xbar.data += zbar.data
-        ybar.data -= zbar.data
+        xbar += zbar
+        ybar -= zbar
 
         return (xbar,ybar)        
 
@@ -453,8 +448,8 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         xbar = cls(cls.__zeros__(x.data.shape))
         ybar = cls(cls.__zeros__(y.data.shape))
         
-        xbar.data += zbar.data * y.data
-        ybar.data += zbar.data * x.data
+        xbar += zbar * y
+        ybar += zbar * x
 
         return (xbar,ybar)
         
@@ -469,9 +464,9 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         
         tmp  = zbar.clone()
         tmp /= y
-        xbar.data += tmp
+        xbar += tmp
         tmp *= z
-        ybar.data += tmp
+        ybar += tmp
 
         return (xbar,ybar)
         
