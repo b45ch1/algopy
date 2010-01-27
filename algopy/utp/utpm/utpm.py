@@ -448,7 +448,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         xbar += zbar
         ybar -= zbar
 
-        return (xbar,ybar)        
+        return (xbar,ybar)
 
 
     @classmethod
@@ -492,7 +492,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
             ybar = cls(cls.__zeros__(y.data.shape))
         
         else:
-            xbar, ybar = out        
+            xbar, ybar = out
         
         cls._dot_pullback(zbar.data, x.data, y.data, z.data, out = (xbar.data, ybar.data))
         return (xbar,ybar)

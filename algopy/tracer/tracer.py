@@ -29,9 +29,9 @@ class CGraph:
         -----------------------------------------------------------
         Id     1 [1]         x1            set independent variable
         Id     2 [2]         x2            set independent variable
-        Id     3 [3]         x3            set independent variable        
-        +      4 [v2,v3]  (v2.x + v3.x)
-        *      5 [v1,+4]  (v1.x * v4.x)
+        Id     3 [3]         x3            set independent variable
+        +      4 [2,3]   (v2.x + v3.x)
+        *      5 [1,4]   (v1.x * v4.x)
         
         --- independent variables
         [1,2,3]
@@ -80,9 +80,9 @@ class CGraph:
         for f in self.functionList:
             arg_IDS = [ af.ID for af in f.args]
             retval += '%s: IDs: %s <- %s\n'%(str(f.func.__name__), str(f.ID), str(arg_IDS))
-            retval += 'x:    %s <-  %s\n'%( str(f.x),str(f.args))
+            retval += 'x:\n    %s \n'%( str(f.x))
             if is_set(f.xbar):
-                retval += 'xbar: %s \n'%(str(f.xbar))
+                retval += 'xbar:\n %s \n'%(str(f.xbar))
         
         retval += '\nIndependent Function List:\n'
         retval += str([f.ID for f in self.independentFunctionList])
@@ -169,7 +169,7 @@ class Function(Algebra):
             return None
     
     @classmethod
-    def create(cls, x, args, func, f = None):
+    def create(cls, x, fargs, func, f = None, funcargs = ()):
         """
         Creates a new function node.
         
@@ -180,18 +180,20 @@ class Function(Algebra):
             
         OPTIONAL:
             f           Function instance
+            funcargs    tuple                               additional arguments to the function func
         
         """
         if f == None:
             f = Function()
         f.x = x
-        f.args = args
+        f.args = fargs
         f.func = func
         f.ID = cls.get_ID()
+        f.funcargs = funcargs
         cls.cgraph.append(f)
         return f
     
-    @classmethod    
+    @classmethod
     def Id(cls, x):
         """
         The identity function:  x = Id(x)
@@ -205,6 +207,12 @@ class Function(Algebra):
 
     def __str__(self):
         return '%s'%str(self.x)
+
+    def __getitem__(self, sl):
+        if type(sl) == int or sl == Ellipsis:
+            sl = (sl,)
+        tmp = self.x.__getitem__((slice(None),slice(None)) + tuple(sl))
+        return self.__class__(tmp)
 
         
     @classmethod
@@ -224,7 +232,13 @@ class Function(Algebra):
             out  = func(arg)
         
         if Fout == None:
-            return cls.create(out, Fargs, func)
+            retval = cls.create(out, Fargs, func)
+            
+            if isinstance(retval.x, tuple):
+                retvals = [cls.create(retval.x[0], (retval,), cls.__getitem__, funcargs = (0,)),
+                           cls.create(retval.x[1], (retval,), cls.__getitem__, funcargs = (1,))]
+                return tuple(retvals)
+            return retval
         
         else:
             Fout.x = out
@@ -253,7 +267,7 @@ class Function(Algebra):
         args = [F.xbar] + args_list + [F.x]
         args = tuple(args)
         
-        kwargs = {'out': tuple(argsbar_list)}            
+        kwargs = {'out': tuple(argsbar_list)}
             
         # get the pullback function
         f = eval('__import__("algopy.utp.utpm.utpm").utp.utpm.utpm.'+F.x.__class__.__name__+'.pb_'+func_name)
@@ -263,14 +277,14 @@ class Function(Algebra):
         return F
         
         
-    @classmethod        
+    @classmethod
     def totype(cls, x):
         """
         tries to convert x to an object of the class
         """
             
         if isinstance(x, cls):
-            return x            
+            return x
         
         else:
             return cls(x)
@@ -308,8 +322,9 @@ class Function(Algebra):
         return lhs/self
         
     def qr(self):
-         return Function.push_forward(self.x.__class__.qr, self)
+         return Function.push_forward(self.x.__class__.qr, (self,))
 
-
+    def eigh(self):
+         return Function.push_forward(self.x.__class__.eigh, (self,))
 
         
