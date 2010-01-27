@@ -177,7 +177,13 @@ class Test_CGgraph_on_UTPM(TestCase):
         fQ,fR = f
         
         print cg
+        
         # print fx - Function.dot(fQ,fR)
+        
+        cg.push_forward([x])
+        
+        print cg
+        
         
         
 

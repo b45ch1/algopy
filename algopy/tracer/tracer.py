@@ -107,7 +107,7 @@ class CGraph:
 
         # traverse the computational tree
         for f in self.functionList:
-            f.__class__.push_forward(f.func, f.args, Fout = f)
+            f.__class__.push_forward(f.func, f.args, Fout = f, funcargs = f.funcargs)
 
 
     def pullback(self, xbar_list):
