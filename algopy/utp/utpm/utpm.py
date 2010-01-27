@@ -483,23 +483,26 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         
     @classmethod
     def inv_pullback(cls, ybar, x, y, out = None):
-        if out != None:
-            raise NotImplementedError('should implement that')
-
-        D,P = y.data.shape[:2]
+        if out == None:
+            D,P = y.data.shape[:2]
+            xbar = cls(cls.__zeros__(x.data.shape))
         
-        xbar = cls(cls.__zeros__(x.data.shape))
+        else:
+            xbar = out
+            
         cls._inv_pullback(ybar.data, x.data, y.data, out = xbar.data)
         return xbar
 
         
     @classmethod
     def solve_pullback(cls, ybar, A, x, y, out = None):
-
-        if out != None:
-            raise NotImplementedError('should implement that')
-
-        D,P = y.data.shape[:2]
+        if out == None:
+            D,P = y.data.shape[:2]
+            Abar = cls(cls.__zeros__(A.data.shape))
+            xbar = cls(cls.__zeros__(x.data.shape))
+        
+        else:
+            Abar, xbar = out    
         
         if not isinstance(x, UTPM):
             tmp = x
@@ -509,9 +512,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
 
         if not isinstance(A, UTPM):
             raise NotImplementedError('should implement that')
-        
-        Abar = cls(cls.__zeros__(A.data.shape))
-        xbar = cls(cls.__zeros__(x.data.shape))
+
         
         cls._solve_pullback(ybar.data, A.data, x.data, y.data, out = (Abar.data, xbar.data))
         
