@@ -80,6 +80,7 @@ class CGraph:
         for f in self.functionList:
             arg_IDS = [ af.ID for af in f.args]
             retval += '%s: IDs: %s <- %s\n'%(str(f.func.__name__), str(f.ID), str(arg_IDS))
+            retval += 'funcargs:%s\n'%(str(f.funcargs))
             retval += 'x:\n    %s \n'%( str(f.x))
             if is_set(f.xbar):
                 retval += 'xbar:\n %s \n'%(str(f.xbar))
@@ -235,8 +236,8 @@ class Function(Algebra):
             retval = cls.create(out, Fargs, func)
             
             if isinstance(retval.x, tuple):
-                retvals = [cls.create(retval.x[0], (retval,), cls.__getitem__, funcargs = (0,)),
-                           cls.create(retval.x[1], (retval,), cls.__getitem__, funcargs = (1,))]
+                Nout = len(retval.x)
+                retvals = [cls.create(retval.x[nout], (retval,), cls.__getitem__, funcargs = (nout,)) for nout in range(Nout)]
                 return tuple(retvals)
             return retval
         

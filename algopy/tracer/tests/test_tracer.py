@@ -175,6 +175,7 @@ class Test_CGgraph_on_UTPM(TestCase):
         x = UTPM(numpy.random.rand(D,P,N,M))
         fx = Function(x)
         fQ,fR = Function.qr(fx)
+        fU,fl = Function.eigh(fQ)
         
         print cg
 
