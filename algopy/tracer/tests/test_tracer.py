@@ -110,6 +110,27 @@ class Test_CGgraph_on_UTPM(TestCase):
         cg.push_forward([aX,aY])
         assert_array_almost_equal(cg.dependentFunctionList[0].x.data, ((aX*aY * aX + aY)*aX*aY).data)
         
+        
+    def test_push_forward_of_qr(self):
+        cg = CGraph()
+        D,P,N,M = 1,1,3,3
+        x = UTPM(numpy.random.rand(D,P,N,M))
+        fx = Function(x)
+        f = Function.qr(fx)
+        
+        fQ,fR = f
+        
+        cg.independentFunctionList = [fx]
+        cg.dependentFunctionList = [fQ,fR]
+        
+        x = UTPM(numpy.random.rand(D,P,N,M))
+        cg.push_forward([x])
+        Q = cg.dependentFunctionList[0].x
+        R = cg.dependentFunctionList[1].x
+        
+        assert_array_almost_equal(x.data,UTPM.dot(Q,R).data)
+        
+        
     def test_pullback(self):
         """
         z = x*y*x
@@ -176,22 +197,13 @@ class Test_CGgraph_on_UTPM(TestCase):
         
         fQ,fR = f
         
-        print cg
-        
-        # print fx - Function.dot(fQ,fR)
-        
-        cg.push_forward([x])
-        
-        print cg
+        cg.independentFunctionList = [fx]
+        cg.dependentFunctionList = [fQ,fR]
         
         
-        
-
-        # cg.independentFunctionList = [fx]
-        # cg.dependentFunctionList = [fy]
-        
-        # ybar = UTPM(numpy.ones((D,P,N,M)))
-        # cg.pullback([v2bar])
+        Qbar = UTPM(numpy.ones((D,P,N,M)))
+        Rbar = UTPM(numpy.ones((D,P,N,M)))
+        # cg.pullback([Qbar,Rbar])
         
         # cg.independentFunctionList[0].xbar.data
 
