@@ -128,7 +128,6 @@ class NumpyArrayOperationsTests(TestCase):
        
        Q,R =  qr(A)
        
-       print numpy.dot(Q,R) - A
    
 
 

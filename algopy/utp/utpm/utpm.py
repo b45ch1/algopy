@@ -470,13 +470,13 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         
     @classmethod
     def dot_pullback(cls, zbar, x, y, z, out = None):
-        if out != None:
-            raise NotImplementedError('should implement that')
-
-        D,P = y.data.shape[:2]
+        if out == None:
+            D,P = y.data.shape[:2]
+            xbar = cls(cls.__zeros__(x.data.shape))
+            ybar = cls(cls.__zeros__(y.data.shape))
         
-        xbar = cls(cls.__zeros__(x.data.shape))
-        ybar = cls(cls.__zeros__(y.data.shape))
+        else:
+            xbar, ybar = out        
         
         cls._dot_pullback(zbar.data, x.data, y.data, z.data, out = (xbar.data, ybar.data))
         return (xbar,ybar)
