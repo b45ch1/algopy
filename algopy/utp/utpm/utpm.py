@@ -515,7 +515,6 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
 
         
         cls._solve_pullback(ybar.data, A.data, x.data, y.data, out = (Abar.data, xbar.data))
-        
 
         return Abar, xbar
 
@@ -530,8 +529,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
             R = cls(cls.__zeros__((D,P,K,N)))
             
         else:
-            Q = out[0]
-            R = out[1]
+            Q,R = out
         
         UTPM._qr(A.data, out = (Q.data, R.data))
         
@@ -542,12 +540,13 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         D,P,M,N = numpy.shape(A.data)
         
         if out == None:
-            out = cls(cls.__zeros__((D,P,M,N)))
-            
-        Abar = out
+            Abar = cls(cls.__zeros__((D,P,M,N)))
+        
+        else:
+            Abar = out
         
         UTPM._qr_pullback( Qbar.data, Rbar.data, A.data, Q.data, R.data, out = Abar.data)
-        return out
+        return Abar
 
     
     @classmethod
@@ -565,6 +564,9 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         if out == None:
             l = cls(cls.__zeros__((D,P,N)))
             Q = cls(cls.__zeros__((D,P,N,N)))
+            
+        else:
+            l,Q = out
         
         UTPM._eigh( l.data, Q.data, A.data)
       
@@ -575,11 +577,13 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         D,P,M,N = numpy.shape(A.data)
         
         if out == None:
-            out = cls(cls.__zeros__((D,P,M,N)))
-        Abar = out
+            Abar = cls(cls.__zeros__((D,P,M,N)))
+        
+        else:
+            Abar = out
         
         UTPM._eigh_pullback( lbar.data,  Qbar.data, A.data,  l.data, Q.data, out = Abar.data)
-        return out
+        return Abar
 
     @classmethod
     def diag(cls, v, k = 0, out = None):
