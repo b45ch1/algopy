@@ -86,7 +86,7 @@ for np,P in enumerate(P_list):
                 Rbar = UTPM(numpy.ascontiguousarray(Rbar_data[0,...].transpose((3,2,0,1))))
                 tic = time()
                 Q,R = UTPM.qr(A)
-                Abar = UTPM.qr_pullback(Qbar, Rbar, A, Q, R)
+                Abar = UTPM.pb_qr(Qbar, Rbar, A, Q, R)
                 toc = time()
                 runtime_algopy_pullback = toc - tic
 

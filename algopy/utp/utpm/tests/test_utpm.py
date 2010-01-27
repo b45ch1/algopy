@@ -433,7 +433,7 @@ class Test_Pullbacks(TestCase):
         assert_array_almost_equal( x.data, UTPM.dot(A,y).data)
         
         ybar = UTPM(numpy.random.rand(*y.data.shape))
-        Abar, xbar = UTPM.solve_pullback(ybar, A, x, y)
+        Abar, xbar = UTPM.pb_solve(ybar, A, x, y)
 
         for p in range(P):
             Ab = Abar.data[0,p]
@@ -488,7 +488,7 @@ class Test_Pullbacks(TestCase):
         Z = UTPM.dot(X,Y)
         Zbar = UTPM(numpy.random.rand(D,P,N,M))
         
-        Xbar, Ybar = UTPM.dot_pullback(Zbar, X, Y, Z)
+        Xbar, Ybar = UTPM.pb_dot(Zbar, X, Y, Z)
        
         Xbar2 = UTPM.dot(Zbar, Y.T)
         Ybar2 = UTPM.dot(X.T, Zbar)
@@ -502,7 +502,7 @@ class Test_Pullbacks(TestCase):
         
         Y = UTPM.inv(X)
         
-        Xbar = UTPM.inv_pullback(Ybar, X, Y)
+        Xbar = UTPM.pb_inv(Ybar, X, Y)
         
         Xbar2 = -1*UTPM.dot(UTPM.dot(Y.T, Ybar), Y.T)
         assert_array_almost_equal(Xbar.data, Xbar2.data)
@@ -570,7 +570,7 @@ class Test_QR_Decomposition(TestCase):
         Qbar = UTPM(Qbar_data)
         Rbar = UTPM(Rbar_data)
 
-        Abar = UTPM.qr_pullback(Qbar, Rbar, A, Q, R)
+        Abar = UTPM.pb_qr(Qbar, Rbar, A, Q, R)
 
         for p in range(P):
             Ab = Abar.data[0,p]
@@ -611,7 +611,7 @@ class Test_QR_Decomposition(TestCase):
         Qbar = UTPM(Qbar_data)
         Rbar = UTPM(Rbar_data)
 
-        Abar = UTPM.qr_pullback(Qbar, Rbar, A, Q, R)
+        Abar = UTPM.pb_qr(Qbar, Rbar, A, Q, R)
 
         for p in range(P):
             Ab = Abar.data[0,p]
@@ -667,7 +667,7 @@ class Test_Eigenvalue_Decomposition(TestCase):
         lbar = UTPM(numpy.random.rand(*(D,P,N)))
         Qbar = UTPM(numpy.random.rand(*(D,P,N,N)))
 
-        Abar = UTPM.eigh_pullback( lbar, Qbar, A, l, Q)
+        Abar = UTPM.pb_eigh( lbar, Qbar, A, l, Q)
 
         Abar = Abar.data[0,0]
         Adot = A.data[1,0]

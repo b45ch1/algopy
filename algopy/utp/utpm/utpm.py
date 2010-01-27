@@ -485,7 +485,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         return (xbar,ybar)
         
     @classmethod
-    def dot_pullback(cls, zbar, x, y, z, out = None):
+    def pb_dot(cls, zbar, x, y, z, out = None):
         if out == None:
             D,P = y.data.shape[:2]
             xbar = cls(cls.__zeros__(x.data.shape))
@@ -498,7 +498,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         return (xbar,ybar)
         
     @classmethod
-    def inv_pullback(cls, ybar, x, y, out = None):
+    def pb_inv(cls, ybar, x, y, out = None):
         if out == None:
             D,P = y.data.shape[:2]
             xbar = cls(cls.__zeros__(x.data.shape))
@@ -511,7 +511,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
 
         
     @classmethod
-    def solve_pullback(cls, ybar, A, x, y, out = None):
+    def pb_solve(cls, ybar, A, x, y, out = None):
         if out == None:
             D,P = y.data.shape[:2]
             Abar = cls(cls.__zeros__(A.data.shape))
@@ -552,7 +552,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         return Q,R
         
     @classmethod
-    def qr_pullback(cls, Qbar, Rbar, A, Q, R, out = None):
+    def pb_qr(cls, Qbar, Rbar, A, Q, R, out = None):
         D,P,M,N = numpy.shape(A.data)
         
         if out == None:
@@ -589,7 +589,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         return l,Q
 
     @classmethod
-    def eigh_pullback(cls, lbar, Qbar,  A, l, Q,  out = None):
+    def pb_eigh(cls, lbar, Qbar,  A, l, Q,  out = None):
         D,P,M,N = numpy.shape(A.data)
         
         if out == None:

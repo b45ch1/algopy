@@ -58,12 +58,12 @@ lbar = UTPM(numpy.zeros(l.data.shape))
 lbar.data[0,0, arg] = 1.
 Ubar = UTPM(numpy.zeros(U.data.shape))
 
-Cbar = UTPM.eigh_pullback(lbar, Ubar, C, l, U)
-Rinvbar, RinvTbar = UTPM.dot_pullback(Cbar, Rinv, Rinv.T, C)
+Cbar = UTPM.pb_eigh(lbar, Ubar, C, l, U)
+Rinvbar, RinvTbar = UTPM.pb_dot(Cbar, Rinv, Rinv.T, C)
 Rinvbar += RinvTbar.T
-Rbar, Idbar = UTPM.solve_pullback(Rinvbar, R, Id, Rinv)
+Rbar, Idbar = UTPM.pb_solve(Rinvbar, R, Id, Rinv)
 Qbar = UTPM(numpy.zeros(Q.data.shape))
-Jbar = UTPM.qr_pullback(Qbar, Rbar, J, Q, R)
+Jbar = UTPM.pb_qr(Qbar, Rbar, J, Q, R)
 
 Fbar = Jbar.T.JTtoF()
 qbars = UTPM.dot(G.T,Fbar)

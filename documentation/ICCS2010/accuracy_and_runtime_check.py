@@ -118,7 +118,7 @@ runtime_push_forward = toc - tic
 Qbar = utpm.UTPM(numpy.random.rand(D,P,M,N))
 Rbar = utpm.UTPM(numpy.random.rand(D,P,N,N))
 tic = time.time()
-Abar = utpm.UTPM.qr_pullback(Qbar, Rbar, A, Q, R)
+Abar = utpm.UTPM.bp_qr(Qbar, Rbar, A, Q, R)
 toc = time.time()
 runtime_pullback = toc - tic
 
@@ -165,7 +165,7 @@ runtime_push_forward = toc - tic
 Qbar = utpm.UTPM(numpy.random.rand(D,P,N,N))
 lbar = utpm.UTPM(numpy.random.rand(D,P,N))
 tic = time.time()
-Abar = utpm.UTPM.eigh_pullback( lbar, Qbar, A, l, Q)
+Abar = utpm.UTPM.pb_eigh( lbar, Qbar, A, l, Q)
 toc = time.time()
 runtime_pullback = toc - tic
 
