@@ -165,6 +165,25 @@ class Test_CGgraph_on_UTPM(TestCase):
         
         assert_array_almost_equal(dzdx.data, cg.independentFunctionList[0].xbar.data)
         assert_array_almost_equal(dzdy.data, cg.independentFunctionList[1].xbar.data)
+        
+        
+    def test_pullback3(self):
+        cg = CGraph()
+        D,P,N,M = 1,1,3,3
+        x = UTPM(numpy.random.rand(D,P,N,M))
+        fx = Function(x)
+        print Function.qr(fx)
+        # cg.independentFunctionList = [fx]
+        # cg.dependentFunctionList = [fy]
+        
+        # ybar = UTPM(numpy.ones((D,P,N,M)))
+        # cg.pullback([v2bar])
+        
+        # cg.independentFunctionList[0].xbar.data
+
+        
+        
+        
 
 if __name__ == "__main__":
     run_module_suite()
