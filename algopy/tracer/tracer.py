@@ -268,7 +268,7 @@ class Function(Algebra):
         kwargs = {'out': tuple(argsbar_list)}            
             
         # get the pullback function
-        f = eval('__import__("algopy.utp.utpm.utpm").utp.utpm.utpm.'+F.x.__class__.__name__+'.'+func_name+'_pullback')
+        f = eval('__import__("algopy.utp.utpm.utpm").utp.utpm.utpm.'+F.x.__class__.__name__+'.pb_'+func_name)
         # call the pullbck function
         f(*args, **kwargs )
         

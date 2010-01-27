@@ -400,12 +400,12 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
    
    
     @classmethod
-    def Id_pullback(cls, ybar, x, y, out = None):
+    def pb_Id(cls, ybar, x, y, out = None):
         return out
         
         
     @classmethod
-    def add_pullback(cls, zbar, x, y , z, out = None):
+    def pb_add(cls, zbar, x, y , z, out = None):
         if out == None:
             D,P = y.data.shape[:2]
             xbar = cls(cls.__zeros__(x.data.shape))
@@ -420,7 +420,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         return (xbar,ybar)
         
     @classmethod
-    def sub_pullback(cls, zbar, x, y , z, out = None):
+    def pb_sub(cls, zbar, x, y , z, out = None):
         if out == None:
             D,P = y.data.shape[:2]
             xbar = cls(cls.__zeros__(x.data.shape))
@@ -436,7 +436,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
 
 
     @classmethod
-    def mul_pullback(cls, zbar, x, y , z, out = None):
+    def pb_mul(cls, zbar, x, y , z, out = None):
         if out == None:
             D,P = y.data.shape[:2]
             xbar = cls(cls.__zeros__(x.data.shape))
@@ -451,7 +451,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         return (xbar,ybar)
         
     @classmethod
-    def div_pullback(cls, zbar, x, y , z, out = None):
+    def pb_div(cls, zbar, x, y , z, out = None):
         if out == None:
             D,P = y.data.shape[:2]
             xbar = cls(cls.__zeros__(x.data.shape))
