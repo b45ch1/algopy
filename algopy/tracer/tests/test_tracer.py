@@ -24,11 +24,9 @@ class Test_Function_on_numpy_types(TestCase):
     def test_push_forward_qr(self):
         x = numpy.random.rand(3,3)
         fx = Function(x)
-        fQ,fR = Function.push_forward(numpy.linalg.qr, fx)
-        Q,R  = numpy.linalg.qr(x)
-        assert_array_almost_equal(fQ.x, Q)
-        assert_array_almost_equal(fR.x, R)
-
+        fy = Function.push_forward(numpy.linalg.qr, fx)
+        y  = numpy.linalg.qr(x)
+        assert_array_almost_equal(fy.x, y)
         
 class Test_Function_on_UTPM(TestCase):
     
@@ -174,10 +172,14 @@ class Test_CGgraph_on_UTPM(TestCase):
         D,P,N,M = 1,1,3,3
         x = UTPM(numpy.random.rand(D,P,N,M))
         fx = Function(x)
-        fQ,fR = Function.qr(fx)
-        fU,fl = Function.eigh(fQ)
+        f = Function.qr(fx)
+        
+        fQ,fR = f
         
         print cg
+        # print fx - Function.dot(fQ,fR)
+        
+        
 
         # cg.independentFunctionList = [fx]
         # cg.dependentFunctionList = [fy]

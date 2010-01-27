@@ -210,14 +210,19 @@ class Function(Algebra):
         return '%s'%str(self.x)
 
     def __getitem__(self, sl):
-        if type(sl) == int or sl == Ellipsis:
-            sl = (sl,)
-        tmp = self.x.__getitem__((slice(None),slice(None)) + tuple(sl))
-        return self.__class__(tmp)
+        return Function.push_forward(self.x.__class__.__getitem__,(self,), funcargs = (sl,))
+        # if isinstance(self.x,tuple):
+        #     tmp = self.x.__getitem__(sl)
+        # else:
+        #     if type(sl) == int or sl == Ellipsis:
+        #         sl = (sl,)
+                
+        #     tmp = self.x.__getitem__((slice(None),slice(None)) + tuple(sl))
+        # return self.__class__(tmp)
 
         
     @classmethod
-    def push_forward(cls, func, Fargs, Fout = None):
+    def push_forward(cls, func, Fargs, Fout = None, funcargs = ()):
         """
         Computes the push forward of func
         
@@ -226,19 +231,14 @@ class Function(Algebra):
             Fargs           tuple               tuple of Function nodes
         """
         if numpy.ndim(Fargs) > 0:
-            args = tuple([ fa.x for fa in Fargs])
+            args = tuple([ fa.x for fa in Fargs] + list(funcargs))
             out  = func(*args)
         else:
             arg = Fargs.x
             out  = func(arg)
         
         if Fout == None:
-            retval = cls.create(out, Fargs, func)
-            
-            if isinstance(retval.x, tuple):
-                Nout = len(retval.x)
-                retvals = [cls.create(retval.x[nout], (retval,), cls.__getitem__, funcargs = (nout,)) for nout in range(Nout)]
-                return tuple(retvals)
+            retval = cls.create(out, Fargs, func, funcargs = funcargs)
             return retval
         
         else:
@@ -321,6 +321,9 @@ class Function(Algebra):
     def __rdiv__(self, lhs):
         lhs = lhs.__class__.totype(lhs)
         return lhs/self
+        
+    def dot(self,rhs):
+        return Function.push_forward(self.x.__class__.dot, (self,rhs))
         
     def qr(self):
          return Function.push_forward(self.x.__class__.qr, (self,))
