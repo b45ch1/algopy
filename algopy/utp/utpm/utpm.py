@@ -512,24 +512,26 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         
     @classmethod
     def pb_solve(cls, ybar, A, x, y, out = None):
-        if out == None:
-            D,P = y.data.shape[:2]
-            Abar = cls(cls.__zeros__(A.data.shape))
-            xbar = cls(cls.__zeros__(x.data.shape))
+        D,P = y.data.shape[:2]
         
-        else:
-            Abar, xbar = out    
+        
+        if not isinstance(A, UTPM):
+            raise NotImplementedError('should implement that')
         
         if not isinstance(x, UTPM):
+            
             tmp = x
             x = UTPM(numpy.zeros( (D,P) + x.shape))
             for p in range(P):
                 x.data[0,p] = tmp[...]
-
-        if not isinstance(A, UTPM):
-            raise NotImplementedError('should implement that')
-
+            
+        if out == None:
+            Abar = cls(cls.__zeros__(A.data.shape))
+            xbar = cls(cls.__zeros__(x.data.shape))
         
+        else:
+            Abar, xbar = out
+
         cls._solve_pullback(ybar.data, A.data, x.data, y.data, out = (Abar.data, xbar.data))
 
         return Abar, xbar
