@@ -67,12 +67,15 @@ class CGraph:
     def __str__(self):
         retval = ''
         for f in self.functionList:
-            if numpy.size(f.args)>1:
-                arg_IDS = [ af.ID for af in f.args]
-            else:
-                arg_IDS = f.args.ID
-                
+            arg_IDS = [ af.ID for af in f.args]
             retval += '%s: IDs: %s <- %s  Values: %s <-  %s\n'%(str(f.func.__name__), str(f.ID), str(arg_IDS), str(f.x),str(f.args))
+        
+        retval += '\nIndependent Function List:\n'
+        retval += str([f.ID for f in self.independentFunctionList])
+        
+        retval += '\n\nDependent Function List:\n'
+        retval += str([f.ID for f in self.dependentFunctionList])
+        retval += '\n'
         return retval
         
     def push_forward(self,x_list):
@@ -85,12 +88,40 @@ class CGraph:
         """
         # populate independent arguments with new values
         for nf,f in enumerate(self.independentFunctionList):
-            f.args.x = x_list[nf]
+            f.args[0].x = x_list[nf]
 
         # traverse the computational tree
         for f in self.functionList:
             f.__class__.push_forward(f.func, f.args, Fout = f)
 
+
+    def pullback(self, xbar_list):
+        """
+        Apply the pullback of the cotangent element, 
+        
+        e.g. for::
+        
+            y = y(x)
+        
+        compute::
+        
+            ybar dy(x) = xbar dx
+            
+        """
+        
+        if len(self.dependentFunctionList) == 0:
+            raise Exception('You forgot to specify which variables are dependent!\n e.g. with cg.dependentFunctionList = [F1,F2]')
+
+        # initial all xbar to zero
+        for f in self.functionList:
+            f.xbar_from_x()
+
+        for nf,f in enumerate(self.dependentFunctionList):
+            f.xbar[...] = xbar_list[nf]
+            
+        for f in self.functionList[::-1]:
+            f.__class__.pullback(f)
+        
 
 class Function(Algebra):
     
@@ -99,11 +130,11 @@ class Function(Algebra):
         Creates a new function node that is a variable.
         """
         
-        if x != None:
+        if type(x) != type(None):
             # create a Function node with value x referring to itself, i.e.
             # returning x when called
             cls = self.__class__
-            cls.create(x, self, cls.Id, self)    
+            cls.create(x, (self,), cls.Id, self)    
     
     cgraph = None
     @classmethod
@@ -184,32 +215,70 @@ class Function(Algebra):
             return Fout
             
             
-            
-    def totype(self, x):
+    @classmethod
+    def pullback(cls, F):
         """
-        tries to convert x to an object of the class
+        compute the pullback of the Function F
         
-        works for : scalar x, numpy.ndarray x
+        e.g. if y = f(x)
+        compute xbar as::
         
-        Remark:
-            at the moment, scalar x expanded as GradedRing with the same degree as self though. 
-            The reason is a missing implementation that works for graded rings of different degree.
-            Once such implementations exist, this function should be adapted.
-        
+            ybar dy = ybar df(x) = ybar df/dx dx = xbar dx
+            
+        The Function F contains information about its arguments, F.y and F.ybar.
+        Thus, pullback(F) computes F.args[i].xbar
         """
-        if numpy.isscalar(x):
-            xdata = self.__class__.__zeros_like__(self.data)
-            self.__class__.__scalar_to_data__(xdata, x)
-            return self.__class__(xdata)
+        
+        func_name = F.func.__name__
+        
+        if func_name == '__add__':
+            func_name = 'add'
             
-        elif isinstance(x, numpy.ndarray):
-            raise NotImplementedError('sorry, not implemented just yet')
+        elif func_name == '__sub__':
+            func_name = 'sub'
+        
+        elif func_name == '__mul__':
+            func_name = 'mul'
             
-        elif not isinstance(x, self.__class__):
-            raise NotImplementedError('Cannot convert x\n type(x) = %s but expected type(x) = %s'%(str(type(x))))
+        elif func_name == '__div__':
+            func_name = 'div'
+            
+        
+        f = eval('__import__("algopy.utp.utpm.utpm").utp.utpm.utpm.'+F.x.__class__.__name__+'.'+func_name+'_pullback')
+        
+        args_list = [Fa.x for Fa in F.args]
+        args = [F.xbar] + args_list + [F.x]
+        args = tuple(args)
+        out = f(*args)
+        
+        if not type(out) == tuple:
+            F.args[0].xbar[...] = out
         
         else:
+            for na in range(len(out)):
+                F.args[na].xbar[...] = out[na]
+        
+        return F
+        
+        
+    @classmethod        
+    def totype(cls, x):
+        """
+        tries to convert x to an object of the class
+        """
+            
+        if isinstance(x, cls):
             return x            
+        
+        else:
+            return cls(x)
+            
+    def xbar_from_x(self):
+        if numpy.isscalar(self.x):
+            self.xbar = 0.
+        else:
+            self.xbar = self.x.zeros_like()
+    
     
     def __add__(self,rhs):
         return Function.push_forward(self.x.__class__.__add__,(self,rhs))
@@ -222,6 +291,19 @@ class Function(Algebra):
 
     def __div__(self,rhs):
         return Function.push_forward(self.x.__class__.__div__,(self,rhs))
+        
+    def __radd__(self,lhs):
+        return self + lhs
+
+    def __rsub__(self,lhs):
+        return -self + lhs
+
+    def __rmul__(self,lhs):
+        return self * lhs
+
+    def __rdiv__(self, lhs):
+        lhs = lhs.__class__.totype(lhs)
+        return lhs/self
 
 
 

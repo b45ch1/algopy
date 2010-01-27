@@ -14,7 +14,6 @@ import numpy
 from algopy.base_type import GradedRing
 from algopy.utp.utpm.algorithms import RawAlgorithmsMixIn
 
-
 class UTPM(GradedRing, RawAlgorithmsMixIn):
     """
     UTPM == Univariate Taylor Polynomial of Matrices
@@ -274,7 +273,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         return self
 
     def zeros_like(self):
-        return UTPM(numpy.zeros_like(self.data))
+        return self.__class__(numpy.zeros_like(self.data))
         
 
     def __str__(self):
@@ -283,7 +282,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
     def __repr__(self):
         return self.__str__()
         
-        
+    
     @classmethod
     def dot(cls, x, y, out = None):
         """
@@ -398,6 +397,83 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
             raise NotImplementedError('should implement that')
             
         return out
+   
+   
+    @classmethod
+    def Id_pullback(cls, ybar, x, y, out = None):
+        if out != None:
+            raise NotImplementedError('should implement that')
+            
+        D,P = y.data.shape[:2]
+        xbar = cls(cls.__zeros__(x.data.shape))
+        
+        xbar.data += ybar.data
+        
+        return xbar  
+        
+        
+    @classmethod
+    def add_pullback(cls, zbar, x, y , z, out = None):
+        if out != None:
+            raise NotImplementedError('should implement that')
+            
+        D,P = y.data.shape[:2]
+        
+        xbar = cls(cls.__zeros__(x.data.shape))
+        ybar = cls(cls.__zeros__(y.data.shape))
+        
+        xbar.data += zbar.data
+        ybar.data += zbar.data
+
+        return (xbar,ybar)
+        
+    @classmethod
+    def sub_pullback(cls, zbar, x, y , z, out = None):
+        if out != None:
+            raise NotImplementedError('should implement that')
+            
+        D,P = y.data.shape[:2]
+        
+        xbar = cls(cls.__zeros__(x.data.shape))
+        ybar = cls(cls.__zeros__(y.data.shape))
+        
+        xbar.data += zbar.data
+        ybar.data -= zbar.data
+
+        return (xbar,ybar)        
+
+
+    @classmethod
+    def mul_pullback(cls, zbar, x, y , z, out = None):
+        if out != None:
+            raise NotImplementedError('should implement that')
+            
+        D,P = y.data.shape[:2]
+        
+        xbar = cls(cls.__zeros__(x.data.shape))
+        ybar = cls(cls.__zeros__(y.data.shape))
+        
+        xbar.data += zbar.data * y.data
+        ybar.data += zbar.data * x.data
+
+        return (xbar,ybar)
+        
+    @classmethod
+    def div_pullback(cls, zbar, x, y , z, out = None):
+        if out != None:
+            raise NotImplementedError('should implement that')
+            
+        D,P = y.data.shape[:2]
+        xbar = cls(cls.__zeros__(x.data.shape))
+        ybar = cls(cls.__zeros__(y.data.shape))
+        
+        tmp  = zbar.clone()
+        tmp /= y
+        xbar.data += tmp
+        tmp *= z
+        ybar.data += tmp
+
+        return (xbar,ybar)
         
     @classmethod
     def dot_pullback(cls, zbar, x, y, z, out = None):
