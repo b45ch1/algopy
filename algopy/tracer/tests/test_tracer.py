@@ -123,7 +123,7 @@ class Test_CGgraph_on_UTPM(TestCase):
         y = UTPM(numpy.random.rand(D,P,N,M))
         fx = Function(x)
         fy = Function(y)
-        fv1 = fx * fy
+        fv1 = fx * fy * fx
         cg.independentFunctionList = [fx,fy]
         cg.dependentFunctionList = [fv1]
         
@@ -131,41 +131,40 @@ class Test_CGgraph_on_UTPM(TestCase):
         cg.pullback([v1bar])
         
         # symbolic differentiation
-        dzdx = y
+        dzdx = 2.*x*y
+        dzdy = x*x
         
-        print cg.independentFunctionList[0].xbar
-        print dzdx        
+        assert_array_almost_equal(dzdx.data, cg.independentFunctionList[0].xbar.data)
+        assert_array_almost_equal(dzdy.data, cg.independentFunctionList[1].xbar.data)
         
-        
-    # def test_pullback2(self):
-        # """
-        # z = (x*y*x+y)*x*y
-          # =  x**3 * y**2 + x * y**2
+    def test_pullback2(self):
+        """
+        z = (x*y*x+y)*x*y
+          =  x**3 * y**2 + x * y**2
           
-        # dz/dx = 3 * x**2 * y**2 + y**2
-        # dz/dy = 2 * x**3 * y  + 2 * x * y 
-        # """
-        # cg = CGraph()
-        # D,P,N,M = 1,1,1,1
-        # aX = UTPM(numpy.random.rand(D,P,N,M))
-        # aY = UTPM(numpy.random.rand(D,P,N,M))
-        # fX = Function(aX)
-        # fY = Function(aY)
-        # fV1 = fX * fY
-        # fV2 = (fV1 * fX + fY)*fV1
-        # cg.independentFunctionList = [fX,fY]
-        # cg.dependentFunctionList = [fV2]
-        # # cg.push_forward([aX,aY])
+        dz/dx = 3 * x**2 * y**2 + y**2
+        dz/dy = 2 * x**3 * y  + 2 * x * y 
+        """
+        cg = CGraph()
+        D,P,N,M = 1,1,1,1
+        x = UTPM(numpy.random.rand(D,P,N,M))
+        y = UTPM(numpy.random.rand(D,P,N,M))
+        fx = Function(x)
+        fy = Function(y)
+        fv1 = fx * fy
+        fv2 = (fv1 * fx + fy)*fv1
+        cg.independentFunctionList = [fx,fy]
+        cg.dependentFunctionList = [fv2]
         
-        # aV2bar = UTPM(numpy.ones((D,P,N,M)))
-        # cg.pullback([aV2bar])
+        v2bar = UTPM(numpy.ones((D,P,N,M)))
+        cg.pullback([v2bar])
         
-        # # symbolic differentiation
-        # dzdx = 3 * aX*aX * aY*aY + aY*aY
+        # symbolic differentiation
+        dzdx = 3 * x*x * y*y + y*y
+        dzdy = 2 * x*x*x * y  + 2 * x * y
         
-        # print cg.independentFunctionList[0].xbar
-        # print dzdx
-
+        assert_array_almost_equal(dzdx.data, cg.independentFunctionList[0].xbar.data)
+        assert_array_almost_equal(dzdy.data, cg.independentFunctionList[1].xbar.data)
 
 if __name__ == "__main__":
     run_module_suite()

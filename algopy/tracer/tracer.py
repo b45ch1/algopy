@@ -133,13 +133,8 @@ class CGraph:
         for nf,f in enumerate(self.dependentFunctionList):
             f.xbar[...] = xbar_list[nf]
             
-            
-        print self
-        
         for f in self.functionList[::-1]:
-            print 'apply pullback of function ID = %d'%f.ID
             f.__class__.pullback(f)
-            print self
         
 
 class Function(Algebra):
@@ -264,20 +259,18 @@ class Function(Algebra):
         elif func_name == '__div__':
             func_name = 'div'
             
+        args_list    = [Fa.x for Fa in F.args]
+        argsbar_list = [Fa.xbar for Fa in F.args]
         
-        f = eval('__import__("algopy.utp.utpm.utpm").utp.utpm.utpm.'+F.x.__class__.__name__+'.'+func_name+'_pullback')
-        
-        args_list = [Fa.x for Fa in F.args]
         args = [F.xbar] + args_list + [F.x]
         args = tuple(args)
-        out = f(*args)
         
-        if not type(out) == tuple:
-            F.args[0].xbar[...] += out
-        
-        else:
-            for na in range(len(out)):
-                F.args[na].xbar[...] += out[na]
+        kwargs = {'out': tuple(argsbar_list)}            
+            
+        # get the pullback function
+        f = eval('__import__("algopy.utp.utpm.utpm").utp.utpm.utpm.'+F.x.__class__.__name__+'.'+func_name+'_pullback')
+        # call the pullbck function
+        f(*args, **kwargs )
         
         return F
         
