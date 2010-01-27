@@ -405,6 +405,22 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         
         
     @classmethod
+    def pb___add__(cls, zbar, x, y , z, out = None):
+        return cls.pb_add(zbar, x, y , z, out = out)
+        
+    @classmethod
+    def pb___sub__(cls, zbar, x, y , z, out = None):
+        return cls.pb_sub(zbar, x, y , z, out = out)        
+        
+    @classmethod
+    def pb___mul__(cls, zbar, x, y , z, out = None):
+        return cls.pb_mul(zbar, x, y , z, out = out)
+        
+    @classmethod
+    def pb___mul__(cls, zbar, x, y , z, out = None):
+        return cls.pb_mul(zbar, x, y , z, out = out)             
+        
+    @classmethod
     def pb_add(cls, zbar, x, y , z, out = None):
         if out == None:
             D,P = y.data.shape[:2]

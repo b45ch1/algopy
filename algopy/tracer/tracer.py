@@ -247,17 +247,17 @@ class Function(Algebra):
         
         func_name = F.func.__name__
         
-        if func_name == '__add__':
-            func_name = 'add'
+        # if func_name == '__add__':
+            # func_name = 'add'
             
-        elif func_name == '__sub__':
-            func_name = 'sub'
+        # elif func_name == '__sub__':
+            # func_name = 'sub'
         
-        elif func_name == '__mul__':
-            func_name = 'mul'
+        # elif func_name == '__mul__':
+            # func_name = 'mul'
             
-        elif func_name == '__div__':
-            func_name = 'div'
+        # elif func_name == '__div__':
+            # func_name = 'div'
             
         args_list    = [Fa.x for Fa in F.args]
         argsbar_list = [Fa.xbar for Fa in F.args]
