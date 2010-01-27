@@ -20,7 +20,10 @@ Rationale:
 
 import numpy
 
-class GradedRing(object):
+
+
+
+class Algebra(object):
     """
     data has to be mutable because it is passed as reference to algorithms, e.g. as
     add(result.data, lhs.data, rhs.data) where add changed result.data inplace.
@@ -89,6 +92,8 @@ class GradedRing(object):
         
     def __str__(self):
        return str(self.data)
- 
 
+
+class GradedRing(Algebra):
+    pass
 

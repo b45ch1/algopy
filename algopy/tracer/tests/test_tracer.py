@@ -44,7 +44,7 @@ class Test_Function_on_UTPM(TestCase):
         
         
 
-class Test_CGgraph(TestCase):
+class Test_CGgraph_on_numpy_operations(TestCase):
     def test_push_forward(self):
         cg = CGraph()
         fx = Function(1.)
@@ -61,6 +61,20 @@ class Test_CGgraph(TestCase):
         cg.push_forward([x,y])
         assert_array_almost_equal( cg.dependentFunctionList[0].x,  (x + y) * y)
         
+class Test_CGgraph_on_UTPM(TestCase):
+    def test_push_forward(self):
+        cg = CGraph()
+        D,P,N,M = 2,5,7,11
+        aX = UTPM(numpy.random.rand(D,P,N,M))
+        aY = UTPM(numpy.random.rand(D,P,N,M))
+        fX = Function(aX)
+        fY = Function(aY)
+        fV1 = fX * fY
+        fV2 = (fV1 * fX + fY)*fV1
+        cg.independentFunctionList = [fX,fY]
+        cg.dependentFunctionList = [fV2]
+        cg.push_forward([aX,aY])
+        assert_array_almost_equal(cg.dependentFunctionList[0].x.data, ((aX*aY * aX + aY)*aX*aY).data)
         
 if __name__ == "__main__":
     run_module_suite()

@@ -237,6 +237,16 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         return UTPM(tmp)        
 
     def clone(self):
+        """
+        Returns a new UTPM instance with the same data.
+        
+        `clone` is opposed to `copy` or `deepcopy` by calling the __init__ function.
+        
+        Rationale:
+            the __init__ function may have side effects that must be executed.
+            Naming stems from the fact that a cloned animal is not an exact copy
+            but built using the same information.
+        """
         return UTPM(self.data.copy())
 
     def get_shape(self):
