@@ -134,11 +134,12 @@ class CGraph:
         for nf,f in enumerate(self.dependentFunctionList):
             f.xbar[...] = xbar_list[nf]
             
-        print self
-            
+        # print self
         for f in self.functionList[::-1]:
             print 'pullback of f=',f.func.__name__
             f.__class__.pullback(f)
+            # print self
+
         
 
 class Function(Algebra):
@@ -280,11 +281,11 @@ class Function(Algebra):
         
         func_name = F.func.__name__
         
-        args_list    = [Fa.x for Fa in F.args]
-        argsbar_list = [Fa.xbar for Fa in F.args]
-        
         if isinstance(F.x,tuple):
             # case if the function F has several outputs, e.g. (y1,y2) = F(x)
+            args_list    = [Fa.x for Fa in F.args]
+            argsbar_list = [Fa.xbar for Fa in F.args]            
+            
             args = list(F.xbar) + args_list + list(F.x)
             args = tuple(args)
             
@@ -293,14 +294,17 @@ class Function(Algebra):
             if len(F.funcargs):
                 kwargs['funcargs'] = F.funcargs
                 
-            print 'func_name=',func_name
-            print 'args=',args
-            print 'kwargs=',kwargs                
+            # print 'func_name=',func_name
+            # print 'args=',args
+            # print 'kwargs=',kwargs                
             # get the pullback function
             f = eval('__import__("algopy.utp.utpm.utpm").utp.utpm.utpm.'+F.x[0].__class__.__name__+'.pb_'+func_name)            
 
         else:
             # case if the function F has output, e.g. y1 = F(x)
+            args_list    = [Fa.x for Fa in F.args]
+            argsbar_list = [Fa.xbar for Fa in F.args]
+            
             args = [F.xbar] + args_list + [F.x]
             args = tuple(args)
             kwargs = {'out': tuple(argsbar_list)}

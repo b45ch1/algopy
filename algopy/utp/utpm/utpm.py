@@ -68,11 +68,25 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         return UTPM(tmp)
         
     @classmethod    
-    def pb___getitem__(cls, ybar, x, y, out = None, funcargs = ()):
+    def pb___getitem__(cls, ybar, x, y, out = None, funcargs = None):
         """
         y = getitem(x, sl) 
         """
-        print 'called pb___getitem__'
+        if out == None:
+            raise NotImplementedError('I\'m not sure this makes sense')
+            
+        # print 'called pb___getitem__'
+        # print 'ybar=',ybar
+        # print 'out=',out
+        # print 'funcargs=',funcargs
+        
+        print out[0][funcargs[0]].data.dtype
+        print ybar.data.dtype
+        
+        tmp = out[0][funcargs[0]]
+        tmp += ybar
+        
+        return out
         
     def __setitem__(self, sl, rhs):
         if isinstance(rhs, UTPM):

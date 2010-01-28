@@ -204,9 +204,10 @@ class Test_CGgraph_on_UTPM(TestCase):
         Qbar = UTPM(numpy.ones((D,P,N,M)))
         Rbar = UTPM(numpy.ones((D,P,N,M)))
         
-        print cg
+        # print cg
         cg.pullback([Qbar,Rbar])
-        
+        print cg
+
         # cg.independentFunctionList[0].xbar.data
 
         
