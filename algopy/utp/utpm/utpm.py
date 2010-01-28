@@ -67,6 +67,13 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         tmp = self.data.__getitem__((slice(None),slice(None)) + tuple(sl))
         return UTPM(tmp)
         
+    @classmethod    
+    def pb___getitem__(cls, ybar, x, y, out = None, funcargs = ()):
+        """
+        y = getitem(x, sl) 
+        """
+        print 'called pb___getitem__'
+        
     def __setitem__(self, sl, rhs):
         if isinstance(rhs, UTPM):
             if type(sl) == int or sl == Ellipsis:
@@ -561,7 +568,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
             Abar = cls(cls.__zeros__((D,P,M,N)))
         
         else:
-            Abar = out
+            Abar, = out
         
         UTPM._qr_pullback( Qbar.data, Rbar.data, A.data, Q.data, R.data, out = Abar.data)
         return Abar
@@ -598,7 +605,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
             Abar = cls(cls.__zeros__((D,P,M,N)))
         
         else:
-            Abar = out
+            Abar, = out
         
         UTPM._eigh_pullback( lbar.data,  Qbar.data, A.data,  l.data, Q.data, out = Abar.data)
         return Abar

@@ -134,7 +134,10 @@ class CGraph:
         for nf,f in enumerate(self.dependentFunctionList):
             f.xbar[...] = xbar_list[nf]
             
+        print self
+            
         for f in self.functionList[::-1]:
+            print 'pullback of f=',f.func.__name__
             f.__class__.pullback(f)
         
 
@@ -256,6 +259,21 @@ class Function(Algebra):
         
             ybar dy = ybar df(x) = ybar df/dx dx = xbar dx
             
+        More specifically:
+        
+        (y1,y2) = f(x1,x2, funcargs = v)
+        
+        where v is a constant argument.
+        
+        Examples:
+
+            1) (Q,R) = qr(A)
+            2) Q = getitem(qr(A),0)
+        
+        This function assumes that for each function f there is a corresponding function::
+        
+            pb_f(y1bar,y2bar,x1,x2,y1,y2,out=(x1bar, x2bar), funcargs = v)
+            
         The Function F contains information about its arguments, F.y and F.ybar.
         Thus, pullback(F) computes F.args[i].xbar
         """
@@ -265,13 +283,36 @@ class Function(Algebra):
         args_list    = [Fa.x for Fa in F.args]
         argsbar_list = [Fa.xbar for Fa in F.args]
         
-        args = [F.xbar] + args_list + [F.x]
-        args = tuple(args)
-        
-        kwargs = {'out': tuple(argsbar_list)}
+        if isinstance(F.x,tuple):
+            # case if the function F has several outputs, e.g. (y1,y2) = F(x)
+            args = list(F.xbar) + args_list + list(F.x)
+            args = tuple(args)
             
-        # get the pullback function
-        f = eval('__import__("algopy.utp.utpm.utpm").utp.utpm.utpm.'+F.x.__class__.__name__+'.pb_'+func_name)
+            kwargs = {'out': tuple(argsbar_list)}
+            
+            if len(F.funcargs):
+                kwargs['funcargs'] = F.funcargs
+                
+            print 'func_name=',func_name
+            print 'args=',args
+            print 'kwargs=',kwargs                
+            # get the pullback function
+            f = eval('__import__("algopy.utp.utpm.utpm").utp.utpm.utpm.'+F.x[0].__class__.__name__+'.pb_'+func_name)            
+
+        else:
+            # case if the function F has output, e.g. y1 = F(x)
+            args = [F.xbar] + args_list + [F.x]
+            args = tuple(args)
+            kwargs = {'out': tuple(argsbar_list)}
+            
+            if len(F.funcargs):
+                # add additional funcargs if they are set
+                kwargs['funcargs'] = F.funcargs
+                
+            # get the pullback function
+            f = eval('__import__("algopy.utp.utpm.utpm").utp.utpm.utpm.'+F.x.__class__.__name__+'.pb_'+func_name)
+
+        
         # call the pullbck function
         f(*args, **kwargs )
         
@@ -293,6 +334,9 @@ class Function(Algebra):
     def xbar_from_x(self):
         if numpy.isscalar(self.x):
             self.xbar = 0.
+            
+        elif isinstance(self.x, tuple):
+            self.xbar = tuple( [xi.zeros_like() for xi in self.x])
         else:
             self.xbar = self.x.zeros_like()
     
