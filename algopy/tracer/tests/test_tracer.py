@@ -258,7 +258,7 @@ class Test_CGgraph_on_UTPM(TestCase):
             assert_almost_equal(numpy.trace(numpy.dot(Ab.T,Ad)), numpy.trace(numpy.dot(Qb.T,Qd) + numpy.dot(Rb.T,Rd)))
 
 
-    def test_pullback5(self):
+    def test_pullback_inv(self):
         """
         test pullback on
         f = inv(A)
@@ -298,6 +298,56 @@ class Test_CGgraph_on_UTPM(TestCase):
             Ainvb = Ainvbar.data[0,p]
             Ainvd = Ainv.data[1,p]
             assert_almost_equal(numpy.trace(numpy.dot(Ab.T,Ad)), numpy.trace(numpy.dot(Ainvb.T,Ainvd)))
+
+
+    def test_pullback_solve(self):
+        """
+        test pullback on
+        f = solve(A,x)
+        """
+        
+        (D,P,M,N,K) = 2,7,10,10,3
+        A_data = numpy.random.rand(D,P,M,N)
+
+        # make A_data sufficiently regular
+        for p in range(P):
+            for n in range(N):
+                A_data[0,p,n,n] += (N + 1)
+
+        A = UTPM(A_data)
+        x = UTPM(numpy.random.rand(D,P,N,K))
+        
+        # STEP 1: tracing
+        cg = CGraph()
+        fA = Function(A)
+        fx = Function(x)
+        fy = Function.solve(fA,fx)
+        cg.independentFunctionList = [fA]
+        cg.dependentFunctionList = [fy]
+        
+        y = fy.x
+        # STEP 2: pullback
+
+        ybar_data = numpy.random.rand(*y.data.shape)
+        ybar = UTPM(ybar_data)
+        cg.pullback([ybar])
+        
+        Abar = fA.xbar
+        xbar = fx.xbar
+        
+        assert_array_almost_equal(x.data, UTPM.dot(A,y).data)
+        
+        for p in range(P):
+            Ab = Abar.data[0,p]
+            Ad = A.data[1,p]
+            
+            xb = xbar.data[0,p]
+            xd = x.data[1,p]
+            
+            yb = ybar.data[0,p]
+            yd = y.data[1,p]
+            assert_almost_equal(numpy.trace(numpy.dot(Ab.T,Ad)) + numpy.trace(numpy.dot(xb.T,xd)), numpy.trace(numpy.dot(yb.T,yd)))
+
 
 
     def test_pullback5(self):

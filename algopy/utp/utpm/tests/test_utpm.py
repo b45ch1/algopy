@@ -350,7 +350,7 @@ class Test_Push_Forward(TestCase):
         assert_array_almost_equal(UTPM.dot(A, Ainv).data, Id)
 
     def test_solve(self):
-        (D,P,N,M) = 3,3,30,1
+        (D,P,N,M) = 3,3,30,5
         x = UTPM(numpy.random.rand(D,P,N,M))
         A = UTPM(numpy.random.rand(D,P,N,N))
 

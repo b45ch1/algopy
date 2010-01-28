@@ -382,4 +382,5 @@ class Function(Algebra):
     def eigh(self):
          return Function.push_forward(self.x.__class__.eigh, (self,))
 
-        
+    def solve(self,rhs):
+        return Function.push_forward(self.x.__class__.solve, (self,rhs))
