@@ -385,6 +385,9 @@ class Function(Algebra):
     def solve(self,rhs):
         return Function.push_forward(self.x.__class__.solve, (self,rhs))
         
+    def trace(self):
+        return Function.push_forward(self.x.__class__.trace, (self,))
+        
     def transpose(self):
         return Function.push_forward(self.x.__class__.transpose, (self,))
         

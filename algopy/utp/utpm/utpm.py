@@ -231,6 +231,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
                 retval[d,p] = numpy.trace(x.data[d,p,...])
         return UTPM(retval)
         
+        
     def FtoJT(self):
         """
         Combines several directional derivatives and combines them to a transposed Jacobian JT, i.e.
@@ -557,6 +558,26 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
 
         return Abar, xbar
 
+    @classmethod
+    def pb_trace(cls, ybar, x, y, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        
+        xbar, = out 
+        Nx = xbar.shape[0]
+        for nx in range(Nx):
+            xbar[nx,nx] += ybar
+        
+        return xbar
+
+    @classmethod
+    def pb_transpose(cls, ybar, x, y, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        
+        xbar, = out
+        xbar += cls.transpose(ybar)
+        return xbar
 
     @classmethod
     def qr(cls, A, out = None, work = None):
