@@ -136,7 +136,7 @@ class CGraph:
             
         # print self
         for f in self.functionList[::-1]:
-            print 'pullback of f=',f.func.__name__
+            # print 'pullback of f=',f.func.__name__
             f.__class__.pullback(f)
             # print self
 

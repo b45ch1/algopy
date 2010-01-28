@@ -80,8 +80,8 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         # print 'out=',out
         # print 'funcargs=',funcargs
         
-        print out[0][funcargs[0]].data.dtype
-        print ybar.data.dtype
+        # print out[0][funcargs[0]].data.dtype
+        # print ybar.data.dtype
         
         tmp = out[0][funcargs[0]]
         tmp += ybar
