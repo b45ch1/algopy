@@ -373,6 +373,9 @@ class Function(Algebra):
     def dot(self,rhs):
         return Function.push_forward(self.x.__class__.dot, (self,rhs))
         
+    def inv(self):
+         return Function.push_forward(self.x.__class__.inv, (self,))
+         
     def qr(self):
          return Function.push_forward(self.x.__class__.qr, (self,))
 

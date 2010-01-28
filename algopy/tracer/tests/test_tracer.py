@@ -258,7 +258,98 @@ class Test_CGgraph_on_UTPM(TestCase):
             assert_almost_equal(numpy.trace(numpy.dot(Ab.T,Ad)), numpy.trace(numpy.dot(Qb.T,Qd) + numpy.dot(Rb.T,Rd)))
 
 
-        # cg.independentFunctionList[0].xbar.data
+    def test_pullback5(self):
+        """
+        test pullback on
+        f = inv(A)
+        """
+        
+        (D,P,M,N) = 2,7,10,10
+        A_data = numpy.random.rand(D,P,M,N)
+
+        # make A_data sufficiently regular
+        for p in range(P):
+            for n in range(N):
+                A_data[0,p,n,n] += (N + 1)
+
+        A = UTPM(A_data)
+        
+        # STEP 1: tracing
+        cg = CGraph()
+        fA = Function(A)
+        fAinv = Function.inv(fA)
+        cg.independentFunctionList = [fA]
+        cg.dependentFunctionList = [fAinv]
+        
+        Ainv = fAinv.x
+        # STEP 2: pullback
+
+        Ainvbar_data = numpy.random.rand(*Ainv.data.shape)
+
+        Ainvbar = UTPM(Ainvbar_data)
+        cg.pullback([Ainvbar])
+        
+        Abar = fA.xbar
+        
+        for p in range(P):
+            Ab = Abar.data[0,p]
+            Ad = A.data[1,p]
+
+            Ainvb = Ainvbar.data[0,p]
+            Ainvd = Ainv.data[1,p]
+            assert_almost_equal(numpy.trace(numpy.dot(Ab.T,Ad)), numpy.trace(numpy.dot(Ainvb.T,Ainvd)))
+
+
+    def test_pullback5(self):
+        """
+        test pullback on::
+        
+            Q,R = qr(A)
+            Rinv = inv(R)
+            
+        """
+        
+        (D,P,M,N) = 2,2,3,2
+        A_data = numpy.random.rand(D,P,M,N)
+
+        # make A_data sufficiently regular
+        for p in range(P):
+            for n in range(N):
+                A_data[0,p,n,n] += (N + 1)
+
+        A = UTPM(A_data)
+        
+        # STEP 1: tracing
+        cg = CGraph()
+        fA = Function(A)
+        fQ,fR = Function.qr(fA)
+        fRinv = Function.inv(fR)
+        cg.independentFunctionList = [fA]
+        cg.dependentFunctionList = [fRinv]
+        
+        Rinv = fRinv.x
+
+        # STEP 2: pullback
+        Rinvbar_data = numpy.random.rand(*Rinv.data.shape)
+
+        # make Rinvbar upper triangular
+        for r in range(N):
+            for c in range(N):
+                Rinvbar_data[:,:,r,c] *= (c>=r)
+
+        Rinvbar = UTPM(Rinvbar_data)
+        cg.pullback([Rinvbar])
+
+        Abar = fA.xbar
+
+        for p in range(P):
+            Ab = Abar.data[0,p]
+            Ad = A.data[1,p]
+
+            Rinvb = Rinvbar.data[0,p]
+            Rinvd = Rinv.data[1,p]
+            
+            assert_almost_equal(numpy.trace(numpy.dot(Ab.T,Ad)), numpy.trace(numpy.dot(Rinvb.T,Rinvd)))
 
         
         

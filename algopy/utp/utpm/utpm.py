@@ -525,7 +525,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
             xbar = cls(cls.__zeros__(x.data.shape))
         
         else:
-            xbar = out
+            xbar, = out
             
         cls._inv_pullback(ybar.data, x.data, y.data, out = xbar.data)
         return xbar
