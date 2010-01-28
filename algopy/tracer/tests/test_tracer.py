@@ -402,8 +402,107 @@ class Test_CGgraph_on_UTPM(TestCase):
             assert_almost_equal(numpy.trace(numpy.dot(Ab.T,Ad)), numpy.trace(numpy.dot(Rinvb.T,Rinvd)))
 
         
+    def test_reverse_on_basic_element_wise_functions(self):
+        cg = CGraph()
+        D,P,N,M = 2,5,7,11
+        ax = UTPM(numpy.random.rand(D,P,N,M))
+        ay = UTPM(numpy.random.rand(D,P,N,M))
+        fx = Function(ax)
+        fy = Function(ay)
+        fv1 = fx * fy
+        fv2 = (fv1 * fx + fy)*fv1
+        cg.independentFunctionList = [fx,fy]
+        cg.dependentFunctionList = [fv2]
+
+        v2bar = UTPM(numpy.zeros((D,P,N,M)))
+        v2bar.data[0,:,:,:] = 1.
+        cg.pullback([v2bar])
+
+        xbar_reverse = cg.independentFunctionList[0].xbar
+        ybar_reverse = cg.independentFunctionList[1].xbar
+        
+        xbar_symbolic = 3. * ax*ax * ay*ay + ay*ay
+        ybar_symbolic = 2.*ax*ax*ax * ay + 2. * ax * ay
+
+        # print xbar_symbolic.tc
+        # print xbar_reverse
+        # print ybar_symbolic
+        # print ybar_reverse
+        
+        assert_array_almost_equal(xbar_reverse.data, xbar_symbolic.data)
+        assert_array_almost_equal(ybar_reverse.data, ybar_symbolic.data)
+        
+    def test_dot(self):
+        cg = CGraph()
+        D,P,N,M = 2,5,7,11
+        ax = UTPM(numpy.random.rand(D,P,N,M))
+        ay = UTPM(numpy.random.rand(D,P,M,N))
+        fx = Function(ax)
+        fy = Function(ay)
+        fz = Function.dot(fx,fy)
+        cg.independentFunctionList = [fx,fy]
+        cg.dependentFunctionList = [fz]
+        
+        ax = UTPM(numpy.random.rand(D,P,N,M))
+        ay = UTPM(numpy.random.rand(D,P,M,N))
+        azbar = UTPM(numpy.random.rand(*fz.x.data.shape))
+        cg.push_forward([ax,ay])
+        cg.pullback([azbar])
+        
+        xbar_reverse = cg.independentFunctionList[0].xbar
+        ybar_reverse = cg.independentFunctionList[1].xbar        
+        
+        xbar_symbolic = UTPM.dot(azbar,ay.T)
+        ybar_symbolic = UTPM.dot(ax.T,azbar)
+        
+        assert_array_almost_equal(xbar_reverse.data, xbar_symbolic.data)
+        assert_array_almost_equal(ybar_reverse.data, ybar_symbolic.data)
         
         
+    def test_transpose(self):
+        cg = CGraph()
+        D,P,N,M = 2,5,7,11
+        ax = UTPM(numpy.random.rand(D,P,N,M))
+        fx = Function(ax)
+        fy = Function.transpose(fx)
+        cg.independentFunctionList = [fx]
+        cg.dependentFunctionList = [fy]
+
+        assert_array_equal(fy.shape, (M,N))
+        assert_array_equal(fy.x.data.shape, (D,P,M,N))
+        
+        cg.push_forward([ax])
+        assert_array_equal(cg.dependentFunctionList[0].shape, (M,N))
+        assert_array_equal(cg.dependentFunctionList[0].x.data.shape, (D,P,M,N))
+        
+    def test_T(self):
+        cg = CGraph()
+        D,P,N,M = 2,5,7,11
+        ax = UTPM(numpy.random.rand(D,P,N,M))
+        fx = Function(ax)
+        fy = fx.T
+        cg.independentFunctionList = [fx]
+        cg.dependentFunctionList = [fy]
+
+        assert_array_equal(fy.shape, (M,N))
+        assert_array_equal(fy.x.data.shape, (D,P,M,N))
+        
+        cg.push_forward([ax])
+        assert_array_equal(cg.dependentFunctionList[0].shape, (M,N))
+        assert_array_equal(cg.dependentFunctionList[0].x.data.shape, (D,P,M,N))        
+    
+    def test_part_of_ODOE_objective_function(self):
+        D,P,N,M = 2,5,100,3
+        MJs = [ UTPM(numpy.random.rand(D,P,N,M)), UTPM(numpy.random.rand(D,P,N,M))]
+        cg = CGraph()
+        FJs = [Function(MJ) for MJ in MJs]
+        FPhi = numpy.sum([ Function.dot(FJ.T, FJ) for FJ in FJs ])
+        cg.independentFunctionList = FJs
+        cg.dependentFunctionList = [FPhi]
+        
+        assert_array_equal(FPhi.shape, (M,M))
+        cg.push_forward(MJs)
+        assert_array_equal(cg.dependentFunctionList[0].x.data.shape, [D,P,M,M])
 
 if __name__ == "__main__":
     run_module_suite()

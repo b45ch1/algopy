@@ -384,3 +384,13 @@ class Function(Algebra):
 
     def solve(self,rhs):
         return Function.push_forward(self.x.__class__.solve, (self,rhs))
+        
+    def transpose(self):
+        return Function.push_forward(self.x.__class__.transpose, (self,))
+        
+    T = property(transpose)
+    
+    def get_shape(self):
+        return self.x.shape
+    shape = property(get_shape)
+ 
