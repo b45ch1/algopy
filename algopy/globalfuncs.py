@@ -4,7 +4,7 @@ from algopy.utp.utpm import UTPM
 
 # override numpy definitions
 
-numpy_function_names = ['trace', 'dot']
+numpy_function_names = ['trace', 'dot', 'zeros_like']
 numpy_linalg_function_names = ['inv', 'solve', 'eig']
 
 function_template = string.Template('''
