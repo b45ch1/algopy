@@ -269,6 +269,9 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
             but built using the same information.
         """
         return UTPM(self.data.copy())
+        
+    def copy(self):
+        return self.clone()
 
     def get_shape(self):
         return numpy.shape(self.data[0,0,...])
