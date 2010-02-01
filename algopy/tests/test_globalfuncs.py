@@ -17,7 +17,8 @@ class Test_Global_Functions_on_Numpy_instances(TestCase):
         
     def test_zeros(self):
         N,M = 3,4
-        y = zeros((N,M), dtype=float)
+        x = numpy.zeros((1,1),dtype=float)
+        y = zeros((N,M), dtype=x)
         assert_array_almost_equal(numpy.zeros((N,M)), y)
         
     def test_global_zeros_like(self):

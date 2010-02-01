@@ -38,6 +38,9 @@ def zeros( shape, dtype=float, order = 'C'):
         D,P = dtype.data.shape[:2]
         return UTPM(numpy.zeros((D,P) + shape ,dtype = float))
     
+    elif isinstance(dtype,numpy.ndarray):
+        return numpy.zeros(shape,dtype=dtype.dtype, order=order)
+        
     else:
         return numpy.zeros(shape, dtype=dtype,order=order)
 
