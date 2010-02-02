@@ -284,6 +284,11 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
             but built using the same information.
         """
         return UTPM(self.data.copy())
+        
+    def copy(self):
+        """ this method is equivalent to `clone`.
+        It's there to allow generic programming because ndarrays do not have the clone method."""
+        return self.clone()
 
     def get_shape(self):
         return numpy.shape(self.data[0,0,...])
