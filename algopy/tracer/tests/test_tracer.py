@@ -65,6 +65,29 @@ class Test_Function_on_UTPM(TestCase):
         assert_almost_equal(fy.xbar.data, (fz.xbar * fx.xbar).data)
         
 
+class Test_Mixed_Function_Operations(TestCase):
+    def test_scalar(self):
+        D,P,N = 2,3,4
+        x = 4.
+        y = 3.
+        fx = Function(x)
+        
+        fz11 = fx + y
+        fz12 = fx - y
+        fz13 = fx * y
+        fz14 = fx / y
+        
+        fz21 = y + fx
+        fz22 = - (y - fx)
+        fz23 = y * fx
+        fz24 = 1./(y/fx)
+        
+        assert_array_almost_equal(fz11.x, fz21.x)
+        assert_array_almost_equal(fz12.x, fz22.x)
+        assert_array_almost_equal(fz13.x, fz23.x)
+        assert_array_almost_equal(fz14.x, fz24.x)
+        
+
 class Test_CGgraph_on_numpy_operations(TestCase):
     def test_push_forward(self):
         cg = CGraph()

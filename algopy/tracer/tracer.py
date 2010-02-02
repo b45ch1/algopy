@@ -202,6 +202,8 @@ class CGraph:
 
 class Function(Algebra):
     
+    __array_priority__ = 2
+    
     xbar = NotSet()
     
     def __init__(self, x = None):
@@ -401,18 +403,25 @@ class Function(Algebra):
             self.xbar = tuple( [xi.zeros_like() for xi in self.x])
         else:
             self.xbar = self.x.zeros_like()
-    
+
+
+    def __neg__(self):
+        return self.__class__(-self.x)
     
     def __add__(self,rhs):
+        rhs = self.totype(rhs)
         return Function.push_forward(self.x.__class__.__add__,(self,rhs))
 
     def __sub__(self,rhs):
+        rhs = self.totype(rhs)
         return Function.push_forward(self.x.__class__.__sub__,(self,rhs))
 
     def __mul__(self,rhs):
+        rhs = self.totype(rhs)
         return Function.push_forward(self.x.__class__.__mul__,(self,rhs))
 
     def __div__(self,rhs):
+        rhs = self.totype(rhs)
         return Function.push_forward(self.x.__class__.__div__,(self,rhs))
         
     def __radd__(self,lhs):
@@ -425,7 +434,7 @@ class Function(Algebra):
         return self * lhs
 
     def __rdiv__(self, lhs):
-        lhs = lhs.__class__.totype(lhs)
+        lhs = self.__class__.totype(lhs)
         return lhs/self
         
     def dot(self,rhs):

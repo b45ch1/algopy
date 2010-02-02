@@ -180,7 +180,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         
 
     def __neg__(self):
-        return UTPM(-self.data)
+        return self.__class__(-self.data)
         
     @classmethod
     def add(cls, x, y , out = None):
