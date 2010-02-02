@@ -1,4 +1,7 @@
 from numpy.testing import *
+from environment import Settings
+import os
+
 from algopy.tracer.tracer import *
 from algopy.utp.utpm import UTPM
 from algopy.utp.utps import UTPS
@@ -503,6 +506,25 @@ class Test_CGgraph_on_UTPM(TestCase):
         assert_array_equal(FPhi.shape, (M,M))
         cg.push_forward(MJs)
         assert_array_equal(cg.dependentFunctionList[0].x.data.shape, [D,P,M,M])
+
+
+class Test_CGraph_Plotting(TestCase):
+    def test_simple(self):
+        cg = CGraph()
+        D,P,N,M = 2,5,7,11
+        ax = UTPM(numpy.random.rand(D,P,N,M))
+        ay = UTPM(numpy.random.rand(D,P,M,N))
+        fx = Function(ax)
+        fy = Function(ay)
+        fz = Function.dot(fx,fy)
+        fz = Function.dot(fz,fy.T)
+        fz = Function.dot((fz * fx + fx),fy)
+
+        cg.independentFunctionList = [fx,fy]
+        cg.dependentFunctionList = [fz]
+        cg.plot(os.path.join(Settings.output_dir,'test_simple.png'))
+        
+
 
 if __name__ == "__main__":
     run_module_suite()

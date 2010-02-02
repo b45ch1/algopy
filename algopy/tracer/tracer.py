@@ -140,7 +140,65 @@ class CGraph:
             f.__class__.pullback(f)
             # print self
 
+
+    def plot(self, filename = None, method = None, orientation = 'TD'):
+        """
+        accepted filenames, e.g.:
+        filename =
+        'myfolder/mypic.png'
+        'mypic.svg'
+        etc.
+
+        accepted methods
+        method = 'dot'
+        method = 'circo'
+
+        accepted orientations:
+        orientation = 'LR'
+        orientation = 'TD'
+        """
+
+        import yapgvb
+        import os
+
+        # checking filename and converting appropriately
+        if filename == None:
+            filename = 'computational_graph.png'
+
+        if orientation != 'LR' and orientation != 'TD' :
+            orientation = 'TD'
+
+        if method != 'dot' and method != 'circo':
+            method = 'dot'
+        name, extension = filename.split('.')
+        if extension != 'png' and extension != 'svg':
+            print 'Only *.png or *.svg are supported formats!'
+            print 'Using *.png now'
+            extension = 'png'
+
+        print 'name=',name, 'extension=', extension
+
+        # setting the style for the nodes
+        g = yapgvb.Digraph('someplot')
         
+        # add nodes
+        for f in self.functionList:
+            if f.func == Function.Id:
+                g.add_node('%d'%f.ID, label = '%d %s'%(f.ID,f.func.__name__), shape = yapgvb.shapes.doublecircle,
+                    color = yapgvb.colors.blue, fontsize = 10)
+            else:
+                g.add_node('%d'%f.ID, label = '%d %s'%(f.ID,f.func.__name__), shape = yapgvb.shapes.box,
+                    color = yapgvb.colors.blue, fontsize = 10)
+       
+        # add edges
+        nodes = list(g.nodes)
+        for f in self.functionList:
+            for a in numpy.ravel(f.args):
+                nodes[a.ID] >> nodes[f.ID]
+        
+        
+        g.layout(yapgvb.engines.circo)
+        g.render(filename)
 
 class Function(Algebra):
     
