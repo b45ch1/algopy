@@ -551,8 +551,42 @@ class Test_CGgraph_on_UTPM(TestCase):
         assert_array_equal(cg.dependentFunctionList[0].x.data.shape, [D,P,M,M])
 
 
-# class Test_more_complicated_Examples(TestCase):
+    def test_reverse_on_getitem_setitem(self):
+        cg = CGraph()
+        N,M = 1,1
+        ax = numpy.random.rand(N,M)
+        ay = numpy.zeros((N,M))
+        fx = Function(ax)
+        fy = Function(ay)
+        
+        for n in range(N):
+            for m in range(M):
+                fy[n,m] = fx[n,m]
+                
+        cg.independentFunctionList = [fx]
+        cg.dependentFunctionList = [fy]
+        
+        assert_array_almost_equal(fx.x, fy.x)
+        
+        # ybar = UTPM(numpy.zeros((D,P,N,M)))
+        # ybar.data[0,:,:,:] = 1.
+        
+        # print cg
+        # cg.pullback([ybar])
 
+        # xbar_reverse = cg.independentFunctionList[0].xbar
+        # ybar_reverse = cg.independentFunctionList[1].xbar
+        
+        # xbar_symbolic = 3. * ax*ax * ay*ay + ay*ay
+        # ybar_symbolic = 2.*ax*ax*ax * ay + 2. * ax * ay
+
+        # # print xbar_symbolic.tc
+        # # print xbar_reverse
+        # # print ybar_symbolic
+        # # print ybar_reverse
+        
+        # assert_array_almost_equal(xbar_reverse.data, xbar_symbolic.data)
+        # assert_array_almost_equal(ybar_reverse.data, ybar_symbolic.data)
                 
         
         
@@ -566,13 +600,15 @@ class Test_CGraph_Plotting(TestCase):
         fx = Function(ax)
         fy = Function(ay)
         fz = Function.dot(fx,fy)
-        for i in range(1):
+        for i in range(10):
             fz = Function.dot(fz,fy.T)
             fz = 3 * Function.dot((fz * fx + fx),fy)
+            for n in range(N):
+                fz[0,0] += fz[n,0]
 
         cg.independentFunctionList = [fx,fy]
         cg.dependentFunctionList = [fz]
-        cg.plot(os.path.join(Settings.output_dir,'test_simple.png'))
+        cg.plot(os.path.join(Settings.output_dir,'test_simple.svg'))
         
 
 

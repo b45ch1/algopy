@@ -396,6 +396,9 @@ class Function(Algebra):
             
         elif isinstance(self.x, tuple):
             self.xbar = tuple( [xi.zeros_like() for xi in self.x])
+            
+        elif self.x == None:
+            pass
         else:
             self.xbar = self.x.zeros_like()
             
@@ -405,7 +408,9 @@ class Function(Algebra):
 
     def __setitem__(self, sl, rhs):
         rhs = self.totype(rhs)
-        return self.x.__setitem__(sl, rhs.x)
+        val = self.x.__setitem__(sl, rhs.x)
+        return self.__class__.create(val, (rhs,), self.x.__class__.__setitem__, funcargs= (sl,))
+        # return self.x.__setitem__(sl, rhs.x)
 
     def __neg__(self):
         return self.__class__(-self.x)
