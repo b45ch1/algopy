@@ -369,9 +369,9 @@ class Function(Algebra):
                 kwargs['funcargs'] = F.funcargs
                 
             # get the pullback function
-            print 'F.args[0]=',F.args[0]
-            print 'args=',args
-            print 'kwargs =',kwargs
+            # print 'F.args[0]=',F.args[0]
+            # print 'args=',args
+            # print 'kwargs =',kwargs
             f = eval('__import__("algopy.utp.utpm.utpm").utp.utpm.utpm.'+F.args[0].x.__class__.__name__+'.pb_'+func_name)
     
         else:

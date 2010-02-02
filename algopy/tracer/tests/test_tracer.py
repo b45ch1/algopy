@@ -572,23 +572,8 @@ class Test_CGgraph_on_UTPM(TestCase):
         ybar.data[0,:,:,:] = 1.
         
         cg.pullback([ybar])
-        print cg
-        
+        assert_almost_equal(ybar.data, fx.xbar.data)
 
-        # xbar_reverse = cg.independentFunctionList[0].xbar
-        # ybar_reverse = cg.independentFunctionList[1].xbar
-        
-        # xbar_symbolic = 3. * ax*ax * ay*ay + ay*ay
-        # ybar_symbolic = 2.*ax*ax*ax * ay + 2. * ax * ay
-
-        # # print xbar_symbolic.tc
-        # # print xbar_reverse
-        # # print ybar_symbolic
-        # # print ybar_reverse
-        
-        # assert_array_almost_equal(xbar_reverse.data, xbar_symbolic.data)
-        # assert_array_almost_equal(ybar_reverse.data, ybar_symbolic.data)
-                
         
         
 

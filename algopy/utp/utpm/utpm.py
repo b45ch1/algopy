@@ -99,8 +99,12 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         if out == None:
             raise NotImplementedError('I\'m not sure if this makes sense')
         
-        print 'funcargs=',funcargs
-        print y[funcargs[0]]
+        ybar, xbar = out
+        # print 'xbar =', xbar
+        # print 'ybar =', ybar
+        xbar += ybar[funcargs[0]]
+        # print 'funcargs=',funcargs
+        # print y[funcargs[0]]
         
         
     def __setitem__(self, sl, rhs):
