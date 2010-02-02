@@ -75,7 +75,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         y = getitem(x, sl) 
         """
         if out == None:
-            raise NotImplementedError('I\'m not sure this makes sense')
+            raise NotImplementedError('I\'m not sure if this makes sense')
             
         # print 'called pb___getitem__'
         # print 'ybar=',ybar
@@ -89,6 +89,19 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         tmp += ybar
         
         return out
+        
+    @classmethod
+    def pb___setitem__(cls, y, x, out = None, funcargs = None):
+        """
+        y.__setitem(sl,x)
+        """
+        
+        if out == None:
+            raise NotImplementedError('I\'m not sure if this makes sense')
+        
+        print 'funcargs=',funcargs
+        print y[funcargs[0]]
+        
         
     def __setitem__(self, sl, rhs):
         if isinstance(rhs, UTPM):

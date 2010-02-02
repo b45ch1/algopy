@@ -176,7 +176,7 @@ class CGraph:
             print 'Using *.png now'
             extension = 'png'
 
-        print 'name=',name, 'extension=', extension
+        # print 'name=',name, 'extension=', extension
 
         # setting the style for the nodes
         g = yapgvb.Digraph('someplot')
@@ -355,6 +355,25 @@ class Function(Algebra):
             # get the pullback function
             f = eval('__import__("algopy.utp.utpm.utpm").utp.utpm.utpm.'+F.x[0].__class__.__name__+'.pb_'+func_name)            
 
+        elif type(F.x) == type(None):
+            # case if the function F has no output, e.g. None = F(x)
+            args_list    = [Fa.x for Fa in F.args]
+            argsbar_list = [Fa.xbar for Fa in F.args]
+            
+            
+            args = tuple(args_list)
+            kwargs = {'out': tuple(argsbar_list)}
+            
+            if len(F.funcargs):
+                # add additional funcargs if they are set
+                kwargs['funcargs'] = F.funcargs
+                
+            # get the pullback function
+            print 'F.args[0]=',F.args[0]
+            print 'args=',args
+            print 'kwargs =',kwargs
+            f = eval('__import__("algopy.utp.utpm.utpm").utp.utpm.utpm.'+F.args[0].x.__class__.__name__+'.pb_'+func_name)
+    
         else:
             # case if the function F has output, e.g. y1 = F(x)
             args_list    = [Fa.x for Fa in F.args]
@@ -408,8 +427,8 @@ class Function(Algebra):
 
     def __setitem__(self, sl, rhs):
         rhs = self.totype(rhs)
-        val = self.x.__setitem__(sl, rhs.x)
-        return self.__class__.create(val, (rhs,), self.x.__class__.__setitem__, funcargs= (sl,))
+        self.x.__setitem__(sl, rhs.x)
+        return self.__class__.create(None, (self,rhs,), self.x.__class__.__setitem__, funcargs= (sl,))
         # return self.x.__setitem__(sl, rhs.x)
 
     def __neg__(self):

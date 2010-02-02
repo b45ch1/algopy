@@ -553,9 +553,9 @@ class Test_CGgraph_on_UTPM(TestCase):
 
     def test_reverse_on_getitem_setitem(self):
         cg = CGraph()
-        N,M = 1,1
-        ax = numpy.random.rand(N,M)
-        ay = numpy.zeros((N,M))
+        D,P,N,M = 1,1,1,1
+        ax = UTPM(numpy.random.rand(D,P,N,M))
+        ay = UTPM(numpy.zeros((D,P,N,M)))
         fx = Function(ax)
         fy = Function(ay)
         
@@ -566,13 +566,14 @@ class Test_CGgraph_on_UTPM(TestCase):
         cg.independentFunctionList = [fx]
         cg.dependentFunctionList = [fy]
         
-        assert_array_almost_equal(fx.x, fy.x)
+        assert_array_almost_equal(fx.x.data, fy.x.data)
         
-        # ybar = UTPM(numpy.zeros((D,P,N,M)))
-        # ybar.data[0,:,:,:] = 1.
+        ybar = UTPM(numpy.zeros((D,P,N,M)))
+        ybar.data[0,:,:,:] = 1.
         
-        # print cg
-        # cg.pullback([ybar])
+        cg.pullback([ybar])
+        print cg
+        
 
         # xbar_reverse = cg.independentFunctionList[0].xbar
         # ybar_reverse = cg.independentFunctionList[1].xbar
