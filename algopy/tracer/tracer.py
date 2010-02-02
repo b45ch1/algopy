@@ -195,7 +195,14 @@ class CGraph:
         for f in self.functionList:
             for a in numpy.ravel(f.args):
                 nodes[a.ID] >> nodes[f.ID]
-        
+                
+        # independent nodes
+        for f in self.independentFunctionList:
+            nodes[f.ID].shape = yapgvb.shapes.octagon
+            
+        # dependent nodes
+        for f in self.dependentFunctionList:
+            nodes[f.ID].shape = yapgvb.shapes.octagon
         
         g.layout(yapgvb.engines.circo)
         g.render(filename)
@@ -215,7 +222,7 @@ class Function(Algebra):
             # create a Function node with value x referring to itself, i.e.
             # returning x when called
             cls = self.__class__
-            cls.create(x, (self,), cls.Id, self)    
+            cls.create(x, (self,), cls.Id, self)
     
     cgraph = None
     @classmethod
@@ -272,18 +279,6 @@ class Function(Algebra):
 
     def __str__(self):
         return '%s'%str(self.x)
-
-    def __getitem__(self, sl):
-        return Function.push_forward(self.x.__class__.__getitem__,(self,), funcargs = (sl,))
-        # if isinstance(self.x,tuple):
-        #     tmp = self.x.__getitem__(sl)
-        # else:
-        #     if type(sl) == int or sl == Ellipsis:
-        #         sl = (sl,)
-                
-        #     tmp = self.x.__getitem__((slice(None),slice(None)) + tuple(sl))
-        # return self.__class__(tmp)
-
         
     @classmethod
     def push_forward(cls, func, Fargs, Fout = None, funcargs = ()):
@@ -403,7 +398,14 @@ class Function(Algebra):
             self.xbar = tuple( [xi.zeros_like() for xi in self.x])
         else:
             self.xbar = self.x.zeros_like()
+            
+            
+    def __getitem__(self, sl):
+        return Function.push_forward(self.x.__class__.__getitem__,(self,), funcargs = (sl,))
 
+    def __setitem__(self, sl, rhs):
+        rhs = self.totype(rhs)
+        return self.x.__setitem__(sl, rhs.x)
 
     def __neg__(self):
         return self.__class__(-self.x)

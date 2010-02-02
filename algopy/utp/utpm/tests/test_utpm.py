@@ -256,6 +256,15 @@ class Test_Push_Forward(TestCase):
         AY = AX[0:2,1:3]
         AY.data[:,:] += 1.
         assert_array_almost_equal(X,X2)
+     
+    def test_getitem_of_2D_array(self):
+        D,P,N = 2,3,7
+        ax = UTPM(numpy.random.rand(D,P,N,N))
+        
+        for r in range(N):
+            for c in range(N):
+                assert_array_almost_equal(ax[r,c].data, ax.data[:,:,r,c])
+                
 
     def test_setitem(self):
         D,P,N,M = 2,3,4,4

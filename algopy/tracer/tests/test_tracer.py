@@ -64,6 +64,26 @@ class Test_Function_on_UTPM(TestCase):
         assert_almost_equal(fx.xbar.data, (fz.xbar * fy.xbar).data)
         assert_almost_equal(fy.xbar.data, (fz.xbar * fx.xbar).data)
         
+    def test_get_item(self):
+        D,P,N = 2,5,7
+        ax = UTPM(numpy.random.rand(D,P,N,N))
+        fx = Function(ax)
+        
+        for r in range(N):
+            for c in range(N):
+                assert_array_almost_equal( fx[r,c].x.data, ax.data[:,:,r,c])
+                
+    def test_set_item(self):
+        D,P,N = 2,5,7
+        ax = UTPM(numpy.zeros((D,P,N)))
+        ay = UTPM(numpy.random.rand(*(D,P,N)))
+        fx = Function(ax)
+        
+        for n in range(N):
+            fx[n] = 2 * ay[n]
+            
+        assert_array_almost_equal( fx.x.data, 2*ay.data)
+        
 
 class Test_Mixed_Function_Operations(TestCase):
     def test_scalar(self):
@@ -531,6 +551,12 @@ class Test_CGgraph_on_UTPM(TestCase):
         assert_array_equal(cg.dependentFunctionList[0].x.data.shape, [D,P,M,M])
 
 
+# class Test_more_complicated_Examples(TestCase):
+
+                
+        
+        
+
 class Test_CGraph_Plotting(TestCase):
     def test_simple(self):
         cg = CGraph()
@@ -540,8 +566,9 @@ class Test_CGraph_Plotting(TestCase):
         fx = Function(ax)
         fy = Function(ay)
         fz = Function.dot(fx,fy)
-        fz = Function.dot(fz,fy.T)
-        fz = Function.dot((fz * fx + fx),fy)
+        for i in range(1):
+            fz = Function.dot(fz,fy.T)
+            fz = 3 * Function.dot((fz * fx + fx),fy)
 
         cg.independentFunctionList = [fx,fy]
         cg.dependentFunctionList = [fz]

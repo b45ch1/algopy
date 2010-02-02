@@ -67,7 +67,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         if type(sl) == int or sl == Ellipsis:
             sl = (sl,)
         tmp = self.data.__getitem__((slice(None),slice(None)) + tuple(sl))
-        return UTPM(tmp)
+        return self.__class__(tmp)
         
     @classmethod
     def pb___getitem__(cls, ybar, x, y, out = None, funcargs = None):
