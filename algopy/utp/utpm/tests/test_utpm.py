@@ -672,6 +672,53 @@ class Test_Mixed_Types(TestCase):
         
         assert_array_almost_equal(az14.data, cz4)
         assert_array_almost_equal(az24.data, cz4)
+        
+    def test_UTPM_and_scalar(self):
+        D,P,N = 2,2,2
+        x = 2 * numpy.random.rand(D,P,N,N)
+        y = 3
+        
+        ax = UTPM(x)
+        
+        az11 = ax + y
+        az12 = ax - y
+        az13 = ax * y
+        az14 = ax / y
+        
+        az21 = y + ax
+        az22 = - (y - ax)
+        az23 = y*ax
+        az24 = 1/( y/ax)
+        
+        cz1 = x.copy()
+        for p in range(P):
+            cz1[0,p] += y
+            
+        cz2 = x.copy()
+        for p in range(P):
+            cz2[0,p] -= y
+
+        cz3 = x.copy()
+        for d in range(D):
+            for p in range(P):
+                cz3[d,p] *= y
+                
+        cz4 = x.copy()
+        for d in range(D):
+            for p in range(P):
+                cz4[d,p] /= y
+            
+        assert_array_almost_equal(az11.data, cz1)
+        assert_array_almost_equal(az21.data, cz1)
+        
+        assert_array_almost_equal(az12.data, cz2)
+        assert_array_almost_equal(az22.data, cz2)
+        
+        assert_array_almost_equal(az13.data, cz3)
+        assert_array_almost_equal(az23.data, cz3)
+        
+        assert_array_almost_equal(az14.data, cz4)
+        assert_array_almost_equal(az24.data, cz4)
 
         
 class Test_Eigenvalue_Decomposition(TestCase):
