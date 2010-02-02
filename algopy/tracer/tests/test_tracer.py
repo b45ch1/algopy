@@ -553,7 +553,7 @@ class Test_CGgraph_on_UTPM(TestCase):
 
     def test_reverse_on_getitem_setitem(self):
         cg = CGraph()
-        D,P,N,M = 1,1,1,1
+        D,P,N,M = 2,3,4,5
         ax = UTPM(numpy.random.rand(D,P,N,M))
         ay = UTPM(numpy.zeros((D,P,N,M)))
         fx = Function(ax)
@@ -573,9 +573,31 @@ class Test_CGgraph_on_UTPM(TestCase):
         
         cg.pullback([ybar])
         assert_almost_equal(ybar.data, fx.xbar.data)
+        
+    def test_reverse_mode_on_linear_function_using_setitem(self):
+        cg = CGraph()
+        D,P,N = 1,1,2
+        ax = UTPM(numpy.random.rand(D,P,N))
+        A = numpy.random.rand(N,N)
+        
+        fx = Function(ax)
+        fy = numpy.zeros(N)
+        
+        # for n in range(N):
+        #     for k in range(N):
+        #         fy[n] += A[n,k] * fx[k]
+            
+            
+        # fx = Function(ax)
+        # fy = Function(ay)
+        
+        # for n in range(N):
+        #     for m in range(M):
+        #         fy[n,m] = fx[n,m]
+            
+        # cg.independentFunctionList = [fx]
+        # cg.dependentFunctionList = [fy]       
 
-        
-        
 
 class Test_CGraph_Plotting(TestCase):
     def test_simple(self):

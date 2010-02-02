@@ -462,9 +462,18 @@ class Function(Algebra):
     def __rdiv__(self, lhs):
         lhs = self.__class__.totype(lhs)
         return lhs/self
+    
+    @classmethod
+    def dot(cls, lhs,rhs):
+        lhs = cls.totype(lhs)
+        rhs = cls.totype(rhs)
         
-    def dot(self,rhs):
-        return Function.push_forward(self.x.__class__.dot, (self,rhs))
+        try:
+            out = Function.push_forward(lhs.x.__class__.dot, (lhs,rhs))
+            return out
+        except:
+            out = Function.push_forward(rhs.x.__class__.dot, (lhs,rhs))
+            return out
         
     def inv(self):
          return Function.push_forward(self.x.__class__.inv, (self,))
