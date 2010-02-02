@@ -49,7 +49,9 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
     See for example __mul__: there, operations of self.data[:d+1,:,:,:]* rhs.data[d::-1,:,:,:] has to be performed. One can see, that contiguous memory blocks are used for such operations.
 
     A disadvantage of this arrangement is: it seems unnatural. It is easier to regard each direction separately.
-    """
+    """           
+    
+    __array_priority__ = 2
     
     def __init__(self, X, Xdot = None):
         """ INPUT:	shape([X]) = (D,P,N,M)
@@ -67,7 +69,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         tmp = self.data.__getitem__((slice(None),slice(None)) + tuple(sl))
         return UTPM(tmp)
         
-    @classmethod    
+    @classmethod
     def pb___getitem__(cls, ybar, x, y, out = None, funcargs = None):
         """
         y = getitem(x, sl) 

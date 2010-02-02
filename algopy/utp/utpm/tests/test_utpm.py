@@ -625,6 +625,55 @@ class Test_QR_Decomposition(TestCase):
             assert_almost_equal(numpy.trace(numpy.dot(Ab.T,Ad)), numpy.trace(numpy.dot(Qb.T,Qd) + numpy.dot(Rb.T,Rd)))
 
 
+class Test_Mixed_Types(TestCase):
+    def test_UTPM_and_array(self):
+        D,P,N = 2,2,2
+        x = 2 * numpy.random.rand(D,P,N,N)
+        y = 3 * numpy.random.rand(D,P,N,N)
+        
+        ax = UTPM(x)
+        
+        az11 = ax + y[0,0]
+        az12 = ax - y[0,0]
+        az13 = ax * y[0,0]
+        az14 = ax / y[0,0]
+        
+        az21 = y[0,0] + ax
+        az22 = - (y[0,0] - ax)
+        az23 = y[0,0]*ax
+        az24 = 1./( y[0,0]/ax)
+        
+        cz1 = x.copy()
+        for p in range(P):
+            cz1[0,p] += y[0,0]
+            
+        cz2 = x.copy()
+        for p in range(P):
+            cz2[0,p] -= y[0,0]
+
+        cz3 = x.copy()
+        for d in range(D):
+            for p in range(P):
+                cz3[d,p] *= y[0,0]
+                
+        cz4 = x.copy()
+        for d in range(D):
+            for p in range(P):
+                cz4[d,p] /= y[0,0]
+            
+        assert_array_almost_equal(az11.data, cz1)
+        assert_array_almost_equal(az21.data, cz1)
+        
+        assert_array_almost_equal(az12.data, cz2)
+        assert_array_almost_equal(az22.data, cz2)
+        
+        assert_array_almost_equal(az13.data, cz3)
+        assert_array_almost_equal(az23.data, cz3)
+        
+        assert_array_almost_equal(az14.data, cz4)
+        assert_array_almost_equal(az24.data, cz4)
+
+        
 class Test_Eigenvalue_Decomposition(TestCase):
 
     def test_push_forward(self):
