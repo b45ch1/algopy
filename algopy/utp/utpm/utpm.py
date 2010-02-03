@@ -70,28 +70,28 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         return self.__class__(tmp)
         
     @classmethod
-    def pb___getitem__(cls, ybar, x, y, out = None, funcargs = None):
+    def pb___getitem__(cls, ybar, x, sl, y, out = None):
         """
-        y = getitem(x, sl) 
+        y = getitem(x, sl)
+        
+        Warning:
+        this includes a workaround for tuples, e.g. for Q,R = qr(A)
+        where A,Q,R are Function objects
         """
         if out == None:
             raise NotImplementedError('I\'m not sure if this makes sense')
             
-        # print 'called pb___getitem__'
-        # print 'ybar=',ybar
-        # print 'out=',out
-        # print 'funcargs=',funcargs
-        
-        # print out[0][funcargs[0]].data.dtype
-        # print ybar.data.dtype
-        
-        tmp = out[0][funcargs[0]]
-        tmp += ybar
-        
+        if isinstance( out[0], tuple):
+            tmp = list(out[0])
+            tmp[sl] += ybar
+            
+        else:
+            out[0][sl] += ybar
+            
         return out
         
     @classmethod
-    def pb___setitem__(cls, y, x, out = None, funcargs = None):
+    def pb___setitem__(cls, y, sl, x, out = None):
         """
         y.__setitem(sl,x)
         """
@@ -99,10 +99,10 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         if out == None:
             raise NotImplementedError('I\'m not sure if this makes sense')
         
-        ybar, xbar = out
+        ybar, dummy, xbar = out
         # print 'xbar =', xbar
         # print 'ybar =', ybar
-        xbar += ybar[funcargs[0]]
+        xbar += ybar[sl]
         # print 'funcargs=',funcargs
         # print y[funcargs[0]]
         

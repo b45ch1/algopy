@@ -78,9 +78,13 @@ class CGraph:
     def __str__(self):
         retval = '\n'
         for f in self.functionList:
-            arg_IDS = [ af.ID for af in f.args]
-            retval += '%s: IDs: %s <- %s\n'%(str(f.func.__name__), str(f.ID), str(arg_IDS))
-            retval += 'funcargs:%s\n'%(str(f.funcargs))
+            arg_IDs = []
+            for a in f.args:
+                if isinstance(a, Function):
+                    arg_IDs.append(a.ID)
+                else:
+                    arg_IDs.append('c(%s)'%str(a))
+            retval += '%s: IDs: %s <- %s\n'%(str(f.func.__name__), str(f.ID), str(arg_IDs))
             retval += 'x:\n    %s \n'%( str(f.x))
             if is_set(f.xbar):
                 retval += 'xbar:\n %s \n'%(str(f.xbar))
@@ -107,7 +111,7 @@ class CGraph:
 
         # traverse the computational tree
         for f in self.functionList:
-            f.__class__.push_forward(f.func, f.args, Fout = f, funcargs = f.funcargs)
+            f.__class__.push_forward(f.func, f.args, Fout = f)
 
 
     def pullback(self, xbar_list):
@@ -194,7 +198,8 @@ class CGraph:
         nodes = list(g.nodes)
         for f in self.functionList:
             for a in numpy.ravel(f.args):
-                nodes[a.ID] >> nodes[f.ID]
+                if isinstance(a, Function):
+                    nodes[a.ID] >> nodes[f.ID]
                 
         # independent nodes
         for f in self.independentFunctionList:
@@ -222,7 +227,7 @@ class Function(Algebra):
             # create a Function node with value x referring to itself, i.e.
             # returning x when called
             cls = self.__class__
-            cls.create(x, (self,), cls.Id, self)
+            cls.create(x, [self], cls.Id, self)
     
     cgraph = None
     @classmethod
@@ -241,7 +246,7 @@ class Function(Algebra):
             return None
     
     @classmethod
-    def create(cls, x, fargs, func, f = None, funcargs = ()):
+    def create(cls, x, fargs, func, f = None):
         """
         Creates a new function node.
         
@@ -255,14 +260,18 @@ class Function(Algebra):
             funcargs    tuple                               additional arguments to the function func
         
         """
+        
+        if not isinstance(fargs, list):
+            raise ValueError('fargs must be of type list')
+        
         if f == None:
             f = Function()
         f.x = x
         f.args = fargs
         f.func = func
-        f.ID = cls.get_ID()
-        f.funcargs = funcargs
-        cls.cgraph.append(f)
+        if cls.cgraph != None:
+            f.ID = cls.get_ID()
+            cls.cgraph.append(f)
         return f
     
     @classmethod
@@ -281,7 +290,7 @@ class Function(Algebra):
         return '%s'%str(self.x)
         
     @classmethod
-    def push_forward(cls, func, Fargs, Fout = None, funcargs = ()):
+    def push_forward(cls, func, Fargs, Fout = None):
         """
         Computes the push forward of func
         
@@ -289,20 +298,32 @@ class Function(Algebra):
             func            callable            func(Fargs[0].x,...,Fargs[-1].x)
             Fargs           tuple               tuple of Function nodes
         """
-        if numpy.ndim(Fargs) > 0:
-            args = tuple([ fa.x for fa in Fargs] + list(funcargs))
-            out  = func(*args)
-        else:
-            arg = Fargs.x
-            out  = func(arg)
+
+        if not isinstance(Fargs,list):
+            raise ValueError('Fargs has to be of type list')
         
+        # extract arguments for func
+        args = []
+        # print 'Fargs = ',Fargs
+        for fa in Fargs:
+            if isinstance(fa, cls):
+                args.append(fa.x)
+                
+            else:
+                args.append(fa)
+        
+        out  = func(*args)
+             
         if Fout == None:
-            retval = cls.create(out, Fargs, func, funcargs = funcargs)
+            retval = cls.create(out, Fargs, func)
             return retval
         
         else:
+            # this branch is called when Function(...) is used
             Fout.x = out
             return Fout
+                     
+             
             
             
     @classmethod
@@ -317,7 +338,7 @@ class Function(Algebra):
             
         More specifically:
         
-        (y1,y2) = f(x1,x2, funcargs = v)
+        (y1,y2) = f(x1,x2,const)
         
         where v is a constant argument.
         
@@ -328,7 +349,7 @@ class Function(Algebra):
         
         This function assumes that for each function f there is a corresponding function::
         
-            pb_f(y1bar,y2bar,x1,x2,y1,y2,out=(x1bar, x2bar), funcargs = v)
+            pb_f(y1bar,y2bar,x1,x2,y1,y2,out=(x1bar, x2bar))
             
         The Function F contains information about its arguments, F.y and F.ybar.
         Thus, pullback(F) computes F.args[i].xbar
@@ -336,62 +357,36 @@ class Function(Algebra):
         
         func_name = F.func.__name__
         
+        args = []
+        argsbar = []
+        for a in F.args:
+            if isinstance(a, cls):
+                args.append(a.x)
+                argsbar.append(a.xbar)
+            else:
+                args.append(a)
+                argsbar.append(None)
+        
         if isinstance(F.x,tuple):
             # case if the function F has several outputs, e.g. (y1,y2) = F(x)
-            args_list    = [Fa.x for Fa in F.args]
-            argsbar_list = [Fa.xbar for Fa in F.args]            
-            
-            args = list(F.xbar) + args_list + list(F.x)
-            args = tuple(args)
-            
-            kwargs = {'out': tuple(argsbar_list)}
-            
-            if len(F.funcargs):
-                kwargs['funcargs'] = F.funcargs
-                
-            # print 'func_name=',func_name
-            # print 'args=',args
-            # print 'kwargs=',kwargs                
-            # get the pullback function
+            args = list(F.xbar) + args + list(F.x)
             f = eval('__import__("algopy.utp.utpm.utpm").utp.utpm.utpm.'+F.x[0].__class__.__name__+'.pb_'+func_name)            
 
         elif type(F.x) == type(None):
             # case if the function F has no output, e.g. None = F(x)
-            args_list    = [Fa.x for Fa in F.args]
-            argsbar_list = [Fa.xbar for Fa in F.args]
-            
-            
-            args = tuple(args_list)
-            kwargs = {'out': tuple(argsbar_list)}
-            
-            if len(F.funcargs):
-                # add additional funcargs if they are set
-                kwargs['funcargs'] = F.funcargs
-                
-            # get the pullback function
-            # print 'F.args[0]=',F.args[0]
-            # print 'args=',args
-            # print 'kwargs =',kwargs
             f = eval('__import__("algopy.utp.utpm.utpm").utp.utpm.utpm.'+F.args[0].x.__class__.__name__+'.pb_'+func_name)
     
         else:
             # case if the function F has output, e.g. y1 = F(x)
-            args_list    = [Fa.x for Fa in F.args]
-            argsbar_list = [Fa.xbar for Fa in F.args]
-            
-            args = [F.xbar] + args_list + [F.x]
-            args = tuple(args)
-            kwargs = {'out': tuple(argsbar_list)}
-            
-            if len(F.funcargs):
-                # add additional funcargs if they are set
-                kwargs['funcargs'] = F.funcargs
+            args = [F.xbar] + args + [F.x]
                 
             # get the pullback function
             f = eval('__import__("algopy.utp.utpm.utpm").utp.utpm.utpm.'+F.x.__class__.__name__+'.pb_'+func_name)
 
         
         # call the pullbck function
+        kwargs = {'out': list(argsbar)}
+        
         f(*args, **kwargs )
         
         return F
@@ -423,32 +418,30 @@ class Function(Algebra):
             
             
     def __getitem__(self, sl):
-        return Function.push_forward(self.x.__class__.__getitem__,(self,), funcargs = (sl,))
+        return Function.push_forward(self.x.__class__.__getitem__,[self,sl])
 
     def __setitem__(self, sl, rhs):
         rhs = self.totype(rhs)
-        self.x.__setitem__(sl, rhs.x)
-        return self.__class__.create(None, (self,rhs,), self.x.__class__.__setitem__, funcargs= (sl,))
-        # return self.x.__setitem__(sl, rhs.x)
+        return Function.push_forward(self.x.__class__.__setitem__,[self,sl,rhs])
 
     def __neg__(self):
         return self.__class__(-self.x)
     
     def __add__(self,rhs):
         rhs = self.totype(rhs)
-        return Function.push_forward(self.x.__class__.__add__,(self,rhs))
+        return Function.push_forward(self.x.__class__.__add__,[self,rhs])
 
     def __sub__(self,rhs):
         rhs = self.totype(rhs)
-        return Function.push_forward(self.x.__class__.__sub__,(self,rhs))
+        return Function.push_forward(self.x.__class__.__sub__,[self,rhs])
 
     def __mul__(self,rhs):
         rhs = self.totype(rhs)
-        return Function.push_forward(self.x.__class__.__mul__,(self,rhs))
+        return Function.push_forward(self.x.__class__.__mul__,[self,rhs])
 
     def __div__(self,rhs):
         rhs = self.totype(rhs)
-        return Function.push_forward(self.x.__class__.__div__,(self,rhs))
+        return Function.push_forward(self.x.__class__.__div__,[self,rhs])
         
     def __radd__(self,lhs):
         return self + lhs
@@ -469,29 +462,29 @@ class Function(Algebra):
         rhs = cls.totype(rhs)
         
         try:
-            out = Function.push_forward(lhs.x.__class__.dot, (lhs,rhs))
+            out = Function.push_forward(lhs.x.__class__.dot, [lhs,rhs])
             return out
         except:
-            out = Function.push_forward(rhs.x.__class__.dot, (lhs,rhs))
+            out = Function.push_forward(rhs.x.__class__.dot, [lhs,rhs])
             return out
         
     def inv(self):
-         return Function.push_forward(self.x.__class__.inv, (self,))
+         return Function.push_forward(self.x.__class__.inv, [self])
          
     def qr(self):
-         return Function.push_forward(self.x.__class__.qr, (self,))
+         return Function.push_forward(self.x.__class__.qr, [self])
 
     def eigh(self):
-         return Function.push_forward(self.x.__class__.eigh, (self,))
+         return Function.push_forward(self.x.__class__.eigh, [self])
 
     def solve(self,rhs):
-        return Function.push_forward(self.x.__class__.solve, (self,rhs))
+        return Function.push_forward(self.x.__class__.solve, [self,rhs])
         
     def trace(self):
-        return Function.push_forward(self.x.__class__.trace, (self,))
+        return Function.push_forward(self.x.__class__.trace, [self])
         
     def transpose(self):
-        return Function.push_forward(self.x.__class__.transpose, (self,))
+        return Function.push_forward(self.x.__class__.transpose, [self])
         
     T = property(transpose)
     

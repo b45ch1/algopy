@@ -20,14 +20,14 @@ class Test_Function_on_numpy_types(TestCase):
         fx = Function(x)
         fy = Function(y)
         
-        fz = Function.push_forward(numpy.add, (fx,fy))
+        fz = Function.push_forward(numpy.add, [fx,fy])
         assert_almost_equal(fz.x, x + y)
         
         
     def test_push_forward_qr(self):
         x = numpy.random.rand(3,3)
         fx = Function(x)
-        fy = Function.push_forward(numpy.linalg.qr, fx)
+        fy = Function.push_forward(numpy.linalg.qr, [fx])
         y  = numpy.linalg.qr(x)
         assert_array_almost_equal(fy.x, y)
         
@@ -44,7 +44,7 @@ class Test_Function_on_UTPM(TestCase):
         fx = Function(x)
         fy = Function(y)
         
-        fz = Function.push_forward(UTPM.add, (fx,fy))
+        fz = Function.push_forward(UTPM.add, [fx,fy])
         assert_almost_equal(fz.x.data, (x + y).data)
         
         
@@ -55,7 +55,7 @@ class Test_Function_on_UTPM(TestCase):
         fx = Function(x)
         fy = Function(y)
         
-        fz = Function.push_forward(UTPM.add, (fx,fy))
+        fz = Function.push_forward(UTPM.add, [fx,fy])
         fz.xbar = fz.x.zeros_like()
         fx.xbar = fx.x.zeros_like()
         fy.xbar = fy.x.zeros_like()
@@ -114,8 +114,8 @@ class Test_CGgraph_on_numpy_operations(TestCase):
         fx = Function(1.)
         fy = Function(2.)
         
-        fz = Function.push_forward(numpy.add, (fx,fy))
-        fz = Function.push_forward(numpy.multiply, (fz,fy))
+        fz = Function.push_forward(numpy.add, [fx,fy])
+        fz = Function.push_forward(numpy.multiply, [fz,fy])
 
         cg.independentFunctionList = [fx,fy]
         cg.dependentFunctionList = [fz]
@@ -574,30 +574,42 @@ class Test_CGgraph_on_UTPM(TestCase):
         cg.pullback([ybar])
         assert_almost_equal(ybar.data, fx.xbar.data)
         
-    def test_reverse_mode_on_linear_function_using_setitem(self):
-        cg = CGraph()
-        D,P,N = 1,1,2
-        ax = UTPM(numpy.random.rand(D,P,N))
-        A = numpy.random.rand(N,N)
+    # def test_reverse_mode_on_linear_function_using_setitem(self):
+    #     cg = CGraph()
+    #     D,P,N = 1,1,2
+    #     ax = UTPM(numpy.random.rand(D,P,N))
+    #     ay = UTPM(numpy.zeros((D,P,N)))
+    #     aA = UTPM(numpy.random.rand(D,P,N,N))
         
-        fx = Function(ax)
-        fy = numpy.zeros(N)
+    #     fx = Function(ax)
+    #     fA = Function(aA)
+    #     fy1 = Function(ay)
         
-        # for n in range(N):
-        #     for k in range(N):
-        #         fy[n] += A[n,k] * fx[k]
-            
-            
-        # fx = Function(ax)
-        # fy = Function(ay)
+    #     fy2 = Function.dot(fA,fx)
         
-        # for n in range(N):
-        #     for m in range(M):
-        #         fy[n,m] = fx[n,m]
+    #     for n in range(N):
+    #         for k in range(N):
+    #             fy1[n] += fA[n,k] * fx[k]
+                
+    #     cg.independentFunctionList = [fx]
+    #     cg.dependentFunctionList = [fy1,fy2]
+                
+    #     cg.push_forward([UTPM(numpy.random.rand(D,P,N))])
+        
+    #     print fy1
+    #     print fy2
             
-        # cg.independentFunctionList = [fx]
-        # cg.dependentFunctionList = [fy]       
 
+        
+    #     # print cg
+        
+    #     # ybar = UTPM(numpy.zeros((D,P,N)))
+    #     # ybar.data[0,:,:] = 1.
+    #     # cg.pullback([ybar, ybar])
+        
+    #     # xbar_correct = UTPM.dot(aA.T, ybar)
+        
+    #     # print xbar_correct - fx.xbar
 
 class Test_CGraph_Plotting(TestCase):
     def test_simple(self):
