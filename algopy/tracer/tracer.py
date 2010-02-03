@@ -246,6 +246,22 @@ class Function(Algebra):
             return None
     
     @classmethod
+    def Id(cls, x):
+        """
+        The identity function:  x = Id(x)
+        
+        """
+        return x
+
+
+    def __repr__(self):
+        return str(self)
+
+    def __str__(self):
+        return '%s'%str(self.x)
+        
+        
+    @classmethod
     def create(cls, x, fargs, func, f = None):
         """
         Creates a new function node.
@@ -273,24 +289,9 @@ class Function(Algebra):
             f.ID = cls.get_ID()
             cls.cgraph.append(f)
         return f
-    
-    @classmethod
-    def Id(cls, x):
-        """
-        The identity function:  x = Id(x)
-        
-        """
-        return x
-
-
-    def __repr__(self):
-        return str(self)
-
-    def __str__(self):
-        return '%s'%str(self.x)
         
     @classmethod
-    def push_forward(cls, func, Fargs, Fout = None):
+    def push_forward(cls, func, Fargs, Fout = None, bufferop = False):
         """
         Computes the push forward of func
         
@@ -304,7 +305,6 @@ class Function(Algebra):
         
         # extract arguments for func
         args = []
-        # print 'Fargs = ',Fargs
         for fa in Fargs:
             if isinstance(fa, cls):
                 args.append(fa.x)
@@ -425,7 +425,7 @@ class Function(Algebra):
 
     def __setitem__(self, sl, rhs):
         rhs = self.totype(rhs)
-        return Function.push_forward(self.x.__class__.__setitem__,[self,sl,rhs])
+        return Function.push_forward(self.x.__class__.__setitem__,[self,sl,rhs], bufferop = True)
 
     def __neg__(self):
         return self.__class__(-self.x)
