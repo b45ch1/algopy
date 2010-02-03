@@ -6,44 +6,22 @@ from algopy.utp.utpm import *
 
 class Test_Function_on_UTPM(TestCase):
     
+    def test_lala(self):
+        D,P,N = 1,1,1
+        ax = UTPM(2*numpy.ones((D,P,N)))
+        ay = UTPM(3*numpy.ones((D,P,N)))
+        
+        UTPM.__iadd__(ay,ax)
+        
+        axbar = UTPM(numpy.zeros((D,P,N)))
+        aybar = UTPM(5*numpy.ones((D,P,N)))
+        print UTPM.pb___iadd__(aybar, ax, ay, ay, out = (axbar, aybar))
+        
+        # print ay
+        
+        
     
-    def test_dot_pullback(self):
-        D,P,N,K,M = 3,4,5,6,7
-        X = UTPM(numpy.random.rand(D,P,N,K))
-        Y = UTPM(numpy.random.rand(D,P,K,M))
-        
-        Z = UTPM.dot(X,Y)
-        Zbar = UTPM(numpy.random.rand(D,P,N,M))
-        
-        Xbar, Ybar = UTPM.pb_dot(Zbar, X, Y, Z)
-       
-        Xbar2 = UTPM.dot(Zbar, Y.T)
-        Ybar2 = UTPM.dot(X.T, Zbar)
-        
-        assert_array_almost_equal(Xbar2.data, Xbar.data)
-    
-    # def test_reverse_of_chained_dot(self):
-    #     cg = CGraph()
-    #     D,P,N = 1,1,2
-    #     ax = UTPM(numpy.random.rand(D,P,N))
-    #     ay = UTPM(numpy.random.rand(D,P,N))
-    #     fx = Function(ax)
-    #     fy = Function(ay)
-        
-    #     fz = Function.dot(fx,fy) + Function.dot(fx,fy)
-       
-    #     cg.independentFunctionList = [fx]
-    #     cg.dependentFunctionList = [fz]
-                
-    #     cg.push_forward([UTPM(numpy.random.rand(D,P,N))])
-       
-    #     zbar = UTPM(numpy.zeros((D,P)))
-    #     zbar.data[0,:] = 1.
-    #     cg.pullback([zbar])
 
-    #     xbar_correct = 2*ay * zbar
-        
-    #     assert_array_almost_equal(xbar_correct.data, fx.xbar.data)
         
     # def test_reverse_of_chained_getsetitem(self):
     #     cg = CGraph()
@@ -91,23 +69,22 @@ class Test_Function_on_UTPM(TestCase):
     # def test_reverse_of_chained_getsetitem2(self):
     #     cg = CGraph()
     #     D,P,N = 1,1,1
-    #     ax = UTPM(numpy.random.rand(D,P,N))
+    #     ax = UTPM(3*numpy.ones((D,P,N)))
     #     ay = UTPM(numpy.zeros((D,P,N)))
     #     fx = Function(ax)
     #     fy = Function(ay)
      
     #     for n in range(N):
-    #         fy[n] += fx[n]
-    #         fy[n] += fx[n]
+    #         fy[n] = fy[n] + fx[n]
+    #         fy[n] = fy[n] + fx[n]
             
     #     cg.independentFunctionList = [fx]
     #     cg.dependentFunctionList = [fy]
         
-    #     # print cg
-
-        
-    #     ybar = UTPM(numpy.random.rand(D,P,N))
+    #     ybar = UTPM(5*numpy.ones((D,P,N)))
     #     cg.pullback([ybar])
+        
+    #     print cg
         
     #     assert_array_almost_equal(2*ybar.data, fx.xbar.data)
         

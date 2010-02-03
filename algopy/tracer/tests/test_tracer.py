@@ -574,6 +574,29 @@ class Test_CGgraph_on_UTPM(TestCase):
         cg.pullback([ybar])
         assert_almost_equal(ybar.data, fx.xbar.data)
         
+    def test_reverse_of_chained_dot(self):
+        cg = CGraph()
+        D,P,N = 1,1,2
+        ax = UTPM(numpy.random.rand(D,P,N))
+        ay = UTPM(numpy.random.rand(D,P,N))
+        fx = Function(ax)
+        fy = Function(ay)
+        
+        fz = Function.dot(fx,fy) + Function.dot(fx,fy)
+       
+        cg.independentFunctionList = [fx]
+        cg.dependentFunctionList = [fz]
+                
+        cg.push_forward([UTPM(numpy.random.rand(D,P,N))])
+       
+        zbar = UTPM(numpy.zeros((D,P)))
+        zbar.data[0,:] = 1.
+        cg.pullback([zbar])
+
+        xbar_correct = 2*ay * zbar
+        
+        assert_array_almost_equal(xbar_correct.data, fx.xbar.data)
+
 
 
 class Test_CGraph_Plotting(TestCase):

@@ -494,8 +494,9 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         
         xbar += zbar
         ybar += zbar
+        
     
-        return out
+        return xbar, ybar
         
     @classmethod
     def pb_sub(cls, zbar, x, y , z, out = None):
