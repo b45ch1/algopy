@@ -49,7 +49,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
     See for example __mul__: there, operations of self.data[:d+1,:,:,:]* rhs.data[d::-1,:,:,:] has to be performed. One can see, that contiguous memory blocks are used for such operations.
 
     A disadvantage of this arrangement is: it seems unnatural. It is easier to regard each direction separately.
-    """           
+    """
     
     __array_priority__ = 2
     
@@ -456,7 +456,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         
     @classmethod
     def pb___sub__(cls, zbar, x, y , z, out = None):
-        return cls.pb_sub(zbar, x, y , z, out = out)        
+        return cls.pb_sub(zbar, x, y , z, out = out)
         
     @classmethod
     def pb___mul__(cls, zbar, x, y , z, out = None):
@@ -464,7 +464,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         
     @classmethod
     def pb___mul__(cls, zbar, x, y , z, out = None):
-        return cls.pb_mul(zbar, x, y , z, out = out)             
+        return cls.pb_mul(zbar, x, y , z, out = out)
         
     @classmethod
     def pb_add(cls, zbar, x, y , z, out = None):
@@ -480,6 +480,22 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         ybar += zbar
 
         return (xbar,ybar)
+        
+        
+    @classmethod
+    def pb___iadd__(cls, zbar, x, y, z, out = None):
+        if out == None:
+            D,P = y.data.shape[:2]
+            xbar = cls(cls.__zeros__(x.data.shape))
+            ybar = cls(cls.__zeros__(y.data.shape))
+        
+        else:
+            xbar, ybar = out
+        
+        xbar += zbar
+        ybar += zbar
+    
+        return out
         
     @classmethod
     def pb_sub(cls, zbar, x, y , z, out = None):

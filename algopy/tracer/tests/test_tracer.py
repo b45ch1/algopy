@@ -574,42 +574,7 @@ class Test_CGgraph_on_UTPM(TestCase):
         cg.pullback([ybar])
         assert_almost_equal(ybar.data, fx.xbar.data)
         
-    # def test_reverse_mode_on_linear_function_using_setitem(self):
-    #     cg = CGraph()
-    #     D,P,N = 1,1,2
-    #     ax = UTPM(numpy.random.rand(D,P,N))
-    #     ay = UTPM(numpy.zeros((D,P,N)))
-    #     aA = UTPM(numpy.random.rand(D,P,N,N))
-        
-    #     fx = Function(ax)
-    #     fA = Function(aA)
-    #     fy1 = Function(ay)
-        
-    #     fy2 = Function.dot(fA,fx)
-        
-    #     for n in range(N):
-    #         for k in range(N):
-    #             fy1[n] += fA[n,k] * fx[k]
-                
-    #     cg.independentFunctionList = [fx]
-    #     cg.dependentFunctionList = [fy1,fy2]
-                
-    #     cg.push_forward([UTPM(numpy.random.rand(D,P,N))])
-        
-    #     print fy1
-    #     print fy2
-            
 
-        
-    #     # print cg
-        
-    #     # ybar = UTPM(numpy.zeros((D,P,N)))
-    #     # ybar.data[0,:,:] = 1.
-    #     # cg.pullback([ybar, ybar])
-        
-    #     # xbar_correct = UTPM.dot(aA.T, ybar)
-        
-    #     # print xbar_correct - fx.xbar
 
 class Test_CGraph_Plotting(TestCase):
     def test_simple(self):

@@ -193,8 +193,8 @@ class RawAlgorithmsMixIn:
         
         (xbar_data, ybar_data) = out
         
-        xbar_data = cls._dot(zbar_data, cls._transpose(y_data), out = xbar_data)
-        ybar_data = cls._dot(cls._transpose(x_data), zbar_data, out = ybar_data)
+        xbar_data += cls._dot(zbar_data, cls._transpose(y_data), out = xbar_data.copy())
+        ybar_data += cls._dot(cls._transpose(x_data), zbar_data, out = ybar_data.copy())
         return out
         
         

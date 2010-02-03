@@ -76,7 +76,7 @@ class CGraph:
         self.functionList.append(func)
         
     def __str__(self):
-        retval = '\n'
+        retval = '\n\n'
         for f in self.functionList:
             arg_IDs = []
             for a in f.args:
@@ -84,7 +84,7 @@ class CGraph:
                     arg_IDs.append(a.ID)
                 else:
                     arg_IDs.append('c(%s)'%str(a))
-            retval += '%s: IDs: %s <- %s\n'%(str(f.func.__name__), str(f.ID), str(arg_IDs))
+            retval += '\n\n%s: IDs: %s <- %s\n'%(str(f.func.__name__), str(f.ID), str(arg_IDs))
             retval += 'x:\n    %s \n'%( str(f.x))
             if is_set(f.xbar):
                 retval += 'xbar:\n %s \n'%(str(f.xbar))
@@ -376,6 +376,9 @@ class Function(Algebra):
             # case if the function F has no output, e.g. None = F(x)
             f = eval('__import__("algopy.utp.utpm.utpm").utp.utpm.utpm.'+F.args[0].x.__class__.__name__+'.pb_'+func_name)
     
+        elif numpy.isscalar(F.x):
+            return lambda x: None
+    
         else:
             # case if the function F has output, e.g. y1 = F(x)
             args = [F.xbar] + args + [F.x]
@@ -426,7 +429,12 @@ class Function(Algebra):
 
     def __neg__(self):
         return self.__class__(-self.x)
-    
+        
+    def __iadd__(self,rhs):
+        rhs = self.totype(rhs)
+        return Function.push_forward(self.x.__class__.__iadd__,[self,rhs])
+        
+        
     def __add__(self,rhs):
         rhs = self.totype(rhs)
         return Function.push_forward(self.x.__class__.__add__,[self,rhs])
