@@ -507,6 +507,11 @@ class Test_Pullbacks(TestCase):
     def test_inv_pullback(self):
         D,P,N = 3,4,5
         X = UTPM(numpy.random.rand(D,P,N,N))
+        
+        #make X sufficiently well-conditioned
+        for n in range(N):
+            X[n,n] += N+1.
+        
         Ybar = UTPM(numpy.random.rand(D,P,N,N))
         
         Y = UTPM.inv(X)
@@ -514,7 +519,7 @@ class Test_Pullbacks(TestCase):
         Xbar = UTPM.pb_inv(Ybar, X, Y)
         
         Xbar2 = -1*UTPM.dot(UTPM.dot(Y.T, Ybar), Y.T)
-        assert_array_almost_equal(Xbar.data, Xbar2.data)
+        assert_array_almost_equal(Xbar.data, Xbar2.data, decimal=12)
         
 
 class Test_QR_Decomposition(TestCase):

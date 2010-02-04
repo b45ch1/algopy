@@ -272,6 +272,10 @@ class TestCGraphOnUTPM(TestCase):
         cg.forward(MJs)
         assert_array_equal(cg.dependentFunctionList[0].x.tc.shape, [D,P,M,M])
 
+
+
+
+
 class TestCGraphOnCTPS(TestCase):
     def test_forward(self):
         cg = CGraph()
