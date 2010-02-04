@@ -7,41 +7,41 @@ from algopy.utp.utpm import *
 class Test_Function_on_UTPM(TestCase):
     
     # def test_lala(self):
-    #     D,P,N = 1,1,1
-    #     ax = UTPM(2*numpy.ones((D,P,N)))
-    #     ay = UTPM(3*numpy.ones((D,P,N)))
+        # D,P,N = 1,1,1
+        # ax = UTPM(2*numpy.ones((D,P,N)))
+        # ay = UTPM(3*numpy.ones((D,P,N)))
         
-    #     UTPM.__iadd__(ay,ax)
+        # UTPM.__iadd__(ay,ax)
         
-    #     axbar = UTPM(numpy.zeros((D,P,N)))
-    #     aybar = UTPM(5*numpy.ones((D,P,N)))
-    #     print UTPM.pb___iadd__(aybar, ax, ay, ay, out = (axbar, aybar))
+        # axbar = UTPM(numpy.zeros((D,P,N)))
+        # aybar = UTPM(5*numpy.ones((D,P,N)))
+        # print UTPM.pb___iadd__(aybar, ax, ay, ay, out = (axbar, aybar))
         
-    #     # print ay
+        # # print ay
         
         
     
 
         
-    # def test_reverse_of_chained_getsetitem(self):
-    #     cg = CGraph()
-    #     D,P,N = 1,1,3
-    #     ax = UTPM(numpy.random.rand(D,P,N))
-    #     ay = UTPM(numpy.zeros((D,P,N)))
-    #     fx = Function(ax)
-    #     fy = Function(ay)
+    def test_reverse_of_chained_getsetitem(self):
+        cg = CGraph()
+        D,P,N = 1,1,3
+        ax = UTPM(numpy.random.rand(D,P,N))
+        ay = UTPM(numpy.zeros((D,P,N)))
+        fx = Function(ax)
+        fy = Function(ay)
      
-    #     for n in range(N):
-    #         fy[n] = fx[n] + fx[n]
+        for n in range(N):
+            fy[n] = fx[n] + fx[n]
             
-    #     cg.independentFunctionList = [fx]
-    #     cg.dependentFunctionList = [fy]
+        cg.independentFunctionList = [fx]
+        cg.dependentFunctionList = [fy]
 
         
-    #     ybar = UTPM(numpy.random.rand(D,P,N))
-    #     cg.pullback([ybar])
+        ybar = UTPM(numpy.random.rand(D,P,N))
+        cg.pullback([ybar])
         
-    #     assert_array_almost_equal(2*ybar.data, fx.xbar.data)
+        assert_array_almost_equal(2*ybar.data, fx.xbar.data)
         
     # def test_reverse_of_chained_iadd(self):
     #     cg = CGraph()
@@ -96,25 +96,19 @@ class Test_Function_on_UTPM(TestCase):
         fx = Function(ax)
         fy = Function(ay)
      
-        tmp1 =  fy[0] + fx
-        fy[0] = tmp1
-        
-        tmp1 =  fy[0] + fx
-        fy[0] = tmp1
-
-        tmp1 =  fy[0] + fx
-        fy[0] = tmp1
-        
+        fy[0] = fy[0] + fx
+        fy[0] = fy[0] + fx
+        fy[0] = fy[0] + fx
+                
         cg.independentFunctionList = [fx]
         cg.dependentFunctionList = [fy]
+        
+        assert_array_almost_equal(ay[0].data, (3*ax).data)
         ybar = UTPM(5*numpy.ones((D,P,N)))
         cg.pullback([ybar])
-        # assert_array_almost_equal(2*ybar.data, fx.xbar.data)        
-        # print cg          
-        
-        print fy.xbar
-        print fx.xbar
-        
+        assert_array_almost_equal(3*ybar[0].data, fx.xbar.data)
+        assert_array_almost_equal(ay[0].data, (0*ax).data)
+       
     
     
     # def test_reverse_of_chained_qr(self):

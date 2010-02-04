@@ -416,11 +416,11 @@ class Function(Algebra):
         # STEP 3: restore buffer values (i.e. if this is the pullback of the setitem function)
         
         if is_set(F.setitem):
-            print 'restoring value'
-            print 'F.setitem=', F.setitem
+            # print 'restoring value'
+            # print 'F.setitem=', F.setitem
             F.args[0].x[F.setitem[0]] = F.setitem[1]
             
-            print 'F.args=',F.args
+            # print 'F.args=',F.args
         
         return F
         
@@ -456,8 +456,8 @@ class Function(Algebra):
     def __setitem__(self, sl, rhs):
         rhs = self.totype(rhs)
         store = self.x.__class__.__getitem__(self.x,sl).copy()
-        print 'storing ', store
-        print 'rhs = ',rhs
+        # print 'storing ', store
+        # print 'rhs = ',rhs
         return Function.push_forward(self.x.__class__.__setitem__,[self,sl,rhs], setitem = (sl,store))
 
     def __neg__(self):
