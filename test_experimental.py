@@ -66,25 +66,25 @@ class Test_Function_on_UTPM(TestCase):
     #     cg.plot('lala.png')
     #     # assert_array_almost_equal(2*ybar.data, fx.xbar.data)        
         
-    # def test_reverse_of_chained_getsetitem2(self):
-    #     cg = CGraph()
-    #     D,P,N = 1,1,1
-    #     ax = UTPM(3*numpy.ones((D,P,N)))
-    #     ay = UTPM(numpy.zeros((D,P,N)))
-    #     fx = Function(ax)
-    #     fy = Function(ay)
+    def test_reverse_of_chained_getsetitem2(self):
+        cg = CGraph()
+        D,P,N = 1,1,1
+        ax = UTPM(3*numpy.ones((D,P)))
+        ay = UTPM(numpy.zeros((D,P,N)))
+        fx = Function(ax)
+        fy = Function(ay)
      
-    #     for n in range(N):
-    #         fy[n] = fy[n] + fx[n]
-    #         fy[n] = fy[n] + fx[n]
+        for n in range(N):
+            fy[n] += fx
+            fy[n] += fx
             
-    #     cg.independentFunctionList = [fx]
-    #     cg.dependentFunctionList = [fy]
+        cg.independentFunctionList = [fx]
+        cg.dependentFunctionList = [fy]
         
-    #     ybar = UTPM(5*numpy.ones((D,P,N)))
-    #     cg.pullback([ybar])
+        ybar = UTPM(5*numpy.ones((D,P,N)))
+        cg.pullback([ybar])
         
-    #     print cg
+        print cg
         
     #     assert_array_almost_equal(2*ybar.data, fx.xbar.data)
         

@@ -161,8 +161,14 @@ class CGraph:
         orientation = 'LR'
         orientation = 'TD'
         """
-
-        import yapgvb
+        
+        try:
+            import yapgvb
+            
+        except:
+            print 'you will need yapgvb to plot graphs'
+            return
+            
         import os
 
         # checking filename and converting appropriately
@@ -217,6 +223,7 @@ class Function(Algebra):
     __array_priority__ = 2
     
     xbar = NotSet()
+    setitem = NotSet()
     
     def __init__(self, x = None):
         """
@@ -291,7 +298,7 @@ class Function(Algebra):
         return f
         
     @classmethod
-    def push_forward(cls, func, Fargs, Fout = None, bufferop = False):
+    def push_forward(cls, func, Fargs, Fout = None, setitem = None):
         """
         Computes the push forward of func
         
@@ -303,7 +310,7 @@ class Function(Algebra):
         if not isinstance(Fargs,list):
             raise ValueError('Fargs has to be of type list')
         
-        # extract arguments for func
+        # STEP 1: extract arguments for func
         args = []
         for fa in Fargs:
             if isinstance(fa, cls):
@@ -312,16 +319,25 @@ class Function(Algebra):
             else:
                 args.append(fa)
         
+        # STEP 2: call the function
         out  = func(*args)
-             
+        
+        # STEP 3: create new Function instance for output
         if Fout == None:
-            retval = cls.create(out, Fargs, func)
-            return retval
+            # this is called when push_forward is called by a function like mul,add, ...
+            Fout = cls.create(out, Fargs, func)
+            # return retval
         
         else:
             # this branch is called when Function(...) is used
             Fout.x = out
-            return Fout
+        
+        # in case the function has side effects on a buffer
+        # we need to store the values that are going to be changed
+        if setitem != None:
+            Fout.setitem = setitem
+        
+        return Fout
                      
              
             
@@ -357,6 +373,7 @@ class Function(Algebra):
         
         func_name = F.func.__name__
         
+        # STEP 1: extract arguments
         args = []
         argsbar = []
         for a in F.args:
@@ -387,10 +404,18 @@ class Function(Algebra):
             f = eval('__import__("algopy.utp.utpm.utpm").utp.utpm.utpm.'+F.x.__class__.__name__+'.pb_'+func_name)
 
         
-        # call the pullbck function
+        # STEP 2: call the pullback function
         kwargs = {'out': list(argsbar)}
-        
         f(*args, **kwargs )
+        
+        # STEP 3: restore buffer values (i.e. if this is the pullback of the setitem function)
+        
+        if is_set(F.setitem):
+            # print 'restoring value'
+            # print 'F.setitem=', F.setitem
+            F.args[0].x[F.setitem[0]] = F.setitem[1]
+            
+            print 'F.args=',F.args
         
         return F
         
@@ -425,7 +450,8 @@ class Function(Algebra):
 
     def __setitem__(self, sl, rhs):
         rhs = self.totype(rhs)
-        return Function.push_forward(self.x.__class__.__setitem__,[self,sl,rhs], bufferop = True)
+        store = self.x.__class__.__getitem__(self.x,sl).copy()
+        return Function.push_forward(self.x.__class__.__setitem__,[self,sl,rhs], setitem = (sl,store))
 
     def __neg__(self):
         return self.__class__(-self.x)

@@ -492,7 +492,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         else:
             xbar, ybar = out
         
-        xbar += zbar
+        xbar = zbar
         ybar += zbar
         
     
