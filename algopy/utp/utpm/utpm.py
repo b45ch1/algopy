@@ -103,6 +103,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         # print 'xbar =', xbar
         # print 'ybar =', ybar
         xbar += ybar[sl]
+        ybar[sl].data[...] = 0.
         # print 'funcargs=',funcargs
         # print y[funcargs[0]]
         
@@ -476,27 +477,30 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         else:
             xbar, ybar = out
         
-        xbar += zbar
         ybar += zbar
+        xbar += zbar
 
         return (xbar,ybar)
         
         
     @classmethod
     def pb___iadd__(cls, zbar, x, y, z, out = None):
-        if out == None:
-            D,P = y.data.shape[:2]
-            xbar = cls(cls.__zeros__(x.data.shape))
-            ybar = cls(cls.__zeros__(y.data.shape))
+        # FIXME: this is a workaround/hack, review this
+        x = x.copy()
+        return cls.pb___add__(zbar, x, y, z, out = out)
+        # if out == None:
+            # D,P = y.data.shape[:2]
+            # xbar = cls(cls.__zeros__(x.data.shape))
+            # ybar = cls(cls.__zeros__(y.data.shape))
         
-        else:
-            xbar, ybar = out
+        # else:
+            # xbar, ybar = out
         
-        xbar = zbar
-        ybar += zbar
+        # xbar = zbar
+        # ybar += zbar
         
     
-        return xbar, ybar
+        # return xbar, ybar
         
     @classmethod
     def pb_sub(cls, zbar, x, y , z, out = None):
