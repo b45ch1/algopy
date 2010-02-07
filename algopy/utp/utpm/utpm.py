@@ -465,8 +465,8 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         return cls.pb_mul(zbar, x, y , z, out = out)
         
     @classmethod
-    def pb___mul__(cls, zbar, x, y , z, out = None):
-        return cls.pb_mul(zbar, x, y , z, out = out)
+    def pb___div__(cls, zbar, x, y , z, out = None):
+        return cls.pb_div(zbar, x, y , z, out = out)
         
     @classmethod
     def pb_add(cls, zbar, x, y , z, out = None):
@@ -548,7 +548,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         tmp /= y
         xbar += tmp
         tmp *= z
-        ybar += tmp
+        ybar -= tmp
 
         return (xbar,ybar)
         

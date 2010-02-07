@@ -611,16 +611,49 @@ class Test_CGgraph_on_UTPM(TestCase):
     def test_buffered_operations(self):
         cg = CGraph()
         D,P,N = 1,1,10
-        ax = UTPM(numpy.random.rand(D,P,N))
+        ax = UTPM(numpy.random.rand(D,P,3))
         ay = UTPM(numpy.zeros((D,P,N)))
         fx = Function(ax)
         fy = Function(ay)
         
-        fy[:N//2] += fx[:N//2]
-        fy[1:2] *= 3.
+        fy[0] = fx[0]
+        fy[1] = fx[1]
+        fy[2] = fx[2]
+        
+        fy[3] = fy[0] + fy[1]
+        fy[4] = fy[3] * fy[1]
+        fy[5] = fy[4] / fy[2]
+        
+        cg.independentFunctionList = [fx]
+        cg.dependentFunctionList = [fy[5]]
+        
+        def zfcn(y):
+            return (y[0] + y[1]) * y[1]/y[2]
+            
+            
+        def dzfcn(y):
+            return numpy.array([ y[1]/y[2],
+                                 (y[0] + 2*y[1])/y[2],
+                                 -(y[0] + y[1]) * y[1]/(y[2]*y[2])
+                                 ])
         
         
-        print fy
+        # check correctness of the push forward
+        ax2 = UTPM(numpy.random.rand(D,P,3))
+        az = zfcn(ax2)
+        cg.push_forward([ ax2 ])
+        
+        assert_array_almost_equal(az.data, fy[5].x.data)
+
+        # check correctness of the pullback
+        zbar = UTPM(numpy.ones((1,1)))
+        cg.pullback([zbar])
+        
+        ax2bar = dzfcn(ax2)
+        assert_array_almost_equal(ax2bar[0].data, fx.xbar.data[:,:,0])
+        assert_array_almost_equal(ax2bar[1].data, fx.xbar.data[:,:,1])
+        assert_array_almost_equal(ax2bar[2].data, fx.xbar.data[:,:,2])
+
 
 
 class Test_CGraph_Plotting(TestCase):
