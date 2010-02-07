@@ -70,6 +70,14 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         tmp = self.data.__getitem__((slice(None),slice(None)) + tuple(sl))
         return self.__class__(tmp)
         
+    def __setitem__(self, sl, rhs):
+        if isinstance(rhs, UTPM):
+            if type(sl) == int or sl == Ellipsis or isinstance(sl, slice):
+                sl = (sl,)
+            return self.data.__setitem__((slice(None),slice(None)) + sl, rhs.data)
+        else:
+            raise NotImplementedError('rhs must be of the type algopy.UTPM!')
+        
     @classmethod
     def pb___getitem__(cls, ybar, x, sl, y, out = None):
         """
@@ -107,15 +115,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         ybar[sl].data[...] = 0.
         # print 'funcargs=',funcargs
         # print y[funcargs[0]]
-        
-        
-    def __setitem__(self, sl, rhs):
-        if isinstance(rhs, UTPM):
-            if type(sl) == int or sl == Ellipsis:
-                sl = (sl,)
-            return self.data.__setitem__((slice(None),slice(None)) + sl, rhs.data)
-        else:
-            raise NotImplementedError('rhs must be of the type algopy.UTPM!')
+
     
     def __add__(self,rhs):
         if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):

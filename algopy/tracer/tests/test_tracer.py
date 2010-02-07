@@ -612,13 +612,15 @@ class Test_CGgraph_on_UTPM(TestCase):
         cg = CGraph()
         D,P,N = 1,1,10
         ax = UTPM(numpy.random.rand(D,P,N))
-        ay = UTPM(numpy.random.rand(D,P,N))
+        ay = UTPM(numpy.zeros((D,P,N)))
         fx = Function(ax)
         fy = Function(ay)
         
-        # tmp = ax[0:1]
+        fy[:N//2] += fx[:N//2]
+        fy[1:2] *= 3.
         
-        # print cg
+        
+        print fy
 
 
 class Test_CGraph_Plotting(TestCase):
