@@ -275,8 +275,13 @@ class Test_Push_Forward(TestCase):
         
     def test_setitem_slice(self):
         D,P,N = 1,1,10
-        ax = UTPM(numpy.random.rand(D,P,N))
+        ax_data = numpy.random.rand(D,P,N)
+        ax_data2 = ax_data.copy()
+        ax = UTPM(ax_data)
         ax[:N//2] += 1
+        
+        ax_data2[:,:,:N//2] += 1
+        assert_array_almost_equal(ax.data[:,:,:N//2], ax_data2[:,:,:N//2])
         
 
     def test_setitem(self):
