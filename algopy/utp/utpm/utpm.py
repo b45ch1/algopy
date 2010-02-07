@@ -64,8 +64,9 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
             raise NotImplementedError
             
     def __getitem__(self, sl):
-        if type(sl) == int or sl == Ellipsis:
+        if type(sl) == int or sl == Ellipsis or isinstance(sl, slice):
             sl = (sl,)
+        
         tmp = self.data.__getitem__((slice(None),slice(None)) + tuple(sl))
         return self.__class__(tmp)
         
