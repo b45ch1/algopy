@@ -653,6 +653,8 @@ class Test_CGgraph_on_UTPM(TestCase):
         assert_array_almost_equal(ax2bar[0].data, fx.xbar.data[:,:,0])
         assert_array_almost_equal(ax2bar[1].data, fx.xbar.data[:,:,1])
         assert_array_almost_equal(ax2bar[2].data, fx.xbar.data[:,:,2])
+        
+        # cg.plot(os.path.join(Settings.output_dir,'test_buffered_operations.svg'))
 
 
 
