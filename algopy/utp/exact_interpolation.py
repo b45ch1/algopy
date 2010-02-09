@@ -8,6 +8,7 @@ Or more in depth in the paper "Evaluating higher derivative tensors by forward p
 by  Andreas Griewank, Jean Utke, Andrea Walther
 
 """
+from __future__ import division
 import numpy
 
 def generate_multi_indices(N,D):
@@ -88,8 +89,8 @@ def gamma(i,j):
     def binomial(z,k):
         """ computes z!/[(z-k)! k!] """
         u = int(numpy.prod([z-i for i in range(k) ]))
-        d = numpy.prod([i for i in range(1,k+1)])
-        return u/d
+        d = int(numpy.prod([i for i in range(1,k+1)]))
+        return u//d
     
     def alpha(i,j,k):
         """ computes one element of the sum in the evaluation of gamma,
@@ -100,7 +101,7 @@ def gamma(i,j):
             term2 *= binomial(i[n],k[n])
         term3 = 1
         for n in range(N):
-            term3 *= binomial(D*k[n]/ numpy.sum(abs(k)), j[n] )
+            term3 *= binomial(D*k[n]// numpy.sum(abs(k)), j[n] )
         term4 = (numpy.sum(abs(k))/D)**(numpy.sum(abs(i)))
         return term1*term2*term3*term4
         
@@ -121,4 +122,56 @@ def gamma(i,j):
     k = numpy.zeros(N,dtype=int)
     sum_recursion(k,0)
     return retval[0]
-
+    
+def generate_permutations(in_x):
+    x = in_x[:]
+    if len(x) <=1:
+        yield x
+    else:
+        for perm in generate_permutations(x[1:]):
+            for i in range(len(perm)+1):
+                yield perm[:i] + x[0:1] + perm[i:]
+                
+                
+def generate_Gamma(i):
+    """
+    generates a big matrix Gamma with elements gamma(i,j)
+    
+    e.g. 
+    i  = [1,3,0,6]
+    means that a function f: R^4 -> R^M should be differentiated as
+    
+    d^10f/(dx1^1 dx2^3 dx4^6)
+    
+    to do so, the following univariate Taylor polynomials are propagated
+    f(x + j t)
+    
+    INPUTS:
+    i           (N,) int-array            multiindex to compute f_i
+    
+    OUTPUTS:
+    J           (Nj,N) int-array            rayvalues
+    Gamma       (NJ,)  int-array            interpolation matrix
+    """
+    
+    i = numpy.asarray(i, dtype=int)
+    
+    if i.ndim != 1:
+        raise ValueError('Expected 1D array but provided i.shape = ',i.shape)
+    
+    N = i.size
+    D = numpy.sum(i)
+    J = generate_multi_indices(N,D)
+    NJ = J.shape[0]
+    print N,D,NJ
+    
+    print 'i=',i
+    
+    out = numpy.zeros(NJ)
+    for nj in range(NJ):
+        j = J[nj,:]
+        print 'j=',j
+        print gamma(i,j)
+        out[nj] = gamma(i,j)
+            
+    return (out,J)
