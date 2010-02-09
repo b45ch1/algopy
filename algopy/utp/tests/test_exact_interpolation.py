@@ -74,8 +74,8 @@ class TestExactInterpolation(TestCase):
 
     def test_generate_Gamma(self):
         i = numpy.array([1,1],dtype=int)
-        Gamma = generate_Gamma(i)
-        print Gamma
+        (Gamma,J) = generate_Gamma(i)
+        assert_array_almost_equal(Gamma, [ - 0.25, 1., -0.25])
 
     # def test_tensor(self):
     #     def f(x):

@@ -163,15 +163,9 @@ def generate_Gamma(i):
     D = numpy.sum(i)
     J = generate_multi_indices(N,D)
     NJ = J.shape[0]
-    print N,D,NJ
-    
-    print 'i=',i
-    
     out = numpy.zeros(NJ)
     for nj in range(NJ):
         j = J[nj,:]
-        print 'j=',j
-        print gamma(i,j)
         out[nj] = gamma(i,j)
             
     return (out,J)
