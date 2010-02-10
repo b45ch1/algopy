@@ -607,9 +607,9 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
     @classmethod
     def pb_trace(cls, ybar, x, y, out = None):
         if out == None:
-            raise NotImplementedError('should implement that')
+            out = (x.zeros_like(),)
         
-        xbar, = out 
+        xbar, = out
         Nx = xbar.shape[0]
         for nx in range(Nx):
             xbar[nx,nx] += ybar
@@ -622,7 +622,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
             raise NotImplementedError('should implement that')
         
         xbar, = out
-        xbar += cls.transpose(ybar)
+        xbar = cls.transpose(ybar)
         return xbar
 
     @classmethod

@@ -1,6 +1,7 @@
 import numpy
 import string
 from algopy.utp.utpm import UTPM
+from algopy.tracer import Function
 
 # override numpy definitions
 
@@ -34,15 +35,18 @@ def zeros( shape, dtype=float, order = 'C'):
     create a zero instance
     """
     
-    if isinstance(dtype,UTPM):
-        D,P = dtype.data.shape[:2]
-        return UTPM(numpy.zeros((D,P) + shape ,dtype = float))
+    if isinstance(dtype,type):
+        return numpy.zeros(shape, dtype=dtype,order=order)
     
-    elif isinstance(dtype,numpy.ndarray):
+    elif isinstance(dtype, numpy.ndarray):
         return numpy.zeros(shape,dtype=dtype.dtype, order=order)
+
+    elif isinstance(dtype, UTPM):
+        D,P = dtype.data.shape[:2]
+        return dtype.__class__(numpy.zeros((D,P) + shape ,dtype = float))
+        
+    elif isinstance(dtype, Function):
+        return dtype.__class__(zeros(shape, dtype=dtype.x, order = order))
         
     else:
-        return numpy.zeros(shape, dtype=dtype,order=order)
-
-
-
+        raise ValueError('don\'t know what to do with dtype = %s'%str(dtype))

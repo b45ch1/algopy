@@ -40,3 +40,4 @@ Rationale:
 """
 
 import utp
+import tracer

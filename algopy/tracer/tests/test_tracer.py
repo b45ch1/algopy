@@ -656,8 +656,78 @@ class Test_CGgraph_on_UTPM(TestCase):
         
         # cg.plot(os.path.join(Settings.output_dir,'test_buffered_operations.svg'))
 
-
-
+    def test_simple_ODOE_objective_function(self):
+        """
+        compute PHI = trace( (J^T,J)^-1 )
+        """
+        D,P,N,M = 1,1,100,3
+        MJ = UTPM(numpy.random.rand(D,P,N,M))
+        cg = CGraph()
+        FJ = Function(MJ)
+        FJT = Function.transpose(FJ)
+        FM = Function(UTPM(numpy.zeros((D,P,M,M))))
+        FM[...] += Function.dot(FJT, FJ)
+        FC = Function.inv(FM)
+        FPHI = Function.trace(FC)
+        cg.independentFunctionList = [FJ]
+        cg.dependentFunctionList = [FPHI]
+        
+        assert_array_equal(FPHI.shape, ())
+        cg.push_forward([MJ])
+        PHIbar = UTPM(numpy.ones((D,P)))
+        
+        # pullback using the tracer
+        cg.pullback([PHIbar])
+        
+        # compute pullback by hand
+        Cbar = UTPM.pb_trace(PHIbar, FC.x, FPHI.x)
+        assert_array_almost_equal(Cbar.data, FC.xbar.data)
+        
+        Mbar = UTPM.pb_inv(Cbar, FM.x, FC.x)
+        assert_array_almost_equal(Mbar.data, FM.xbar.data)
+        
+        tmpbar = UTPM.pb_dot(Mbar, FJT.x, FJ.x, FM.x)
+        assert_array_almost_equal(tmpbar[1].data, FJ.xbar.data)
+        
+        
+    def test_more_complicated_ODOE_objective_function(self):
+        """
+        compute PHI = trace( (J^T,J)^-1 )
+        """
+        D,P,N,M = 1,1,100,3
+        MJs = [UTPM(numpy.random.rand(D,P,N,M)),UTPM(numpy.random.rand(D,P,N,M))]
+        cg = CGraph()
+        FJs= [Function(MJ) for MJ in MJs]
+        
+        FM = Function(UTPM(numpy.zeros((D,P,M,M))))
+        for FJ in FJs:
+            FJT = Function.transpose(FJ)
+            FM += Function.dot(FJT, FJ)
+        FC = Function.inv(FM)
+        FPHI = Function.trace(FC)
+        cg.independentFunctionList = [FJ]
+        cg.dependentFunctionList = [FPHI]
+        
+        assert_array_equal(FPHI.shape, ())
+        cg.push_forward([MJ])
+        PHIbar = UTPM(numpy.ones((D,P)))
+        
+        # pullback using the tracer
+        cg.pullback([PHIbar])
+        
+        # compute pullback by hand
+        Cbar = UTPM.pb_trace(PHIbar, FC.x, FPHI.x)
+        assert_array_almost_equal(Cbar.data, FC.xbar.data)
+        
+        Mbar = UTPM.pb_inv(Cbar, FM.x, FC.x)
+        assert_array_almost_equal(Mbar.data, FM.xbar.data)
+        
+        for FJ in FJs:
+            tmpbar = UTPM.pb_dot(Mbar, FJ.T.x, FJ.x, FM.x)
+            assert_array_almost_equal(tmpbar[1].data , FJ.xbar.data)
+        
+        
+        
 class Test_CGraph_Plotting(TestCase):
     def test_simple(self):
         cg = CGraph()
