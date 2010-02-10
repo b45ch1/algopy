@@ -705,11 +705,11 @@ class Test_CGgraph_on_UTPM(TestCase):
             FM += Function.dot(FJT, FJ)
         FC = Function.inv(FM)
         FPHI = Function.trace(FC)
-        cg.independentFunctionList = [FJ]
+        cg.independentFunctionList = FJs
         cg.dependentFunctionList = [FPHI]
         
         assert_array_equal(FPHI.shape, ())
-        cg.push_forward([MJ])
+        cg.push_forward(MJs)
         PHIbar = UTPM(numpy.ones((D,P)))
         
         # pullback using the tracer
@@ -725,6 +725,66 @@ class Test_CGgraph_on_UTPM(TestCase):
         for FJ in FJs:
             tmpbar = UTPM.pb_dot(Mbar, FJ.T.x, FJ.x, FM.x)
             assert_array_almost_equal(tmpbar[1].data , FJ.xbar.data)
+            
+            
+    # def test_complicated_ODOE_objective_function(self):
+
+    #     def Cfcn(F1p_list, out = None, work = None):
+    #         from numpy import sum, zeros
+    #         from algopy.globalfuncs import inv, dot, zeros
+            
+    #         # check input arguments
+    #         Nex  = len(F1p_list)
+    #         Np   = F1p_list[0].shape[1]
+                   
+    #         # create temporary matrix M if not provided
+    #         # to store M = [[J_1^T J_1, J_2^T],[J_2, 0]]
+    #         if work == None:
+    #             work = zeros((Np,Np), dtype=F1p_list[0])
+    #         M = work
+                
+    #         # Step 1:   compute M = J_1^T J_1
+    #         for nex in range(Nex):
+    #             M += dot(F1p_list[nex].T, F1p_list[nex])
+            
+    #         # Step 2: invert M and prepare output
+
+    #         if out == None:
+    #             out = inv(M)
+    #         else:
+    #             out[...] = M
+    #         return out
+        
+    #     D,P,N,M = 1,1,100,3
+    #     F1p_list = [UTPM(numpy.random.rand(D,P,N,M)),UTPM(numpy.random.rand(D,P,N,M))]
+    #     cg = CGraph()
+    #     FF1p_list = [Function(F1p) for F1p in F1p_list]
+    #     FC = Cfcn(FF1p_list)
+    #     FPHI = Function.trace(FC)
+        
+    #     cg.independentFunctionList = F1p_list
+    #     cg.dependentFunctionList = [FPHI]
+        
+    #     assert_array_equal(FPHI.shape, ())
+    #     cg.push_forward(MJs)
+    #     PHIbar = UTPM(numpy.ones((D,P)))
+        
+    #     # pullback using the tracer
+    #     cg.pullback([PHIbar])
+        
+    #     # compute pullback by hand
+    #     Cbar = UTPM.pb_trace(PHIbar, FC.x, FPHI.x)
+    #     assert_array_almost_equal(Cbar.data, FC.xbar.data)
+        
+              
+    #     for FF1p in FF1p_list:
+    #         tmpbar = UTPM.pb_dot(Mbar, FF1p.T.x, FF1p.x, FM.x)
+    #         assert_array_almost_equal(tmpbar[1].data , FJ.xbar.data)        
+        
+        
+        
+        
+        
         
         
         
