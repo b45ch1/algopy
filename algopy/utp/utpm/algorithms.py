@@ -384,7 +384,7 @@ class RawAlgorithmsMixIn:
     @classmethod
     def __zeros__(cls, shp):
         return numpy.zeros(shp)
-
+        
     @classmethod
     def _qr(cls,  A_data, out = None,  work = None):
         """
@@ -401,8 +401,38 @@ class RawAlgorithmsMixIn:
 
         """
         
+        # check if the output array is provided
+        if out == None:
+            raise NotImplementedError('need to implement that...')
+        Q_data = out[0]
+        R_data = out[1]
+        
         DT,P,M,N = numpy.shape(A_data)
-        K = min(M,N)        
+        K = min(M,N)
+        
+        if M < N:
+            A1_data = A_data[:,:,:,:M]
+            A2_data = A_data[:,:,:,M:]
+            R1_data = R_data[:,:,:,:M]
+            R2_data = R_data[:,:,:,M:]
+            
+            cls._qr_rectangular(A1_data, out = (Q_data, R1_data))
+            cls._dot(Q_data.transpose((0,1,3,2)), A2_data, out=R2_data)
+            
+        else:
+            cls._qr_rectangular(A_data, out = (Q_data, R_data))
+
+    @classmethod
+    def _qr_rectangular(cls,  A_data, out = None,  work = None):
+        """
+        computation of qr(A) where A.shape(M,N) with M >= N
+        
+        this function is called by the more general function _qr
+        """
+
+        
+        DT,P,M,N = numpy.shape(A_data)
+        K = min(M,N)
         
         # check if the output array is provided
         if out == None:
@@ -453,7 +483,7 @@ class RawAlgorithmsMixIn:
 
             # STEP 2:
             H = A_data[D,:,:,:] - dF[:,:,:]
-            S = - 0.5 * dG
+            S =  0.5 * dG
 
             # STEP 3:
             for p in range(P):

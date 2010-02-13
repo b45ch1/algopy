@@ -542,7 +542,7 @@ class Test_Pullbacks(TestCase):
 
 class Test_QR_Decomposition(TestCase):
     def test_push_forward(self):
-        (D,P,N) = 6,3,20
+        (D,P,N) = 3,5,10
         A_data = numpy.random.rand(D,P,N,N)
 
         # make A_data sufficiently regular
@@ -554,9 +554,12 @@ class Test_QR_Decomposition(TestCase):
 
         Q,R = UTPM.qr(A)
         assert_array_almost_equal( ( UTPM.dot(Q,R)).data, A_data_old, decimal = 12)
+        assert_array_almost_equal(UTPM.dot(Q.T,Q).data[0], [numpy.eye(N) for p in range(P)])
+        assert_array_almost_equal(UTPM.dot(Q.T,Q).data[1:],0)
+        
 
     def test_push_forward_rectangular_A(self):
-        (D,P,M,N) = 5,3,5,3
+        (D,P,M,N) = 5,3,15,3
         A_data = numpy.random.rand(D,P,M,N)
 
         # make A_data sufficiently regular
@@ -573,6 +576,35 @@ class Test_QR_Decomposition(TestCase):
 
         # print 'zero?\n',dot(Q, R) - A
         assert_array_almost_equal( (UTPM.dot(Q,R)).data, A.data, decimal = 14)
+
+    # def test_push_forward_more_cols_than_rows(self):
+    #     """
+    #     A.shape = (3,11)
+    #     """
+    #     (D,P,M,N) = 3,1,2,3
+    #     A_data = numpy.random.rand(D,P,M,N)
+        
+    #     # make A_data sufficiently regular
+    #     for p in range(P):
+    #         for m in range(M):
+    #             A_data[0,p,m,m] += (N + 1)
+        
+
+    #     A = UTPM(A_data)
+
+    #     Q,R = UTPM.qr(A)
+
+    #     assert_array_equal( Q.data.shape, [D,P,M,M])
+    #     assert_array_equal( R.data.shape, [D,P,M,N])
+
+    #     # print 'zero?\n',dot(Q, R) - A
+    #     assert_array_almost_equal( (UTPM.dot(Q,R[:,:M])).data, A[:,:M].data, decimal = 14)
+        
+    #     print UTPM.dot(Q.T,Q)
+        
+    #     # print UTPM.dot(Q,R[:,M:]) - A[:,M:]
+    #     # # assert_array_almost_equal( (UTPM.dot(Q,R[:,M:])).data, A[:,M:].data, decimal = 9)
+        
 
     def test_pullback(self):
         (D,P,M,N) = 2,3,10,10
