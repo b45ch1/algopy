@@ -583,7 +583,7 @@ class Test_QR_Decomposition(TestCase):
         """
         A.shape = (3,11)
         """
-        (D,P,M,N) = 3,1,2,3
+        (D,P,M,N) = 5,3,2,15
         A_data = numpy.random.rand(D,P,M,N)
         
         # make A_data sufficiently regular
