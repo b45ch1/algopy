@@ -41,3 +41,4 @@ Rationale:
 
 import utp
 import tracer
+import globalfuncs
