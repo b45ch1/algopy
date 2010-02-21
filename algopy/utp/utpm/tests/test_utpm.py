@@ -202,6 +202,15 @@ class Test_Push_Forward(TestCase):
         assert_array_almost_equal(AX2.data, AY6.data )
         assert_array_almost_equal(AX3.data, AY7.data )
         assert_array_almost_equal(AX4.data, AY8.data )
+        
+    def test_shift(self):
+        D,P,N = 5,1,2
+        X = UTPM(numpy.random.rand(D,P,N))
+        Y = UTPM.shift(X,2)
+        assert_array_almost_equal(X.data[:-2,...], Y.data[2:,...])
+        
+        Z = UTPM.shift(X,-2)
+        assert_array_almost_equal(X.data[2:,...], Z.data[:-2,...])
 
     def test_max(self):
         D,P,N = 2,3,4

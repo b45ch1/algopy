@@ -95,7 +95,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
             tmp[sl] += ybar
             
         else:
-            out[0][sl] += ybar
+            out[0][sl] = ybar
             
         return out
         
@@ -315,6 +315,11 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
 
     def transpose(self, axes = None):
         return UTPM( UTPM._transpose(self.data))
+        
+    def get_owndata(self):
+        return self.data.flags['OWNDATA']
+    
+    owndata = property(get_owndata)
 
     def set_zero(self):
         self.data[...] = 0.
@@ -322,6 +327,25 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
 
     def zeros_like(self):
         return self.__class__(numpy.zeros_like(self.data))
+        
+    def shift(self, s, out = None):
+        """
+        shifting coefficients [x0,x1,x2,x3] s positions
+        
+        e.g. shift([x0,x1,x2,x3], -1) = [x1,x2,x3,0]
+             shift([x0,x1,x2,x3], +1) = [0,x0,x1,x2]
+        """
+        
+        if out == None:
+            out = self.zeros_like()
+        
+        if s <= 0:
+            out.data[:s,...] = self.data[-s:,...]
+        
+        else:
+            out.data[s:,...] = self.data[:-s,...]
+        
+        return out
         
 
     def __str__(self):

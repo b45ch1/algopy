@@ -436,7 +436,7 @@ class Function(Algebra):
         
         else:
             return cls(x)
-            
+    
     def xbar_from_x(self):
         if numpy.isscalar(self.x):
             self.xbar = 0.
@@ -447,7 +447,26 @@ class Function(Algebra):
         elif self.x == None:
             pass
         else:
-            self.xbar = self.x.zeros_like()
+            if self.x.owndata == True:
+                self.xbar = self.x.zeros_like()
+            else:
+                
+                # STEP 1: extract arguments for func
+                args = []
+                for fa in self.args:
+                    if isinstance(fa, self.__class__):
+                        args.append(fa.xbar)
+                        
+                    else:
+                        args.append(fa)
+                
+                self.xbar = self.func(*args)
+                # print tmp
+                # self.xbar = self.func(
+                # print len(self.args)
+                # print self.func
+                # print self.args[0].x.strides
+                # raise NotImplementedError('should implement that')
             
             
     def __getitem__(self, sl):
