@@ -5,6 +5,8 @@ import os
 from algopy.tracer.tracer import *
 from algopy.utp.utpm import UTPM
 from algopy.utp.utps import UTPS
+from algopy.utp.ctps_c import CTPS_C
+
 
 import numpy
 
@@ -539,6 +541,7 @@ class Test_CGgraph_on_UTPM(TestCase):
         assert_array_almost_equal(ybar_reverse.data, ybar_symbolic.data)
         
     def test_dot(self):
+        """ test   z = dot(x,y)"""
         cg = CGraph()
         D,P,N,M = 2,5,7,11
         ax = UTPM(numpy.random.rand(D,P,N,M))
@@ -994,7 +997,23 @@ class Test_CGgraph_on_UTPM(TestCase):
         
         assert_array_almost_equal(const1.data[0,:], const2.data[0,:])
         assert_array_almost_equal(const2.data[0,:], const3.data[0,:])
-       
+
+
+
+class TestCGraphOnCTPS(TestCase):
+    def test_forward(self):
+        cg = CGraph()
+        ax = CTPS_C([3.,1.,0.,0.])
+        ay = CTPS_C([7.,0.,0.,0.])
+        fx = Function(ax)
+        fy = Function(ay)
+        fv1 = fx * fy
+        fv2 = (fv1 * fx + fy)*fv1
+        cg.independentFunctionList = [fx,fy]
+        cg.dependentFunctionList = [fv2]
+        cg.push_forward([ax,ay])
+        assert_array_almost_equal(cg.dependentFunctionList[0].x.data, ((ax*ay * ax + ay)*ax*ay).data)
+
         
         
 class Test_CGraph_Plotting(TestCase):
