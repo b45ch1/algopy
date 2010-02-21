@@ -10,6 +10,39 @@ import numpy
 
 class Test_Function_on_numpy_types(TestCase):
     
+    def test_function_constructor(self):
+
+        class foo:
+            pass
+
+        fx = Function(2.)
+        fy = Function(foo())
+        fz = Function(fx)
+
+    def test_add(self):
+        fx = Function(2.)
+        fy = Function(3.)
+        fz = fx + fy
+        assert_almost_equal(fz.x, fx.x + fy.x)
+
+    def test_sub(self):
+        fx = Function(2.)
+        fy = Function(3.)
+        fz = fx - fy
+        assert_almost_equal(fz.x, fx.x - fy.x)
+
+    def test_mul(self):
+        fx = Function(2.)
+        fy = Function(3.)
+        fz = fx * fy
+        assert_almost_equal(fz.x, fx.x * fy.x)
+
+    def test_div(self):
+        fx = Function(2.)
+        fy = Function(3.)
+        fz = fx / fy
+        assert_almost_equal(fz.x, fx.x / fy.x)    
+    
     def test_init(self):
         x = 1.
         fx = Function(x)
@@ -133,6 +166,21 @@ class Test_CGgraph_on_numpy_operations(TestCase):
         
         fx[0] += 1
         assert_array_almost_equal( fx.x, [2,2,3])
+        
+    def test_forward(self):
+        cg = CGraph()
+        fx = Function(3.)
+        fy = Function(7.)
+        fv1 = fx * fy
+        fv2 = (fv1 * fx + fy)*fv1
+        cg.independentFunctionList = [fx,fy]
+        cg.dependentFunctionList = [fv2]
+
+        x = 23.
+        y = 23523.
+        cg.push_forward([x,y])
+        assert_almost_equal(cg.dependentFunctionList[0].x, (x*y * x + y)*x*y)
+        
 
         
         
@@ -165,7 +213,8 @@ class Test_CGgraph_on_UTPM(TestCase):
         cg.dependentFunctionList = [fV2]
         cg.push_forward([aX,aY])
         assert_array_almost_equal(cg.dependentFunctionList[0].x.data, ((aX*aY * aX + aY)*aX*aY).data)
-        
+   
+
         
     def test_push_forward_of_qr(self):
         cg = CGraph()
@@ -223,7 +272,7 @@ class Test_CGgraph_on_UTPM(TestCase):
         dz/dy = 2 * x**3 * y  + 2 * x * y 
         """
         cg = CGraph()
-        D,P,N,M = 1,1,1,1
+        D,P,N,M = 2,5,7,11
         x = UTPM(numpy.random.rand(D,P,N,M))
         y = UTPM(numpy.random.rand(D,P,N,M))
         fx = Function(x)
@@ -233,7 +282,8 @@ class Test_CGgraph_on_UTPM(TestCase):
         cg.independentFunctionList = [fx,fy]
         cg.dependentFunctionList = [fv2]
         
-        v2bar = UTPM(numpy.ones((D,P,N,M)))
+        v2bar = UTPM(numpy.zeros((D,P,N,M)))
+        v2bar.data[0,...] = 1.
         cg.pullback([v2bar])
         
         # symbolic differentiation
