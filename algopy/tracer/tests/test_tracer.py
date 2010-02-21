@@ -585,6 +585,61 @@ class Test_CGgraph_on_UTPM(TestCase):
         cg.pullback([zbar])
         
         assert_array_almost_equal(Fx.x.data * 2, Fx.xbar.data)
+        
+        
+    def test_simple_getitem2(self):
+        """
+        test:  z = x1*x2
+        
+        by x1 = x[0]
+           x2 = x[1]
+           z = x1 * x2
+        """
+        D,P,N = 1,1,2
+        
+        cg = CGraph()
+        x = UTPM(numpy.random.rand(*(D,P,N)))
+        Fx = Function(x)
+        Fx1 = Fx[0]
+        Fx2 = Fx[1]
+        Fz = Fx1 * Fx2
+        cg.independentFunctionList = [Fx1, Fx2]
+        cg.dependentFunctionList = [Fz]
+        
+        zbar = UTPM(numpy.zeros((D,P)))
+        zbar.data[0,:] = 1.
+        cg.pullback([zbar])
+        
+        assert_array_almost_equal(Fx1.xbar.data , Fx2.x.data)
+        assert_array_almost_equal(Fx2.xbar.data , Fx1.x.data)
+        
+    def test_simple_getitem_setitem(self):
+        """
+        test:  z = x*x * 2
+        
+        by z = UTPM(zeros(...))
+           z[...] += x*x
+           z *= 2
+        """
+        D,P = 1,1
+        
+        cg = CGraph()
+        x = UTPM(numpy.random.rand(*(D,P)))
+        Fx = Function(x)
+        Fz = Function(UTPM(numpy.zeros((D,P))))
+        Fz[...] += Fx * Fx
+        Fz *= 3
+        cg.independentFunctionList = [Fx]
+        cg.dependentFunctionList = [Fz]
+        
+        assert_array_almost_equal(Fz.x.data[0], 3*x.data[0]**2)
+        
+        zbar = UTPM(numpy.zeros((D,P)))
+        zbar.data[0,:] = 1.
+        cg.pullback([zbar])
+        
+        assert_array_almost_equal(Fx.x.data * 6, Fx.xbar.data)
+        
 
     def test_reverse_on_getitem_setitem(self):
         cg = CGraph()
@@ -727,20 +782,35 @@ class Test_CGgraph_on_UTPM(TestCase):
         """
         compute PHI = trace( (J^T,J)^-1 )
         """
-        D,P,N,M = 2,1,100,3
+        D,P,N,M = 2,1,3,2
         MJ = UTPM(numpy.random.rand(D,P,N,M))
+       #  MJ = UTPM(numpy.array([[[[ 0.79636398,  0.22627532],
+       #   [ 0.89051158,  0.25639902],
+       #   [ 0.11028533,  0.95436784]]],
+
+
+       # [[[ 0.87357288,  0.12196627],
+       #   [ 0.77661888,  0.81793605],
+       #   [ 0.96229905,  0.7880918 ]]]]))
+
+        
+        
         cg = CGraph()
         FJ = Function(MJ)
+        # print 'FJ=\n',FJ
         FJT = Function.transpose(FJ)
+        # print 'FJT=\n',FJT
         FM = Function(UTPM(numpy.zeros((D,P,M,M))))
-        FM += Function.dot(FJT, FJ)
+        # print 'FM=\n',FM
+        FM[...] += Function.dot(FJT, FJ)
+        # print 'FM=\n',FM
         FC = Function.inv(FM)
+        # print 'FC=\n',FC
         FPHI = Function.trace(FC)
         cg.independentFunctionList = [FJ]
         cg.dependentFunctionList = [FPHI]
         
         assert_array_equal(FPHI.shape, ())
-        cg.push_forward([MJ])
         PHIbar = UTPM(numpy.ones((D,P)))
         
         # pullback using the tracer
@@ -760,138 +830,121 @@ class Test_CGgraph_on_UTPM(TestCase):
         # verifying pullback by  ybar.T ydot == xbar.T xdot
         const1 =  UTPM.dot(FPHI.xbar, UTPM.shift(FPHI.x,-1))
         const2 = UTPM.trace(UTPM.dot(FJ.xbar.T, UTPM.shift(FJ.x,-1)))
-        
-        # print cg
-        # print const1
-        # print const2
         assert_array_almost_equal(const1.data[0,:], const2.data[0,:])
         
         
         
-    # def test_more_complicated_ODOE_objective_function(self):
-    #     """
-    #     compute PHI = trace( (J^T,J)^-1 )
-    #     """
-    #     D,P,N,M = 2,1,100,3
-    #     MJs = [UTPM(numpy.random.rand(D,P,N,M)),UTPM(numpy.random.rand(D,P,N,M))]
-    #     cg = CGraph()
-    #     FJs= [Function(MJ) for MJ in MJs]
+    def test_more_complicated_ODOE_objective_function(self):
+        """
+        compute PHI = trace( (J^T,J)^-1 )
+        """
+        D,P,N,M = 2,1,100,3
+        MJs = [UTPM(numpy.random.rand(D,P,N,M)),UTPM(numpy.random.rand(D,P,N,M))]
+        cg = CGraph()
+        FJs= [Function(MJ) for MJ in MJs]
         
-    #     FM = Function(UTPM(numpy.zeros((D,P,M,M))))
-    #     for FJ in FJs:
-    #         FJT = Function.transpose(FJ)
-    #         FM += Function.dot(FJT, FJ)
-    #     FC = Function.inv(FM)
-    #     FPHI = Function.trace(FC)
-    #     cg.independentFunctionList = FJs
-    #     cg.dependentFunctionList = [FPHI]
+        FM = Function(UTPM(numpy.zeros((D,P,M,M))))
+        for FJ in FJs:
+            FJT = Function.transpose(FJ)
+            FM += Function.dot(FJT, FJ)
+        FC = Function.inv(FM)
+        FPHI = Function.trace(FC)
+        cg.independentFunctionList = FJs
+        cg.dependentFunctionList = [FPHI]
         
-    #     assert_array_equal(FPHI.shape, ())
-    #     cg.push_forward(MJs)
-    #     PHIbar = UTPM(numpy.ones((D,P)))
+        assert_array_equal(FPHI.shape, ())
+        # cg.push_forward(MJs)
         
-    #     # pullback using the tracer
-    #     cg.pullback([PHIbar])
+        # pullback using the tracer
+        PHIbar = UTPM(numpy.ones((D,P)))
+        cg.pullback([PHIbar])
         
-    #     # compute pullback by hand
-    #     Cbar = UTPM.pb_trace(PHIbar, FC.x, FPHI.x)
-    #     assert_array_almost_equal(Cbar.data, FC.xbar.data)
+        # # compute pullback by hand
+        # Cbar = UTPM.pb_trace(PHIbar, FC.x, FPHI.x)
+        # assert_array_almost_equal(Cbar.data, FC.xbar.data)
         
-    #     Mbar = UTPM.pb_inv(Cbar, FM.x, FC.x)
-    #     assert_array_almost_equal(Mbar.data, FM.xbar.data)
+        # Mbar = UTPM.pb_inv(Cbar, FM.x, FC.x)
+        # assert_array_almost_equal(Mbar.data, FM.xbar.data)
         
-    #     for FJ in FJs:
-    #         tmpbar = UTPM.pb_dot(Mbar, FJ.T.x, FJ.x, FM.x)
-    #         assert_array_almost_equal(tmpbar[1].data , FJ.xbar.data)
+        # for FJ in FJs:
+        #     tmpbar = UTPM.pb_dot(Mbar, FJ.T.x, FJ.x, FM.x)
+        #     assert_array_almost_equal(tmpbar[1].data , FJ.xbar.data)
             
             
-    #     # verifying pullback by  ybar.T ydot == xbar.T xdot
-    #     const1 =  UTPM.dot(FPHI.xbar, UTPM.shift(FPHI.x,-1))
-    #     const2 = UTPM(numpy.zeros((D,P)))
+        # verifying pullback by  ybar.T ydot == xbar.T xdot
+        const1 =  UTPM.dot(FPHI.xbar, UTPM.shift(FPHI.x,-1))
+        const2 = UTPM(numpy.zeros((D,P)))
         
-    #     for nFJ, FJ in enumerate(FJs):
-    #         const2 += UTPM.trace(UTPM.dot(FJ.xbar.T, UTPM.shift(FJ.x,-1)))
+        for nFJ, FJ in enumerate(FJs):
+            const2 += UTPM.trace(UTPM.dot(FJ.xbar.T, UTPM.shift(FJ.x,-1)))
         
-    #     # assert_array_almost_equal(const1.data[0,:], const2.data[0,:])
+        assert_array_almost_equal(const1.data[0,:], const2.data[0,:])
+            
+    def test_complicated_ODOE_objective_function(self):
 
-        
+        def Cfcn(F1p_list, out = None, work = None):
+            from numpy import sum, zeros
+            from algopy.globalfuncs import inv, dot, zeros
             
-            
-    # def test_complicated_ODOE_objective_function(self):
-
-    #     def Cfcn(F1p_list, out = None, work = None):
-    #         from numpy import sum, zeros
-    #         from algopy.globalfuncs import inv, dot, zeros
-            
-    #         # check input arguments
-    #         Nex  = len(F1p_list)
-    #         Np   = F1p_list[0].shape[1]
+            # check input arguments
+            Nex  = len(F1p_list)
+            Np   = F1p_list[0].shape[1]
                    
-    #         # create temporary matrix M if not provided
-    #         # to store M = [[J_1^T J_1, J_2^T],[J_2, 0]]
-    #         if work == None:
-    #             work = zeros((Np,Np), dtype=F1p_list[0])
-    #         M = work
+            # create temporary matrix M if not provided
+            # to store M = [[J_1^T J_1, J_2^T],[J_2, 0]]
+            if work == None:
+                work = zeros((Np,Np), dtype=F1p_list[0])
+            M = work
                 
-    #         # Step 1:   compute M = J_1^T J_1
-    #         for nex in range(Nex):
-    #             M += dot(F1p_list[nex].T, F1p_list[nex])
+            # Step 1:   compute M = J_1^T J_1
+            for nex in range(Nex):
+                M += dot(F1p_list[nex].T, F1p_list[nex])
             
-    #         # Step 2: invert M and prepare output
+            # Step 2: invert M and prepare output
 
-    #         if out == None:
-    #             out = inv(M)
-    #         else:
-    #             out[...] = M
-    #         return out
+            if out == None:
+                out = inv(M)
+            else:
+                out[...] = M
+            return out
         
-    #     D,P,N,M = 2,1,100,3
-    #     F1p_list = [UTPM(numpy.random.rand(D,P,N,M)),UTPM(numpy.random.rand(D,P,N,M))]
-    #     cg = CGraph()
-    #     FF1p_list = [Function(F1p) for F1p in F1p_list]
-    #     FC = Cfcn(FF1p_list)
-    #     FPHI = Function.trace(FC)
+        D,P,N,M = 2,1,100,3
+        F1p_list = [UTPM(numpy.random.rand(D,P,N,M)),UTPM(numpy.random.rand(D,P,N,M))]
+        cg = CGraph()
+        FF1p_list = [Function(F1p) for F1p in F1p_list]
+        FC = Cfcn(FF1p_list)
+        FPHI = Function.trace(FC)
         
-    #     cg.independentFunctionList = FF1p_list
-    #     cg.dependentFunctionList = [FPHI]
+        cg.independentFunctionList = FF1p_list
+        cg.dependentFunctionList = [FPHI]
         
-    #     assert_array_equal(FPHI.shape, ())
-    #     cg.push_forward(F1p_list)
-    #     PHIbar = UTPM(numpy.zeros((D,P)))
-    #     PHIbar.data[0,:] = 1.
+        assert_array_equal(FPHI.shape, ())
+        # cg.push_forward(F1p_list)
+        PHIbar = UTPM(numpy.zeros((D,P)))
+        PHIbar.data[0,:] = 1.
         
-    #     # pullback using the tracer
-    #     cg.pullback([PHIbar])
+        # pullback using the tracer
+        cg.pullback([PHIbar])
         
-    #     # verifying the computation
-    #     const1 =  UTPM.dot(PHIbar, UTPM.shift(FPHI.x,-1))
-    #     # print const1
+        # verifying the computation
+        const1 =  UTPM.dot(PHIbar, UTPM.shift(FPHI.x,-1))
+        # print const1
         
-    #     Cbar = UTPM.pb_trace(PHIbar, FC.x, FPHI.x)
-    #     assert_array_almost_equal(Cbar.data, FC.xbar.data)
-    #     const2 =  UTPM.trace(UTPM.dot(Cbar.T, UTPM.shift(FC.x,-1)))
-    #     # print const2
+        Cbar = UTPM.pb_trace(PHIbar, FC.x, FPHI.x)
+        assert_array_almost_equal(Cbar.data, FC.xbar.data)
+        const2 =  UTPM.trace(UTPM.dot(Cbar.T, UTPM.shift(FC.x,-1)))
+        # print const2
         
-    #     const3 = UTPM(numpy.zeros((D,P)))
+        const3 = UTPM(numpy.zeros((D,P)))
         
-    #     for nFF1p, FF1p in enumerate(FF1p_list):
-    #         const3 += UTPM.trace(UTPM.dot(FF1p.xbar.T, UTPM.shift(FF1p.x,-1)))
+        for nFF1p, FF1p in enumerate(FF1p_list):
+            const3 += UTPM.trace(UTPM.dot(FF1p.xbar.T, UTPM.shift(FF1p.x,-1)))
         
-    #     # print const3
+        # print const3
         
-    #     # assert_array_almost_equal(const1.data[0,:], const2.data[0,:])
-    #     # assert_array_almost_equal(const2.data[0,:], const3.data[0,:])
-        
-        
-        
-              
-        
-        
-        
-        
-        
-        
-        
+        assert_array_almost_equal(const1.data[0,:], const2.data[0,:])
+        assert_array_almost_equal(const2.data[0,:], const3.data[0,:])
+       
         
         
 class Test_CGraph_Plotting(TestCase):
