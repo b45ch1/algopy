@@ -292,6 +292,14 @@ class Test_Push_Forward(TestCase):
         ax_data2[:,:,:N//2] += 1
         assert_array_almost_equal(ax.data[:,:,:N//2], ax_data2[:,:,:N//2])
         
+    def test_setitem_with_scalar(self):
+        D,P,N = 3,2,5
+        ax_data = numpy.zeros((D,P,N))
+        ax = UTPM(ax_data)
+        ax[...] = 1.2
+        
+        assert_array_almost_equal(ax.data[0,...], 1.2)
+        assert_array_almost_equal(ax.data[1:,...], 0)
 
     def test_setitem(self):
         D,P,N,M = 2,3,4,4

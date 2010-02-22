@@ -142,6 +142,13 @@ class Test_Mixed_Function_Operations(TestCase):
         assert_array_almost_equal(fz13.x, fz23.x)
         assert_array_almost_equal(fz14.x, fz24.x)
         
+        
+    def test_function_setitem_with_scalar(self):
+        D,P,N = 2,3,4
+        x = UTPM(numpy.zeros((D,P,N)))
+        y = 3.
+        fx = Function(x)
+        fx[...] = y
 
 class Test_CGgraph_on_numpy_operations(TestCase):
     def test_push_forward(self):
