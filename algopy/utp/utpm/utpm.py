@@ -78,6 +78,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         else:
             if type(sl) == int or sl == Ellipsis or isinstance(sl, slice):
                 sl = (sl,)
+            self.data.__setitem__((slice(1,None),slice(None)) + sl, 0)
             return self.data.__setitem__((0,slice(None)) + sl, rhs)
         
     @classmethod

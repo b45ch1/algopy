@@ -145,10 +145,13 @@ class Test_Mixed_Function_Operations(TestCase):
         
     def test_function_setitem_with_scalar(self):
         D,P,N = 2,3,4
-        x = UTPM(numpy.zeros((D,P,N)))
+        x = UTPM(numpy.ones((D,P,N)))
         y = 3.
         fx = Function(x)
         fx[...] = y
+        
+        assert_array_almost_equal(fx.x.data[0,...], y)
+        assert_array_almost_equal(fx.x.data[1:,...], 0)
 
 class Test_CGgraph_on_numpy_operations(TestCase):
     def test_push_forward(self):

@@ -294,7 +294,7 @@ class Test_Push_Forward(TestCase):
         
     def test_setitem_with_scalar(self):
         D,P,N = 3,2,5
-        ax_data = numpy.zeros((D,P,N))
+        ax_data = numpy.ones((D,P,N))
         ax = UTPM(ax_data)
         ax[...] = 1.2
         
