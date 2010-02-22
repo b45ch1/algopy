@@ -998,6 +998,29 @@ class Test_CGgraph_on_UTPM(TestCase):
         assert_array_almost_equal(const1.data[0,:], const2.data[0,:])
         assert_array_almost_equal(const2.data[0,:], const3.data[0,:])
 
+    def test_simple_repeated_buffered_operation(self):
+        """
+        test:  y *= x
+        
+        by y = ones(...)
+           y[...] *= x
+           
+        """
+        D,P = 1,1
+        
+        cg = CGraph()
+        x = UTPM(numpy.random.rand(*(D,P)))
+        Fx = Function(x)
+        Fy = Function(UTPM(numpy.zeros((D,P))))
+        Fy[...] = UTPM(numpy.ones((1,1)))
+        Fy[...] *= Fx
+        cg.independentFunctionList = [Fx]
+        cg.dependentFunctionList = [Fy]
+        
+        assert_array_almost_equal(Fy.x.data[0], x.data[0])
+        cg.push_forward([x])
+        assert_array_almost_equal(Fy.x.data[0], x.data[0])
+
 
 
 class TestCGraphOnCTPS(TestCase):
