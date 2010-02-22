@@ -447,24 +447,29 @@ class Function(Algebra):
         elif self.x == None:
             pass
         else:
-            if self.x.owndata == True:
+            if self.x.owndata == True or self.func == self.Id:
                 self.xbar = self.x.zeros_like()
             else:
-                
+               
                 # STEP 1: extract arguments for func
                 args = []
                 for fa in self.args:
                     if isinstance(fa, self.__class__):
                         args.append(fa.xbar)
+                        print fa.ID
                         
                     else:
                         args.append(fa)
-                
+                        
+                # print self.func
+                # # print 'self.x', self.x
+                # print 'args', args
+                # print self.func(*args)
                 self.xbar = self.func(*args)
+                # print self.xbar.shape
                 # print tmp
                 # self.xbar = self.func(
                 # print len(self.args)
-                # print self.func
                 # print self.args[0].x.strides
                 # raise NotImplementedError('should implement that')
             
