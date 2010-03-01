@@ -7,7 +7,17 @@ from algopy.utp.utps import UTPS
 from algopy.utp.ctps_c import CTPS_C
 
 
+
 import numpy
+
+# class TestInverse(TestCase):
+#     X = UTPM(numpy.array([[[[2.]]]]))
+#     Y  = UTPM.inv(X)
+#     Ybar = UTPM(numpy.array([[[[1.]]]]))
+#     Xbar = UTPM.pb_inv(Ybar, X, Y)
+    
+#     print X,Y
+#     print Xbar
 
 # class TestCGraphOnSclars(TestCase):
 #     def test_reverse(self):
