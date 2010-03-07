@@ -569,9 +569,10 @@ class RawAlgorithmsMixIn:
             for p in range(P):
                 for r in range(N):
                     for c in range(N):
-                        if c == r:
-                            continue
-                        H[p,r,c] = 1./( L[p,c,c] - L[p,r,r])
+                        tmp = L[p,c,c] - L[p,r,r]
+                        if numpy.abs(tmp) > 10**-8:
+                            H[p,r,c] = 1./tmp
+                        
 
             # STEP 6:
             tmp0 = K - dL

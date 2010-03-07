@@ -4,23 +4,47 @@ import numpy
 from algopy.tracer.tracer import *
 from algopy.utp.utpm import *
 
-class Test_Function_on_UTPM(TestCase):
+
+class Test_Eigenvalue_Decomposition_with_degenerate_Eigenvalues(TestCase):
     
-    # def test_lala(self):
-        # D,P,N = 1,1,1
-        # ax = UTPM(2*numpy.ones((D,P,N)))
-        # ay = UTPM(3*numpy.ones((D,P,N)))
+    def test_first_order_two_blocks(self):
+        D,P,N = 2,1,3
+        X = UTPM(numpy.zeros((D,P,N,N)))
         
-        # UTPM.__iadd__(ay,ax)
+        # create orthogonormal transformation matrix
+        T = UTPM.qr(UTPM(numpy.random.rand(*(D,P,N,N))))[0]
         
-        # axbar = UTPM(numpy.zeros((D,P,N)))
-        # aybar = UTPM(5*numpy.ones((D,P,N)))
-        # print UTPM.pb___iadd__(aybar, ax, ay, ay, out = (axbar, aybar))
+        # set diagonal elements of X
+        X.data[0,0,0,0] = 1.
+        X.data[0,0,1,1] = 1.
+        X.data[0,0,2,2] = 2.
+        X.data[1,0,0,0] = 3.
+        X.data[1,0,1,1] = 5.
+        X.data[1,0,2,2] = 7.
         
-        # # print ay
+        
+        # similarity transformation to get a matrix Y with the same eigenvalues
+        # as X but not already diagonal
+        # Y = T X T.T
+        Y = UTPM.dot(T, UTPM.dot(X,T.T))
+        
+        tmp, Q_tilde = numpy.linalg.eigh(Y.data[0,0])
+        
+        # sanity checks for degree d = 0
+        tmp = numpy.diag(tmp)
+        assert_array_almost_equal(tmp, X.data[0,0])
+        
+        # compute first order coefficient
+        dD = numpy.dot(Q_tilde.T, numpy.dot(Y.data[1,0], Q_tilde))
+        
+        U = numpy.linalg.eigh(dD)[1]
+        
+        print U
+        
+        Q = numpy.dot(Q_tilde, U.T)
+        dD = numpy.dot(Q.T, numpy.dot(Y.data[1,0], Q))
         
         
-    
 
         
 
