@@ -562,27 +562,65 @@ class RawAlgorithmsMixIn:
                 vdot(S, L) + vdot(L,S)
 
             # STEP 4:
-            dL = Id * K
-
-            # STEP 5:
             H = numpy.zeros((P,N,N),dtype=float)
+            blocks = numpy.zeros((P,N),dtype=int)
             for p in range(P):
                 for r in range(N):
                     for c in range(N):
                         tmp = L[p,c,c] - L[p,r,r]
                         if numpy.abs(tmp) > 10**-8:
                             H[p,r,c] = 1./( L[p,c,c] - L[p,r,r])
-                        
+                        else:
+                            Id[p,r,c] = 1
+                            blocks[p,r] += 1
+            
+            blocks2 = []
+            for p in range(P):
+                tmp_blocks = []
+                n = 0
+                while n<N:
+                    tmp_blocks.append(blocks[p,n])
+                    n += blocks[p,n]
+                    
+                blocks2.append(tmp_blocks)
+            
+            blocks = blocks2
+                            
+            
+            # STEP 5:
+            dL = Id * K
 
             # STEP 6:
             tmp0 = K - dL
             tmp1 = H * tmp0
             tmp2 = tmp1 + S
             Q_data[D] = vdot(Q_data[0], tmp2)
+            
+            # STEP 7: orthogonalize the invariant subspaces to get diagonal Delta Lambda
 
-            # STEP 7:
+            # print dL
+            
+
+            
             for p in range(P):
-                L_data[D,p,:] = numpy.diag(dL[p])
+                
+                start = 0
+                for nb, b in enumerate(blocks[p]):
+                    stop = start + b
+                    dL2,U = numpy.linalg.eigh(dL[p,start:stop,start:stop])
+                    # print U.shape
+                    # print Q_data[0,0,:,start:stop].shape
+                    # Q_data[0,0,:,start:stop] = numpy.dot(Q_data[0,0,:,start:stop],U)
+                    # Q_data[1,0,:,start:stop] = numpy.dot(Q_data[1,0,:,start:stop],U)
+                    for d in range(D+1):
+                        # print 'd=',d
+                        Q_data[d,p,:,start:stop] = numpy.dot(Q_data[d,p,:,start:stop],U)
+                    L_data[D,p,start:stop] = dL2
+                    start = stop
+
+            # # STEP 7:
+            # for p in range(P):
+            #     L_data[D,p,:] = numpy.diag(dL[p])
 
     @classmethod
     def _mul_non_UTPM_x(cls, x_data, y_data, out = None):

@@ -806,7 +806,7 @@ class Test_Mixed_Types(TestCase):
 class Test_Eigenvalue_Decomposition(TestCase):
 
     def test_push_forward(self):
-        (D,P,N) = 3,3,5
+        (D,P,N) = 3,2,5
         A_data = numpy.zeros((D,P,N,N))
         for d in range(D):
             for p in range(P):
@@ -823,8 +823,25 @@ class Test_Eigenvalue_Decomposition(TestCase):
 
         assert_array_almost_equal(UTPM.dot(Q, UTPM.dot(L,Q.T)).data, A.data, decimal = 12)
 
+    def test_push_forward_repeated_eigenvalues(self):
+        D,P,N = 2,1,6
+        A = UTPM(numpy.zeros((D,P,N,N)))
+        V = UTPM(numpy.random.rand(D,P,N,N))
+        
+        A.data[0,0] = numpy.diag([2,2,3,3.,4,5])
+        A.data[1,0] = numpy.diag([5,6,3,3.,1,3])
+        
+        V,Rtilde = UTPM.qr(V)
+        A = UTPM.dot(UTPM.dot(V.T, A), V)
+
+        l,Q = UTPM.eigh(A)
+        L = UTPM.diag(l)
+
+        assert_array_almost_equal(UTPM.dot(Q, UTPM.dot(L,Q.T)).data, A.data, decimal = 12)
+
+
     def test_pullback(self):
-        (D,P,N) = 2,3,10
+        (D,P,N) = 2,5,10
         A_data = numpy.zeros((D,P,N,N))
         for d in range(D):
             for p in range(P):

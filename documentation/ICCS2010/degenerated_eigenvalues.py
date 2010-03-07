@@ -8,12 +8,12 @@ from algopy.utp.utpm import *
 
 
 # Build Symmetric Matrix with degenerate eigenvalues
-D,P,N = 2,1,4
+D,P,N = 2,1,6
 A = UTPM(numpy.zeros((D,P,N,N)))
 V = UTPM(numpy.random.rand(D,P,N,N))
 
-A.data[0,0] = numpy.diag([2,2,3,3.])
-A.data[1,0] = numpy.diag([5,6,7,7.])
+A.data[0,0] = numpy.diag([2,2,3,3.,4,5])
+A.data[1,0] = numpy.diag([5,6,3,3.,1,3])
 
 V,Rtilde = UTPM.qr(V)
 A = UTPM.dot(UTPM.dot(V.T, A), V)
@@ -32,23 +32,26 @@ L = UTPM.diag(l)
 
 # Q1 = Q[:,:2]
 
-# print UTPM.dot(Q1.T, UTPM.dot(A,Q1))
+# # print UTPM.dot(Q1.T, UTPM.dot(A,Q1))
 
-tmp2 = numpy.dot(Q.T.data[1,0], numpy.dot(A.data[0,0], Q.data[0,0]))
-tmp3 = numpy.dot(Q.T.data[0,0], numpy.dot(A.data[1,0], Q.data[0,0]))
-tmp4 = numpy.dot(Q.T.data[0,0], numpy.dot(A.data[0,0], Q.data[1,0]))
+# tmp2 = numpy.dot(Q.T.data[1,0], numpy.dot(A.data[0,0], Q.data[0,0]))
+# tmp3 = numpy.dot(Q.T.data[0,0], numpy.dot(A.data[1,0], Q.data[0,0]))
+# tmp4 = numpy.dot(Q.T.data[0,0], numpy.dot(A.data[0,0], Q.data[1,0]))
 
-tmp = tmp2 + tmp3 + tmp4
+# tmp = tmp2 + tmp3 + tmp4
 
-# print tmp
-U = numpy.linalg.eigh(tmp)[1]
-# U[2:,:2] = 0.
-# U[:2,2:] = 0.
-# print numpy.dot(U.T,U)
+# # print 'dL = ', tmp
+# U = numpy.linalg.eigh(tmp)[1]
+# # U[2:,:2] = 0.
+# # U[:2,2:] = 0.
+# # print numpy.dot(U.T,U)
 
-Q = UTPM.dot(Q, U)
+# Q = UTPM.dot(Q, U)
 
-# print UTPM.dot(Q.T, Q)
+# print UTPM.dot(Q[:,:2].T, Q[:,:2])
+# print UTPM.dot(Q[:,:].T, Q[:,:])
+
+# # print l
 
 print UTPM.dot(Q.T, UTPM.dot(A,Q))
 
