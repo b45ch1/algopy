@@ -619,7 +619,7 @@ class Test_QR_Decomposition(TestCase):
         # print 'zero?\n',dot(Q, R) - A
         # assert_array_almost_equal( (UTPM.dot(Q,R[:,:M])).data, A[:,:M].data, decimal = 14)
         # assert_array_almost_equal( (UTPM.dot(Q,R[:,M:])).data, A[:,M:].data, decimal = 14)
-        assert_array_almost_equal( (UTPM.dot(Q,R)).data, A.data, decimal = 14)
+        assert_array_almost_equal( (UTPM.dot(Q,R)).data, A.data, decimal = 12)
         assert_array_almost_equal(UTPM.dot(Q.T,Q).data[0], [numpy.eye(M) for p in range(P)])
         assert_array_almost_equal(UTPM.dot(Q.T,Q).data[1:],0)
         
@@ -829,7 +829,7 @@ class Test_Eigenvalue_Decomposition(TestCase):
         V = UTPM(numpy.random.rand(D,P,N,N))
         
         A.data[0,0] = numpy.diag([2,2,3,3.,4,5])
-        A.data[1,0] = numpy.diag([5,6,3,3.,1,3])
+        A.data[1,0] = numpy.diag([5,1,3,1.,1,3])
         
         V,Rtilde = UTPM.qr(V)
         A = UTPM.dot(UTPM.dot(V.T, A), V)
@@ -875,6 +875,39 @@ class Test_Eigenvalue_Decomposition(TestCase):
 
         assert_almost_equal(numpy.trace(numpy.dot(Abar.T, Adot)), numpy.trace( numpy.dot(Lbar.T, Ldot) + numpy.dot(Qbar.T, Qdot)))
 
+    # def test_pullback_repeated_eigenvalues(self):
+        # D,P,N = 1,1,6
+        # A = UTPM(numpy.zeros((D,P,N,N)))
+        # V = UTPM(numpy.random.rand(D,P,N,N))
+        
+        # A.data[0,0] = numpy.diag([2,2,3,3.,4,5])
+        # A.data[1,0] = numpy.diag([5,1,3,1.,1,3])
+        
+        # V,Rtilde = UTPM.qr(V)
+        # A = UTPM.dot(UTPM.dot(V.T, A), V)
+
+        # l,Q = UTPM.eigh(A)
+
+        # L_data = UTPM._diag(l.data)
+        # L = UTPM(L_data)
+
+        # assert_array_almost_equal(UTPM.dot(Q, UTPM.dot(L,Q.T)).data, A.data, decimal = 13)
+
+        # lbar = UTPM(numpy.random.rand(*(D,P,N)))
+        # Qbar = UTPM(numpy.random.rand(*(D,P,N,N)))
+
+        # Abar = UTPM.pb_eigh( lbar, Qbar, A, l, Q)
+
+        # Abar = Abar.data[0,0]
+        # Adot = A.data[1,0]
+
+        # Lbar = UTPM._diag(lbar.data)[0,0]
+        # Ldot = UTPM._diag(l.data)[1,0]
+
+        # Qbar = Qbar.data[0,0]
+        # Qdot = Q.data[1,0]
+
+        # assert_almost_equal(numpy.trace(numpy.dot(Abar.T, Adot)), numpy.trace( numpy.dot(Lbar.T, Ldot) + numpy.dot(Qbar.T, Qdot)))
 
 
 class TestFunctionOfJacobian(TestCase):

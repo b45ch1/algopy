@@ -665,10 +665,13 @@ class RawAlgorithmsMixIn:
         # STEP 1: compute H
         for m in range(N):
             for n in range(N):
-                if n == m:
-                    continue
-                tmp = lam_data[:,:,n] -   lam_data[:,:,m]
-                cls._div(Id, tmp, out = H[:,:,m,n])
+                for p in range(P):
+                    tmp = lam_data[0,p,n] - lam_data[0,p,m]
+                    if numpy.abs(tmp) > 10**-8:
+                        for d in range(D):
+                            H[d,p,m,n] = 1./tmp
+                # tmp = lam_data[:,:,n] -   lam_data[:,:,m]
+                # cls._div(Id, tmp, out = H[:,:,m,n])
 
         # STEP 2: compute Lbar +  H * Q^T Qbar
         cls._dot(cls._transpose(Q_data), Qbar_data, out = tmp1)
