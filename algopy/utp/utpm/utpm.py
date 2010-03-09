@@ -473,7 +473,18 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
             
         return out
    
-   
+    @classmethod
+    def cholesky(cls, A, out = None):
+        if out == None:
+            out = A.zeros_like()
+            
+        cls._choleksy(A.data, out.data)
+            
+            
+        return out
+        
+        
+
     @classmethod
     def pb_Id(cls, ybar, x, y, out = None):
         return out

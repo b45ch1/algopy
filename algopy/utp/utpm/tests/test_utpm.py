@@ -824,7 +824,7 @@ class Test_Eigenvalue_Decomposition(TestCase):
         assert_array_almost_equal(UTPM.dot(Q, UTPM.dot(L,Q.T)).data, A.data, decimal = 12)
 
     def test_push_forward_repeated_eigenvalues(self):
-        D,P,N = 2,1,6
+        D,P,N = 3,1,6
         A = UTPM(numpy.zeros((D,P,N,N)))
         V = UTPM(numpy.random.rand(D,P,N,N))
         

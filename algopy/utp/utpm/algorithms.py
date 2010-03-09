@@ -338,6 +338,42 @@ class RawAlgorithmsMixIn:
 
 
         return out
+        
+    @classmethod
+    def _choleksy(cls, A_data, L_data):
+        """
+        compute the choleksy decomposition in Taylor arithmetic of a symmetric
+        positive definite matrix A
+        i.e.
+        ..math:
+        
+            A = L L^T
+        """
+        DT,P,N = numpy.shape(A_data)[:3]
+        
+        # allocate temporary storage
+        dF = numpy.zeros((P,N,N),dtype=float)
+        
+        # base point: d = 0
+        for p in range(P):
+            L_data[0,p] = numpy.linalg.cholesky(A_data[0,p])
+
+        
+        # higher order coefficients: d > 0
+        # STEP 1: compute diagonal elements of dL
+        for D in range(1,DT):
+            dF *= 0
+            for d in range(1,D):
+                for p in range(P):
+                    dF[p] -= numpy.dot(L_data[D-d,p], L_data[d,p].T)
+                    
+            for p in range(P):
+                dF[p] += A_data[D-1,p]
+                dF[p] -= A_data[D,p]
+            
+            for p in range(P):
+                tmp = numpy.linalg.solve( L_data[0,p], dF)
+            print 'dF=',dF
 
     @classmethod
     def _ndim(cls, a_data):

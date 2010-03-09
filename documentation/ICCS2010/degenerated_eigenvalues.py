@@ -13,7 +13,7 @@ A = UTPM(numpy.zeros((D,P,N,N)))
 V = UTPM(numpy.random.rand(D,P,N,N))
 
 A.data[0,0] = numpy.diag([2,2,3,3.,4,5])
-A.data[1,0] = numpy.diag([5,6,3,3.,1,3])
+A.data[1,0] = numpy.diag([5,1,3,1.,1,3])
 
 V,Rtilde = UTPM.qr(V)
 A = UTPM.dot(UTPM.dot(V.T, A), V)
