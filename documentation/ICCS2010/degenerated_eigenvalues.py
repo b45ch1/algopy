@@ -8,12 +8,18 @@ from algopy.utp.utpm import *
 
 
 # Build Symmetric Matrix with degenerate eigenvalues
-D,P,N = 2,1,6
+D,P,N = 3,1,4
 A = UTPM(numpy.zeros((D,P,N,N)))
 V = UTPM(numpy.random.rand(D,P,N,N))
 
-A.data[0,0] = numpy.diag([2,2,3,3.,4,5])
-A.data[1,0] = numpy.diag([5,1,3,1.,1,3])
+# A.data[0,0] = numpy.diag([2,2,3,3,2,5.])
+# A.data[1,0] = numpy.diag([5,5,3,1,1,3.])
+# A.data[2,0] = numpy.diag([3,1,3,1,1,3.])
+
+A.data[0,0] = numpy.diag([2,2,2,5.])
+A.data[1,0] = numpy.diag([5,5,6,6.])
+A.data[2,0] = numpy.diag([1,1,1,1.])
+
 
 V,Rtilde = UTPM.qr(V)
 A = UTPM.dot(UTPM.dot(V.T, A), V)
@@ -42,9 +48,11 @@ Ldot = UTPM._diag(l.data)[1,0]
 Qbar = Qbar.data[0,0]
 Qdot = Q.data[1,0]
 
-print 'check pushforward:'
+print l
+
+# print 'check pushforward:'
 print 'Q.T A Q - L =\n', UTPM.dot(Q.T, UTPM.dot(A,Q)) - L
-print 'Q.T Q - I =\n', UTPM.dot(Q.T, Q) - numpy.eye(N)
-print 'check pullback:'
-print 'error measure of the pullback = ', numpy.trace(numpy.dot(Abar.T, Adot)) - numpy.trace( numpy.dot(Lbar.T, Ldot) + numpy.dot(Qbar.T, Qdot))
+# print 'Q.T Q - I =\n', UTPM.dot(Q.T, Q) - numpy.eye(N)
+# print 'check pullback:'
+# print 'error measure of the pullback = ', numpy.trace(numpy.dot(Abar.T, Adot)) - numpy.trace( numpy.dot(Lbar.T, Ldot) + numpy.dot(Qbar.T, Qdot))
 

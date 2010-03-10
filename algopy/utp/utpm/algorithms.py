@@ -539,17 +539,49 @@ class RawAlgorithmsMixIn:
                 Q_data[D,p,:,:] = numpy.dot(H[p] - numpy.dot(Q_data[0,p],R_data[D,p]), Rinv[p]) #numpy.dot(Q_data[0,p,:,:],K[p,:,:])
 
     @classmethod
-    def _eigh(cls, L_data, Q_data, A_data):
+    def _eigh(cls, L_data, Q_data, A_data, epsilon = 10**-8, full_output = False):
         """
         computes the eigenvalue decompositon
 
         L,Q = eig(A)
 
-        for symmetric matrix A with distinct eigenvalues, i.e.
-        where L is a diagonal matrix of ordered eigenvalues l_1 > l_2 > ...> l_N
+        for symmetric matrix A with possibly repeated eigenvalues, i.e.
+        where L is a diagonal matrix of ordered eigenvalues l_1 >= l_2 >= ...>= l_N
         and Q a matrix of corresponding orthogonal eigenvectors
 
         """
+        
+        def find_repeated_values(L):
+            """
+            INPUT:  L    (N,) array of ordered values, dtype = float
+            OUTPUT: b    (Nb,) array s.t. L[b[i:i+1]] are all repeated values
+            
+            Nb is the number of blocks of repeated values. It holds that
+            b[-1] = N.
+            
+            e.g. L = [1.,1.,1.,2.,2.,3.,5.,7.,7.]
+            then the output is [0,3,5,6,7,9]
+            """
+            N = len(L)
+            # print 'L=',L
+            b = [0]
+            n = 0
+            while n < N:
+                m = n + 1
+                while m < N:
+                    # print 'n,m=',n,m
+                    tmp = L[n] - L[m]
+                    if numpy.abs(tmp) > epsilon:
+                        b += [m]
+                        break
+                    m += 1
+                n += (m - n)
+            b += [N]
+            
+            # print 'OK'
+            return numpy.asarray(b)
+                            
+        
         # input checks
         DT,P,M,N = numpy.shape(A_data)
 
@@ -561,28 +593,37 @@ class RawAlgorithmsMixIn:
         if L_data.shape != (DT,P,N):
             raise ValueError('expected L_data.shape = %s but provided %s'%(str((DT,P,N)),str(L_data.shape)))
 
-
         # INIT: compute the base point
         for p in range(P):
             L_data[0,p,:], Q_data[0,p,:,:] = numpy.linalg.eigh(A_data[0,p,:,:])
-
-        Id = numpy.zeros((P,N,N))
-        for p in range(P):
-            Id[p] = numpy.eye(N)
 
         # save zero'th coefficient of L_data as diagonal matrix
         L = numpy.zeros((P,N,N))
         for p in range(P):
             L[p] = numpy.diag(L_data[0,p])
+            
+        # store blocks of repeated eigenvalues for all degrees in the variable blocks
+        blocks_list = []
+        tmp = []
+        for p in range(P):
+            tmp.append(find_repeated_values(L_data[0,p]))
+        blocks_list.append(tmp)
+
+        # compute H
+        H = numpy.zeros((P,N,N))
+        for p in range(P):
+            for r in range(N):
+                for c in range(N):
+                    tmp = L_data[0,p,c] - L_data[0,p,r]
+                    if abs(tmp) > epsilon:
+                        H[p,r,c] = 1./tmp
 
         dG = numpy.zeros((P,N,N))
 
         # ITERATE: compute derivatives
         for D in range(1,DT):
-            # print 'D=',D
+            print 'D=',D
             dG[...] = 0.
-
-            dL = numpy.zeros((P,N,N))
 
             # STEP 1:
             dF = truncated_triple_dot(Q_data.transpose(0,1,3,2), A_data, Q_data, D)
@@ -597,66 +638,40 @@ class RawAlgorithmsMixIn:
             K = dF + vdot(vdot(Q_data.transpose(0,1,3,2)[0], A_data[D]),Q_data[0]) + \
                 vdot(S, L) + vdot(L,S)
 
-            # STEP 4:
-            H = numpy.zeros((P,N,N),dtype=float)
-            blocks = numpy.zeros((P,N),dtype=int)
+            # STEP 4: compute Q
+            XT = K*H
             for p in range(P):
-                for r in range(N):
-                    for c in range(N):
-                        tmp = L[p,c,c] - L[p,r,r]
-                        if numpy.abs(tmp) > 10**-8:
-                            H[p,r,c] = 1./( L[p,c,c] - L[p,r,r])
-                        else:
-                            Id[p,r,c] = 1
-                            blocks[p,r] += 1
+                Q_data[D,p] = numpy.dot(Q_data[0,p], XT[p] + S[p])
             
-            blocks2 = []
+            # STEP 5: eigenvalue decomposition of dL in the invariant subspace
             for p in range(P):
-                tmp_blocks = []
-                n = 0
-                while n<N:
-                    tmp_blocks.append(blocks[p,n])
-                    n += blocks[p,n]
+                blocks = blocks_list[D-1][p]
+                for nb in range(len(blocks)-1):
+                    start, stop = blocks[nb], blocks[nb+1]
+                    L_data[D,p,start:stop], U = numpy.linalg.eigh(K[p,start:stop,start:stop])
                     
-                blocks2.append(tmp_blocks)
-            
-            blocks = blocks2
-                            
-            
-            # STEP 5:
-            dL = Id * K
-
-            # STEP 6:
-            tmp0 = K - dL
-            tmp1 = H * tmp0
-            tmp2 = tmp1 + S
-            Q_data[D] = vdot(Q_data[0], tmp2)
-            
-            # STEP 7: orthogonalize the invariant subspaces to get diagonal Delta Lambda
-
-            # print dL
-            
-
-            
-            for p in range(P):
-                
-                start = 0
-                for nb, b in enumerate(blocks[p]):
-                    stop = start + b
-                    dL2,U = numpy.linalg.eigh(dL[p,start:stop,start:stop])
-                    # print U.shape
-                    # print Q_data[0,0,:,start:stop].shape
-                    # Q_data[0,0,:,start:stop] = numpy.dot(Q_data[0,0,:,start:stop],U)
-                    # Q_data[1,0,:,start:stop] = numpy.dot(Q_data[1,0,:,start:stop],U)
+                    # print 'start,stop=',start,stop
+                    print 'U=', numpy.dot(U.T,U)
                     for d in range(D+1):
-                        # print 'd=',d
-                        Q_data[d,p,:,start:stop] = numpy.dot(Q_data[d,p,:,start:stop],U)
-                    L_data[D,p,start:stop] = dL2
-                    start = stop
+                        Q_data[d,p,:,start:stop] = numpy.dot(Q_data[d,p,:,start:stop], U)
+            
+            tmp = []
+            for p in range(P):
+                blocks = blocks_list[D-1][p]
+                tmp2 = []
+                for nb in range(len(blocks)-1):
+                    start, stop = blocks[nb], blocks[nb+1]
+                
+                    tmp2.append(find_repeated_values(L_data[D,p,start:stop]) + start)
+                
+                tmp.append( numpy.unique(numpy.concatenate(tmp2)))
+                
+            blocks_list.append(tmp)
+        
+        print blocks_list
+        if full_output == True:
+            return L_data, Q_data, blocks_list
 
-            # # STEP 7:
-            # for p in range(P):
-            #     L_data[D,p,:] = numpy.diag(dL[p])
 
     @classmethod
     def _mul_non_UTPM_x(cls, x_data, y_data, out = None):
