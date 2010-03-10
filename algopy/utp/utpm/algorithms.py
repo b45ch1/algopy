@@ -370,10 +370,14 @@ class RawAlgorithmsMixIn:
             for p in range(P):
                 dF[p] += A_data[D-1,p]
                 dF[p] -= A_data[D,p]
-            
-            for p in range(P):
-                tmp = numpy.linalg.solve( L_data[0,p], dF)
-            print 'dF=',dF
+                tmp = numpy.linalg.solve( L_data[0,p], dF[p]).T
+                dF[p] = numpy.linalg.solve( L_data[0,p], tmp)
+                
+                tmp1 = numpy.diag(L_data[0,p])
+                tmp2 = numpy.diag(dF[p])
+                L_data[D,p][numpy.diag_indices(N)] = -0.5 * tmp1 * tmp2
+                L_data[D,p][numpy.diag_indices(N)] = -0.5 * numpy.diag(L_data[0,p]) * numpy.diag(dF[p])
+                
 
     @classmethod
     def _ndim(cls, a_data):

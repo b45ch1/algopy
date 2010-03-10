@@ -15,7 +15,7 @@ class Test_Experimental(TestCase):
         
         L = UTPM.cholesky(A)
         
-        print L
+        print 'L=',L
 
         
         
