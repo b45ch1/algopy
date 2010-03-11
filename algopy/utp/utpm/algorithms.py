@@ -600,6 +600,30 @@ class RawAlgorithmsMixIn:
             # print 'OK'
             return numpy.asarray(b)
                             
+        def generate_mask(blocks1, blocks2, nb):
+            """
+            
+            e.g. blocks1 = [0,3,7,9]
+                 blocks2 = [0,2,3,7,9]
+            
+            and nb = 1
+                 
+            then the corresponding matrix looks like
+            
+            mask = [[0,0,1],
+                    [0,0,1],
+                    [1,1,0]]
+            """
+            
+            start1 = blocks1[nb]
+            stop1  = blocks1[nb+1]
+            
+            start2, = numpy.where( start1 == blocks2 )
+            print 'start2=',start2
+            
+            
+            
+            
         
         # input checks
         DT,P,M,N = numpy.shape(A_data)
@@ -667,27 +691,28 @@ class RawAlgorithmsMixIn:
                 blocks = blocks_list[D-1][p]
                 for nb in range(len(blocks)-1):
                     start, stop = blocks[nb], blocks[nb+1]
+                    
+                    # print generate_mask(blocks_list[0][p], blocks, 0)
                     L_data[D,p,start:stop], U = numpy.linalg.eigh(K[p,start:stop,start:stop])
                     
                     # print 'start,stop=',start,stop
-                    print 'U=', numpy.dot(U.T,U)
+                    # print 'U=', numpy.dot(U.T,U)
                     for d in range(D+1):
                         Q_data[d,p,:,start:stop] = numpy.dot(Q_data[d,p,:,start:stop], U)
             
+            
+            # STEP 6: update the blocks_list
             tmp = []
             for p in range(P):
                 blocks = blocks_list[D-1][p]
                 tmp2 = []
                 for nb in range(len(blocks)-1):
                     start, stop = blocks[nb], blocks[nb+1]
-                
                     tmp2.append(find_repeated_values(L_data[D,p,start:stop]) + start)
-                
                 tmp.append( numpy.unique(numpy.concatenate(tmp2)))
-                
             blocks_list.append(tmp)
         
-        print blocks_list
+        print 'blocks_list=',blocks_list
         if full_output == True:
             return L_data, Q_data, blocks_list
 

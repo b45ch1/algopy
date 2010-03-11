@@ -48,7 +48,7 @@ Ldot = UTPM._diag(l.data)[1,0]
 Qbar = Qbar.data[0,0]
 Qdot = Q.data[1,0]
 
-print l
+# print l
 
 # print 'check pushforward:'
 print 'Q.T A Q - L =\n', UTPM.dot(Q.T, UTPM.dot(A,Q)) - L
