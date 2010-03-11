@@ -23,7 +23,7 @@ class Test_Helper_Functions(TestCase):
                 S2[d,p,:,:] = numpy.dot(A[d,p],B[d,p])
 
         assert_array_almost_equal(R,R2)
-        assert_array_almost_equal(S,S2)      
+        assert_array_almost_equal(S,S2)
        
     def test_triple_truncated_dot(self):
         D,P,N,M = 3,1,1,1

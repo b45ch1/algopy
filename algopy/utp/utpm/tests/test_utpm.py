@@ -555,6 +555,18 @@ class Test_Pullbacks(TestCase):
         
         Xbar2 = -1*UTPM.dot(UTPM.dot(Y.T, Ybar), Y.T)
         assert_array_almost_equal(Xbar.data, Xbar2.data, decimal=12)
+
+
+class Test_Cholesky_Decomposition(TestCase):
+    def test_pushforward(self):
+        D,P,N = 3, 2, 10
+        tmp = numpy.random.rand(*(D,P,N,N))
+        A = UTPM(tmp)
+        A = UTPM.dot(A.T,A)
+
+        L = UTPM.cholesky(A)
+        assert_array_almost_equal( A.data, UTPM.dot(L,L.T).data)
+        
         
 
 class Test_QR_Decomposition(TestCase):
