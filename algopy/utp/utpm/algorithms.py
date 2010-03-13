@@ -222,7 +222,7 @@ class RawAlgorithmsMixIn:
                 for c in range(1,d+1):
                     y_data[d,p,:,:] += numpy.dot(x_data[c,p,:,:], y_data[d-c,p,:,:],)
                 y_data[d,p,:,:] =  numpy.dot(-y_data[0,p,:,:], y_data[d,p,:,:],)
-        return out
+        return y_data
         
 
     @classmethod
@@ -462,6 +462,7 @@ class RawAlgorithmsMixIn:
         if out == None:
             raise NotImplementedError('should implement this')
         
+        Abar_data, = out
         
         D,P,N = A_data.shape[:3]
         
@@ -471,9 +472,13 @@ class RawAlgorithmsMixIn:
         tmp *= Proj
         
         # compute Abar
-        Linv_data = cls._inv(L_data)
-        print Linv_data
-
+        Linv_data = cls._inv(L_data, (cls.__zeros_like__(A_data),))
+        tmp2 = cls._dot(tmp, Linv_data, cls.__zeros_like__(A_data))
+        tmp3 = cls._dot(cls._transpose(Linv_data), tmp2, cls.__zeros_like__(A_data))
+        Abar_data += tmp3
+        
+        return Abar_data
+        
 
     @classmethod
     def _ndim(cls, a_data):
