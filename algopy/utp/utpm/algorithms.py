@@ -376,8 +376,8 @@ class RawAlgorithmsMixIn:
                 for d in range(1,D):
                     dF += numpy.dot(L_data[D-d,p], L_data[d,p].T)
                 
-                print numpy.dot(L_data[1,p],L_data[1,p].T)
-                print 'dF = ',dF
+                # print numpy.dot(L_data[1,p],L_data[1,p].T)
+                # print 'dF = ',dF
                     
                 dF -= A_data[D,p]
                 
@@ -392,7 +392,20 @@ class RawAlgorithmsMixIn:
                 tmp3 = -0.5 * tmp1 * tmp2
                 L_data[D,p][numpy.diag_indices(N)] = tmp3
 
-                
+
+    @classmethod
+    def _pb_cholesky(cls, Lbar_data, A_data, L_data, out = None):
+        """
+        pullback of the linear form of the cholesky decomposition
+        """
+    
+        if out == None:
+            raise NotImplementedError('should implement this')
+        
+        Abar_data, = out
+        
+        print Abar_data
+
 
     @classmethod
     def _ndim(cls, a_data):

@@ -479,10 +479,20 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
             out = A.zeros_like()
             
         cls._choleksy(A.data, out.data)
-            
-            
         return out
+
+
+    @classmethod
+    def pb_cholesky(cls, Lbar, A, L, out = None):
+        if out == None:
+            D,P = y.data.shape[:2]
+            Abar = cls(cls.__zeros__(A.data.shape))
         
+        else:
+            Abar, = out
+            
+        cls._pb_cholesky(Lbar.data, A.data, L.data, out = Abar.data)
+        return xbar
         
 
     @classmethod
