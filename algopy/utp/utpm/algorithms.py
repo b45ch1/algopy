@@ -159,6 +159,8 @@ class RawAlgorithmsMixIn:
         z_data[...] = 0.
 
         D,P = x_data.shape[:2]
+        
+        print 'z_data=',z_data
 
         for d in range(D):
             for p in range(P):
@@ -197,7 +199,30 @@ class RawAlgorithmsMixIn:
         ybar_data += cls._dot(cls._transpose(x_data), zbar_data, out = ybar_data.copy())
         return out
         
+
+    @classmethod
+    def _inv(cls, x_data, out = None):
+        """
+        computes y = inv(x)
+        """
         
+        if out == None:
+            raise NotImplementedError('should implement that')
+        
+        y_data, = out
+        (D,P,N,M) = y_data.shape
+            
+        # tc[0] element
+        for p in range(P):
+            y_data[0,p,:,:] = numpy.linalg.inv(x_data[0,p,:,:])
+
+        # tc[d] elements
+        for d in range(1,D):
+            for p in range(P):
+                for c in range(1,d+1):
+                    y_data[d,p,:,:] += numpy.dot(x_data[c,p,:,:], y_data[d-c,p,:,:],)
+                y_data[d,p,:,:] =  numpy.dot(-y_data[0,p,:,:], y_data[d,p,:,:],)
+        return out
         
 
     @classmethod
@@ -394,6 +419,41 @@ class RawAlgorithmsMixIn:
 
 
     @classmethod
+    def build_PL(cls, N):
+        """
+        build lower triangular matrix with all ones, i.e.
+        
+        PL = [[0,0,0],
+              [1,0,0],
+              [1,1,0]]
+        """
+        retval = numpy.zeros((N,N))
+        
+        for r in range(N):
+            for c in range(r):
+                retval[r,c] = 1.
+
+        return retval
+
+    @classmethod
+    def build_PU(cls, N):
+        """
+        build upper triangular matrix with all ones, i.e.
+        
+        PL = [[0,1,1],
+              [0,0,1],
+              [0,0,0]]
+        """
+        retval = numpy.zeros((N,N))
+        
+        for r in range(N):
+            for c in range(r+1,N):
+                retval[r,c] = 1.
+                
+        return retval
+        
+
+    @classmethod
     def _pb_cholesky(cls, Lbar_data, A_data, L_data, out = None):
         """
         pullback of the linear form of the cholesky decomposition
@@ -402,9 +462,17 @@ class RawAlgorithmsMixIn:
         if out == None:
             raise NotImplementedError('should implement this')
         
-        Abar_data, = out
         
-        print Abar_data
+        D,P,N = A_data.shape[:3]
+        
+        # compute (P_L + 0.5*P_D) * dot(L.T, Lbar)
+        Proj = cls.build_PL(N) + 0.5 * numpy.eye(N)
+        tmp = cls._dot(cls._transpose(L_data), Lbar_data, cls.__zeros_like__(A_data))
+        tmp *= Proj
+        
+        # compute Abar
+        Linv_data = cls._inv(L_data)
+        print Linv_data
 
 
     @classmethod

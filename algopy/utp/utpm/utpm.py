@@ -418,19 +418,20 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
             out = cls(cls.__zeros__(A.data.shape))
         else:
             raise NotImplementedError('')
-        (D,P,N,M) = out.data.shape
-
-        # tc[0] element
-        for p in range(P):
-            out.data[0,p,:,:] = numpy.linalg.inv(A.data[0,p,:,:])
-
-        # tc[d] elements
-        for d in range(1,D):
-            for p in range(P):
-                for c in range(1,d+1):
-                    out.data[d,p,:,:] += numpy.dot(A.data[c,p,:,:], out.data[d-c,p,:,:],)
-                out.data[d,p,:,:] =  numpy.dot(-out.data[0,p,:,:], out.data[d,p,:,:],)
+        
+        cls._inv(A.data,(out.data,))
         return out
+        # # tc[0] element
+        # for p in range(P):
+        #     out.data[0,p,:,:] = numpy.linalg.inv(A.data[0,p,:,:])
+
+        # # tc[d] elements
+        # for d in range(1,D):
+        #     for p in range(P):
+        #         for c in range(1,d+1):
+        #             out.data[d,p,:,:] += numpy.dot(A.data[c,p,:,:], out.data[d-c,p,:,:],)
+        #         out.data[d,p,:,:] =  numpy.dot(-out.data[0,p,:,:], out.data[d,p,:,:],)
+        # return out
         
     @classmethod
     def solve(cls, A, x, out = None):
@@ -485,14 +486,14 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
     @classmethod
     def pb_cholesky(cls, Lbar, A, L, out = None):
         if out == None:
-            D,P = y.data.shape[:2]
+            D,P = A.data.shape[:2]
             Abar = cls(cls.__zeros__(A.data.shape))
         
         else:
-            Abar, = out
+            Abar = out
             
-        cls._pb_cholesky(Lbar.data, A.data, L.data, out = Abar.data)
-        return xbar
+        cls._pb_cholesky(Lbar.data, A.data, L.data, out = (Abar.data,))
+        return Abar
         
 
     @classmethod
