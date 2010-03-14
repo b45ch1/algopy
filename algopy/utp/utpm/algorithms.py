@@ -462,20 +462,34 @@ class RawAlgorithmsMixIn:
         if out == None:
             raise NotImplementedError('should implement this')
         
-        Abar_data, = out
+        Abar_data = out
         
         D,P,N = A_data.shape[:3]
+        
+        # compute (P_L + 0.5*P_D) * dot(L.T, Lbar)
+        Proj = cls.build_PL(N) + 0.5 * numpy.eye(N)
         
         # compute (P_L + 0.5*P_D) * dot(L.T, Lbar)
         Proj = cls.build_PL(N) + 0.5 * numpy.eye(N)
         tmp = cls._dot(cls._transpose(L_data), Lbar_data, cls.__zeros_like__(A_data))
         tmp *= Proj
         
+        # symmetrize (P_L + 0.5*P_D) * dot(L.T, Lbar)
+        tmp = 0.5*(cls._transpose(tmp) + tmp)
+        
         # compute Abar
         Linv_data = cls._inv(L_data, (cls.__zeros_like__(A_data),))
-        tmp2 = cls._dot(tmp, Linv_data, cls.__zeros_like__(A_data))
-        tmp3 = cls._dot(cls._transpose(Linv_data), tmp2, cls.__zeros_like__(A_data))
+        tmp2 = cls._dot(cls._transpose(Linv_data), tmp, cls.__zeros_like__(A_data))
+        tmp3 = cls._dot(tmp2, Linv_data, cls.__zeros_like__(A_data))
         Abar_data += tmp3
+              
+        # tmp *= Proj
+        
+        # # compute Abar
+        # Linv_data = cls._inv(L_data, (cls.__zeros_like__(A_data),))
+        # tmp2 = cls._dot(tmp, Linv_data, cls.__zeros_like__(A_data))
+        # tmp3 = cls._dot(cls._transpose(Linv_data), tmp2, cls.__zeros_like__(A_data))
+        # Abar_data += tmp3
         
         return Abar_data
         

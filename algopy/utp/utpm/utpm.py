@@ -492,7 +492,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         else:
             Abar = out
             
-        cls._pb_cholesky(Lbar.data, A.data, L.data, out = (Abar.data,))
+        cls._pb_cholesky(Lbar.data, A.data, L.data, out = Abar.data)
         return Abar
         
 
