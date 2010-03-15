@@ -23,7 +23,7 @@ class Test_Experimental(TestCase):
         # print L
         
         Abar = UTPM.pb_cholesky(Lbar, A, L)
-        # print Abar
+        print Abar
         
         for p in range(P):
             Ab = Abar.data[0,p]

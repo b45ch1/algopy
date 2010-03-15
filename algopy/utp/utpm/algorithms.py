@@ -482,14 +482,6 @@ class RawAlgorithmsMixIn:
         tmp2 = cls._dot(cls._transpose(Linv_data), tmp, cls.__zeros_like__(A_data))
         tmp3 = cls._dot(tmp2, Linv_data, cls.__zeros_like__(A_data))
         Abar_data += tmp3
-              
-        # tmp *= Proj
-        
-        # # compute Abar
-        # Linv_data = cls._inv(L_data, (cls.__zeros_like__(A_data),))
-        # tmp2 = cls._dot(tmp, Linv_data, cls.__zeros_like__(A_data))
-        # tmp3 = cls._dot(cls._transpose(Linv_data), tmp2, cls.__zeros_like__(A_data))
-        # Abar_data += tmp3
         
         return Abar_data
         
