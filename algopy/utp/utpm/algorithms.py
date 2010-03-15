@@ -888,7 +888,7 @@ class RawAlgorithmsMixIn:
 
 
         if M < N:
-            raise ValueError('supplied matrix has more columns that rows')
+            raise NotImplementedError('supplied matrix has more columns that rows')
 
         # allocate temporary storage and temporary matrices
         tmp1 = numpy.zeros((D,P,N,N))
