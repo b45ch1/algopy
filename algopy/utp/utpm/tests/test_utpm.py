@@ -559,7 +559,7 @@ class Test_Pullbacks(TestCase):
 
 class Test_Cholesky_Decomposition(TestCase):
     def test_pushforward(self):
-        D,P,N = 3, 2, 10
+        D,P,N = 5, 2, 10
         tmp = numpy.random.rand(*(D,P,N,N))
         A = UTPM(tmp)
         A = UTPM.dot(A.T,A)
