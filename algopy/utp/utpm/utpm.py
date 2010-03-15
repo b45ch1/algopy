@@ -479,7 +479,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         if out == None:
             out = A.zeros_like()
             
-        cls._choleksy(A.data, out.data)
+        cls._cholesky(A.data, out.data)
         return out
 
 

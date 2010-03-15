@@ -42,3 +42,7 @@ Rationale:
 import utp
 import tracer
 import globalfuncs
+
+from utp.utps import UTPS
+from utp.utpm import UTPM
+from tracer import CGraph, Function

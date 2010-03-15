@@ -365,7 +365,7 @@ class RawAlgorithmsMixIn:
         return out
         
     @classmethod
-    def _choleksy(cls, A_data, L_data):
+    def _cholesky(cls, A_data, L_data):
         """
         compute the choleksy decomposition in Taylor arithmetic of a symmetric
         positive definite matrix A
