@@ -635,6 +635,10 @@ class Test_QR_Decomposition(TestCase):
         assert_array_almost_equal(UTPM.dot(Q.T,Q).data[0], [numpy.eye(M) for p in range(P)])
         assert_array_almost_equal(UTPM.dot(Q.T,Q).data[1:],0)
         
+        
+
+        
+        
 
     def test_pullback(self):
         (D,P,M,N) = 2,3,10,10

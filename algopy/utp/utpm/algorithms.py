@@ -874,9 +874,50 @@ class RawAlgorithmsMixIn:
         return out
 
 
-
     @classmethod
     def _qr_pullback(cls, Qbar_data, Rbar_data, A_data, Q_data, R_data, out = None):
+        """
+        computes the pullback of the qr decomposition (Q,R) = qr(A)    <===>    QR = A
+        
+            A_data      (D,P,M,N) array             regular matrix
+            Q_data      (D,P,M,K) array             orthogonal vectors Q_1,...,Q_K
+            R_data      (D,P,K,N) array             upper triagonal matrix
+        
+            where K = min(M,N)
+        
+        """
+        
+        # check if the output array is provided
+        if out == None:
+            raise NotImplementedError('need to implement that...')
+        Abar_data = out
+        
+        DT,P,M,N = numpy.shape(A_data)
+        K = min(M,N)
+        
+        if M < N:
+            A1_data = A_data[:,:,:,:M]
+            A2_data = A_data[:,:,:,M:]
+            R1_data = R_data[:,:,:,:M]
+            R2_data = R_data[:,:,:,M:]
+            
+            A1bar_data = Abar_data[:,:,:,:M]
+            A2bar_data = Abar_data[:,:,:,M:]
+            R1bar_data = Rbar_data[:,:,:,:M]
+            R2bar_data = Rbar_data[:,:,:,M:]
+
+            Qbar_data += cls._dot(A2_data, cls._transpose(R2bar_data), numpy.zeros((DT,P,M,M)))
+            A2bar_data += cls._dot(Q_data, R2bar_data, numpy.zeros((DT,P,M,N-M)))
+            cls._qr_rectangular_pullback(Qbar_data, R1bar_data, A1_data, Q_data, R1_data, out = A1bar_data)
+            
+        else:
+            cls._qr_rectangular_pullback( Qbar_data, Rbar_data, A_data, Q_data, R_data, out = out)
+
+    @classmethod
+    def _qr_rectangular_pullback(cls, Qbar_data, Rbar_data, A_data, Q_data, R_data, out = None):
+        """
+        assumes that A.shape = M,N with M >= N
+        """
 
         if out == None:
             raise NotImplementedError('need to implement that...')
