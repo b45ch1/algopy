@@ -415,7 +415,8 @@ class RawAlgorithmsMixIn:
                 tmp1 = numpy.diag(L_data[0,p])
                 tmp2 = numpy.diag(dF)
                 tmp3 = -0.5 * tmp1 * tmp2
-                L_data[D,p][numpy.diag_indices(N)] = tmp3
+                for n in range(N):
+                    L_data[D,p,n,n] = tmp3[n]
 
 
     @classmethod
