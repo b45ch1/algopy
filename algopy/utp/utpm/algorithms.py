@@ -910,14 +910,11 @@ class RawAlgorithmsMixIn:
             A2bar_data = Abar_data[:,:,:,M:]
             R1bar_data = Rbar_data[:,:,:,:M]
             R2bar_data = Rbar_data[:,:,:,M:]
+            
+            Qbar_data = Qbar_data.copy()
 
             Qbar_data += cls._dot(A2_data, cls._transpose(R2bar_data), out = numpy.zeros((DT,P,M,M)))
             A2bar_data += cls._dot(Q_data, R2bar_data, out = numpy.zeros((DT,P,M,N-M)))
-            
-            # print ' Qbar_data.shape=',Qbar_data.shape
-            # print cls._dot(A2_data, cls._transpose(R2bar_data), numpy.zeros((DT,P,M,M))).shape
-            # print ' A2bar_data.shape=',A2bar_data.shape
-            # print cls._dot(Q_data, R2bar_data, numpy.zeros((DT,P,M,N-M))).shape
             cls._qr_rectangular_pullback(Qbar_data, R1bar_data, A1_data, Q_data, R1_data, out = A1bar_data)
             
         else:

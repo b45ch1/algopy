@@ -634,11 +634,6 @@ class Test_QR_Decomposition(TestCase):
         assert_array_almost_equal( (UTPM.dot(Q,R)).data, A.data, decimal = 12)
         assert_array_almost_equal(UTPM.dot(Q.T,Q).data[0], [numpy.eye(M) for p in range(P)])
         assert_array_almost_equal(UTPM.dot(Q.T,Q).data[1:],0)
-        
-        
-
-        
-        
 
     def test_pullback(self):
         (D,P,M,N) = 2,3,10,10
@@ -722,8 +717,32 @@ class Test_QR_Decomposition(TestCase):
             Rd = R.data[1,p]
             assert_almost_equal(numpy.trace(numpy.dot(Ab.T,Ad)), numpy.trace(numpy.dot(Qb.T,Qd) + numpy.dot(Rb.T,Rd)))
 
+    def test_pullback_more_cols_than_rows(self):
+        (D,P,M,N) = 3,3,5,17
+        A_data = numpy.random.rand(D,P,M,N)
+        
+        A = UTPM(A_data)
+        Q,R = UTPM.qr(A)
+        
+        Qbar = UTPM(numpy.random.rand(D,P,M,M))
+        Rbar = UTPM(numpy.random.rand(D,P,M,N))
+        for r in range(M):
+            for c in range(N):
+                Rbar[r,c] *= (c>=r)
 
-class Test_Mixed_Types(TestCase):
+        Abar = UTPM.pb_qr(Qbar, Rbar, A, Q, R)
+        
+        for p in range(P):
+            Ab = Abar.data[0,p]
+            Ad = A.data[1,p]
+            Qb = Qbar.data[0,p]
+            Qd = Q.data[1,p]
+            Rb = Rbar.data[0,p]
+            Rd = R.data[1,p]
+            
+            assert_almost_equal(numpy.trace(numpy.dot(Ab.T,Ad)), numpy.trace(numpy.dot(Qb.T,Qd)) + numpy.trace( numpy.dot(Rb.T,Rd)))
+
+
     def test_UTPM_and_array(self):
         D,P,N = 2,2,2
         x = 2 * numpy.random.rand(D,P,N,N)
