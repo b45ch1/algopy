@@ -35,34 +35,36 @@ class Test_Experimental(TestCase):
 
 
     def test_pullback_more_cols_than_rows(self):
-        """
-        A.shape = (3,11)
-        """
-        (D,P,M,N) = 2,1,3,11
+        (D,P,M,N) = 2,1,2,3
         A_data = numpy.random.rand(D,P,M,N)
         
-        # make A_data sufficiently regular
-        for p in range(P):
-            for m in range(M):
-                A_data[0,p,m,m] += (N + 1)
-        
-
         A = UTPM(A_data)
-
         Q,R = UTPM.qr(A)
         
         Qbar = UTPM(numpy.random.rand(D,P,M,M))
+        Qbar_old = Qbar.copy()
         Rbar = UTPM(numpy.random.rand(D,P,M,N))
-        Rbar[:,M:] *= 0
-        Abar = UTPM.pb_qr(Qbar, Rbar, A, Q, R)
+        for r in range(M):
+            for c in range(N):
+                Rbar[r,c] *= (c>=r)
+
+        Qbar += UTPM.dot(A[:,M:], Rbar[:,M:].T)
+        A1bar = UTPM.pb_qr(Qbar, Rbar[:,:M], A[:,:M], Q, R[:,:M])
+        A2bar = UTPM.dot(Q, Rbar[:,M:])
+        
+        Abar = UTPM(numpy.zeros_like(A.data))
+        Abar[:,:M] = A1bar
+        Abar[:,M:] = A2bar
+
         
         for p in range(P):
             Ab = Abar.data[0,p]
             Ad = A.data[1,p]
-            Qb = Qbar.data[0,p]
+            Qb = Qbar_old.data[0,p]
             Qd = Q.data[1,p]
             Rb = Rbar.data[0,p]
             Rd = R.data[1,p]
+            
             assert_almost_equal(numpy.trace(numpy.dot(Ab.T,Ad)), numpy.trace(numpy.dot(Qb.T,Qd)) + numpy.trace( numpy.dot(Rb.T,Rd)))
         
 
