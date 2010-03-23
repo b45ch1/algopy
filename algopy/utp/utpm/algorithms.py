@@ -876,17 +876,18 @@ class RawAlgorithmsMixIn:
             Q_data[0,p] = numpy.eye(N)
             for D in range(DT):
                 # print 'relaxed problem of order d=',D+1
+                # print 'b=',b
+                tmp_b_list = []
                 for nb in range(len(b)-1):
                     start, stop = b[nb], b[nb+1]
                     Q_hat_data = numpy.zeros((DT-D, stop-start, stop-start))
                     L_hat_data = numpy.zeros((DT-D, stop-start, stop-start))
                     
-                    tmp = cls._eigh_relaxed(L_hat_data, Q_hat_data, L_tilde_data[D:, start:stop, start:stop])
+                    tmp_b_list.append( cls._eigh_relaxed(L_hat_data, Q_hat_data, L_tilde_data[D:, start:stop, start:stop]))
                     
                     # compute L_tilde
                     L_data[D:,p, start:stop] = numpy.diag(L_hat_data[0])
                     L_tilde_data[D:, start:stop, start:stop] = L_hat_data
-                    b = numpy.union1d(b, tmp)
 
                     # update Q
                     # print 'Q_hat_data=',Q_hat_data
@@ -903,6 +904,9 @@ class RawAlgorithmsMixIn:
                     Q_data[:,p:p+1,:,start:stop] = cls._dot(Q_data[:,p:p+1,:,start:stop],Q_tmp,numpy.zeros_like(Q_data[:,p:p+1,:,start:stop]))
                     
                     # print 'Q_data=',Q_data
+                
+                for tmp_b in tmp_b_list:
+                    b = numpy.union1d(b, tmp_b)
         
         # print Q_data
         # print L_data
