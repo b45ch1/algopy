@@ -53,6 +53,22 @@ def truncated_triple_dot(X,Y,Z, D):
     
     """
     import algopy.utp.exact_interpolation
+    noP = False
+    if len(X.shape) == 3:
+        noP = True
+        DT,NX,MX = X.shape
+        X = X.reshape((DT,1,NX,MX))
+        
+    if len(Y.shape) == 3:
+        noP = True
+        DT,NY,MY = Y.shape
+        Y = Y.reshape((DT,1,NY,MY))
+        
+    if len(Z.shape) == 3:
+        noP = True
+        DT,NZ,MZ = Z.shape
+        Z = Z.reshape((DT,1,NZ,MZ))
+    
     DT,P,NX,MX = X.shape
     DT,P,NZ,MZ = Z.shape
 
@@ -64,8 +80,11 @@ def truncated_triple_dot(X,Y,Z, D):
             if mi[0] == D or mi[1] == D or mi[2] == D:
                 continue
             retval[p] += numpy.dot(X[mi[0],p,:,:], numpy.dot(Y[mi[1],p,:,:], Z[mi[2],p,:,:]))
-                
-    return retval
+    
+    if noP == False:
+        return retval
+    else:
+        return retval[0]
 
 
 
@@ -654,6 +673,167 @@ class RawAlgorithmsMixIn:
             for p in range(P):
                 Q_data[D,p,:,:] = numpy.dot(H[p] - numpy.dot(Q_data[0,p],R_data[D,p]), Rinv[p]) #numpy.dot(Q_data[0,p,:,:],K[p,:,:])
 
+    # @classmethod
+    # def _eigh(cls, L_data, Q_data, A_data, epsilon = 10**-8, full_output = False):
+    #     """
+    #     computes the eigenvalue decompositon
+
+    #     L,Q = eig(A)
+
+    #     for symmetric matrix A with possibly repeated eigenvalues, i.e.
+    #     where L is a diagonal matrix of ordered eigenvalues l_1 >= l_2 >= ...>= l_N
+    #     and Q a matrix of corresponding orthogonal eigenvectors
+
+    #     """
+        
+    #     def find_repeated_values(L):
+    #         """
+    #         INPUT:  L    (N,) array of ordered values, dtype = float
+    #         OUTPUT: b    (Nb,) array s.t. L[b[i:i+1]] are all repeated values
+            
+    #         Nb is the number of blocks of repeated values. It holds that
+    #         b[-1] = N.
+            
+    #         e.g. L = [1.,1.,1.,2.,2.,3.,5.,7.,7.]
+    #         then the output is [0,3,5,6,7,9]
+    #         """
+    #         N = len(L)
+    #         # print 'L=',L
+    #         b = [0]
+    #         n = 0
+    #         while n < N:
+    #             m = n + 1
+    #             while m < N:
+    #                 # print 'n,m=',n,m
+    #                 tmp = L[n] - L[m]
+    #                 if numpy.abs(tmp) > epsilon:
+    #                     b += [m]
+    #                     break
+    #                 m += 1
+    #             n += (m - n)
+    #         b += [N]
+            
+    #         # print 'OK'
+    #         return numpy.asarray(b)
+                            
+    #     def generate_mask(blocks1, blocks2, nb):
+    #         """
+            
+    #         e.g. blocks1 = [0,3,7,9]
+    #              blocks2 = [0,2,3,7,9]
+            
+    #         and nb = 1
+                 
+    #         then the corresponding matrix looks like
+            
+    #         mask = [[0,0,1],
+    #                 [0,0,1],
+    #                 [1,1,0]]
+    #         """
+            
+    #         start1 = blocks1[nb]
+    #         stop1  = blocks1[nb+1]
+            
+    #         start2, = numpy.where( start1 == blocks2 )
+    #         print 'start2=',start2
+            
+            
+            
+            
+        
+    #     # input checks
+    #     DT,P,M,N = numpy.shape(A_data)
+
+    #     assert M == N
+
+    #     if Q_data.shape != (DT,P,N,N):
+    #         raise ValueError('expected Q_data.shape = %s but provided %s'%(str((DT,P,M,K)),str(Q_data.shape)))
+
+    #     if L_data.shape != (DT,P,N):
+    #         raise ValueError('expected L_data.shape = %s but provided %s'%(str((DT,P,N)),str(L_data.shape)))
+
+    #     # INIT: compute the base point
+    #     for p in range(P):
+    #         L_data[0,p,:], Q_data[0,p,:,:] = numpy.linalg.eigh(A_data[0,p,:,:])
+
+    #     # save zero'th coefficient of L_data as diagonal matrix
+    #     L = numpy.zeros((P,N,N))
+    #     for p in range(P):
+    #         L[p] = numpy.diag(L_data[0,p])
+            
+    #     # store blocks of repeated eigenvalues for all degrees in the variable blocks
+    #     blocks_list = []
+    #     tmp = []
+    #     for p in range(P):
+    #         tmp.append(find_repeated_values(L_data[0,p]))
+    #     blocks_list.append(tmp)
+
+    #     # compute H
+    #     H = numpy.zeros((P,N,N))
+    #     for p in range(P):
+    #         for r in range(N):
+    #             for c in range(N):
+    #                 tmp = L_data[0,p,c] - L_data[0,p,r]
+    #                 if abs(tmp) > epsilon:
+    #                     H[p,r,c] = 1./tmp
+
+    #     dG = numpy.zeros((P,N,N))
+
+    #     # ITERATE: compute derivatives
+    #     for D in range(1,DT):
+    #         print 'D=',D
+    #         dG[...] = 0.
+
+    #         # STEP 1:
+    #         dF = truncated_triple_dot(Q_data.transpose(0,1,3,2), A_data, Q_data, D)
+
+    #         for d in range(1,D):
+    #             dG += vdot(Q_data[d,...].transpose(0,2,1), Q_data[D-d,...])
+
+    #         # STEP 2:
+    #         S = -0.5 * dG
+
+    #         # STEP 3:
+    #         K = dF + vdot(vdot(Q_data.transpose(0,1,3,2)[0], A_data[D]),Q_data[0]) + \
+    #             vdot(S, L) + vdot(L,S)
+
+    #         # STEP 4: compute Q
+    #         XT = K*H
+    #         for p in range(P):
+    #             Q_data[D,p] = numpy.dot(Q_data[0,p], XT[p] + S[p])
+            
+    #         # STEP 5: eigenvalue decomposition of dL in the invariant subspace
+    #         for p in range(P):
+    #             blocks = blocks_list[D-1][p]
+    #             for nb in range(len(blocks)-1):
+    #                 start, stop = blocks[nb], blocks[nb+1]
+                    
+    #                 # print generate_mask(blocks_list[0][p], blocks, 0)
+    #                 L_data[D,p,start:stop], U = numpy.linalg.eigh(K[p,start:stop,start:stop])
+                    
+    #                 # print 'start,stop=',start,stop
+    #                 # print 'U=', numpy.dot(U.T,U)
+    #                 for d in range(D+1):
+    #                     Q_data[d,p,:,start:stop] = numpy.dot(Q_data[d,p,:,start:stop], U)
+            
+            
+    #         # STEP 6: update the blocks_list
+    #         tmp = []
+    #         for p in range(P):
+    #             blocks = blocks_list[D-1][p]
+    #             tmp2 = []
+    #             for nb in range(len(blocks)-1):
+    #                 start, stop = blocks[nb], blocks[nb+1]
+    #                 tmp2.append(find_repeated_values(L_data[D,p,start:stop]) + start)
+    #             tmp.append( numpy.unique(numpy.concatenate(tmp2)))
+    #         blocks_list.append(tmp)
+        
+    #     print 'blocks_list=',blocks_list
+    #     if full_output == True:
+    #         return L_data, Q_data, blocks_list
+
+
+
     @classmethod
     def _eigh(cls, L_data, Q_data, A_data, epsilon = 10**-8, full_output = False):
         """
@@ -664,6 +844,56 @@ class RawAlgorithmsMixIn:
         for symmetric matrix A with possibly repeated eigenvalues, i.e.
         where L is a diagonal matrix of ordered eigenvalues l_1 >= l_2 >= ...>= l_N
         and Q a matrix of corresponding orthogonal eigenvectors
+
+        """
+        # input checks
+        DT,P,M,N = numpy.shape(A_data)
+        assert M == N
+        if Q_data.shape != (DT,P,N,N):
+            raise ValueError('expected Q_data.shape = %s but provided %s'%(str((DT,P,M,K)),str(Q_data.shape)))
+        if L_data.shape != (DT,P,N):
+            raise ValueError('expected L_data.shape = %s but provided %s'%(str((DT,P,N)),str(L_data.shape)))
+        
+        
+        for p in range(P):
+            b = [0,N]
+            L_tilde_data = A_data[:,p].copy()
+            Q_data[0,p] = numpy.eye(N)
+            for D in range(DT):
+                for nb in range(len(b)-1):
+                    start, stop = b[nb], b[nb+1]
+                    Q_hat_data = numpy.zeros((DT-D, stop-start, stop-start))
+                    L_hat_data = numpy.zeros((DT-D, stop-start, stop-start))
+                    
+                    tmp = cls._eigh_relaxed(L_hat_data, Q_hat_data, L_tilde_data[D:, start:stop, start:stop])
+                    
+                    # compute L_tilde
+                    L_data[D:,p, start:stop] = numpy.diag(L_hat_data[0])
+                    L_tilde_data[D:, start:stop, start:stop] = L_hat_data
+                    b = numpy.union1d(b, tmp)
+                    
+
+                    
+                    # print Q_tmp
+                    # cls._dot(Q_data[:,p:p+1,:,start:stop], Q_tmp, Q_data[:,p:p+1,:,start:stop])
+                    # print 'Q_tmp=',Q_tmp
+        
+        # print Q_data
+        # print L_data
+
+
+    @classmethod
+    def _eigh_relaxed(cls, L_data, Q_data, A_data, epsilon = 10**-8, full_output = False):
+        """
+        computes the solution of the relaxed problem of order 1
+
+        L,Q = eig(A)
+
+        for symmetric matrix A with possibly repeated eigenvalues, i.e.
+        where L[0] is a diagonal matrix of ordered eigenvalues l_1 >= l_2 >= ...>= l_N
+        and L[1:] is block diagonal.
+        
+        and Q a matrix of corresponding orthonormal eigenvectors.
 
         """
         
@@ -694,71 +924,34 @@ class RawAlgorithmsMixIn:
                 n += (m - n)
             b += [N]
             
-            # print 'OK'
             return numpy.asarray(b)
-                            
-        def generate_mask(blocks1, blocks2, nb):
-            """
-            
-            e.g. blocks1 = [0,3,7,9]
-                 blocks2 = [0,2,3,7,9]
-            
-            and nb = 1
-                 
-            then the corresponding matrix looks like
-            
-            mask = [[0,0,1],
-                    [0,0,1],
-                    [1,1,0]]
-            """
-            
-            start1 = blocks1[nb]
-            stop1  = blocks1[nb+1]
-            
-            start2, = numpy.where( start1 == blocks2 )
-            print 'start2=',start2
-            
-            
-            
-            
-        
+                    
         # input checks
-        DT,P,M,N = numpy.shape(A_data)
-
+        DT,M,N = numpy.shape(A_data)
         assert M == N
-
-        if Q_data.shape != (DT,P,N,N):
-            raise ValueError('expected Q_data.shape = %s but provided %s'%(str((DT,P,M,K)),str(Q_data.shape)))
-
-        if L_data.shape != (DT,P,N):
-            raise ValueError('expected L_data.shape = %s but provided %s'%(str((DT,P,N)),str(L_data.shape)))
+        if Q_data.shape != (DT,N,N):
+            raise ValueError('expected Q_data.shape = %s but provided %s'%(str((DT,N,N)),str(Q_data.shape)))
+        if L_data.shape != (DT,N,N):
+            raise ValueError('expected L_data.shape = %s but provided %s'%(str((DT,N,N)),str(L_data.shape)))
 
         # INIT: compute the base point
-        for p in range(P):
-            L_data[0,p,:], Q_data[0,p,:,:] = numpy.linalg.eigh(A_data[0,p,:,:])
-
-        # save zero'th coefficient of L_data as diagonal matrix
-        L = numpy.zeros((P,N,N))
-        for p in range(P):
-            L[p] = numpy.diag(L_data[0,p])
+        tmp, Q_data[0,:,:] = numpy.linalg.eigh(A_data[0,:,:])
             
-        # store blocks of repeated eigenvalues for all degrees in the variable blocks
-        blocks_list = []
-        tmp = []
-        for p in range(P):
-            tmp.append(find_repeated_values(L_data[0,p]))
-        blocks_list.append(tmp)
+        # set output L_data
+        for n in range(N):
+            L_data[0,n,n] = tmp[n]
+            
+        # find repeated eigenvalues that define the block structure of the higher order coefficients
+        b = find_repeated_values(tmp)
 
-        # compute H
-        H = numpy.zeros((P,N,N))
-        for p in range(P):
-            for r in range(N):
-                for c in range(N):
-                    tmp = L_data[0,p,c] - L_data[0,p,r]
-                    if abs(tmp) > epsilon:
-                        H[p,r,c] = 1./tmp
-
-        dG = numpy.zeros((P,N,N))
+        # compute H = 1/E
+        H = numpy.zeros((N,N))
+        for r in range(N):
+            for c in range(N):
+                tmp = L_data[0,c,c] - L_data[0,r,r]
+                if abs(tmp) > epsilon:
+                    H[r,c] = 1./tmp
+        dG = numpy.zeros((N,N))
 
         # ITERATE: compute derivatives
         for D in range(1,DT):
@@ -766,52 +959,28 @@ class RawAlgorithmsMixIn:
             dG[...] = 0.
 
             # STEP 1:
-            dF = truncated_triple_dot(Q_data.transpose(0,1,3,2), A_data, Q_data, D)
+            dF = truncated_triple_dot(Q_data.transpose(0,2,1), A_data, Q_data, D)
 
             for d in range(1,D):
-                dG += vdot(Q_data[d,...].transpose(0,2,1), Q_data[D-d,...])
+                dG += numpy.dot(Q_data[d].T, Q_data[D-d])
 
             # STEP 2:
             S = -0.5 * dG
 
             # STEP 3:
-            K = dF + vdot(vdot(Q_data.transpose(0,1,3,2)[0], A_data[D]),Q_data[0]) + \
-                vdot(S, L) + vdot(L,S)
+            K = dF + numpy.dot(numpy.dot(Q_data[0].T, A_data[D]),Q_data[0]) + numpy.dot(S, L_data[0]) + numpy.dot(L_data[0],S)
+                
+            # STEP 4: compute L
+            for nb in range(len(b)-1):
+                start, stop = b[nb], b[nb+1]
+                L_data[D,start:stop, start:stop] = K[start:stop, start:stop]
 
-            # STEP 4: compute Q
+            # STEP 5: compute Q
             XT = K*H
-            for p in range(P):
-                Q_data[D,p] = numpy.dot(Q_data[0,p], XT[p] + S[p])
+            Q_data[D] = numpy.dot(Q_data[0], XT + S)
+
+        return b
             
-            # STEP 5: eigenvalue decomposition of dL in the invariant subspace
-            for p in range(P):
-                blocks = blocks_list[D-1][p]
-                for nb in range(len(blocks)-1):
-                    start, stop = blocks[nb], blocks[nb+1]
-                    
-                    # print generate_mask(blocks_list[0][p], blocks, 0)
-                    L_data[D,p,start:stop], U = numpy.linalg.eigh(K[p,start:stop,start:stop])
-                    
-                    # print 'start,stop=',start,stop
-                    # print 'U=', numpy.dot(U.T,U)
-                    for d in range(D+1):
-                        Q_data[d,p,:,start:stop] = numpy.dot(Q_data[d,p,:,start:stop], U)
-            
-            
-            # STEP 6: update the blocks_list
-            tmp = []
-            for p in range(P):
-                blocks = blocks_list[D-1][p]
-                tmp2 = []
-                for nb in range(len(blocks)-1):
-                    start, stop = blocks[nb], blocks[nb+1]
-                    tmp2.append(find_repeated_values(L_data[D,p,start:stop]) + start)
-                tmp.append( numpy.unique(numpy.concatenate(tmp2)))
-            blocks_list.append(tmp)
-        
-        print 'blocks_list=',blocks_list
-        if full_output == True:
-            return L_data, Q_data, blocks_list
 
 
     @classmethod
