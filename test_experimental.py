@@ -7,52 +7,59 @@ from algopy.utp.utpm import *
 
 class Test_Experimental(TestCase):
     
-    # def test_eigh(self):
-    #     D,P,N = 2,1,3
-    #     A = UTPM(numpy.zeros((D,P,N,N)))
-    #     V = UTPM(numpy.random.rand(D,P,N,N))
+    def test_eigh(self):
+        D,P,N = 3,1,6
+        A = UTPM(numpy.zeros((D,P,N,N)))
+        V = UTPM(numpy.random.rand(D,P,N,N))
         
-    #     A.data[0,0] = numpy.diag([2,2,2])
-    #     A.data[1,0] = numpy.diag([1,1,2])
+        A.data[0,0] = numpy.diag([2,2,2,3,3,4])
+        A.data[1,0] = numpy.diag([1,1,2,2,2,5])
+        A.data[2,0] = numpy.diag([1,1,1,7,3,1])
         
-    #     V,Rtilde = UTPM.qr(V)
-    #     A = UTPM.dot(UTPM.dot(V.T, A), V)
+        V,Rtilde = UTPM.qr(V)
+        A = UTPM.dot(UTPM.dot(V.T, A), V)
         
-    #     l,Q = UTPM.eigh(A)
-    
-    def test_q_lift(self):
-        from algopy.utp.utpm.algorithms import vdot
-        d,D,P,N = 2,3,1,3
-        A = numpy.zeros((D,P,N,N))
-        A[0,0] = numpy.random.rand(N,N)
-        A[1,0] = numpy.random.rand(N,N)
-        A = UTPM(A)
-        
-        Q = UTPM.qr(A)[0]
-        Q.data[2,...] = 0
-        
-        print Q
-        Q = Q.data
-        
-        def lift_Q(Q, d, D):
-            S = numpy.zeros((P,N,N))
-            for k in range(d,D):
-                S *= 0
-                for i in range(1,k):
-                    S += vdot(Q[i,...].transpose(0,2,1), Q[k-i,...])
-                
-                for p in range(P):
-                    Q[k,p] = -0.5 * numpy.dot(Q[0,p], S[p])
-                    
-            return Q
-        
-        Q = lift_Q(Q,d,D)
-        
-        Q = UTPM(Q)
+        l,Q = UTPM.eigh(A)
         
         # print Q
+        # print UTPM.dot(Q.T,Q)
         
-        print UTPM.dot(Q.T,Q)
+        # print A
+        print UTPM.dot(Q.T, UTPM.dot(A, Q))
+    
+    # def test_q_lift(self):
+    #     from algopy.utp.utpm.algorithms import vdot
+    #     d,D,P,N = 2,4,5,7
+    #     A = numpy.zeros((D,P,N,N))
+    #     A[0,:] = numpy.random.rand(P,N,N)
+    #     A[1,:] = numpy.random.rand(P,N,N)
+    #     A = UTPM(A)
+        
+    #     Q = UTPM.qr(A)[0]
+    #     Q.data[2,...] = 0
+        
+    #     print Q
+    #     Q = Q.data
+        
+    #     def lift_Q(Q, d, D):
+    #         S = numpy.zeros((P,N,N))
+    #         for k in range(d,D):
+    #             S *= 0
+    #             for i in range(1,k):
+    #                 S += vdot(Q[i,...].transpose(0,2,1), Q[k-i,...])
+                
+    #             for p in range(P):
+    #                 Q[k,p] = -0.5 * numpy.dot(Q[0,p], S[p])
+                    
+    #         return Q
+        
+    #     Q = lift_Q(Q,d,D)
+        
+    #     Q = UTPM(Q)
+        
+    #     # print Q
+        
+    #     print UTPM.dot(Q.T,Q)
                 
         
         # Q_tmp = numpy.zeros((DT,  stop-start, stop-start))

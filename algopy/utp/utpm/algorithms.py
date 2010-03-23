@@ -846,6 +846,21 @@ class RawAlgorithmsMixIn:
         and Q a matrix of corresponding orthogonal eigenvectors
 
         """
+        
+        def lift_Q(Q, d, D):
+            """ lift orthonormal matrix from degree d to degree D
+            given [Q]_d = [Q_0,...,Q_{d-1]] s.t.  0 =_d [Q^T]_d [Q]_d - Id
+            compute dQ s.t. [Q]_D = [[Q]_d , [dQ]_{D-d] satisfies 0 =_D [Q^T]_D [Q]_D - Id
+            """
+            S = numpy.zeros(Q.shape[1:])
+            for k in range(d,D):
+                S *= 0
+                for i in range(1,k):
+                    S += numpy.dot(Q[i,:,:].T, Q[k-i,:,:])
+                Q[k] = -0.5 * numpy.dot(Q[0], S)
+                    
+            return Q
+        
         # input checks
         DT,P,M,N = numpy.shape(A_data)
         assert M == N
@@ -860,6 +875,7 @@ class RawAlgorithmsMixIn:
             L_tilde_data = A_data[:,p].copy()
             Q_data[0,p] = numpy.eye(N)
             for D in range(DT):
+                # print 'relaxed problem of order d=',D+1
                 for nb in range(len(b)-1):
                     start, stop = b[nb], b[nb+1]
                     Q_hat_data = numpy.zeros((DT-D, stop-start, stop-start))
@@ -871,12 +887,22 @@ class RawAlgorithmsMixIn:
                     L_data[D:,p, start:stop] = numpy.diag(L_hat_data[0])
                     L_tilde_data[D:, start:stop, start:stop] = L_hat_data
                     b = numpy.union1d(b, tmp)
-                    
 
+                    # update Q
+                    # print 'Q_hat_data=',Q_hat_data
+                    Q_tmp = numpy.zeros((DT, stop-start, stop-start))
+                    Q_tmp[:DT-D] = Q_hat_data
                     
-                    # print Q_tmp
-                    # cls._dot(Q_data[:,p:p+1,:,start:stop], Q_tmp, Q_data[:,p:p+1,:,start:stop])
+                    # print 'D,DT=',D,DT, DT-D
+                    Q_tmp = lift_Q(Q_tmp, DT-D, DT)
+                    
+                    Q_tmp  = Q_tmp.reshape((DT,1,stop-start,stop-start))
                     # print 'Q_tmp=',Q_tmp
+                    
+                    # print Q_tmp.shape
+                    Q_data[:,p:p+1,:,start:stop] = cls._dot(Q_data[:,p:p+1,:,start:stop],Q_tmp,numpy.zeros_like(Q_data[:,p:p+1,:,start:stop]))
+                    
+                    # print 'Q_data=',Q_data
         
         # print Q_data
         # print L_data
@@ -955,7 +981,6 @@ class RawAlgorithmsMixIn:
 
         # ITERATE: compute derivatives
         for D in range(1,DT):
-            print 'D=',D
             dG[...] = 0.
 
             # STEP 1:
