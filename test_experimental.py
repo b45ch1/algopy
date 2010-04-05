@@ -7,29 +7,43 @@ from algopy.utp.utpm import *
 
 class Test_Experimental(TestCase):
     
-    def test_push_forward_repeated_eigenvalues(self):
-        D,P,N = 4,7,6
+    def test_almost_singular_qr(self):
+        D,P,N = 2,1,3
         A = UTPM(numpy.zeros((D,P,N,N)))
-        V = UTPM(numpy.random.rand(D,P,N,N))
+        A.data[0,0,0,:] = 1.
+        A.data[0,0,1,:] = 1 #+10**-16
+        A.data[0,0,2,:] = 1 #+2*10**-16
         
-        A.data[0,0] = numpy.diag([2,2,2,3.,3.,3.])
-        A.data[1,0] = numpy.diag([1,1,3,2.,2,2])
-        A.data[2,0] = numpy.diag([7,5,5,1.,2,2])
+        A.data[1,0] += numpy.random.rand(N,N)
+        
+        Q,R = UTPM.qr(A)
+        
+        print A
+        print UTPM.dot(Q,R) - A
+    
+    # def test_push_forward_repeated_eigenvalues(self):
+    #     D,P,N = 4,7,6
+    #     A = UTPM(numpy.zeros((D,P,N,N)))
+    #     V = UTPM(numpy.random.rand(D,P,N,N))
+        
+    #     A.data[0,0] = numpy.diag([2,2,2,3.,3.,3.])
+    #     A.data[1,0] = numpy.diag([1,1,3,2.,2,2])
+    #     A.data[2,0] = numpy.diag([7,5,5,1.,2,2])
         
         
-        V,Rtilde = UTPM.qr(V)
-        A = UTPM.dot(UTPM.dot(V.T, A), V)
+    #     V,Rtilde = UTPM.qr(V)
+    #     A = UTPM.dot(UTPM.dot(V.T, A), V)
 
-        l,Q = UTPM.eigh(A)
-        L = UTPM.diag(l)
+    #     l,Q = UTPM.eigh(A)
+    #     L = UTPM.diag(l)
         
-        for d in range(D):
-            print l.data[d,0]
-            print numpy.diag(UTPM.dot(Q.T, UTPM.dot(A,Q)).data[d,0])\
+    #     for d in range(D):
+    #         print l.data[d,0]
+    #         print numpy.diag(UTPM.dot(Q.T, UTPM.dot(A,Q)).data[d,0])\
             
-        # print UTPM.dot(Q.T, UTPM.dot(A,Q)).data
+    #     # print UTPM.dot(Q.T, UTPM.dot(A,Q)).data
 
-        assert_array_almost_equal(UTPM.dot(Q.T, UTPM.dot(A,Q)).data, L.data)    
+    #     assert_array_almost_equal(UTPM.dot(Q.T, UTPM.dot(A,Q)).data, L.data)    
     
     
     # def test_eigh(self):
@@ -48,24 +62,24 @@ class Test_Experimental(TestCase):
         
     #     assert_array_almost_equal( UTPM.dot(UTPM.dot(Q.T, A), Q).data, L.data)
         
-        # D,P,N = 3,1,6
-        # A = UTPM(numpy.zeros((D,P,N,N)))
-        # V = UTPM(numpy.random.rand(D,P,N,N))
+    #     D,P,N = 3,1,6
+    #     A = UTPM(numpy.zeros((D,P,N,N)))
+    #     V = UTPM(numpy.random.rand(D,P,N,N))
         
-        # A.data[0,0] = numpy.diag([2,2,2,3,3,4])
-        # A.data[1,0] = numpy.diag([1,1,2,2,2,5])
-        # A.data[2,0] = numpy.diag([1,1,1,7,3,1])
+    #     A.data[0,0] = numpy.diag([2,2,2,3,3,4])
+    #     A.data[1,0] = numpy.diag([1,1,2,2,2,5])
+    #     A.data[2,0] = numpy.diag([1,1,1,7,3,1])
         
-        # V,Rtilde = UTPM.qr(V)
-        # A = UTPM.dot(UTPM.dot(V.T, A), V)
+    #     V,Rtilde = UTPM.qr(V)
+    #     A = UTPM.dot(UTPM.dot(V.T, A), V)
         
-        # l,Q = UTPM.eigh(A)
+    #     l,Q = UTPM.eigh(A)
         
-        # # print Q
-        # # print UTPM.dot(Q.T,Q)
+    #     # print Q
+    #     # print UTPM.dot(Q.T,Q)
         
-        # # print A
-        # print UTPM.dot(Q.T, UTPM.dot(A, Q))
+    #     # print A
+    #     print UTPM.dot(Q.T, UTPM.dot(A, Q))
     
     # def test_q_lift(self):
     #     from algopy.utp.utpm.algorithms import vdot
@@ -118,57 +132,57 @@ class Test_Experimental(TestCase):
         
     
     # def test_numerical_stability_qr(self):
-        # from adolc import adouble
-        # from adolc.cgraph import AdolcProgram
-        # from adolc.linalg import qr
-        # D,P,N = 2, 1, 3
+    #     from adolc import adouble
+    #     from adolc.cgraph import AdolcProgram
+    #     from adolc.linalg import qr
+    #     D,P,N = 2, 1, 3
         
-        # A_data = numpy.random.rand(D,P,N,N)
-        # A_data[0,0] = numpy.array([[1.,0,0],[0,1.,-1],[0,-1,1.]])
+    #     A_data = numpy.random.rand(D,P,N,N)
+    #     A_data[0,0] = numpy.array([[1.,0,0],[0,1.,-1],[0,-1,1.]])
         
-        # #----------------------------------------------
-        # # STEP 1:
-        # # QR decomposition by Givens Rotations
-        # # using pyadolc for the differentiation
-        # #----------------------------------------------
-        # A = A_data[0,0,:,:]
+    #     #----------------------------------------------
+    #     # STEP 1:
+    #     # QR decomposition by Givens Rotations
+    #     # using pyadolc for the differentiation
+    #     #----------------------------------------------
+    #     A = A_data[0,0,:,:]
         
-        # # trace QR decomposition with adolc
-        # AP = AdolcProgram()
-        # AP.trace_on(1)
-        # aA = adouble(A)
-        # AP.independent(aA)
-        # aQ, aR = qr(aA)
-        # AP.dependent(aQ)
-        # AP.dependent(aR)
-        # AP.trace_off()
+    #     # trace QR decomposition with adolc
+    #     AP = AdolcProgram()
+    #     AP.trace_on(1)
+    #     aA = adouble(A)
+    #     AP.independent(aA)
+    #     aQ, aR = qr(aA)
+    #     AP.dependent(aQ)
+    #     AP.dependent(aR)
+    #     AP.trace_off()
         
-        # # compute push forward
-        # VA = A_data[1:,...].transpose((2,3,1,0))
-        # # print VA
-        # out = AP.forward([A],[VA])
+    #     # compute push forward
+    #     VA = A_data[1:,...].transpose((2,3,1,0))
+    #     # print VA
+    #     out = AP.forward([A],[VA])
         
-        # Q_data = numpy.zeros((D,P,N,N))
-        # R_data = numpy.zeros((D,P,N,N))
+    #     Q_data = numpy.zeros((D,P,N,N))
+    #     R_data = numpy.zeros((D,P,N,N))
         
-        # Q_data[0,0] = out[0][0]
-        # R_data[0,0] = out[0][1]
+    #     Q_data[0,0] = out[0][0]
+    #     R_data[0,0] = out[0][1]
         
-        # Q_data[1:,0] = out[1][0][:,:,0,:].transpose((2,0,1))
-        # R_data[1:,0] = out[1][1][:,:,0,:].transpose((2,0,1))
+    #     Q_data[1:,0] = out[1][0][:,:,0,:].transpose((2,0,1))
+    #     R_data[1:,0] = out[1][1][:,:,0,:].transpose((2,0,1))
         
-        # Q = UTPM(Q_data)
-        # R = UTPM(R_data)
+    #     Q = UTPM(Q_data)
+    #     R = UTPM(R_data)
         
-        # A = UTPM(A_data)
-        # print A - UTPM.dot(Q,R)
+    #     A = UTPM(A_data)
+    #     print A - UTPM.dot(Q,R)
         
-        # print numpy.rank(A_data[0,0])
+    #     print numpy.rank(A_data[0,0])
         
-        # Q,R = UTPM.qr(A[:,:])
+    #     Q,R = UTPM.qr(A[:,:])
         
         
-        # print A - UTPM.dot(Q,R)
+    #     print A - UTPM.dot(Q,R)
     
     # def test_pb_cholesky(self):
         # D,P,N = 2, 1, 3
