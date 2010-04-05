@@ -876,6 +876,30 @@ class Test_Eigenvalue_Decomposition(TestCase):
 
         assert_array_almost_equal(UTPM.dot(Q, UTPM.dot(L,Q.T)).data, A.data, decimal = 12)
 
+    def test_push_forward_repeated_eigenvalues_higher_order_multiple_direction(self):
+        D,P,N = 4,7,6
+        A = UTPM(numpy.zeros((D,P,N,N)))
+        V = UTPM(numpy.random.rand(D,P,N,N))
+        
+        A.data[0,0] = numpy.diag([2,2,2,3.,3.,3.])
+        A.data[1,0] = numpy.diag([1,1,3,2.,2,2])
+        A.data[2,0] = numpy.diag([7,5,5,1.,2,2])
+        
+        
+        V,Rtilde = UTPM.qr(V)
+        A = UTPM.dot(UTPM.dot(V.T, A), V)
+
+        l,Q = UTPM.eigh(A)
+        L = UTPM.diag(l)
+        
+        for d in range(D):
+            print l.data[d,0]
+            print numpy.diag(UTPM.dot(Q.T, UTPM.dot(A,Q)).data[d,0])\
+            
+        # print UTPM.dot(Q.T, UTPM.dot(A,Q)).data
+
+        assert_array_almost_equal(UTPM.dot(Q.T, UTPM.dot(A,Q)).data, L.data)    
+
 
     def test_pullback(self):
         (D,P,N) = 2,5,10
