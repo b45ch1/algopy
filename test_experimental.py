@@ -7,7 +7,7 @@ from algopy.utp.utpm import *
 
 class Test_Experimental(TestCase):
     
-    def test_eigh(self):
+    def test_push_forward_repeated_eigenvalues(self):
         D,P,N = 3,1,6
         A = UTPM(numpy.zeros((D,P,N,N)))
         V = UTPM(numpy.random.rand(D,P,N,N))
@@ -21,9 +21,27 @@ class Test_Experimental(TestCase):
         l,Q = UTPM.eigh(A)
         L = UTPM.diag(l)
         
-        print l
+        # print l.data[1,0]
+        # print numpy.diag(UTPM.dot(Q.T, UTPM.dot(A,Q)).data[1,0])
+
+        assert_array_almost_equal(UTPM.dot(Q.T, UTPM.dot(A,Q)).data, L.data, decimal = 13)    
+    
+    
+    # def test_eigh(self):
+    #     D,P,N = 3,1,6
+    #     A = UTPM(numpy.zeros((D,P,N,N)))
+    #     V = UTPM(numpy.random.rand(D,P,N,N))
         
+    #     A.data[0,0] = numpy.diag([2,2,3,3.,4,5])
+    #     A.data[1,0] = numpy.diag([5,1,3,1.,1,3])
         
+    #     V,Rtilde = UTPM.qr(V)
+    #     A = UTPM.dot(UTPM.dot(V.T, A), V)
+
+    #     l,Q = UTPM.eigh(A)
+    #     L = UTPM.diag(l)
+        
+    #     assert_array_almost_equal( UTPM.dot(UTPM.dot(Q.T, A), Q).data, L.data)
         
         # D,P,N = 3,1,6
         # A = UTPM(numpy.zeros((D,P,N,N)))

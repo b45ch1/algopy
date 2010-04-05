@@ -880,10 +880,15 @@ class RawAlgorithmsMixIn:
                 tmp_b_list = []
                 for nb in range(len(b)-1):
                     start, stop = b[nb], b[nb+1]
+                    
+                    # print 'stop-start=',stop-start
+
                     Q_hat_data = numpy.zeros((DT-D, stop-start, stop-start))
                     L_hat_data = numpy.zeros((DT-D, stop-start, stop-start))
                     
-                    tmp_b_list.append( cls._eigh_relaxed(L_hat_data, Q_hat_data, L_tilde_data[D:, start:stop, start:stop]))
+                    
+                    tmp_b = cls._eigh_relaxed(L_hat_data, Q_hat_data, L_tilde_data[D:, start:stop, start:stop])
+                    tmp_b_list.append( tmp_b)
                     
                     # compute L_tilde
                     L_data[D:,p, start:stop] = numpy.diag(L_hat_data[0])
@@ -905,8 +910,13 @@ class RawAlgorithmsMixIn:
                     
                     # print 'Q_data=',Q_data
                 
+                # print tmp_b_list
+                offset = 0
                 for tmp_b in tmp_b_list:
-                    b = numpy.union1d(b, tmp_b)
+                    # print 'tmp_b=',tmp_b + offset
+                    b = numpy.union1d(b, tmp_b + offset)
+                    offset += numpy.max(tmp_b)
+                # print 'b=',b
         
         # print Q_data
         # print L_data
@@ -938,6 +948,11 @@ class RawAlgorithmsMixIn:
             e.g. L = [1.,1.,1.,2.,2.,3.,5.,7.,7.]
             then the output is [0,3,5,6,7,9]
             """
+            
+            # print 'finding repeated eigenvalues'
+            # print 'L = ',L
+            
+            
             N = len(L)
             # print 'L=',L
             b = [0]
@@ -954,6 +969,7 @@ class RawAlgorithmsMixIn:
                 n += (m - n)
             b += [N]
             
+            # print 'b=',b
             return numpy.asarray(b)
                     
         # input checks
@@ -973,6 +989,7 @@ class RawAlgorithmsMixIn:
             
         # find repeated eigenvalues that define the block structure of the higher order coefficients
         b = find_repeated_values(tmp)
+        # print 'b=',b
 
         # compute H = 1/E
         H = numpy.zeros((N,N))
