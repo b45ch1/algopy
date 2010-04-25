@@ -887,7 +887,7 @@ class RawAlgorithmsMixIn:
                     L_hat_data = numpy.zeros((DT-D, stop-start, stop-start))
                     
                     
-                    tmp_b = cls._eigh_relaxed(L_hat_data, Q_hat_data, L_tilde_data[D:, start:stop, start:stop])
+                    tmp_b = cls._eigh_relaxed(L_hat_data, Q_hat_data, L_tilde_data[D:, start:stop, start:stop], epsilon = epsilon)
                     tmp_b_list.append( tmp_b)
                     
                     # compute L_tilde
@@ -1220,4 +1220,13 @@ class RawAlgorithmsMixIn:
             return out
 
         else:
-            raise NotImplementedError('should implement that') 
+            D,P,M,N = v_data.shape
+            if out == None:
+                out = numpy.zeros((D,P,N),dtype=float)
+                
+            for d in range(D):
+                for p in range(P):
+                    out[d,p] = numpy.diag(v_data[d,p])
+            
+            return out
+

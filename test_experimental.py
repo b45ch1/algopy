@@ -5,21 +5,49 @@ from algopy.tracer.tracer import *
 from algopy.utp.utpm import *
 
 
-class Test_Experimental(TestCase):
+D,P,N = 2,1,3
+
+def create_matrix(D,P,N, a_list):
+    """
+    create low rank update matrices,
     
-    def test_almost_singular_qr(self):
-        D,P,N = 2,1,3
-        A = UTPM(numpy.zeros((D,P,N,N)))
-        A.data[0,0,0,:] = 1.
-        A.data[0,0,1,:] = 1 #+10**-16
-        A.data[0,0,2,:] = 1 #+2*10**-16
-        
-        A.data[1,0] += numpy.random.rand(N,N)
-        
-        Q,R = UTPM.qr(A)
-        
-        print A
-        print UTPM.dot(Q,R) - A
+    A =  \sum_{i=0}^Na a_i x_i x_i^T
+    
+    where a is a list of weighs of length Na,
+    x_i are randomly generated vectors
+    """
+    
+    for na, a in enumerate(a_list):
+        x = UTPM(numpy.random.rand(D,P,N,1))
+        if na == 0:
+            A =  a * UTPM.dot(x,x.T)
+        else:
+            A += a * UTPM.dot(x,x.T)
+            
+    return A
+
+# create rank 1 matrix
+A = create_matrix(D,P,N,[10000., 10**-8, 10**-4])
+
+# QR decomposition of the rank 1 matrix
+Q,R = UTPM.qr(A)
+
+# print A
+print R
+print (UTPM.dot(Q,R) - A).data.max()
+
+
+# A = UTPM(numpy.zeros((D,P,N,N)))
+# A.data[0,0,0,:] = 1.
+# A.data[0,0,1,:] = 1 #+10**-16
+# A.data[0,0,2,:] = 1 #+2*10**-16
+
+# A.data[1,0] += numpy.random.rand(N,N)
+
+# Q,R = UTPM.qr(A)
+
+# print A
+# print UTPM.dot(Q,R) - A
     
     # def test_push_forward_repeated_eigenvalues(self):
     #     D,P,N = 4,7,6
@@ -218,7 +246,6 @@ class Test_Experimental(TestCase):
     #     tmp[0,0] = [[0,0,0],[0,0,0],[0,1,0]]
     #     A = UTPM(tmp)
     #     print A
-    pass
         
 
 if __name__ == "__main__":

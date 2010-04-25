@@ -1,3 +1,8 @@
+"""
+In this file, the numerical accuracy and the speed tests for QR and eigh functions
+are performed.
+"""
+
 import numpy
 import time
 import algopy.utp.utpm as utpm

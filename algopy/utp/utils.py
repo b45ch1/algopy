@@ -44,6 +44,7 @@ def utps2utpm(x):
             tmp[:,:,n,m] = x[n,m].data[:,:]
     
     return UTPM(tmp)
+    
 
 def utps2base_and_dirs(x):
     """

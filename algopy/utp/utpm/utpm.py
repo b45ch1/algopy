@@ -705,7 +705,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
 
     
     @classmethod
-    def eigh(cls, A, out = None):
+    def eigh(cls, A, out = None, epsilon = 10**-8):
         """
         computes the eigenvalue decomposition A = Q^T L Q
         of a symmetrical matrix A with distinct eigenvalues
@@ -723,7 +723,7 @@ class UTPM(GradedRing, RawAlgorithmsMixIn):
         else:
             l,Q = out
         
-        UTPM._eigh( l.data, Q.data, A.data)
+        UTPM._eigh( l.data, Q.data, A.data, epsilon = epsilon)
       
         return l,Q
 
