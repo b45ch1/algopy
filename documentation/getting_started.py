@@ -42,7 +42,7 @@ Consider the following function:
 """
 
 def f(A,x):
-    for n in range(50):
+    for n in range(3):
         y = dot(x.T,dot(A,x))
         A = A - dot(x,x.T) * y
         
@@ -69,8 +69,8 @@ D,P,N = 2,1,2
 A = UTPM(numpy.zeros((D,P,N,N)))
 x = UTPM(numpy.zeros((D,P,N,N)))
 
-A.data[0,0] = numpy.random.rand(N,N)
-x.data[0,0] = numpy.random.rand(N,1)
+A.data[0,:] = numpy.random.rand(N,N)
+x.data[0,:] = numpy.random.rand(N,1)
 
 A.data[1,0,0,0] = 1.
 y = f(A,x)
@@ -78,30 +78,72 @@ y = f(A,x)
 print 'df/dA_{11] = ',y.data[1,0]
 
 """
-Of course we want all partial derivatives. 
+Of course it is the goal to obtain all partial derivatives. 
 That's why there is the `P` argument above. One can simultaneously propagate
-several directional derivatives at once.
+several directional derivatives at once. In our example we have N**2 elements in
+A and N in x resulting in a total of P = N**2 + N directions. The 0'th coefficient
+of all P directions have to be the same.
 """
 
-D,P,N = 2,5,2
+D,N = 2,2
+P = N**2 + N
 A = UTPM(numpy.zeros((D,P,N,N)))
-x = UTPM(numpy.zeros((D,P,N,N)))
+x = UTPM(numpy.zeros((D,P,N,1)))
 
-A.data[0,:] = numpy.random.rand(P,N,N)
-x.data[0,:] = numpy.random.rand(P,N,1)
+A.data[0,:] = numpy.random.rand(N,N)
+x.data[0,:,:,0] = numpy.random.rand(N)
 
 for n1 in range(N):
     for n2 in range(N):
         A.data[1,n1*N + n2,n1,n2] = 1.
 
 for n in range(N):
-    x.data[1,n,n] = 1.
+    x.data[1,N**2 + n,n,0] = 1.
+  
+# print A.data  
+# print x.data
     
-print x
-    
-# y = f(A,x)
+y = f(A,x)
 
-# print 'gradient g(A,x) = ', y.data[1,:]
+gradient_AD = y.data[1,:]
+
+print 'AD gradient g(A,x) = ', gradient_AD
+
+"""
+Ok, no idea if that's correct. However, we can check by Finite Differences if
+the solution makes sense. We are going to use only the 0'th coefficient.
+"""
+
+A = A.data[0,0]
+x = x.data[0,0]
+
+epsilon = numpy.sqrt(2**-53) # mantissa in 64bit IEEE 754 floating point arithmetic is 53 bits
+
+# rule of thumb how to pick the perturbation
+deltaA = numpy.abs(A) * epsilon
+deltax = numpy.abs(x) * epsilon
+
+gradient_FD = [] # list with the finite differences solutions
+for n1 in range(N):
+    for n2 in range(N):
+        tmp = A.copy()
+        tmp[n1,n2] += deltaA[n1,n2]
+        gradient_FD.append((f(tmp,x) - f(A,x))/ deltaA[n1,n2] )
+
+for n in range(N):
+    tmp = x.copy()
+    tmp[n] += deltax[n]
+    gradient_FD.append((f(A,tmp) - f(A,x))/ deltax[n] )
+    
+
+gradient_FD = numpy.ravel(gradient_FD)
+
+"""
+Checking now how close the AD solution is to FD. The FD solution is at best
+numpy.sqrt(2**-53) digits accurate.
+"""
+
+print 'gradient_FD - gradient_AD = ', gradient_FD - gradient_AD 
 
 
 
