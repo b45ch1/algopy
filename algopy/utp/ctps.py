@@ -8,7 +8,7 @@ where R the real numbers.
 """
 
 import numpy
-from algopy.base_type import GradedRing
+from algopy.base_type import Ring
 
 def i2m(i):
     """
@@ -83,7 +83,7 @@ def inconv2(z, x, y):
         #for m in range(2**(nx)-1):
             #z[2**nx + m] = numpy.sum(x[:m+1]*y[::-1][:m+1])
 
-class CTPS(GradedRing):
+class CTPS(Ring):
     def __init__(self, data):
         """
         CTPS = Cross Derivative Taylor Polynomial

@@ -1,5 +1,5 @@
 """
-This implements an abstrace base class GradedRing .
+This implements an abstrace base class Ring .
 
 Rationale:
     
@@ -23,10 +23,26 @@ import numpy
 
 
 
-class Algebra(object):
+class Ring(object):
     """
-    data has to be mutable because it is passed as reference to algorithms, e.g. as
-    add(result.data, lhs.data, rhs.data) where add changed result.data inplace.
+    
+    An abstract base class in an attempt to follow the DRY principle.
+    It implements the algebraic class of a ring as defined on
+    http://en.wikipedia.org/wiki/Ring_%28mathematics%29
+    
+    The idea is that the set is described in data and the operations +,* etc.
+    are implemented as functions that operate on the data.
+    
+    E.g. the factor ring of natural numbers modulo 4, x.data = 3 y.data = 2
+    then z = add(x,y) is implemented as
+    
+    def add(x,y):
+        return self.__class__((x.data*y.data)%4)
+        
+    and one obtains z.data = 1
+    
+    Warning:
+    Since this class is only of little value it may be deprecated in the future.
     """
     data = NotImplementedError()
     
@@ -37,7 +53,7 @@ class Algebra(object):
         works for : scalar x, numpy.ndarray x
         
         Remark:
-            at the moment, scalar x expanded as GradedRing with the same degree as self though. 
+            at the moment, scalar x expanded as Ring with the same degree as self though. 
             The reason is a missing implementation that works for graded rings of different degree.
             Once such implementations exist, this function should be adapted.
         
@@ -92,8 +108,4 @@ class Algebra(object):
         
     def __str__(self):
        return str(self.data)
-
-
-class GradedRing(Algebra):
-    pass
 

@@ -1,6 +1,6 @@
 import numpy
 
-from algopy.base_type import Algebra
+from algopy.base_type import Ring
 
 class NotSet:
     def __init__(self, descr=None):
@@ -218,7 +218,7 @@ class CGraph:
         g.layout(yapgvb.engines.circo)
         g.render(filename)
 
-class Function(Algebra):
+class Function(Ring):
     
     __array_priority__ = 2
     

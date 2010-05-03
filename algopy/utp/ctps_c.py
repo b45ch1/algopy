@@ -2,7 +2,7 @@ import os
 import ctypes
 import numpy
 
-from algopy.base_type import GradedRing
+from algopy.base_type import Ring
 
 _ctps = numpy.ctypeslib.load_library('libctps', os.path.dirname(__file__))
 
@@ -14,7 +14,7 @@ _ctps.ctps_sub.argtypes = argtypes1
 _ctps.ctps_mul.argtypes = argtypes1
 _ctps.ctps_div.argtypes = argtypes1
 
-class CTPS_C(GradedRing):
+class CTPS_C(Ring):
     def __init__(self, data):
         """
         CTPS = Cross Derivative Taylor Polynomial

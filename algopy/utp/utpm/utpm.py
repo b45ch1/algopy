@@ -11,10 +11,10 @@ where M is the ring of matrices and t an external parameter
 import numpy.linalg
 import numpy
 
-from algopy.base_type import GradedRing
+from algopy.base_type import Ring
 from algopy.utp.utpm.algorithms import RawAlgorithmsMixIn
 
-class UTPM(GradedRing, RawAlgorithmsMixIn):
+class UTPM(Ring, RawAlgorithmsMixIn):
     """
     UTPM == Univariate Taylor Polynomial of Matrices
     This class implements univariate Taylor arithmetic on matrices, i.e.
