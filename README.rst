@@ -18,6 +18,7 @@ Rationale:
     
 Example:
     Compute directional derivatives of the function f(J)::
+        
         import numpy
         from algopy.utp import UTPM
         
