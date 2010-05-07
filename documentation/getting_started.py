@@ -3,18 +3,31 @@
 What is ALGOPY:
 ---------------
 
-The central idea of ALGOPY is the computation on Taylor polynomials with scalar coefficients
-and with matrix coefficients. These algorithms are primarily used for Algorithmic Differentiation (AD)
-in the forward and reverse mode. The focus are univariate Taylor polynomials over matrices (UTPM),
-implemented int the class `algopy.utpm.UTPM`.
+The purpose of ALGOPY is the efficient evaluation of higher order derivatives
+in the forward and reverse mode of Algorithmic Differentiation (AD). Particular
+focus are matrix valued functions as they often appear in statistically motivated
+functions. E.g. the covariance matrix of a least squares problem requires the
+computation::
+
+    C = inv(dot(J.T,J))
+
+where J(x) is a partial derivative of a function F.
+
+The central idea of ALGOPY is the computation on Taylor polynomials with scalar
+coefficientsand with matrix coefficients. These algorithms are primarily used for
+Algorithmic Differentiation (AD)in the forward and reverse mode.
+
+The focus are univariate Taylor polynomials over matrices (UTPM),implemented in
+the class `algopy.utpm.UTPM`.
 
 To allow the use of the reverse mode of AD a simple code tracer has been implemented in
 `algopy.tracer`. The idea is to record the computation procedure in a datastructure s.t.
 the control flow sequence can walked in reverse order.
 
 ALGOPY is a research prototype where, to the best of authors'
-knowledge, some novel algorithms are implemented. In particular, the algorithms for
-the qr decomposition of matrix polynomials and the symmetric eigenvalue decomposition with
+knowledge, some algorithms are implemented that cannot be found elsewhere.
+In particular, the algorithms for the qr decomposition of matrix polynomials and
+the symmetric eigenvalue decomposition with
 possibly repeated eigenvalues are novel.
 
 Most of ALGOPY is implemented in pure Python. However, some submodules are implemented
@@ -23,16 +36,17 @@ in pure C. For these submodules Python bindings using ctypes are provided.
 
 A word of warning:
 ------------------
-There is a good chance that the  *user* API might change in the future to make
-the software even more intuitive and easy to use.
-We will try to stay backward-compatible if possible but we rate clean code over
-backward-compatibility at the current stage.
+Some of *user* API might change in the future to make the software even more
+intuitive and easy to use. We will try to stay backward-compatible.
+But we rate clean code over backward-compatibility at the current stage.
+Since we use the software ourselves extensively, changes to the API will be done
+in a way s.t. the refactoring may for instance be a simple search and replace.
+
 The algorithms are quite well-tested and have been successfully used.
 However, since the user-base is currently quite small, it is possible that bugs
 may still be persistent.
-Also, the current code is by far from feature complete. In particular, all 
-algorithms in `algopy.utps.UTPS` should be also available in `algopy.utpm.UTPM`,
-but they are not.
+Also, not all submodules of ALGOPY are feature complete. The most important parts
+`algopy.tracer` and `algopy.upt.UTPM` are however fairly complete.
 
 
 

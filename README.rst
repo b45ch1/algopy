@@ -1,43 +1,49 @@
 ALGOPY, a library for Automatic Differentation (AD) in Python
 -------------------------------------------------------------
 
+Description:
+    ALGOPY allows to differentiate complex simulation codes by using
+    Algorithmic Differentiation (AD) techniques in the forward and reverse mode.
+    
+    Speciality of ALGOPY is the possibility to differentiate functions that contain
+    matrix functions as +,-,*,/, dot, solve, qr, eigh, cholesky.    
+
 Rationale:
     ALGOPY is a research prototype striving to provide state of the art algorithms.
-    It is not (yet) geared towards end users.
     The ultimative goal is to provide high performance algorithms
     that can be used to differentiate dynamic systems  (ODEs, DAEs, PDEs)
     and static systems (linear/nonlinear systems of equations). Most algorithms
-    are implemented as Single Program Multiple Data (SPMD). 
+    are implemented as Single Program Multiple Data (SPMD).
     
-    ALGOPY focuses on the algebraic differentiation of elementary operations,
-    e.g. C = dot(A,B) where A,B,C are matrices, y = sin(x), z = x*y, etc.
-    to compute derivatives of functions composed of such elementary functions.
-    
-    In particular, ALGOPY offers:
+Example:
+    Compute directional derivatives of the function f(J)::
+        import numpy
+        from algopy.utp import UTPM
         
-        Univariate Taylor Propagation:
+        def f(J):
+            Q,R = UTPM.qr(J)
+            Id = numpy.eye(Np)
+            Rinv = UTPM.solve(R,Id)
+            C = UTPM.dot(Rinv,Rinv.T)
+            l,U = UTPM.eigh(C)
+            return l[0]
             
-            * Univariate Taylor Propagation on Scalars  (UTPS)
-              Implementation in: `./algopy/utp/utps.py`
-            * Univariate Taylor Propagation on Matrices (UTPM)
-              Implementation in: `./algopy/utp/utpm.py`
-            * Cross Taylor Propagation on Scalars (CPTS)
-              Implementation in: `./algopy/utp/ctps_c.py`
-            * Exact Interpolation of Higher Order Derivative Tensors:
-              (Hessians, etc.)
-              
-        Reverse Mode:
-        
-            ALGOPY also features functionality for convenient differentiation of a given
-            algorithm. For that, the sequence of operation is recorded by tracing the 
-            evaluation of the algorithm. Implementation in: `./algopy/tracer.py`
-
-    ALGOPY aims to provide algorithms in a clean and accessible way allowing quick
-    understanding of the underlying algorithms. Therefore, it should be easy to
-    port to other programming languages, take code snippets.
-    If optimized algorithms are wanted, they should be provided in a subclass derived
-    from the reference implementation.
-    
+Features:
+    Univariate Taylor Propagation:
+        * Univariate Taylor Propagation on Scalars  (UTPS)
+          Implementation in: `./algopy/utp/utps.py`
+        * Univariate Taylor Propagation on Matrices (UTPM)
+          Implementation in: `./algopy/utp/utpm.py`
+        * Cross Taylor Propagation on Scalars (CPTS)
+          Implementation in: `./algopy/utp/ctps_c.py`
+        * Exact Interpolation of Higher Order Derivative Tensors:
+          (Hessians, etc.)
+          
+    Reverse Mode:
+        ALGOPY also features functionality for convenient differentiation of a given
+        algorithm. For that, the sequence of operation is recorded by tracing the 
+        evaluation of the algorithm. Implementation in: `./algopy/tracer.py`
+   
 
 Dependencies:
     ALGOPY Core:
