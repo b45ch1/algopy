@@ -2,11 +2,12 @@ ALGOPY, a library for Automatic Differentation (AD) in Python
 -------------------------------------------------------------
 
 Description:
-    ALGOPY allows to differentiate complex simulation codes by using
-    Algorithmic Differentiation (AD) techniques in the forward and reverse mode.
+    ALGOPY allows you to differentiate functions implemented as computer programs
+    by using Algorithmic Differentiation (AD) techniques in the forward and
+    reverse mode.
     
     Speciality of ALGOPY is the possibility to differentiate functions that contain
-    matrix functions as +,-,*,/, dot, solve, qr, eigh, cholesky.    
+    matrix functions as +,-,*,/, dot, solve, qr, eigh, cholesky.
 
 Rationale:
     ALGOPY is a research prototype striving to provide state of the art algorithms.
