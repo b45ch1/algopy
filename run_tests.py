@@ -4,9 +4,10 @@ from algopy.utp.utpm.tests.test_utpm import *
 from algopy.utp.utpm.tests.test_algorithms import *
 from algopy.tests.test_globalfuncs import *
 
-
-
-
-if __name__ == "__main__":
-    run_module_suite()
+if __name__ == '__main__':
+    try:
+        import nose
+    except:
+        print 'Please install nose for unit testing'
+    nose.runmodule()
 
