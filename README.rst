@@ -31,7 +31,9 @@ Example:
             return l[0]
             
 Features:
+
     Univariate Taylor Propagation:
+    
         * Univariate Taylor Propagation on Scalars  (UTPS)
           Implementation in: `./algopy/utp/utps.py`
         * Univariate Taylor Propagation on Matrices (UTPM)
@@ -42,12 +44,14 @@ Features:
           (Hessians, etc.)
           
     Reverse Mode:
+    
         ALGOPY also features functionality for convenient differentiation of a given
         algorithm. For that, the sequence of operation is recorded by tracing the 
         evaluation of the algorithm. Implementation in: `./algopy/tracer.py`
    
 
 Dependencies:
+
     ALGOPY Core:
         * numpy
 
@@ -59,6 +63,7 @@ Dependencies:
         * Nose
 
 Alternatives:
+
     If you are looking for a robust tool for AD in Python you should try:
         
         * `PYADOLC`_ a Python wrapper for ADOL-C (C++)
