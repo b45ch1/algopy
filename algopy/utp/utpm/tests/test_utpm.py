@@ -208,6 +208,14 @@ class Test_Push_Forward(TestCase):
         X = UTPM(numpy.random.rand(D,P,N,N))
         Y = UTPM.sqrt(X)
         assert_array_almost_equal(X.data, (Y*Y).data)
+
+    def test_exp_log(self):
+        D,P,N = 4,2,2
+        X = UTPM(numpy.random.rand(D,P,N,N))
+        X.data[1] = 1.
+        Y = UTPM.exp(X)
+        Z = UTPM.log(Y)
+        assert_array_almost_equal(X.data, Z.data)
         
     def test_shift(self):
         D,P,N = 5,1,2

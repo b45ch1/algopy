@@ -151,8 +151,42 @@ class RawAlgorithmsMixIn:
         for k in range(1,D):
             y_data[k] = 1./(2.*y_data[0]) * ( x_data[k] - numpy.sum( y_data[1:k] * y_data[k-1:0:-1], axis=0))
         return y_data
-            
-            
+
+    @classmethod
+    def _exp(cls, x_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        y_data = out
+        D,P = x_data.shape[:2]
+        y_data[0] = numpy.exp(x_data[0])
+        xtctilde = x_data[1:].copy()
+        for d in range(1,D):
+            xtctilde[d-1] *= d
+        for d in range(1, D):
+            y_data[d] = numpy.sum(y_data[:d][::-1]*xtctilde[:d], axis=0)/d
+        return y_data
+        
+    @classmethod
+    def _log(cls, x_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        y_data = out
+        D,P = x_data.shape[:2]
+        
+        # base point: d = 0
+        y_data[0] = numpy.log(x_data[0])
+        
+        # higher order coefficients: d > 0
+        
+        for d in range(1,D):
+            y_data[d] =  (x_data[d]*d - numpy.sum(x_data[1:d][::-1] * y_data[1:d], axis=0))
+            y_data[d] /= x_data[0]
+        
+        for d in range(1,D):
+            y_data[d] /= d
+        
+        return y_data
+        
 
     @classmethod
     def _dot(cls, x_data, y_data, out = None):

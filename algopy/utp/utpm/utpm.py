@@ -204,6 +204,16 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         retval = self.clone()
         self._sqrt(self.data, out = retval.data)
         return retval
+        
+    def exp(self):
+        retval = self.clone()
+        self._exp(self.data, out = retval.data)
+        return retval
+        
+    def log(self):
+        retval = self.clone()
+        self._log(self.data, out = retval.data)
+        return retval
 
     def __neg__(self):
         return self.__class__(-self.data)
