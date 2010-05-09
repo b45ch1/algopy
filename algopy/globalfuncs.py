@@ -5,8 +5,8 @@ from algopy.tracer import Function
 
 # override numpy definitions
 
-numpy_function_names = ['trace', 'dot', 'zeros_like']
-numpy_linalg_function_names = ['inv', 'solve', 'eig', 'qr']
+numpy_function_names = ['trace', 'dot', 'zeros_like', 'diag']
+numpy_linalg_function_names = ['inv', 'solve', 'eigh', 'qr']
 
 
 

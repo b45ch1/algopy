@@ -199,7 +199,11 @@ class UTPM(Ring, RawAlgorithmsMixIn):
                 retval.data[d,:,...] = 1./ rhs.data[0,:,...] * ( self.data[d,:,...] - numpy.sum(retval.data[:d,:,...] * rhs.data[d:0:-1,:,...], axis=0))
             self.data[...] = retval.data[...]
         return self
-        
+
+    def sqrt(self):
+        retval = self.clone()
+        self._sqrt(self.data, out = retval)
+        return self.__class__(retval)
 
     def __neg__(self):
         return self.__class__(-self.data)

@@ -138,6 +138,21 @@ class RawAlgorithmsMixIn:
         (D,P) = z_data.shape[:2]
         for d in range(D):
             z_data[d,:,...] = 1./ y_data[0,:,...] * ( x_data[d,:,...] - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
+            
+    @classmethod
+    def _sqrt(cls, x_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        y_data = out
+        y_data[...] = 0.
+        D,P = x_data.shape[:2]
+        
+        y_data[0] = numpy.sqrt(x_data[0])
+        for k in range(1,self.D):
+            y_data[k] = 1./(2*y_data[0]) * ( x_data[k] - numpy.sum( y_data[1:k] * y_data[k-1:0:-1]))
+        return y_data
+            
+            
 
     @classmethod
     def _dot(cls, x_data, y_data, out = None):
