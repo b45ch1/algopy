@@ -135,7 +135,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             return retval
         else:
             return UTPM(self.data - rhs.data)
-            
 
     def __mul__(self,rhs):
         retval = self.clone()
@@ -214,6 +213,27 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         retval = self.clone()
         self._log(self.data, out = retval.data)
         return retval
+
+    def __abs__(self):
+        """ absolute value of polynomials
+        
+        FIXME: theory tells us to check first coefficient if the zero'th coefficient is zero
+        """
+        # check if zero order coeff is smaller than 0
+        tmp = self.data[0] < 0
+        
+        # check that taking absolute value for vectorized polynomials (i.e. P > 1) is well-defined
+        D,P = self.data.shape[:2]
+        for p in range(P-1):
+            if (tmp[p] - tmp[p+1]).any():
+                raise ValueError('vectorized version of abs works only if all directions P have the same sign!')
+        
+        retval = self.clone()
+        retval.data *= (-1)**tmp[0]
+        
+        return retval
+
+
 
     def __neg__(self):
         return self.__class__(-self.data)
