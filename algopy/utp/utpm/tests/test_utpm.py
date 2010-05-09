@@ -203,6 +203,12 @@ class Test_Push_Forward(TestCase):
         assert_array_almost_equal(AX3.data, AY7.data )
         assert_array_almost_equal(AX4.data, AY8.data )
         
+    def test_sqrt(self):
+        D,P,N = 5,3,2
+        X = UTPM(numpy.random.rand(D,P,N,N))
+        Y = UTPM.sqrt(X)
+        assert_array_almost_equal(X.data, (Y*Y).data)
+        
     def test_shift(self):
         D,P,N = 5,1,2
         X = UTPM(numpy.random.rand(D,P,N))

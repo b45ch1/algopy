@@ -148,8 +148,8 @@ class RawAlgorithmsMixIn:
         D,P = x_data.shape[:2]
         
         y_data[0] = numpy.sqrt(x_data[0])
-        for k in range(1,self.D):
-            y_data[k] = 1./(2*y_data[0]) * ( x_data[k] - numpy.sum( y_data[1:k] * y_data[k-1:0:-1]))
+        for k in range(1,D):
+            y_data[k] = 1./(2.*y_data[0]) * ( x_data[k] - numpy.sum( y_data[1:k] * y_data[k-1:0:-1], axis=0))
         return y_data
             
             

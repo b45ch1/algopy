@@ -202,8 +202,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     def sqrt(self):
         retval = self.clone()
-        self._sqrt(self.data, out = retval)
-        return self.__class__(retval)
+        self._sqrt(self.data, out = retval.data)
+        return retval
 
     def __neg__(self):
         return self.__class__(-self.data)
