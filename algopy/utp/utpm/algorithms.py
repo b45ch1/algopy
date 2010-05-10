@@ -707,7 +707,7 @@ class RawAlgorithmsMixIn:
 
             # STEP 3:
             for p in range(P):
-                X[p,:,:] = PL * (numpy.dot( numpy.dot(Q_data[0,p,:,:].T, H[p,:,:,]), numpy.linalg.inv(R_data[0,p,:,:])) - S[p,:,:])
+                X[p,:,:] = PL * (numpy.dot( numpy.dot(Q_data[0,p,:,:].T, H[p,:,:,]), Rinv[p]) - S[p,:,:])
                 X[p,:,:] = X[p,:,:] - X[p,:,:].T
 
             # STEP 4:

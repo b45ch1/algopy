@@ -5,14 +5,16 @@ from algopy.tracer.tracer import *
 from algopy.utp.utpm import *
 from algopy.globalfuncs import *
 
-D,P,N = 2,3,2
-tmp = numpy.random.rand(D,P,N,N) - 0.5
-tmp[0,:] = tmp[0,0]
+D,P,M,N = 3,1,4,2
 
-X = UTPM(tmp)
+x = UTPM(numpy.random.rand(D,P,N,M))
+A = dot(x.T,x)
+# A = UTPM(numpy.random.rand(D,P,M,M))
+# A.data[0,0,N:,:] = 10**-30
+Q,R = qr(A)
 
-assert_array_almost_equal(X.data, 0.5*( abs(X + abs(X)) - abs(X - abs(X))).data)
-
+# print A - dot(Q,R)
+print dot(Q.T,Q) - numpy.eye(M)
 
 
 
