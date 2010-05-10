@@ -629,6 +629,15 @@ class Test_QR_Decomposition(TestCase):
         assert_array_almost_equal( (UTPM.dot(Q,R)).data, A.data, decimal = 14)
         assert_array_almost_equal(UTPM.dot(Q.T,Q).data[0], [numpy.eye(N) for p in range(P)])
         assert_array_almost_equal(UTPM.dot(Q.T,Q).data[1:],0)
+        
+    def test_singular_matrix(self):
+        D,P,M,N = 3,1,40,20
+        A = UTPM(numpy.random.rand(D,P,M,M))
+        A[N:,:] = 0
+        Q,R = UTPM.qr(A)
+        
+        assert_array_almost_equal(A.data, UTPM.dot(Q,R).data)
+        assert_array_almost_equal(0, (UTPM.dot(Q.T,Q) - numpy.eye(M)).data)
 
     def test_push_forward_more_cols_than_rows(self):
         """

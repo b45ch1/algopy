@@ -687,7 +687,15 @@ class RawAlgorithmsMixIn:
 
 
         for p in range(P):
-            Rinv[p] = numpy.linalg.inv(R_data[0,p])
+            rank = 0
+            for n in range(N):
+                if abs(R_data[0,p,n,n]) > 10**-16:
+                    rank += 1
+            
+            # print 'R_data[0,p]=',R_data[0,p]
+            # print 'rank = ',rank
+            Rinv[p] = 0.
+            Rinv[p,:rank,:rank] = numpy.linalg.inv(R_data[0,p,:rank,:rank])
 
         # ITERATE: compute the derivatives
         for D in range(1,DT):
