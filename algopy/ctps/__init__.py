@@ -1,3 +1,3 @@
 from ctps import *
 
-print 'The submodule algopy.utps is deprecated and tagged for removal'
+print 'WARNING: the submodule algopy.ctps is deprecated and tagged for removal!'
