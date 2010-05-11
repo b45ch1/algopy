@@ -5,7 +5,7 @@ are performed.
 
 import numpy
 import time
-import algopy.utp.utpm as utpm
+import algopy.utpm as utpm
 
 # D-1 is the degree of the polynomial
 # P is the number of simultaneously computed decompositions (Single Program Multiple Data)

@@ -1,7 +1,7 @@
 from numpy.testing import *
 import numpy
 
-from algopy.utp.utps import *
+from algopy.utps import *
 
 
 class ElementaryFunctions(TestCase):

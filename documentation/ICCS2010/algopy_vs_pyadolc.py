@@ -3,7 +3,7 @@ from adolc.cgraph import AdolcProgram
 from adolc.linalg import qr
 import numpy
 import numpy.testing
-from algopy.utp.utpm import UTPM
+from algopy.utpm import UTPM
 from time import time
 import os
 

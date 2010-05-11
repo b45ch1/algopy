@@ -52,7 +52,7 @@ def truncated_triple_dot(X,Y,Z, D):
     X,Y,Z are (DT,P,N,M) arrays s.t. the dimensions match to compute dot(X[d,p,:,:], dot(Y[d,p,:,:], Z[d,p,:,:])) 
     
     """
-    import algopy.utp.exact_interpolation
+    import algopy.exact_interpolation
     noP = False
     if len(X.shape) == 3:
         noP = True
@@ -72,7 +72,7 @@ def truncated_triple_dot(X,Y,Z, D):
     DT,P,NX,MX = X.shape
     DT,P,NZ,MZ = Z.shape
 
-    multi_indices = algopy.utp.exact_interpolation.generate_multi_indices(3,D)
+    multi_indices = algopy.exact_interpolation.generate_multi_indices(3,D)
     retval = numpy.zeros((P,NX,MZ))
     
     for mi in multi_indices:

@@ -39,12 +39,12 @@ Rationale:
 
 """
 
-import utp
+# import standard submodules and important classes/functions
 import tracer
-import globalfuncs
-
-from utp.utps import UTPS
-from utp.utpm import UTPM
 from tracer import CGraph, Function
 
+import utpm
+from utpm import UTPM
+
+import globalfuncs
 from globalfuncs import *

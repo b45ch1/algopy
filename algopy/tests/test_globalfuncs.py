@@ -1,7 +1,7 @@
 from numpy.testing import *
 import numpy
 
-from algopy.utp.utpm import UTPM
+from algopy.utpm import UTPM
 from algopy.globalfuncs import *
 
 

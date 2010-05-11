@@ -2,9 +2,9 @@ from numpy.testing import *
 import numpy
 import numpy.random
 
-from algopy.utp.utpm import UTPM
-from algopy.utp.utps import UTPS
-from algopy.utp.utils import *
+from algopy.utpm import UTPM
+from algopy.utps import UTPS
+from algopy.utils import *
 
 class TestUtils ( TestCase ):
     def test_utpm2utps(self):

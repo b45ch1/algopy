@@ -1,14 +1,12 @@
 import numpy
 import string
-from algopy.utp.utpm import UTPM
-from algopy.tracer import Function
+from utpm import UTPM
+from tracer import Function
 
 # override numpy definitions
 
 numpy_function_names = ['trace', 'dot', 'zeros_like', 'diag']
 numpy_linalg_function_names = ['inv', 'solve', 'eigh', 'qr']
-
-
 
 
 function_template = string.Template('''

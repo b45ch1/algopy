@@ -4,7 +4,7 @@ fails for symmetric matrices with degenerated eigenvalues.
 """
 
 import numpy
-from algopy.utp.utpm import *
+from algopy.utpm import *
 
 
 # Build Symmetric Matrix with degenerate eigenvalues

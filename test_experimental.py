@@ -2,7 +2,7 @@ from numpy.testing import *
 import numpy
 
 from algopy.tracer.tracer import *
-from algopy.utp.utpm import *
+from algopy.utpm import *
 from algopy.globalfuncs import *
 
 D,P,M,N = 3,1,5,2

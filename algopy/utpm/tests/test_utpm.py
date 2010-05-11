@@ -1,7 +1,7 @@
 from numpy.testing import *
 import numpy
 
-from algopy.utp.utpm import *
+from algopy.utpm import *
 
 class Test_Push_Forward(TestCase):
     def test_UTPM_in_a_stupid_way(self):

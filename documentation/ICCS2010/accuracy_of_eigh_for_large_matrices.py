@@ -2,7 +2,7 @@ from numpy.testing import *
 import numpy
 
 from algopy.tracer.tracer import *
-from algopy.utp.utpm import *
+from algopy.utpm import *
 
 D,P,N = 4,1,100
 A = UTPM(numpy.random.rand(D,P,N,N))

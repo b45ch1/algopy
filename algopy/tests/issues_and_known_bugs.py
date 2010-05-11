@@ -2,11 +2,9 @@ from numpy.testing import *
 import os
 
 from algopy.tracer.tracer import *
-from algopy.utp.utpm import UTPM
-from algopy.utp.utps import UTPS
-from algopy.utp.ctps_c import CTPS_C
-
-
+from algopy.utpm import UTPM
+from algopy.utps import UTPS
+from algopy.ctps import CTPS
 
 import numpy
 

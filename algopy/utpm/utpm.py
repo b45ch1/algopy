@@ -11,8 +11,8 @@ where M is the ring of matrices and t an external parameter
 import numpy.linalg
 import numpy
 
-from algopy.base_type import Ring
-from algopy.utp.utpm.algorithms import RawAlgorithmsMixIn
+from ..base_type import Ring
+from algorithms import RawAlgorithmsMixIn
 
 class UTPM(Ring, RawAlgorithmsMixIn):
     """

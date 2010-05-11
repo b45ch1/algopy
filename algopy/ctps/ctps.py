@@ -14,7 +14,7 @@ _ctps.ctps_sub.argtypes = argtypes1
 _ctps.ctps_mul.argtypes = argtypes1
 _ctps.ctps_div.argtypes = argtypes1
 
-class CTPS_C(Ring):
+class CTPS(Ring):
     def __init__(self, data):
         """
         CTPS = Cross Derivative Taylor Polynomial

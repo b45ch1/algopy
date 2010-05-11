@@ -27,4 +27,4 @@ env = Environment(
 env.Append(LINKFLAGS = "-pthread")
 
 Export('env')
-SConscript('algopy/utp/SConscript')
+SConscript('algopy/ctps/SConscript')

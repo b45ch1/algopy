@@ -1,8 +1,8 @@
 from numpy.testing import *
 import numpy
 
-from algopy.utp.utpm import *
-from algopy.utp.utpm.algorithms import *
+from algopy.utpm import *
+from algopy.utpm.algorithms import *
 
 class Test_Helper_Functions(TestCase):
     def test_vdot(self):

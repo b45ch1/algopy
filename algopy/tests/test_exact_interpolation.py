@@ -7,7 +7,7 @@ Not working ATM.
 from numpy.testing import *
 import numpy
 
-from algopy.utp.exact_interpolation import *
+from algopy.exact_interpolation import *
 
 
 class TestExactInterpolation(TestCase):

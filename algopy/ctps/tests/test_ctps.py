@@ -1,15 +1,15 @@
 from numpy.testing import *
 import numpy
 
-from algopy.utp.ctps_c import *
+from algopy.ctps import *
 
-class Test_CTPS_C_operations(TestCase):
+class Test_CTPS_operations(TestCase):
     def test_add(self):
         x1 = numpy.random.rand()
         x2 = numpy.random.rand()
     
-        ax1 = CTPS_C(numpy.array([x1,1,0,0],dtype=float))
-        ax2 = CTPS_C(numpy.array([x2,0,0,0],dtype=float))
+        ax1 = CTPS(numpy.array([x1,1,0,0],dtype=float))
+        ax2 = CTPS(numpy.array([x2,0,0,0],dtype=float))
 
         ay = ax1 + ax2
         assert_array_almost_equal(ay.data, ax1.data + ax2.data)
@@ -18,8 +18,8 @@ class Test_CTPS_C_operations(TestCase):
         x1 = numpy.random.rand()
         x2 = numpy.random.rand()
     
-        ax1 = CTPS_C(numpy.array([x1,1,0,0],dtype=float))
-        ax2 = CTPS_C(numpy.array([x2,0,0,0],dtype=float))
+        ax1 = CTPS(numpy.array([x1,1,0,0],dtype=float))
+        ax2 = CTPS(numpy.array([x2,0,0,0],dtype=float))
 
         ay = ax1 - ax2
         assert_array_almost_equal(ay.data, ax1.data - ax2.data)        
@@ -28,8 +28,8 @@ class Test_CTPS_C_operations(TestCase):
         x1 = numpy.random.rand()
         x2 = numpy.random.rand()
 
-        ax1 = CTPS_C(numpy.array([x1,1,0,0],dtype=float))
-        ax2 = CTPS_C(numpy.array([x2,0,2,0],dtype=float))
+        ax1 = CTPS(numpy.array([x1,1,0,0],dtype=float))
+        ax2 = CTPS(numpy.array([x2,0,2,0],dtype=float))
 
         ay = ax1 * ax2
         assert_array_almost_equal([x1*x2, x2, 2*x1, 2], ay.data)
@@ -38,8 +38,8 @@ class Test_CTPS_C_operations(TestCase):
         x1 = numpy.random.rand()
         x2 = numpy.random.rand()
 
-        ax1 = CTPS_C(numpy.array([x1,1,0,0],dtype=float))
-        ax2 = CTPS_C(numpy.array([x2,0,2,0],dtype=float))
+        ax1 = CTPS(numpy.array([x1,1,0,0],dtype=float))
+        ax2 = CTPS(numpy.array([x2,0,2,0],dtype=float))
 
         ay = ax1 / ax2
         assert_array_almost_equal([x1/x2, 1./x2, -2*x1/x2**2, -2./x2**2], ay.data)
@@ -49,7 +49,7 @@ class Test_CTPS_C_operations(TestCase):
         x1 = numpy.random.rand()
         x2 = numpy.random.rand()
 
-        ax1 = CTPS_C(numpy.array([x1,1,0,0],dtype=float))
+        ax1 = CTPS(numpy.array([x1,1,0,0],dtype=float))
         ay = ax1 + x2
         assert_array_almost_equal(ay.data, ax1.data + [x2,0,0,0])
         
@@ -57,7 +57,7 @@ class Test_CTPS_C_operations(TestCase):
         x1 = numpy.random.rand()
         x2 = numpy.random.rand()
         
-        ax1 = CTPS_C(numpy.array([x1,1,0,0],dtype=float))
+        ax1 = CTPS(numpy.array([x1,1,0,0],dtype=float))
         
         ay = ax1 - x2
         assert_array_almost_equal(ay.data, ax1.data - [x2,0,0,0])
@@ -66,7 +66,7 @@ class Test_CTPS_C_operations(TestCase):
         x1 = numpy.random.rand()
         x2 = numpy.random.rand()
 
-        ax1 = CTPS_C(numpy.array([x1,1,0,0],dtype=float))
+        ax1 = CTPS(numpy.array([x1,1,0,0],dtype=float))
 
         ay = ax1 * x2
         assert_array_almost_equal( ay.data, [x1*x2, x2, 0 , 0])
@@ -75,7 +75,7 @@ class Test_CTPS_C_operations(TestCase):
         x1 = numpy.random.rand()
         x2 = numpy.random.rand()
 
-        ax1 = CTPS_C(numpy.array([x1,1,0,0],dtype=float))
+        ax1 = CTPS(numpy.array([x1,1,0,0],dtype=float))
 
         ay = ax1 / x2
         assert_array_almost_equal([x1/x2, 1./x2, 0, 0], ay.data)        
@@ -100,10 +100,10 @@ class Test_CTPS_C_operations(TestCase):
         x4 = numpy.random.rand()
     
         # compute d/dx1 d/x3 f
-        ax1 = CTPS_C(numpy.array([x1,1,0,0],dtype=float))
-        ax2 = CTPS_C(numpy.array([x2,0,0,0],dtype=float))
-        ax3 = CTPS_C(numpy.array([x3,0,1,0],dtype=float))
-        ax4 = CTPS_C(numpy.array([x4,0,0,0],dtype=float))
+        ax1 = CTPS(numpy.array([x1,1,0,0],dtype=float))
+        ax2 = CTPS(numpy.array([x2,0,0,0],dtype=float))
+        ax3 = CTPS(numpy.array([x3,0,1,0],dtype=float))
+        ax4 = CTPS(numpy.array([x4,0,0,0],dtype=float))
     
         ay = ax1 * ax2 * ax3 * ax4
    

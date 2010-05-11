@@ -13,7 +13,7 @@ import prettyplotting
 # pyplot.rcParams.update({'figure.figsize': (6,3.5)}) 
 
 from algopy.tracer.tracer import *
-from algopy.utp.utpm import *
+from algopy.utpm import *
 
 
 

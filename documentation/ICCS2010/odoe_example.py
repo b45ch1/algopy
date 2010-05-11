@@ -1,7 +1,7 @@
 import numpy
 from numpy.testing import *
 from prettyplotting import *
-from algopy.utp.utpm import *
+from algopy.utpm import *
 
 # STEP 0: setting parameters and general problem definition
 ############################################################

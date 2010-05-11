@@ -35,11 +35,11 @@ Features:
     Univariate Taylor Propagation:
     
         * Univariate Taylor Propagation on Scalars  (UTPS)
-          Implementation in: `./algopy/utp/utps.py`
+          Implementation in: `algopy.utps`
         * Univariate Taylor Propagation on Matrices (UTPM)
-          Implementation in: `./algopy/utp/utpm.py`
+          Implementation in: `algopy.utpm`
         * Cross Taylor Propagation on Scalars (CPTS)
-          Implementation in: `./algopy/utp/ctps_c.py`
+          Implementation in: `algopy.ctps`
         * Exact Interpolation of Higher Order Derivative Tensors:
           (Hessians, etc.)
           
