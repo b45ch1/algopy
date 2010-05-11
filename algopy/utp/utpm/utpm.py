@@ -268,7 +268,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         
         a_shp = a.data.shape
         out_shp = a_shp[:2]
-        out = cls(cls.__zeros__(out_shp))
+        out = cls(cls.__zeros__(out_shp, dtype = a.data.dtype))
         cls._max( a.data, axis = axis, out = out.data)
         return out
 
@@ -411,7 +411,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             else:
                 out_shp = x_shp[:2] + x_shp[2:-1] + y_shp[2:][:-2] + y_shp[2:][-1:]
                 
-            out = cls(cls.__zeros__(out_shp))
+            out = cls(cls.__zeros__(out_shp, dtype = x.data.dtype))
             cls._dot( x.data, y.data, out = out.data)
             
         elif isinstance(x, UTPM) and not isinstance(y, UTPM):
@@ -424,7 +424,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             else:
                 out_shp = x_shp[:2] + x_shp[2:-1] + y_shp[:-2] + y_shp[-1:]
                 
-            out = cls(cls.__zeros__(out_shp))
+            out = cls(cls.__zeros__(out_shp, dtype = x.data.dtype))
             cls._dot_non_UTPM_y(x.data, y, out = out.data)
             
         elif not isinstance(x, UTPM) and isinstance(y, UTPM):
@@ -437,7 +437,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             else:
                 out_shp = y_shp[:2] + x_shp[:-1] + y_shp[2:][:-2] + y_shp[2:][-1:]
 
-            out = cls(cls.__zeros__(out_shp))
+            out = cls(cls.__zeros__(out_shp, dtype = y.data.dtype))
             cls._dot_non_UTPM_x(x, y.data, out = out.data)
             
             
@@ -449,7 +449,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def inv(cls, A, out = None):
         if out == None:
-            out = cls(cls.__zeros__(A.data.shape))
+            out = cls(cls.__zeros__(A.data.shape, dtype = A.data.dtype))
         else:
             raise NotImplementedError('')
         
@@ -484,7 +484,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             D, P, M = A_shp[:3]
             
             if out == None:
-                out = cls(cls.__zeros__((D,P,M) + x_shp[3:]))
+                out = cls(cls.__zeros__((D,P,M) + x_shp[3:], dtype = A.data.dtype))
     
             UTPM._solve(A.data, x.data, out = out.data)
         
@@ -493,14 +493,14 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             x_shp = numpy.shape(x.data)
             M = A_shp[0]
             D,P = x_shp[:2]
-            out = cls(cls.__zeros__((D,P,M) + x_shp[3:]))
+            out = cls(cls.__zeros__((D,P,M) + x_shp[3:], dtype = A.data.dtype))
             cls._solve_non_UTPM_A(A, x.data, out = out.data)
             
         elif isinstance(A, UTPM) and not isinstance(x, UTPM):
             A_shp = numpy.shape(A.data)
             x_shp = numpy.shape(x)
             D,P,M = A_shp[:3]
-            out = cls(cls.__zeros__((D,P,M) + x_shp[1:]))
+            out = cls(cls.__zeros__((D,P,M) + x_shp[1:], dtype = A.data.dtype))
             cls._solve_non_UTPM_x(A.data, x, out = out.data)
             
         else:
@@ -521,7 +521,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def pb_cholesky(cls, Lbar, A, L, out = None):
         if out == None:
             D,P = A.data.shape[:2]
-            Abar = cls(cls.__zeros__(A.data.shape))
+            Abar = A.zeros_like()
         
         else:
             Abar = out
@@ -555,8 +555,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def pb_add(cls, zbar, x, y , z, out = None):
         if out == None:
             D,P = y.data.shape[:2]
-            xbar = cls(cls.__zeros__(x.data.shape))
-            ybar = cls(cls.__zeros__(y.data.shape))
+            xbar = x.zeros_like()
+            ybar = y.zeros_like()
         
         else:
             xbar, ybar = out
@@ -590,8 +590,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def pb_sub(cls, zbar, x, y , z, out = None):
         if out == None:
             D,P = y.data.shape[:2]
-            xbar = cls(cls.__zeros__(x.data.shape))
-            ybar = cls(cls.__zeros__(y.data.shape))
+            xbar = x.zeros_like()
+            ybar = y.zeros_like()
         
         else:
             xbar, ybar = out
@@ -606,8 +606,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def pb_mul(cls, zbar, x, y , z, out = None):
         if out == None:
             D,P = y.data.shape[:2]
-            xbar = cls(cls.__zeros__(x.data.shape))
-            ybar = cls(cls.__zeros__(y.data.shape))
+            xbar = x.zeros_like()
+            ybar = y.zeros_like()
         
         else:
             xbar, ybar = out
@@ -621,8 +621,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def pb_div(cls, zbar, x, y , z, out = None):
         if out == None:
             D,P = y.data.shape[:2]
-            xbar = cls(cls.__zeros__(x.data.shape))
-            ybar = cls(cls.__zeros__(y.data.shape))
+            xbar = x.zeros_like()
+            ybar = y.zeros_like()
         
         else:
             xbar, ybar = out
@@ -639,8 +639,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def pb_dot(cls, zbar, x, y, z, out = None):
         if out == None:
             D,P = y.data.shape[:2]
-            xbar = cls(cls.__zeros__(x.data.shape))
-            ybar = cls(cls.__zeros__(y.data.shape))
+            xbar = x.zeros_like()
+            ybar = y.zeros_like()
         
         else:
             xbar, ybar = out
@@ -652,7 +652,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def pb_inv(cls, ybar, x, y, out = None):
         if out == None:
             D,P = y.data.shape[:2]
-            xbar = cls(cls.__zeros__(x.data.shape))
+            xbar = x.zeros_like()
         
         else:
             xbar, = out
@@ -677,8 +677,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
                 x.data[0,p] = tmp[...]
             
         if out == None:
-            Abar = cls(cls.__zeros__(A.data.shape))
-            xbar = cls(cls.__zeros__(x.data.shape))
+            xbar = x.zeros_like()
+            Abar = A.zeros_like()
         
         else:
             Abar, xbar = out
@@ -714,8 +714,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         K = min(M,N)
         
         if out == None:
-            Q = cls(cls.__zeros__((D,P,M,K)))
-            R = cls(cls.__zeros__((D,P,K,N)))
+            Q = cls(cls.__zeros__((D,P,M,K), dtype=A.data.dtype))
+            R = cls(cls.__zeros__((D,P,K,N), dtype=A.data.dtype))
             
         else:
             Q,R = out
@@ -729,7 +729,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         D,P,M,N = numpy.shape(A.data)
         
         if out == None:
-            Abar = cls(cls.__zeros__((D,P,M,N)))
+            Abar = A.zeros_like()
         
         else:
             Abar, = out
@@ -751,8 +751,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         D,P,M,N = numpy.shape(A.data)
         
         if out == None:
-            l = cls(cls.__zeros__((D,P,N)))
-            Q = cls(cls.__zeros__((D,P,N,N)))
+            l = cls(cls.__zeros__((D,P,N), dtype=A.data.dtype))
+            Q = cls(cls.__zeros__((D,P,N,N), dtype=A.data.dtype))
             
         else:
             l,Q = out
@@ -766,7 +766,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         D,P,M,N = numpy.shape(A.data)
         
         if out == None:
-            Abar = cls(cls.__zeros__((D,P,M,N)))
+            Abar = A.zeros_like()
         
         else:
             Abar, = out

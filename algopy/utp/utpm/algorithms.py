@@ -584,7 +584,7 @@ class RawAlgorithmsMixIn:
         if len(cls._shape(y_data)) == 1:
             y_data = cls._reshape(y_data, cls._shape(y_data) + (1,))
 
-        tmp = cls.__zeros__(out_data.shape)
+        tmp = cls.__zeros__(out_data.shape, dtype = out_data.dtype)
         cls._dot(x_data, cls._transpose(y_data), out = tmp)
 
         out_data += tmp
@@ -598,8 +598,8 @@ class RawAlgorithmsMixIn:
         return numpy.zeros_like(data)
 
     @classmethod
-    def __zeros__(cls, shp):
-        return numpy.zeros(shp)
+    def __zeros__(cls, shp, dtype):
+        return numpy.zeros(shp, dtype = dtype)
         
     @classmethod
     def _qr(cls,  A_data, out = None,  work = None):
