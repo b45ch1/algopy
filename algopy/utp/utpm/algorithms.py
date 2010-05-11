@@ -913,12 +913,12 @@ class RawAlgorithmsMixIn:
             compute dQ s.t. [Q]_D = [[Q]_d , [dQ]_{D-d] satisfies 0 =_D [Q^T]_D [Q]_D - Id
             """
             S = numpy.zeros(Q.shape[1:])
+            S = cls.__zeros_like__(Q[0])
             for k in range(d,D):
                 S *= 0
                 for i in range(1,k):
                     S += numpy.dot(Q[i,:,:].T, Q[k-i,:,:])
                 Q[k] = -0.5 * numpy.dot(Q[0], S)
-                    
             return Q
         
         # input checks
@@ -943,8 +943,8 @@ class RawAlgorithmsMixIn:
                     
                     # print 'stop-start=',stop-start
 
-                    Q_hat_data = numpy.zeros((DT-D, stop-start, stop-start))
-                    L_hat_data = numpy.zeros((DT-D, stop-start, stop-start))
+                    Q_hat_data = numpy.zeros((DT-D, stop-start, stop-start), dtype = A_data.dtype)
+                    L_hat_data = numpy.zeros((DT-D, stop-start, stop-start), dtype = A_data.dtype)
                     
                     
                     tmp_b = cls._eigh_relaxed(L_hat_data, Q_hat_data, L_tilde_data[D:, start:stop, start:stop], epsilon = epsilon)
@@ -956,7 +956,7 @@ class RawAlgorithmsMixIn:
 
                     # update Q
                     # print 'Q_hat_data=',Q_hat_data
-                    Q_tmp = numpy.zeros((DT, stop-start, stop-start))
+                    Q_tmp = numpy.zeros((DT, stop-start, stop-start), dtype = A_data.dtype)
                     Q_tmp[:DT-D] = Q_hat_data
                     
                     # print 'D,DT=',D,DT, DT-D
@@ -1052,13 +1052,13 @@ class RawAlgorithmsMixIn:
         # print 'b=',b
 
         # compute H = 1/E
-        H = numpy.zeros((N,N))
+        H = numpy.zeros((N,N), dtype = A_data.dtype)
         for r in range(N):
             for c in range(N):
                 tmp = L_data[0,c,c] - L_data[0,r,r]
                 if abs(tmp) > epsilon:
                     H[r,c] = 1./tmp
-        dG = numpy.zeros((N,N))
+        dG = numpy.zeros((N,N), dtype = A_data.dtype)
 
         # ITERATE: compute derivatives
         for D in range(1,DT):
