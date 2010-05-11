@@ -18,7 +18,7 @@ class TestUtils ( TestCase ):
         x = numpy.array([[UTPS(numpy.random.rand(D,P)) for m in range(M)] for n in range(N)])
         y = utps2utpm(x)
         
-        assert_array_equal(y.tc.shape, (D,P,N,M))
+        assert_array_equal(y.data.shape, (D,P,N,M))
         
         
     def test_utps2base_and_dirs2utps(self):
