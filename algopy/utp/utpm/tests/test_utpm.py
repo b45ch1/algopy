@@ -630,7 +630,7 @@ class Test_QR_Decomposition(TestCase):
         assert_array_almost_equal(UTPM.dot(Q.T,Q).data[0], [numpy.eye(N) for p in range(P)])
         assert_array_almost_equal(UTPM.dot(Q.T,Q).data[1:],0)
         
-    def test_singular_matrix(self):
+    def test_singular_matrix1(self):
         D,P,M,N = 3,1,40,20
         A = UTPM(numpy.random.rand(D,P,M,M))
         A[N:,:] = 0
@@ -638,7 +638,34 @@ class Test_QR_Decomposition(TestCase):
         
         assert_array_almost_equal(A.data, UTPM.dot(Q,R).data)
         assert_array_almost_equal(0, (UTPM.dot(Q.T,Q) - numpy.eye(M)).data)
+        
+        
+    def test_singular_matrix2(self):
+        D,P,M,N = 3,1,40,20
+        x = UTPM(numpy.random.rand(D,P,M,N))
+        A = UTPM.dot(x,x.T)
+        Q,R = UTPM.qr(A)
+        
+        assert_array_almost_equal(A.data, UTPM.dot(Q,R).data)
+        assert_array_almost_equal(0, (UTPM.dot(Q.T,Q) - numpy.eye(M)).data)
+        
+        # check that columns of Q2 span the nullspace of A
+        Q2 = Q[:,N:]
+        assert_array_almost_equal(0, UTPM.dot(A.T, Q2).data)
 
+    def test_singular_matrix3(self):
+        D,P,M,N = 3,1,40,20
+        A = UTPM(numpy.random.rand(D,P,M,M))
+        A[:,N:] = 0
+        Q,R = UTPM.qr(A)
+        
+        assert_array_almost_equal(A.data, UTPM.dot(Q,R).data)
+        assert_array_almost_equal(0, (UTPM.dot(Q.T,Q) - numpy.eye(M)).data)
+        
+        # check that columns of Q2 span the nullspace of A
+        Q2 = Q[:,N:]
+        assert_array_almost_equal(0, UTPM.dot(A.T, Q2).data)
+        
     def test_push_forward_more_cols_than_rows(self):
         """
         A.shape = (3,11)

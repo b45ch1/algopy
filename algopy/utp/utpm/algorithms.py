@@ -728,7 +728,10 @@ class RawAlgorithmsMixIn:
 
             # STEP 6:
             for p in range(P):
-                Q_data[D,p,:,:] = numpy.dot(H[p] - numpy.dot(Q_data[0,p],R_data[D,p]), Rinv[p]) #numpy.dot(Q_data[0,p,:,:],K[p,:,:])
+                if M == N:
+                     Q_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:],K[p,:,:])
+                else:
+                    Q_data[D,p,:,:] = numpy.dot(H[p] - numpy.dot(Q_data[0,p],R_data[D,p]), Rinv[p])
 
     # @classmethod
     # def _eigh(cls, L_data, Q_data, A_data, epsilon = 10**-8, full_output = False):
