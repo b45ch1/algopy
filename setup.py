@@ -117,7 +117,7 @@ def setup_package():
         elif filenames:
             data_files.append([dirpath, [os.path.join(dirpath, f) for f in filenames]])
 
-    from distutils.core import setup
+    from distutils.core import setup, Extension
     
     try:
         setup(name=NAME,
@@ -130,6 +130,8 @@ def setup_package():
           author_email= AUTHOR_EMAIL,
           url=URL,
           packages = packages,
+          # ext_package='algopy.ctps',
+          # ext_modules=[Extension('algopy.utp.libctps_c', ['algopy/utp/src/ctps.c'])],
          )
 
     finally:
