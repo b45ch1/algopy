@@ -130,8 +130,8 @@ def setup_package():
           author_email= AUTHOR_EMAIL,
           url=URL,
           packages = packages,
-          # ext_package='algopy.ctps',
-          # ext_modules=[Extension('algopy.utp.libctps_c', ['algopy/utp/src/ctps.c'])],
+          ext_package='algopy.utp.ctps',
+          ext_modules=[Extension('libctps_c', ['algopy/utp/ctps/src/ctps.c'])],
          )
 
     finally:
