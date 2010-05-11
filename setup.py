@@ -57,6 +57,10 @@ if not ISRELEASED:
     # If in git or something, bypass the svn rev
     if os.path.exists('.svn'):
         FULLVERSION += svn_version()
+        
+# BEFORE importing distutils, remove MANIFEST. distutils doesn't properly
+# update it when the contents of directories change.
+if os.path.exists('MANIFEST'): os.remove('MANIFEST')
 
 def write_version_py(filename='algopy/version.py'):
     cnt = """
