@@ -131,7 +131,7 @@ def setup_package():
           url=URL,
           packages = packages,
           ext_package='algopy.ctps',
-          ext_modules=[Extension('libctps_c', ['algopy/utp/ctps/src/ctps.c'])],
+          ext_modules=[Extension('libctps_c', ['algopy/ctps/src/ctps.c'])],
          )
 
     finally:
