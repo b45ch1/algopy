@@ -23,6 +23,8 @@ trash
 *.log
 *.tap
 
+version.py
+
 SConstruct
 
 build
