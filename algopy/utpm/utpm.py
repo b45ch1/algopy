@@ -391,6 +391,17 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def __repr__(self):
         return self.__str__()
         
+    @classmethod
+    def triu(cls, x, out = None):
+        out = x.zeros_like()
+        D,P = out.data.shape[:2]
+        # print D,P
+        for d in range(D):
+            for p in range(P):
+                out.data[d,p] = numpy.triu(x.data[d,p])
+        
+        return out
+        
     
     @classmethod
     def dot(cls, x, y, out = None):

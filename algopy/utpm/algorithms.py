@@ -727,12 +727,32 @@ class RawAlgorithmsMixIn:
             for p in range(P):
                 R_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:].T, H[p,:,:]) - numpy.dot(K[p,:,:],R_data[0,p,:,:])
                 
-                # print R_data[D,p]
+                
+                # if M == N:
+                #     Qtmp, Rtmp = numpy.linalg.qr(R_data[D,p])
+                    
+                #     R_data[D,p,:,:] = Rtmp
+                    
+                #     # update Q
+                #     for d in range(D):
+                #         Q_data[d,p] = numpy.dot(Q_data[d,p],Qtmp)
+                        
+                #     # update R
+                #     for d in range(D):
+                #         R_data[d,p] = numpy.dot(Qtmp.T, R_data[d,p])
+                #         # print 'R_data[d,p]=',R_data[d,p]
+                        
+                #     # update K
+                #     K[p] = numpy.dot(Qtmp.T,numpy.dot(K[p],Qtmp))
+                
+                #     # print 'R_data[D,p]=',R_data[D,p]
+                #     # print 'Qtmp=',Qtmp
+                #     # print 'Rtmp=',Rtmp
 
             # STEP 6:
             for p in range(P):
                 if M == N:
-                     Q_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:],K[p,:,:])
+                    Q_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:],K[p,:,:])
                 else:
                     Q_data[D,p,:,:] = numpy.dot(H[p] - numpy.dot(Q_data[0,p],R_data[D,p]), Rinv[p])
 

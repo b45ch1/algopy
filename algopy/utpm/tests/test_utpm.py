@@ -604,6 +604,7 @@ class Test_QR_Decomposition(TestCase):
         A = UTPM(A_data)
 
         Q,R = UTPM.qr(A)
+        assert_array_almost_equal(UTPM.triu(R).data,  R.data)
         assert_array_almost_equal( ( UTPM.dot(Q,R)).data, A_data_old, decimal = 12)
         assert_array_almost_equal(UTPM.dot(Q.T,Q).data[0], [numpy.eye(N) for p in range(P)])
         assert_array_almost_equal(UTPM.dot(Q.T,Q).data[1:],0)
@@ -626,6 +627,7 @@ class Test_QR_Decomposition(TestCase):
         assert_array_equal( R.data.shape, [D,P,N,N])
 
         # print 'zero?\n',dot(Q, R) - A
+        assert_array_almost_equal(UTPM.triu(R).data,  R.data)
         assert_array_almost_equal( (UTPM.dot(Q,R)).data, A.data, decimal = 14)
         assert_array_almost_equal(UTPM.dot(Q.T,Q).data[0], [numpy.eye(N) for p in range(P)])
         assert_array_almost_equal(UTPM.dot(Q.T,Q).data[1:],0)
@@ -636,6 +638,7 @@ class Test_QR_Decomposition(TestCase):
         A[N:,:] = 0
         Q,R = UTPM.qr(A)
         
+        assert_array_almost_equal(UTPM.triu(R).data,  R.data)
         assert_array_almost_equal(A.data, UTPM.dot(Q,R).data)
         assert_array_almost_equal(0, (UTPM.dot(Q.T,Q) - numpy.eye(M)).data)
         
@@ -646,6 +649,7 @@ class Test_QR_Decomposition(TestCase):
         A = UTPM.dot(x,x.T)
         Q,R = UTPM.qr(A)
         
+        assert_array_almost_equal(UTPM.triu(R).data,  R.data)
         assert_array_almost_equal(A.data, UTPM.dot(Q,R).data)
         assert_array_almost_equal(0, (UTPM.dot(Q.T,Q) - numpy.eye(M)).data)
         
@@ -659,6 +663,7 @@ class Test_QR_Decomposition(TestCase):
         A[:,N:] = 0
         Q,R = UTPM.qr(A)
         
+        assert_array_almost_equal(UTPM.triu(R).data,  R.data)
         assert_array_almost_equal(A.data, UTPM.dot(Q,R).data)
         assert_array_almost_equal(0, (UTPM.dot(Q.T,Q) - numpy.eye(M)).data)
         
@@ -689,6 +694,7 @@ class Test_QR_Decomposition(TestCase):
         # print 'zero?\n',dot(Q, R) - A
         # assert_array_almost_equal( (UTPM.dot(Q,R[:,:M])).data, A[:,:M].data, decimal = 14)
         # assert_array_almost_equal( (UTPM.dot(Q,R[:,M:])).data, A[:,M:].data, decimal = 14)
+        assert_array_almost_equal(UTPM.triu(R).data,  R.data)
         assert_array_almost_equal( (UTPM.dot(Q,R)).data, A.data, decimal = 12)
         assert_array_almost_equal(UTPM.dot(Q.T,Q).data[0], [numpy.eye(M) for p in range(P)])
         assert_array_almost_equal(UTPM.dot(Q.T,Q).data[1:],0)
@@ -722,7 +728,6 @@ class Test_QR_Decomposition(TestCase):
         Rbar = UTPM(Rbar_data)
 
         Abar = UTPM.pb_qr(Qbar, Rbar, A, Q, R)
-
         for p in range(P):
             Ab = Abar.data[0,p]
             Ad = A.data[1,p]
