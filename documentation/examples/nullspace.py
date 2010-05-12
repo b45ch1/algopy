@@ -24,7 +24,28 @@ from algopy import CGraph, Function, UTPM, dot, qr, eigh
 # M number of rows of J1
 # N number of cols of J1
 # K number of rows of J2 (must be smaller than N)
-D,P,M,N,K,Nx = 2,1,10,3,2
+D,P,M,N,K,Nx = 2,1,10,3,2,1
 
-J1 = UTPM(numpy.random.rand((D,P,M,N)))
+J1 = UTPM(numpy.random.rand(*(D,P,M,N)))
+J2 = UTPM(numpy.random.rand(*(D,P,K,N)))
+
+J2_tilde = UTPM(numpy.zeros((D,P,N,N)))
+J2_tilde[:,:K] = J2.T
+
+Q,R = qr(J2_tilde)
+
+Q2 = Q[:,K:].T
+
+print 'check that Q2.T spans the nullspace of J2:', dot(J2,Q2.T)
+J1_tilde = dot(J1,Q2.T)
+Q,R = qr(J1_tilde)
+
+tmp = dot(R.T,R)
+C = dot(Q2.T, dot(tmp,Q2))
+print 'covariance matrix: C =',C
+
+
+
+
+
 
