@@ -727,7 +727,6 @@ class RawAlgorithmsMixIn:
             for p in range(P):
                 R_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:].T, H[p,:,:]) - numpy.dot(K[p,:,:],R_data[0,p,:,:])
                 
-                
                 # if M == N:
                 #     Qtmp, Rtmp = numpy.linalg.qr(R_data[D,p])
                     
