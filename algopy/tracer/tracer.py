@@ -533,7 +533,13 @@ class Function(Ring):
         except:
             out = Function.push_forward(rhs.x.__class__.dot, [lhs,rhs])
             return out
-        
+
+    def log(self):
+         return Function.push_forward(self.x.__class__.log, [self])
+
+    def exp(self):
+         return Function.push_forward(self.x.__class__.exp, [self])
+
     def inv(self):
          return Function.push_forward(self.x.__class__.inv, [self])
          
