@@ -39,7 +39,7 @@ MAINTAINER_EMAIL    = "sebastian.walter@gmail.com"
 DESCRIPTION         = DOCLINES[0]
 LONG_DESCRIPTION    = "\n".join(DOCLINES[2:])
 URL                 = "http://www.github.com/b45ch1/algopy"
-DOWNLOAD_URL        = "http://sourceforge.net/project/showfiles.php?group_id=1369&package_id=175103"
+DOWNLOAD_URL        = "http://www.github.com/b45ch1/algopy"
 LICENSE             = 'BSD'
 CLASSIFIERS         = filter(None, CLASSIFIERS.split('\n'))
 AUTHOR              = "Sebastian F. Walter"
