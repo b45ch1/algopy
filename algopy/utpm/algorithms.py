@@ -726,7 +726,8 @@ class RawAlgorithmsMixIn:
             # STEP 5:
             for p in range(P):
                 R_data[D,p,:,:] = numpy.dot(Q_data[0,p,:,:].T, H[p,:,:]) - numpy.dot(K[p,:,:],R_data[0,p,:,:])
-                # R_data[D,p,:,:] = R_data[D,p,:,:] - PL * R_data[D,p,:,:]
+                
+                # print R_data[D,p]
 
             # STEP 6:
             for p in range(P):
