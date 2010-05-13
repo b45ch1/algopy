@@ -118,6 +118,41 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         ybar[sl].data[...] = 0.
         # print 'funcargs=',funcargs
         # print y[funcargs[0]]
+        
+        
+    @classmethod
+    def broadcast(cls, x,y):
+        """ supposed to work like numpy.broadcast but for UTPM instances
+        FIXME: returns the shape at the moment! 
+        """
+        D,P = x.data.shape[:2]
+        class Dummy:
+            shape = (D,P) + numpy.broadcast(x.data[0,0,...], y.data[0,0,...]).shape
+
+        return Dummy()
+        
+    @classmethod
+    def postpend_ones(cls, x, y):
+        """
+        a helper function for broadcasting. The problem is that numpy broadcasting
+        prepends ones if necessary, however, the memory layout of UTPM.data
+        requires to postpend ones.
+        
+        This function postpends these ones and returns a new UTPM instance without
+        copying memory or the like.
+        
+        Example:
+        
+        x.data.shape = (2,3,4,5)
+        y.data.shape = (2,3)
+        
+        then postpend_ones returns two UTPM instances u,v with
+        u.data.shape = (2,3,4,5)
+        v.data.shape = (2,3,1,1)
+        """
+        return cls(x.data.reshape(x.data.shape + tuple([1]*(y.data.ndim - x.data.ndim)))),\
+                cls(y.data.reshape(y.data.shape + tuple([1]*(x.data.ndim - y.data.ndim))))
+        
 
     
     def __add__(self,rhs):
