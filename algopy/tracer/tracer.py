@@ -387,11 +387,11 @@ class Function(Ring):
         if isinstance(F.x,tuple):
             # case if the function F has several outputs, e.g. (y1,y2) = F(x)
             args = list(F.xbar) + args + list(F.x)
-            f = eval('__import__("algopy.utpm.utpm").utpm.utpm.'+F.x[0].__class__.__name__+'.pb_'+func_name)            
+            f = eval('__import__("algopy.utpm").utpm.'+F.x[0].__class__.__name__+'.pb_'+func_name)            
 
         elif type(F.x) == type(None):
             # case if the function F has no output, e.g. None = F(x)
-            f = eval('__import__("algopy.utpm.utpm").utpm.utpm.'+F.args[0].x.__class__.__name__+'.pb_'+func_name)
+            f = eval('__import__("algopy.utpm").utpm.'+F.args[0].x.__class__.__name__+'.pb_'+func_name)
     
         elif numpy.isscalar(F.x):
             return lambda x: None
@@ -401,7 +401,7 @@ class Function(Ring):
             args = [F.xbar] + args + [F.x]
                 
             # get the pullback function
-            f = eval('__import__("algopy.utpm.utpm").utpm.utpm.'+F.x.__class__.__name__+'.pb_'+func_name)
+            f = eval('__import__("algopy.utpm").utpm.'+F.x.__class__.__name__+'.pb_'+func_name)
 
         
         # STEP 2: call the pullback function

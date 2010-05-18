@@ -1,8 +1,7 @@
 import numpy
 import numpy.testing
-from algopy.utps import UTPS
-from algopy.utpm import UTPM
-
+from utps import UTPS
+from utpm import UTPM
 
 def utpm2utps(x):
     """

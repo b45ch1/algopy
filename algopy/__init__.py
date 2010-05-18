@@ -39,6 +39,10 @@ Rationale:
 
 """
 
+# testing
+from numpy.testing import Tester
+test = Tester().test
+
 # import standard submodules and important classes/functions
 import tracer
 from tracer import CGraph, Function
@@ -48,3 +52,4 @@ from utpm import UTPM
 
 import globalfuncs
 from globalfuncs import *
+
