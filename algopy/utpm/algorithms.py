@@ -228,7 +228,7 @@ class RawAlgorithmsMixIn:
 
         D,P = x_data.shape[:2]
         
-        print 'z_data=',z_data
+        # print 'z_data=',z_data
 
         for d in range(D):
             for p in range(P):
