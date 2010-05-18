@@ -935,7 +935,7 @@ class Test_Eigenvalue_Decomposition(TestCase):
         l,Q = UTPM.eigh(A)
         L = UTPM.diag(l)
         
-        print l
+        # print l
 
         assert_array_almost_equal(UTPM.dot(Q, UTPM.dot(L,Q.T)).data, A.data, decimal = 12)
 
@@ -955,9 +955,9 @@ class Test_Eigenvalue_Decomposition(TestCase):
         l,Q = UTPM.eigh(A)
         L = UTPM.diag(l)
         
-        for d in range(D):
-            print l.data[d,0]
-            print numpy.diag(UTPM.dot(Q.T, UTPM.dot(A,Q)).data[d,0])\
+        # for d in range(D):
+        #     print l.data[d,0]
+        #     print numpy.diag(UTPM.dot(Q.T, UTPM.dot(A,Q)).data[d,0])\
             
         # print UTPM.dot(Q.T, UTPM.dot(A,Q)).data
 
