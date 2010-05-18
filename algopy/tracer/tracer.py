@@ -456,7 +456,7 @@ class Function(Ring):
                 for fa in self.args:
                     if isinstance(fa, self.__class__):
                         args.append(fa.xbar)
-                        print fa.ID
+                        # print fa.ID
                         
                     else:
                         args.append(fa)
