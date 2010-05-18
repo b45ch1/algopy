@@ -5,30 +5,39 @@ Consider the error model::
 
     y = x + \epsilon
 
-where x,y,\epsilon arrays of size Nm. \epsilon is a iid normally distributed
-random variable with mean zero and covariance matrix \Sigma^2.
-The y are the observed quantities and x a real vector.
+where x a vector and \epsilon a random variable with zero mean and
+covariance matrix \Sigma^2. The y is the observed quantity and x is a real vector
+representing the "true" value.
 
-However, not y is of interest by some function f(y)::
+One can find some estimator \hat x that is in some or another way optimal.
+For instance one take 100 samples and obtain y_1,y_2,....,y_100 and take the
+arithmetic mean as an estimator for x. In the following we simply assume that 
+some estimate \hat x is known and has an associated confidence region described 
+by its covariance matrix Sigma^2 = E[(\hat x - E[\hat x])(\hat x - E[\hat x])^T]
 
-    f: R^Nm ---> R^M
-        y  ---> z = f(y)
-        
-Since y depends on the random variable \epsilon it is also a random variable 
-with the same covariance matrix as \epsilon.
+However, not \hat x is of interest but some function f(\hat x)::
+
+    f: R^N ---> R^M
+        \hat x ---> \hat x = f(\hat x)
 
 The question is:
 
     What can we say about the confidence region of the function f(y) when
     the confidence region of y is described by the covariance matrix \Sigma^2?
 
-For affine (linear) functions f(y) = Ay + b the procedure is described in the 
+For affine (linear) functions::
+
+    z = f(y) = Ay + b
+        
+the procedure is described in the 
 wikipedia article http://en.wikipedia.org/wiki/Propagation_of_uncertainty .
 
 For nonlinear functions can be linearized about an estimate \hat y of E[y].
 In the vicinity of \hat y, the linear model approximates the nonlinear function often quite well.
 
-To linearize the function, the Jacobian J(\hat y) of the function f(\hat y) has to be computed.
+To linearize the function, the Jacobian J(\hat y) of the function f(\hat y) has to be computed, i.e.:
+
+    z \approx f(y) = f(\hat y) + J(\hat y) (y - \hat y)
 
 The covariance matrix of z is defined as C = E[z z^T] = E[ J y y^T J^T] = J \Sigma^2 J^T.
 That means if we know J(y), we can approximately compute the confidence region if

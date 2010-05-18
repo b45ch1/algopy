@@ -7,32 +7,38 @@ from algopy.globalfuncs import *
 
 
 
-D,P,M,N = 3,1,4,2
-
-x = UTPM(numpy.zeros((D,P,M,N)))
-y = UTPM(numpy.zeros((D,P)))
-
-x,y = UTPM.postpend_ones(x,y)
-
-x + y
-
 # D,P,M,N = 3,1,4,2
 
-# A = UTPM(numpy.zeros((D,P,M,M)))
-# A.data = numpy.random.rand(D,P,M,M)
-# A[:,N:] = 0 
-# # A.data[1,0,:N,:] = 2.
+# x = UTPM(numpy.zeros((D,P,M,N)))
+# y = UTPM(numpy.zeros((D,P)))
+
+# x,y = UTPM.postpend_ones(x,y)
+
+# x + y
+
+D,P,M,N = 3,1,3,2
+A = UTPM(numpy.zeros((D,P,M,M)))
+
+
+x = numpy.random.rand(3,2)
+A.data[0,0] = numpy.dot(x,x.T)
+x = numpy.random.rand(3,2)
+A.data[1,0] = numpy.dot(x,x.T)
+
+
+         
+# A.data[1,0,:N,:] = 2.
 # A.data[1,0] = 1.
-# # A.data[2,0] = 2
+# A.data[2,0] = 2
 
 
-# print 'A=',A
+print 'A=',A
 
-# Q,R = UTPM.qr(A)
+Q,R = UTPM.qr(A)
 
-# print 'UTPM.dot(Q.T,Q)=\n',UTPM.dot(Q.T,Q)
-# print 'R =\n',R
-# print 'UTPM.dot(Q,R) - A=\n',UTPM.dot(Q,R) - A
+print 'UTPM.dot(Q.T,Q)=\n',UTPM.dot(Q.T,Q)
+print 'R =\n',R
+print 'UTPM.dot(Q,R) - A=\n',UTPM.dot(Q,R) - A
 
 
 

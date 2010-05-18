@@ -47,4 +47,4 @@ def zeros( shape, dtype=float, order = 'C'):
         return dtype.__class__(zeros(shape, dtype=dtype.x, order = order))
         
     else:
-        raise ValueError('don\'t know what to do with dtype = %s'%str(dtype))
+        raise ValueError('don\'t know what to do with dtype = %s, type(dtype)=%s'%(str(dtype), str(type(dtype))))
