@@ -133,7 +133,10 @@ class CGraph:
 
         # initial all xbar to zero
         for f in self.functionList:
+            # print 'f=',f.func.__name__
             f.xbar_from_x()
+            
+        # print 'before pullback',self
 
         for nf,f in enumerate(self.dependentFunctionList):
             f.xbar[...] = xbar_list[nf]
@@ -387,7 +390,7 @@ class Function(Ring):
         if isinstance(F.x,tuple):
             # case if the function F has several outputs, e.g. (y1,y2) = F(x)
             args = list(F.xbar) + args + list(F.x)
-            f = eval('__import__("algopy.utpm").utpm.'+F.x[0].__class__.__name__+'.pb_'+func_name)            
+            f = eval('__import__("algopy.utpm").utpm.'+F.x[0].__class__.__name__+'.pb_'+func_name)
 
         elif type(F.x) == type(None):
             # case if the function F has no output, e.g. None = F(x)

@@ -22,44 +22,75 @@ def f(x,N):
 cg = CGraph()
 
 # create an UTPM instance
-D,N = 1,3
-P = 5
+D,N,M = 2,3,2
+P = N
 
-x = UTPM(numpy.random.rand(*(1,P,2*N)))
+A = UTPM(numpy.zeros((D,P,M,N)))
+x = UTPM(numpy.zeros((D,P,N,1)))
+
+x.data[0,:] = numpy.random.rand(N,1)
+A.data[0,:] = numpy.random.rand(M,N)
+
+x.data[1,:,:,0] = numpy.eye(P)
+
+
+x = Function(x)
+A = Function(A)
+
 
 # wrap the UTPM instance in a Function instance to trace all operations 
 # that have x as an argument
 # x = Function(x)
 
-v1 = x # x[N:]
-v2 = x # x[:N]
-# v1 = x[N:]
-# v2 = x[:N]
-v3 = dot(v1,v2)
-# print 'x.data=',x.data
+y = dot(A,x)
 
-# print 'v1.data=',v1.data
-# print 'v2.data=',v2.data
-# print 'v3.data=',v3.data
+# define dependent and independent variables in the computational procedure
+cg.independentFunctionList = [x,A]
+cg.dependentFunctionList = [y]
 
-print 'v1.data.strides=',v1.data.strides
-print 'v2.data.strides=',v2.data.strides
-print 'v3.data.strides=',v3.data.strides
+# for such linear function we already know the Jacobian: df/dx = A
+# y.data is a (D,P,N) array, i.e. we have to transpose to get the Jacobian
+# Since the UTPM instrance is wrapped in a Function instance we have to access it
+# by y.x. That means the Jacobian is
+J = y.x.data[1].T
 
-print 'v1.data.shape=',v1.data.shape
-print 'v2.data.shape=',v2.data.shape
-print 'v3.data.shape=',v3.data.shape
+# # checking against the analytical result
+print 'J - A =\n', J - A.x.data[0,0]
 
-y = v3 * v1
+# Now we want to compute the same Jacobian in the reverse mode of AD
+# before we do that we have a look what the computational graph looks like:
+# print 'Computational graph is', cg
+
+# the reverse mode is called by cg.pullback([ybar])
+# it is a little hard to explain what's going on here. Suffice to say that we
+# now compute one row of the Jacobian instead of one column as in the forward mode
+
+ybar = y.x.zeros_like()
+
+# compute first row of J
+ybar.data[0,0,0,0] = 1
+cg.pullback([ybar])
+J_row1 = x.xbar.data[0,0]
+
+# compute second row of J
+ybar.data[...] = 0
+ybar.data[0,0,1,0] = 1
+cg.pullback([ybar])
+J_row2 = x.xbar.data[0,0]
+
+# build Jacobian
+J2 = numpy.vstack([J_row1.T, J_row2.T])
+print 'J - J2 =\n', J - J2
+
+# one can also easiliy extract the Hessian which is here a (M,N,N)-tensor
+# e.g. the hessian of y[1] is zero since y[1] is linear in x
+print 'Hessian of y[1] w.r.t. x = \n',x.xbar.data[1,:,:,0]
 
 
-# y = f(x,N)
 
-# print y.shape
 
-# cg.independentFunctionList = [x]
-# cg.dependentFunctionList = [y]
 
-# print cg
+
+
 
 
