@@ -1,6 +1,6 @@
 """
-This example computes the covariance matrix of a constrained parameter estimation
-problem by a nullspace method.
+In this example it is the goal to compute derivatives of the covariance matrix
+of a constrained parameter estimation problem.
 
 I.e. compute
 
@@ -8,11 +8,22 @@ I.e. compute
 C =  (1,0)  |                  |     |   |
             \ J2          0    /     \ 0 /
 
-where J1 = J1(x) and J2 = J2(x), where x is Nx dimensional.
-Goal is the numerically computation (this claim is not thoroughly tested yet!),
-i.e. it is advicable not to multiply J1.T J1 since this would square the condition
-number.
+where J1 = J1(x) and J2 = J2(x). The vector x is Nx dimensional.
 
+Two possibilities are compared:
+    1) filling a big matrix with elements, then invert it and return a view of
+       of the upper left part of the matrix
+    
+    2) Computation of the Nullspace of J2 with a QR decomposition.
+       The formula is::
+           C = Q2.T( Q2 J1.T J1 Q2.T)^-1 Q2 .
+       Potentially, using the QR decomposition twice, i.e. once to compute Q2 and
+       then for J1 Q2.T to avoid the multiplication which would square the condition
+       number, may be numerically more stable. This has not been tested yet though.
+       This example only shows the computation of Q2.
+
+I.e. this small example is a demonstration how the QR decomposition on polynomial
+matrices can be used.
 """
 
 import numpy
