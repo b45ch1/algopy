@@ -5,7 +5,7 @@ from tracer import Function
 
 # override numpy definitions
 
-numpy_function_names = ['trace', 'dot', 'zeros_like', 'diag']
+numpy_function_names = ['trace', 'dot', 'zeros_like', 'diag', 'triu']
 numpy_linalg_function_names = ['inv', 'solve', 'eigh', 'qr']
 
 

@@ -2,7 +2,8 @@
 Experimentally test how stable the QR decomposition is.
 
 Low rank matrices A are built by low rank updates, then it is tested how big the
-residual R = QR - A  is.
+residuals res_1 = QR - A and res_2 = Q.T Q - I and res_3 = P_L ( R)
+
 """
 
 from numpy.testing import *
@@ -10,67 +11,47 @@ import numpy
 import matplotlib.pyplot as pyplot
 import prettyplotting
 
-# pyplot.rcParams.update({'figure.figsize': (6,3.5)}) 
+from algopy import UTPM, qr, dot, triu
 
-from algopy.tracer.tracer import *
-from algopy.utpm import *
+D,P,N = 3,1,3
+
+x1 = UTPM(numpy.random.rand(D,P,N,1))
+x2 = UTPM(numpy.random.rand(D,P,N,1))
+x3 = UTPM(numpy.random.rand(D,P,N,1))
+
+def alpha(beta):
+    return numpy.array([1., 2.**(-beta/2.), 2.**(-beta)])
+
+# create matrix A by lowrank updates, alpha triggeres what the rank is
 
 
+res_1_list = []
+res_2_list = []
+res_3_list = []
 
-def create_matrix(D,P,N, a_list):
-    """
-    create low rank update matrices,
+betas = range(0,200,10)
+for beta in betas:
+    a = alpha(beta)
+    A = a[0]*dot(x1,x1.T) + a[1]*dot(x2,x2.T) + a[2]*dot(x3,x3.T)
+
+    Q,R = qr(A)
+    res_1 = numpy.abs((dot(Q,R) - A).data).max()
+    res_2 = numpy.abs((dot(Q.T,Q) - numpy.eye(N)).data).max()
+    res_3 = numpy.abs((triu(R) - R).data).max()
     
-    A =  \sum_{i=0}^Na a_i x_i x_i^T
-    
-    where a is a list of weights of length Na,
-    x_i are randomly generated vectors
-    """
-    
-    for na, a in enumerate(a_list):
-        x = UTPM(numpy.random.rand(D,P,N,1))
-        if na == 0:
-            A =  a * UTPM.dot(x,x.T)
-        else:
-            A += a * UTPM.dot(x,x.T)
-            
-    return A
+    res_1_list.append(res_1)
+    res_2_list.append(res_2)
+    res_3_list.append(res_3)
+      
 
-D,P,N = 3,1,30
-repetitions = 100
-rank_list = [1,5,N]
+pyplot.figure()
+pyplot.semilogy(betas, res_1_list, 'kd', label=r'max $ (| QR - A |)$')
+pyplot.semilogy(betas, res_2_list, 'ko', label=r'max $ (| Q^T Q - I |)$')
+pyplot.semilogy(betas, res_3_list, 'k.', label=r'max $ (| P_R \circ R - R |)$')
+pyplot.xlabel(r'$\beta$')
 
-residuals_dict = dict()
-for rank in rank_list:
-    a_list = numpy.ones(rank)
-    residuals_dict[rank] = []
-    
-    for rep in range(repetitions):
-        A = create_matrix(D,P,N,a_list)
-        Q,R = UTPM.qr(A)
-        
-        tmp = []
-        for d in range(D):
-            tmp.append(numpy.abs((UTPM.dot(Q,R) - A).data[d]).max())
-            
-        residuals_dict[rank].append(tmp)
-        
-    residuals_dict[rank] = numpy.asarray(residuals_dict[rank])
-        
 
-for rank in rank_list:
-    pyplot.figure()
-    for d in range(D):
-        pyplot.subplot(D,1,d+1)
-        if d == 0:
-            pyplot.title(r'max $ (| QR - A |)$, rank(A) = %d'%rank)
-            
-        tmp = numpy.sort(residuals_dict[rank].ravel())
-        ran = tmp[0], tmp[(9*tmp.size)//10]
-        print 'ran=',ran
-        n, bins, patches = pyplot.hist(residuals_dict[rank][:,d], 20, histtype='bar', range = ran, label=r'degree $d=%d$'%d)
-        pyplot.setp(patches, 'facecolor', '#444444')
-        pyplot.legend( loc='best')
-        pyplot.savefig('/tmp/qr_residuals_rank%d.eps'%rank)
+pyplot.legend( loc='best')
+# #         pyplot.savefig('/tmp/qr_residuals_rank%d.eps'%rank)
 
 pyplot.show()
