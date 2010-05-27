@@ -27,7 +27,7 @@ matrices can be used.
 """
 
 import numpy
-from algopy import CGraph, Function, UTPM, dot, qr, eigh, inv
+from algopy import CGraph, Function, UTPM, dot, qr, eigh, inv, solve
 
 # first order derivatives, one directional derivative
 # D - 1 is the degree of the Taylor polynomial
@@ -47,8 +47,9 @@ Q,R = qr(J2_tilde)
 Q2 = Q[:,K:].T
 J1_tilde = dot(J1,Q2.T)
 Q,R = qr(J1_tilde)
-tmp = inv(dot(R.T,R))
-C = dot(Q2.T, dot(tmp,Q2))
+V = solve(R.T, Q2)
+C = dot(V.T,V)
+
 
 print 'covariance matrix: C =\n',C
 print 'check that Q2.T spans the nullspace of J2:\n', dot(J2,Q2.T)
