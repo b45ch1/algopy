@@ -1073,44 +1073,43 @@ class Test_CGgraph_on_UTPM(TestCase):
         assert_array_almost_equal(g11, g21)
         assert_array_almost_equal(g1, g2)
         
-    # def test_pullback_gradient2(self):
-    #     (D,P,M,N) = 3,9,3,3
-    #     A = UTPM(numpy.zeros((D,P,M,M)))
+    def test_pullback_gradient2(self):
+        (D,P,M,N) = 3,9,3,3
+        A = UTPM(numpy.zeros((D,P,M,M)))
         
-    #     for m in range(M):
-    #         for n in range(N):
-    #             p = m*N + n
-    #             A.data[0,p,:M,:N] = numpy.random.rand(M,N)
-    #             A.data[1,p,m,n] = 1.
+        A0 = numpy.random.rand(M,N)
+        for m in range(M):
+            for n in range(N):
+                p = m*N + n
+                A.data[0,p,:M,:N] = A0
+                A.data[1,p,m,n] = 1.
         
-    #     cg = CGraph()
-    #     A = Function(A)
-    #     A = dot(A.T,A)
-    #     B = inv(A)
-    #     y = trace(B)
+        cg = CGraph()
+        A = Function(A)
+        B = inv(A)
+        y = trace(B)
         
-    #     cg.independentFunctionList = [A]
-    #     cg.dependentFunctionList = [y]
+        cg.independentFunctionList = [A]
+        cg.dependentFunctionList = [y]
+
+        ybar = y.x.zeros_like()
+        ybar.data[0,:] = 1.
+        cg.pullback([ybar])
         
-    #     # print cg
+        g1  =  y.x.data[1]
+        g2 = A.xbar.data[0,0].ravel()
         
-    #     # # print y.x.data
+        assert_array_almost_equal(g1, g2)
         
-    #     g1  =  y.x.data[1]
-    #     # g11 =  y.x.data[2]
+        tmp = []
+        for m in range(M):
+            for n in range(N):
+                p = m*N + n
+                tmp.append( A.xbar.data[1,p,m,n])
         
-    #     # print g1
-    #     ybar = y.x.zeros_like()
-    #     ybar.data[0,0] = 1.
-    #     cg.pullback([ybar])
-        
-    #     g2 = A.xbar.data[0,0].ravel()
-    #     # g21 = A.xbar.data[1,0].ravel()
-        
-    #     # # print A.xbar.data
-        
-    #     assert_array_almost_equal(g1, g2)        
-    #     # assert_array_almost_equal(g11, g21)
+        h1 = y.x.data[2]
+        h2 = numpy.array(tmp)
+        assert_array_almost_equal(2*h1, h2)
         
         
 
