@@ -577,6 +577,39 @@ class Test_Pullbacks(TestCase):
         
         Xbar2 = -1*UTPM.dot(UTPM.dot(Y.T, Ybar), Y.T)
         assert_array_almost_equal(Xbar.data, Xbar2.data, decimal=12)
+        
+    def test_inv_trace_pullback(self):
+        (D,P,M,N) = 3,9,3,3
+        A = UTPM(numpy.zeros((D,P,M,M)))
+        
+        A0 = numpy.random.rand(M,N)
+        
+        for m in range(M):
+            for n in range(N):
+                p = m*N + n
+                A.data[0,p,:M,:N] = A0
+                A.data[1,p,m,n] = 1.
+
+        B = UTPM.inv(A)
+        y = UTPM.trace(B)
+        ybar = y.zeros_like()
+        ybar.data[0,:] = 1.
+        
+        Bbar = UTPM.pb_trace(ybar, B, y)
+        Abar = UTPM.pb_inv(Bbar, A, B)
+        
+        assert_array_almost_equal(Abar.data[0,0].ravel(), y.data[1])
+        
+        
+        tmp = []
+        for m in range(M):
+            for n in range(N):
+                p = m*N + n
+                tmp.append( Abar.data[1,p,m,n])
+        
+        assert_array_almost_equal(tmp, 2*y.data[2])
+        
+        
 
 
 class Test_Cholesky_Decomposition(TestCase):

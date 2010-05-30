@@ -7,7 +7,7 @@ from algopy.utpm import UTPM
 from algopy.utps import UTPS
 from algopy.ctps import CTPS
 
-from algopy import dot, eigh, qr, trace, solve
+from algopy import dot, eigh, qr, trace, solve, inv
 
 
 import numpy
@@ -1035,7 +1035,7 @@ class Test_CGgraph_on_UTPM(TestCase):
 
 
     def test_pullback_gradient(self):
-        (D,P,M,N) = 2,9,3,2
+        (D,P,M,N) = 3,9,3,3
         A = UTPM(numpy.zeros((D,P,M,M)))
         
         for m in range(M):
@@ -1055,16 +1055,64 @@ class Test_CGgraph_on_UTPM(TestCase):
         
         # print cg
         
-        g1 =  y.x.data[1]
+        # print y.x.data
         
-        print g1
-        # ybar = y.x.zeros_like()
-        # ybar.data[0,0] = 1.
-        # cg.pullback([ybar])
+        g1  =  y.x.data[1]
+        g11 =  y.x.data[2]
         
-        # g2 = A.xbar.data[0,0].ravel()
+        # print g1
+        ybar = y.x.zeros_like()
+        ybar.data[0,0] = 1.
+        cg.pullback([ybar])
         
-        # assert_array_almost_equal(g1, g2)
+        g2 = A.xbar.data[0,0].ravel()
+        g21 = A.xbar.data[1,0].ravel()
+        
+        # print A.xbar.data
+        
+        assert_array_almost_equal(g11, g21)
+        assert_array_almost_equal(g1, g2)
+        
+    # def test_pullback_gradient2(self):
+    #     (D,P,M,N) = 3,9,3,3
+    #     A = UTPM(numpy.zeros((D,P,M,M)))
+        
+    #     for m in range(M):
+    #         for n in range(N):
+    #             p = m*N + n
+    #             A.data[0,p,:M,:N] = numpy.random.rand(M,N)
+    #             A.data[1,p,m,n] = 1.
+        
+    #     cg = CGraph()
+    #     A = Function(A)
+    #     A = dot(A.T,A)
+    #     B = inv(A)
+    #     y = trace(B)
+        
+    #     cg.independentFunctionList = [A]
+    #     cg.dependentFunctionList = [y]
+        
+    #     # print cg
+        
+    #     # # print y.x.data
+        
+    #     g1  =  y.x.data[1]
+    #     # g11 =  y.x.data[2]
+        
+    #     # print g1
+    #     ybar = y.x.zeros_like()
+    #     ybar.data[0,0] = 1.
+    #     cg.pullback([ybar])
+        
+    #     g2 = A.xbar.data[0,0].ravel()
+    #     # g21 = A.xbar.data[1,0].ravel()
+        
+    #     # # print A.xbar.data
+        
+    #     assert_array_almost_equal(g1, g2)        
+    #     # assert_array_almost_equal(g11, g21)
+        
+        
 
 
 class TestCGraphOnCTPS(TestCase):
