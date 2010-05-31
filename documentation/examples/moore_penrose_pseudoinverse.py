@@ -44,8 +44,6 @@ print 'naive approach: Apinv A Apinv - Apinv = 0 \n', dot(dot(Apinv, A),Apinv) -
 print 'naive approach: (Apinv A)^T - Apinv A = 0 \n', dot(Apinv, A).T  - dot(Apinv, A)
 print 'naive approach: (A Apinv)^T - A Apinv = 0 \n', dot(A, Apinv).T  - dot(A, Apinv)
 
-
-
 # print dot(C,B)
 
 Q,R = qr(A)
