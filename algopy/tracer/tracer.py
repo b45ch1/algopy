@@ -71,6 +71,12 @@ class CGraph:
         self.independentFunctionList = []
         Function.cgraph = self
         
+    def trace_on(self):
+        Function.cgraph = self
+    
+    def trace_off(self):
+        Function.cgraph = None
+        
     def append(self, func):
         self.functionCount += 1
         self.functionList.append(func)
