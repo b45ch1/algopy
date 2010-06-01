@@ -1242,7 +1242,7 @@ class RawAlgorithmsMixIn:
         tmp4 = numpy.zeros((D,P,M,N))
         PL  = numpy.array([[ c < r for c in range(N)] for r in range(N)],dtype=float)
 
-        # STEP 1: compute V
+        # STEP 1: compute V = Qbar^T Q - R Rbar^T
         cls._dot( cls._transpose(Qbar_data), Q_data, out = tmp1)
         cls._dot( R_data, cls._transpose(Rbar_data), out = tmp2)
         tmp1[...] -= tmp2[...]
@@ -1253,7 +1253,18 @@ class RawAlgorithmsMixIn:
         cls._mul_non_UTPM_x(PL, tmp2, out = tmp1)
 
         # STEP 3: compute PL * (V.T - V) R^{-T}
-        cls._solve(R_data, cls._transpose(tmp1), out = tmp2)
+        
+        # compute rank of the zero'th coefficient
+        rank_list = []
+        for p in range(P):
+            rank = 0
+            for n in range(N):
+                if abs(R_data[0,p,n,n]) > 10**-16:
+                    rank += 1
+            rank_list.append(rank)
+        
+        # FIXME: assuming the same rank for all zero'th coefficient
+        cls._solve(R_data[:,:,:rank,:rank], cls._transpose(tmp1[:,:,:rank,:rank]), out = tmp2[:,:,:rank,:rank])
         tmp2 = tmp2.transpose((0,1,3,2))
 
         # STEP 4: compute Rbar + PL * (V.T - V) R^{-T}

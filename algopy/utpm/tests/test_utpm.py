@@ -839,6 +839,30 @@ class Test_QR_Decomposition(TestCase):
             assert_almost_equal(numpy.trace(numpy.dot(Ab.T,Ad)), numpy.trace(numpy.dot(Qb.T,Qd)) + numpy.trace( numpy.dot(Rb.T,Rd)))
 
 
+    def test_pullback_singular_matrix(self):
+        D,P,M,N = 2,1,6,3
+        A = UTPM(numpy.zeros((D,P,M,M)))
+        A[:,:N] = numpy.random.rand(M,N)
+        
+        for m in range(M):
+            for n in range(N):
+                A.data[1] = 0.
+                A.data[1,0,m,n] = 1.
+                
+                # STEP1: forward
+                Q,R = UTPM.qr(A)
+                B = UTPM.dot(Q,R)
+                y = UTPM.trace(B)
+                
+                # STEP2: reverse
+                ybar = y.zeros_like()
+                ybar.data[0,0] = 13./7.
+                Bbar = UTPM.pb_trace(ybar, B, y)
+                Qbar, Rbar = UTPM.pb_dot(Bbar, Q, R, B)
+                Abar = UTPM.pb_qr(Qbar, Rbar, A, Q, R)
+                
+                assert_array_almost_equal((m==n)*13./7., Abar.data[0,0,m,n])
+
     def test_UTPM_and_array(self):
         D,P,N = 2,2,2
         x = 2 * numpy.random.rand(D,P,N,N)
