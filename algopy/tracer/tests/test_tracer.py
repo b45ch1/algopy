@@ -1035,13 +1035,16 @@ class Test_CGgraph_on_UTPM(TestCase):
 
 
     def test_pullback_gradient(self):
-        (D,P,M,N) = 3,9,3,3
+        (D,M,N) = 3,3,2
+        P = M*N
         A = UTPM(numpy.zeros((D,P,M,M)))
+        
+        A0 = numpy.random.rand(M,N)
         
         for m in range(M):
             for n in range(N):
                 p = m*N + n
-                A.data[0,p,:M,:N] = numpy.random.rand(M,N)
+                A.data[0,p,:M,:N] = A0
                 A.data[1,p,m,n] = 1.
         
         cg = CGraph()
@@ -1062,16 +1065,19 @@ class Test_CGgraph_on_UTPM(TestCase):
         
         # print g1
         ybar = y.x.zeros_like()
-        ybar.data[0,0] = 1.
+        ybar.data[0,:] = 1.
         cg.pullback([ybar])
         
-        g2 = A.xbar.data[0,0].ravel()
-        g21 = A.xbar.data[1,0].ravel()
         
-        # print A.xbar.data
-        
-        assert_array_almost_equal(g11, g21)
-        assert_array_almost_equal(g1, g2)
+        for m in range(M):
+            for n in range(N):
+                p = m*N + n
+                
+                #check gradient
+                assert_array_almost_equal(y.x.data[1,p], A.xbar.data[0,p,m,n])
+                
+                #check hessian
+                assert_array_almost_equal(0, A.xbar.data[1,p,m,n])
         
     def test_pullback_gradient2(self):
         (D,P,M,N) = 3,9,3,3

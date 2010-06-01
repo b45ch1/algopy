@@ -1258,12 +1258,15 @@ class RawAlgorithmsMixIn:
         rank_list = []
         for p in range(P):
             rank = 0
+            # print 'p=',p
             for n in range(N):
+                # print 'R_data[0,p,n,n]=',R_data[0,p,n,n]
                 if abs(R_data[0,p,n,n]) > 10**-16:
                     rank += 1
             rank_list.append(rank)
         
         # FIXME: assuming the same rank for all zero'th coefficient
+        # print 'rank = ', rank
         cls._solve(R_data[:,:,:rank,:rank], cls._transpose(tmp1[:,:,:rank,:rank]), out = tmp2[:,:,:rank,:rank])
         tmp2 = tmp2.transpose((0,1,3,2))
 
