@@ -609,7 +609,39 @@ class Test_Pullbacks(TestCase):
         
         assert_array_almost_equal(tmp, 2*y.data[2])
         
+
+    def test_pullback_solve_for_inversion(self):
+        """
+        test pullback on
+        x = solve(A,Id)
+        """
+    
+        (D,P,N) = 2,7,10
+        A_data = numpy.random.rand(D,P,N,N)
         
+        # make A_data sufficiently regular
+        for p in range(P):
+            for n in range(N):
+                A_data[0,p,n,n] += (N + 1)
+        
+        A = UTPM(A_data)
+        
+        # method 1: computation of the inverse matrix by solving an extended linear system
+        # forward
+        Id = numpy.eye(N)
+        x = UTPM.solve(A,Id)
+        # reverse
+        xbar = UTPM(numpy.random.rand(D,P,N,N))
+        Abar1, Idbar = UTPM.pb_solve(xbar, A, Id, x)
+        
+        # method 2: direct inversion
+        # forward
+        Ainv = UTPM.inv(A)
+        # reverse
+        Abar2 = UTPM.pb_inv(xbar, A, Ainv)
+        
+        assert_array_almost_equal(x.data, Ainv.data)
+        assert_array_almost_equal(Abar1.data, Abar2.data)
 
 
 class Test_Cholesky_Decomposition(TestCase):

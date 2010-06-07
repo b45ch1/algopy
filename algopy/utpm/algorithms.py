@@ -1250,8 +1250,9 @@ class RawAlgorithmsMixIn:
         # STEP 2: compute PL * (V.T - V)
         tmp2[...]  = cls._transpose(tmp1)
         tmp2[...] -= tmp1[...]
+        
         cls._mul_non_UTPM_x(PL, tmp2, out = tmp1)
-
+        
         # STEP 3: compute PL * (V.T - V) R^{-T}
         
         # compute rank of the zero'th coefficient
@@ -1267,15 +1268,24 @@ class RawAlgorithmsMixIn:
         
         # FIXME: assuming the same rank for all zero'th coefficient
         # print 'rank = ', rank
+        # print tmp1
+        # print 'tmp1[:,:,:rank,:rank]=',tmp1[:,:,:rank,:rank]
+        tmp2[...] = 0
         cls._solve(R_data[:,:,:rank,:rank], cls._transpose(tmp1[:,:,:rank,:rank]), out = tmp2[:,:,:rank,:rank])
         tmp2 = tmp2.transpose((0,1,3,2))
+        
+        # print 'Rbar_data=',Rbar_data[...]
 
         # STEP 4: compute Rbar + PL * (V.T - V) R^{-T}
         tmp2[...] += Rbar_data[...]
+        
+        # tmp2[...,rank:,:] = 0
 
         # STEP 5: compute Q ( Rbar + PL * (V.T - V) R^{-T} )
         cls._dot( Q_data, tmp2, out = tmp3)
         Abar_data += tmp3
+        
+        # print 'Abar_data = ', Abar_data
 
         if M > N:
             # STEP 6: compute (Qbar - Q Q^T Qbar) R^{-T}
