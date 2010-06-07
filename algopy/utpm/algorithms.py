@@ -318,16 +318,30 @@ class RawAlgorithmsMixIn:
         Abar_data = out[0]
         xbar_data = out[1]
 
-        tmp = numpy.zeros(xbar_data.shape)
+        Tbar = numpy.zeros(xbar_data.shape)
         
-        cls._solve( A_data.transpose((0,1,3,2)), ybar_data, out = tmp)
-
-        xbar_data += tmp
-
-        tmp *= -1.
-        cls._iouter(tmp, y_data, Abar_data)
+        cls._solve( A_data.transpose((0,1,3,2)), ybar_data, out = Tbar)
+        Tbar *= -1.
+        cls._iouter(Tbar, y_data, Abar_data)
+        xbar_data -= Tbar
 
         return out
+
+    @classmethod
+    def _solve_non_UTPM_x_pullback(cls, ybar_data, A_data, x_data, y_data, out = None):
+
+        if out == None:
+            raise NotImplementedError('should implement that')
+
+        Abar_data = out
+
+        Tbar = numpy.zeros(xbar_data.shape)
+        
+        cls._solve( A_data.transpose((0,1,3,2)), ybar_data, out = Tbar)
+        Tbar *= -1.
+        cls._iouter(Tbar, y_data, Abar_data)
+
+        return out, None
 
     
     @classmethod

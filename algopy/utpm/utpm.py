@@ -727,8 +727,13 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             Abar = A.zeros_like()
         
         else:
-            Abar, xbar = out
-
+            if out[1] == None:
+                Abar = out[0]
+                xbar = x.zeros_like()
+            
+            else:
+                Abar, xbar = out
+        
         cls._solve_pullback(ybar.data, A.data, x.data, y.data, out = (Abar.data, xbar.data))
 
         return Abar, xbar

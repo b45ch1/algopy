@@ -468,8 +468,50 @@ class Test_CGgraph_on_UTPM(TestCase):
             yd = y.data[1,p]
             assert_almost_equal(numpy.trace(numpy.dot(Ab.T,Ad)) + numpy.trace(numpy.dot(xb.T,xd)), numpy.trace(numpy.dot(yb.T,yd)))
 
-
-
+    def test_pullback_solve_inv_comparison(self):
+        """simple check that the reverse mode of solve(A,Id) computes the same solution
+        as inv(A)
+        """
+        (D,P,N) = 3,7,10
+        A_data = numpy.random.rand(D,P,N,N)
+        
+        # make A_data sufficiently regular
+        for p in range(P):
+            for n in range(N):
+                A_data[0,p,n,n] += (N + 1)
+        
+        A = UTPM(A_data)
+        
+        # method 1: computation of the inverse matrix by solving an extended linear system
+        # tracing
+        cg1 = CGraph()
+        A = Function(A)
+        Id = numpy.eye(N)
+        Ainv1 = solve(A,Id)
+        cg1.trace_off()
+        cg1.independentFunctionList = [A]
+        cg1.dependentFunctionList = [Ainv1]
+        
+        # reverse
+        Ainvbar = UTPM(numpy.random.rand(*(D,P,N,N)))
+        cg1.pullback([Ainvbar])
+        
+        # method 2: direct inversion
+        # tracing
+        cg2 = CGraph()
+        A = Function(A.x)
+        Ainv2 = inv(A)
+        cg2.trace_off()
+        cg2.independentFunctionList = [A]
+        cg2.dependentFunctionList = [Ainv2]
+        
+        # reverse
+        cg2.pullback([Ainvbar])
+    
+        Abar1 = cg1.independentFunctionList[0].xbar
+        Abar2 = cg2.independentFunctionList[0].xbar
+        
+        assert_array_almost_equal(Abar1.data, Abar2.data)
 
         
 
