@@ -195,7 +195,14 @@ class Test_CGgraph_on_numpy_operations(TestCase):
         cg.push_forward([x,y])
         assert_almost_equal(cg.dependentFunctionList[0].x, (x*y * x + y)*x*y)
         
-
+    def test_gradient(self):
+        cg = CGraph()
+        fx = Function(3.)
+        fy = Function(7.)
+        fv1 = fx * fy
+        fv2 = (fv1 * fx + fy)*fv1
+        cg.independentFunctionList = [fx,fy]
+        cg.dependentFunctionList = [fv2]
         
         
 class TestCGraph_on_UTPS(TestCase):

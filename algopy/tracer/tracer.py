@@ -153,6 +153,26 @@ class CGraph:
             f.__class__.pullback(f)
             # print self
 
+    def gradient(self, x_list):
+        """ computes the gradient of a function y = f(x_list), where y is a scalar 
+        and x_list is a list or tuple of input arguments.
+        The computation is performed in thein the reverse mode of AD.
+        x_list contains the independent variables at which the gradient should be evaluated.
+        
+        Warning: this function does _not_ compute the Jacobian.
+        """
+        
+        utpm_x_list = [UTPM(numpy.reshape(x, (1,1) + numpy.shape(x))) for x in x_list]
+        
+        print utpm_x_list
+        
+        # self.push_forward(utpm_x_list)
+        # ybar =  self.independentFunctionList[0].x.zeros_like()
+        # ybar.data[0,:] = 1.
+        
+        
+        
+
 
     def plot(self, filename = None, method = None, orientation = 'TD'):
         """
