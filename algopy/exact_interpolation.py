@@ -1,11 +1,16 @@
 """
 This file implements EXACT INTERPOLATION
 
-The theory is explained on page 315 of the book "Evaluating Derivatives" by Andreas Griewank,
+The mathematical details are described on page 315 of the book "Evaluating Derivatives" by Andreas Griewank,
 Chapter 13, Subsection: Multivariate Tensors via Univariate Tensors.
 
-Or more in depth in the paper "Evaluating higher derivative tensors by forward propagation of univariate Taylor series"
-by  Andreas Griewank, Jean Utke, Andrea Walther
+A more detailed and easier to understand description can be found in the original paper "Evaluating higher derivative tensors by forward propagation of univariate Taylor series"
+by  Andreas Griewank, Jean Utke, Andrea Walther. 
+
+We use the same notation as in the book since the notation in asci is easier to read (e.g. gamma vs. c).
+
+
+
 
 """
 from __future__ import division
@@ -24,6 +29,7 @@ def generate_multi_indices(N,deg):
     [0, 0, 2]])
     i.e. each row is one multi-index.
     
+<<<<<<< HEAD
     These multi-indices represent all distinct partial derivatives of the derivative tensor,
     
     Example:
@@ -41,6 +47,14 @@ def generate_multi_indices(N,deg):
     f_xx <--> [2,0]
     f_xy <--> [1,1]
     f_yy <--> [0,2]
+=======
+    E.g. all distinct elements of the Hessian of the function f(x,y)
+    are f_xx, f_xy, f_yy which correspond to 
+
+    f_xx --> [2,0]
+    f_xy --> [1,1]
+    f_yy --> [0,2]
+>>>>>>> e1272662c8511066423a413d45e8e68ead46c656
     
     """
     
@@ -99,8 +113,12 @@ def convert_multi_indices_to_pos(in_I):
     
     Example2:
     a multi-index [2,1,0] tells us that we differentiate twice w.r.t x[0] and once w.r.t
+
     x[1] and never w.r.t x[2]
     This multi-index represents therefore the [0,0,1] element in the derivative tensor.
+    
+    FIXME: this doesn't make much sense!!!
+   
     """
     I = in_I.copy()
     M,N = numpy.shape(I)
