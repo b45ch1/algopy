@@ -11,11 +11,11 @@ by  Andreas Griewank, Jean Utke, Andrea Walther
 from __future__ import division
 import numpy
 
-def generate_multi_indices(N,D):
+def generate_multi_indices(N,deg):
     """
-    generates 2D array of all possible multi-indices with |i| = D
+    generates 2D array of all possible multi-indices with |i| = deg
     e.g.
-    N=3, D=2
+    N=3, deg=2
     array([[2, 0, 0],
     [1, 1, 0],
     [1, 0, 1],
@@ -23,7 +23,29 @@ def generate_multi_indices(N,D):
     [0, 1, 1],
     [0, 0, 2]])
     i.e. each row is one multi-index.
+    
+    These multi-indices represent all distinct partial derivatives of the derivative tensor,
+    
+    Example:
+    -------
+    Let f:R^2 -> R
+           x   -> y = f(x)
+           
+    then the Hessian is
+    
+    H = [[f_xx, f_xy],[f_yx, f_yy]]
+    
+    since for differentiable functions the identity  f_xy = f_yx  holds,
+    there are only three distinct elemnts in the hessian which are described by the multi-indices
+    
+    f_xx <--> [2,0]
+    f_xy <--> [1,1]
+    f_yy <--> [0,2]
+    
     """
+    
+    D = deg # renaming
+    
     T = []
     def rec(r,n,N,D):
         j = r.copy()
@@ -40,7 +62,10 @@ def generate_multi_indices(N,D):
 
 
 def multi_index_binomial(z,k):
-    """n and k are multi-indices, i.e.
+    """
+    This is a helper function.
+    
+    n and k are multi-indices, i.e.
     n = [n1,n2,...]
     k = [k1,k2,...]
     and computes
@@ -63,6 +88,16 @@ def multi_index_abs(z):
 
 def convert_multi_indices_to_pos(in_I):
     """
+    given a multi-index this function returns at to which position in the derivative tensor this mult-index points to.
+    
+    It is used to populate a derivative tensor with the values computed by exact interpolation.
+    
+    Example1:
+    
+    i = [2,0] corresponds to f_xx which is H[0,0] in the Hessian
+    i = [1,1] corresponds to f_xy which is H[0,1] in the Hessian
+    
+    Example2:
     a multi-index [2,1,0] tells us that we differentiate twice w.r.t x[0] and once w.r.t
     x[1] and never w.r.t x[2]
     This multi-index represents therefore the [0,0,1] element in the derivative tensor.
@@ -124,6 +159,22 @@ def gamma(i,j):
     return retval[0]
     
 def generate_permutations(in_x):
+    """
+    returns a generator for all permuations of a list x = [x1,x2,x3,...]
+    
+    Example::
+    
+        >>> for perm in generate_permutations([0,1,2]):
+        ...     print perm
+        ...
+        [0, 1, 2]
+        [1, 0, 2]
+        [1, 2, 0]
+        [0, 2, 1]
+        [2, 0, 1]
+        [2, 1, 0]
+    
+    """
     x = in_x[:]
     if len(x) <=1:
         yield x
