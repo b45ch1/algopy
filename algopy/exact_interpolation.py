@@ -29,7 +29,6 @@ def generate_multi_indices(N,deg):
     [0, 0, 2]])
     i.e. each row is one multi-index.
     
-<<<<<<< HEAD
     These multi-indices represent all distinct partial derivatives of the derivative tensor,
     
     Example:
@@ -47,14 +46,6 @@ def generate_multi_indices(N,deg):
     f_xx <--> [2,0]
     f_xy <--> [1,1]
     f_yy <--> [0,2]
-=======
-    E.g. all distinct elements of the Hessian of the function f(x,y)
-    are f_xx, f_xy, f_yy which correspond to 
-
-    f_xx --> [2,0]
-    f_xy --> [1,1]
-    f_yy --> [0,2]
->>>>>>> e1272662c8511066423a413d45e8e68ead46c656
     
     """
     
