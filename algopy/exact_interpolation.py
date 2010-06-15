@@ -169,7 +169,7 @@ def gamma(i,j):
     
 def generate_permutations(in_x):
     """
-    returns a generator for all permuations of a list x = [x1,x2,x3,...]
+    returns a generator for all permutations of a list x = [x1,x2,x3,...]
     
     Example::
     
