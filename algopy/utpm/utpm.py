@@ -775,6 +775,22 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         
         return Q,R
         
+        
+    @classmethod
+    def qr_full(cls, A, out = None, work = None):
+        D,P,M,N = numpy.shape(A.data)
+        
+        if out == None:
+            Q = cls(cls.__zeros__((D,P,M,M), dtype=A.data.dtype))
+            R = cls(cls.__zeros__((D,P,M,N), dtype=A.data.dtype))
+            
+        else:
+            Q,R = out
+        
+        UTPM._qr_full(A.data, out = (Q.data, R.data))
+        
+        return Q,R        
+        
     @classmethod
     def pb_qr(cls, Qbar, Rbar, A, Q, R, out = None):
         D,P,M,N = numpy.shape(A.data)

@@ -746,6 +746,78 @@ class RawAlgorithmsMixIn:
                     Q_data[D,p,:,:] = numpy.dot(H[p] - numpy.dot(Q_data[0,p],R_data[D,p]), Rinv[p])
 
 
+    @classmethod
+    def _qr_full(cls,  A_data, out = None,  work = None):
+        """
+        computation of QR = A 
+        
+        INPUTS:
+            A    (M,N) UTPM instance            with A.data[0,:] have all rank N, M >= N
+        
+        OUTPUTS:
+            Q     (M,M) UTPM instance             orthonormal matrix
+            R     (M,N) UTPM instance             only upper M rows are non-zero, i.e. R[:N,:] == 0
+            
+        
+        """
+        
+        import scipy.linalg
+
+        D,P,M,N = numpy.shape(A_data)
+        
+        # check if the output array is provided
+        if out == None:
+            raise NotImplementedError('need to implement that...')
+        Q_data = out[0]
+        R_data = out[1]
+        
+        # input checks
+        if Q_data.shape != (D,P,M,M):
+            raise ValueError('expected Q_data.shape = %s but provided %s'%(str((DT,P,M,K)),str(Q_data.shape)))
+        assert R_data.shape == (D,P,M,N)
+
+        if not M >= N:
+            raise NotImplementedError('A_data.shape = (DT,P,M,N) = %s but require (for now) that M>=N')        
+                
+        # check if work arrays are provided, if not allocate them
+        if work == None:
+            dF = numpy.zeros((M,N))
+            S = numpy.zeros((M,M))
+            X  = numpy.zeros((M,M))
+            PL = numpy.array([[ r > c for c in range(M)] for r in range(M)],dtype=float)
+            Rinv = numpy.zeros((N,N))
+            K  = numpy.zeros((M,M))
+            
+        else:
+            raise NotImplementedError('need to implement that...')
+            
+        for p in range(P):
+            
+            # d = 0: compute the base point
+            Q_data[0,p,:,:], R_data[0,p,:,:] = scipy.linalg.qr(A_data[0,p,:,:])
+            
+            # d > 0: iterate
+            Rinv[:,:] = numpy.linalg.inv(R_data[0,p,:N,:])            
+            
+            for d in range(1,D):
+                # STEP 1: compute dF and S
+                dF[...] = A_data[d,p,:,:]
+                S[...] = 0
+            
+                for k in range(1,d):
+                    dF[...] -= numpy.dot(Q_data[d-k,p,:,:], R_data[k,p,:,:])
+                    S[...]  -= numpy.dot(Q_data[d-k,p,:,:].T, Q_data[k,p,:,:])
+                S *= 0.5
+                
+                # STEP 2: compute X
+                X[...] = 0
+                X[:,:N] = PL[:,:N] * (numpy.dot( numpy.dot(Q_data[0,p,:,:].T, dF[:,:]), Rinv) - S[:,:N])
+                X[:,:] = X[:,:] - X[:,:].T
+                K[...] = 0; K[...] += S;  K[...] += X
+                R_data[d,p,:,:] = numpy.dot(Q_data[0,p,:,:].T, dF) - numpy.dot(K,R_data[0,p,:,:])
+                Q_data[d,p,:,:] = numpy.dot(Q_data[0,p,:,:],K)
+
+
 
     @classmethod
     def _eigh(cls, L_data, Q_data, A_data, epsilon = 10**-8, full_output = False):
