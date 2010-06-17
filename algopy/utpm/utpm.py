@@ -829,6 +829,19 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def diag(cls, v, k = 0, out = None):
         """Extract a diagonal or construct  diagonal UTPM instance"""
         return cls(cls._diag(v.data))
+        
+    @classmethod
+    def pb_diag(cls, ybar, x, y, k = 0, out = None):
+        """Extract a diagonal or construct  diagonal UTPM instance"""
+        
+        if out == None:
+            xbar = x.zeros_like()
+        
+        else:
+            xbar, = out
+
+        return cls(cls._diag_pullback(ybar.data, x.data, y.data, k = k, out = xbar.data))        
+        
     
     @classmethod
     def iouter(cls, x, y, out):

@@ -392,7 +392,21 @@ class Test_Push_Forward(TestCase):
 
         for n in range(N):
             assert_almost_equal( x.data[...,n], X.data[...,n,n])
+
+    def test_diag_pullback(self):
+        D,P,N = 2,3,4
+        # forward
+        x = UTPM(numpy.random.rand(D,P,N))
+        X = UTPM.diag(x)
         
+        #reverse
+        Xbar = UTPM.diag(UTPM(numpy.random.rand(D,P,N)))
+        xbar = UTPM.pb_diag(Xbar, x, X)
+        
+        assert_array_almost_equal(UTPM.diag(Xbar).data,xbar.data)
+
+
+    
 
     def test_trace(self):
         N1 = 2

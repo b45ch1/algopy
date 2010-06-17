@@ -1350,3 +1350,24 @@ class RawAlgorithmsMixIn:
             
             return out
 
+    @classmethod
+    def _diag_pullback(cls, ybar_data, x_data, y_data, k = 0, out = None):
+        """computes tr(ybar.T, dy) = tr(xbar.T,dx)
+        where y = diag(x)
+        """
+        
+        if out == None:
+            raise NotImplementedError('should implement that')
+            
+        if k != 0:
+            raise NotImplementedError('should implement that')
+
+
+        D,P = x_data.shape[:2]
+        for d in range(D):
+            for p in range(P):
+                out[d,p] += numpy.diag(ybar_data[d,p])
+
+        return out
+
+

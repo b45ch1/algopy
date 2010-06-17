@@ -236,6 +236,23 @@ class Test_CGgraph_on_UTPM(TestCase):
         assert_array_almost_equal(cg.dependentFunctionList[0].x.data, ((aX*aY * aX + aY)*aX*aY).data)
    
 
+    def test_pullback_diag(self):
+        D,P,N = 2,3,4
+        cg = CGraph()
+        # forward
+        x = Function(UTPM(numpy.random.rand(D,P,N)))
+        X = Function.diag(x)
+        Y = Function.diag(x)
+        cg.trace_off()
+        cg.independentFunctionList = [x]
+        cg.dependentFunctionList = [X,Y]
+        
+        #reverse
+        Xbar = UTPM.diag(UTPM(numpy.random.rand(D,P,N)))
+        Ybar = Xbar.copy()
+        
+        cg.pullback([Xbar, Ybar])
+        assert_array_almost_equal(x.xbar.data, 2* UTPM.diag(Xbar).data)
         
     def test_push_forward_of_qr(self):
         cg = CGraph()

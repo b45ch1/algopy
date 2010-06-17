@@ -574,6 +574,9 @@ class Function(Ring):
          
     def qr(self):
          return Function.push_forward(self.x.__class__.qr, [self])
+         
+    def diag(self):
+         return Function.push_forward(self.x.__class__.diag, [self])         
 
     def eigh(self):
          return Function.push_forward(self.x.__class__.eigh, [self])
