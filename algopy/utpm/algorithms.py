@@ -195,7 +195,8 @@ class RawAlgorithmsMixIn:
         """
 
         if out == None:
-            raise NotImplementedError('should implement that')
+            new_shp = x_data.shape[:-1] + y_data.shape[2:-2] + (y_data.shape[-1],)
+            out = numpy.zeros(new_shp, dtype=x_data.dtype)
 
         z_data = out
         z_data[...] = 0.
@@ -819,6 +820,42 @@ class RawAlgorithmsMixIn:
 
 
 
+    @classmethod
+    def _qr_full_pullback(cls, Qbar_data, Rbar_data, A_data, Q_data, R_data, out = None):
+        """
+        computes the pullback of the qr decomposition (Q,R) = qr(A)    <===>    QR = A
+        
+            A_data      (D,P,M,N) array             regular matrix
+            Q_data      (D,P,M,M) array             orthogonal vectors Q_1,...,Q_K
+            R_data      (D,P,M,N) array             upper triagonal matrix
+        
+        """
+        
+
+        if out == None:
+            raise NotImplementedError('need to implement that...')
+
+        Abar_data = out
+        A_shp = A_data.shape
+        D,P,M,N = A_shp
+
+        if M < N:
+            raise NotImplementedError('supplied matrix has more columns that rows')
+
+        # allocate temporary storage and temporary matrices
+        PL = numpy.array([[ r > c for c in range(M)] for r in range(M)],dtype=float)
+        
+        tmp = cls._dot(cls._transpose(Q_data), Qbar_data) + cls._dot(R_data, cls._transpose(Rbar_data)) 
+        tmp = tmp - cls._transpose(tmp)
+        
+        for d in range(D):
+            for p in range(P):
+                tmp[d,p] *= PL
+
+        print R_data[:,:,:N,:].shape
+        tmp2 = cls._solve(cls._transpose(R_data[:,:,:N,:]), cls._transpose(tmp), out = numpy.zeros((D,P,M,N)))
+        # tmp = cls._dot(tmp[:,:,:,:N], cls._transpose
+        # print Rbar_data.shape
     @classmethod
     def _eigh(cls, L_data, Q_data, A_data, epsilon = 10**-8, full_output = False):
         """

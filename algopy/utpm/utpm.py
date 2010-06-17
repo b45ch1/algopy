@@ -772,9 +772,20 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             Q,R = out
         
         UTPM._qr(A.data, out = (Q.data, R.data))
-        
         return Q,R
         
+    @classmethod
+    def pb_qr(cls, Qbar, Rbar, A, Q, R, out = None):
+        D,P,M,N = numpy.shape(A.data)
+        
+        if out == None:
+            Abar = A.zeros_like()
+        
+        else:
+            Abar, = out
+        
+        UTPM._qr_pullback( Qbar.data, Rbar.data, A.data, Q.data, R.data, out = Abar.data)
+        return Abar
         
     @classmethod
     def qr_full(cls, A, out = None, work = None):
@@ -789,10 +800,10 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         
         UTPM._qr_full(A.data, out = (Q.data, R.data))
         
-        return Q,R        
+        return Q,R
         
     @classmethod
-    def pb_qr(cls, Qbar, Rbar, A, Q, R, out = None):
+    def pb_qr_full(cls, Qbar, Rbar, A, Q, R, out = None):
         D,P,M,N = numpy.shape(A.data)
         
         if out == None:
@@ -801,9 +812,9 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         else:
             Abar, = out
         
-        UTPM._qr_pullback( Qbar.data, Rbar.data, A.data, Q.data, R.data, out = Abar.data)
-        return Abar
-
+        UTPM._qr_full_pullback( Qbar.data, Rbar.data, A.data, Q.data, R.data, out = Abar.data)
+        return Abar        
+        
     
     @classmethod
     def eigh(cls, A, out = None, epsilon = 10**-8):
