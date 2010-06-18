@@ -798,7 +798,7 @@ class RawAlgorithmsMixIn:
             Q_data[0,p,:,:], R_data[0,p,:,:] = scipy.linalg.qr(A_data[0,p,:,:])
             
             # d > 0: iterate
-            Rinv[:,:] = numpy.linalg.inv(R_data[0,p,:N,:])            
+            Rinv[:,:] = numpy.linalg.inv(R_data[0,p,:N,:])
             
             for d in range(1,D):
                 # STEP 1: compute dF and S
@@ -842,9 +842,8 @@ class RawAlgorithmsMixIn:
         if M < N:
             raise NotImplementedError('supplied matrix has more columns that rows')
 
-        # allocate temporary storage and temporary matrices
+        # STEP 1: compute: tmp1 = PL * ( Q.T Qbar - Qbar.T Q + R Rbar.T - Rbar R.T)
         PL = numpy.array([[ r > c for c in range(M)] for r in range(M)],dtype=float)
-        
         tmp = cls._dot(cls._transpose(Q_data), Qbar_data) + cls._dot(R_data, cls._transpose(Rbar_data)) 
         tmp = tmp - cls._transpose(tmp)
         
@@ -852,10 +851,24 @@ class RawAlgorithmsMixIn:
             for p in range(P):
                 tmp[d,p] *= PL
 
-        print R_data[:,:,:N,:].shape
-        tmp2 = cls._solve(cls._transpose(R_data[:,:,:N,:]), cls._transpose(tmp), out = numpy.zeros((D,P,M,N)))
+        # STEP 2: compute H = K * R1^{-T}
+        R1 = R_data[:,:,:N,:]
+        K = tmp[:,:,:,:N]
+        H = numpy.zeros((D,P,M,N))
+        
+        cls._solve(R1, cls._transpose(K), out = cls._transpose(H))
+        
+        H += Rbar_data
+        
+        Abar_data += cls._dot(Q_data, H, out = numpy.zeros_like(Abar_data))
+        
+        # tmp2 = cls._solve(cls._transpose(R_data[:,:,:N,:]), cls._transpose(tmp), out = numpy.zeros((D,P,M,N)))
         # tmp = cls._dot(tmp[:,:,:,:N], cls._transpose
         # print Rbar_data.shape
+        
+        
+        
+        
     @classmethod
     def _eigh(cls, L_data, Q_data, A_data, epsilon = 10**-8, full_output = False):
         """
