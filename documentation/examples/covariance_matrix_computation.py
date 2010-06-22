@@ -44,10 +44,10 @@ cg1 = CGraph()
 J1 = Function(UTPM(numpy.random.rand(*(D,P,M,N))))
 J2 = Function(UTPM(numpy.random.rand(*(D,P,K,N))))
 
-J2_tilde = Function(UTPM(numpy.zeros((D,P,N,N))))
-J2_tilde[:,:K] = J2.T
-Q,R = qr(J2_tilde)
+
+Q,R = Function.qr_full(J2.T)
 Q2 = Q[:,K:].T
+
 J1_tilde = dot(J1,Q2.T)
 Q,R = qr(J1_tilde)
 V = solve(R.T, Q2)
@@ -86,8 +86,6 @@ cg1.pullback([Cbar])
 cg2.pullback([Cbar])
 print 'J1\n',cg2.independentFunctionList[0].xbar - cg1.independentFunctionList[0].xbar
 print 'J2\n',cg2.independentFunctionList[1].xbar - cg1.independentFunctionList[1].xbar
-
-
 
 
 

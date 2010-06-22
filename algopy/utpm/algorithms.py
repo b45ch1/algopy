@@ -1,5 +1,5 @@
 import numpy
-
+import scipy.linalg
 
 
 def vdot(x,y, z = None):
@@ -762,7 +762,7 @@ class RawAlgorithmsMixIn:
         
         """
         
-        import scipy.linalg
+        
 
         D,P,M,N = numpy.shape(A_data)
         
