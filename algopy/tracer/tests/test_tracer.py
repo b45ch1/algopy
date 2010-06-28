@@ -121,6 +121,19 @@ class Test_Function_on_UTPM(TestCase):
             
         assert_array_almost_equal( fx.x.data, 2*ay.data)
         
+    def test_neg(self):
+        cg = CGraph()
+        x = Function(UTPM(numpy.ones((1,1,1))))
+        y = -1*x
+        cg.trace_off()
+        cg.independentFunctionList = [x]
+        cg.dependentFunctionList = [y]
+        
+        ybar = y.x.zeros_like()
+        ybar[0] = 1.
+        cg.pullback([ybar])
+        
+        assert_array_almost_equal(x.xbar.data, - y.xbar.data)
 
 class Test_Mixed_Function_Operations(TestCase):
     def test_scalar(self):

@@ -268,10 +268,12 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         
         return retval
 
-
-
     def __neg__(self):
-        return self.__class__(-self.data)
+        return self.__class__.neg(self)
+        
+    @classmethod
+    def neg(cls, x, out = None):
+        return -1*x
         
     @classmethod
     def add(cls, x, y , out = None):
@@ -580,7 +582,22 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def pb_Id(cls, ybar, x, y, out = None):
         return out
         
+    
+    @classmethod
+    def pb_neg(cls, ybar, x, y, out = None):
+        if out == None:
+            xbar = x.zeros_like()
         
+        else:
+            xbar, = out
+            
+        xbar -= ybar
+        return xbar
+        
+    @classmethod
+    def pb___neg__(cls, ybar, x, y, out = None):
+        return cls.pb_neg(ybar, x, y, out = out)
+
     @classmethod
     def pb___add__(cls, zbar, x, y , z, out = None):
         return cls.pb_add(zbar, x, y , z, out = out)
