@@ -26,21 +26,9 @@ the control flow sequence can walked in reverse order.
 
 ALGOPY is a research prototype where, to the best of authors'
 knowledge, some algorithms are implemented that cannot be found elsewhere.
-In particular, the algorithms for the qr decomposition of matrix polynomials and
-the symmetric eigenvalue decomposition with
-possibly repeated eigenvalues are novel.
 
 Most of ALGOPY is implemented in pure Python. However, some submodules are implemented
 in pure C. For these submodules Python bindings using ctypes are provided.
-
-
-A word of warning:
-------------------
-Some of *user* API might change in the future to make the software even more
-intuitive and easy to use. We will try to stay backward-compatible.
-But we rate clean code over backward-compatibility at the current stage.
-Since we use the software ourselves extensively, changes to the API will be done
-in a way s.t. the refactoring may for instance be a simple search and replace.
 
 The algorithms are quite well-tested and have been successfully used.
 However, since the user-base is currently quite small, it is possible that bugs
