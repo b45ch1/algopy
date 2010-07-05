@@ -1,11 +1,11 @@
 import numpy
 import string
-from utpm import UTPM
-from tracer import Function
+from algopy import UTPM
+from algopy import Function
 
 # override numpy definitions
 
-numpy_function_names = ['trace', 'dot', 'zeros_like', 'diag', 'triu']
+numpy_function_names = ['sin','cos', 'exp', 'log', 'sqrt', 'trace', 'dot', 'zeros_like', 'diag', 'triu']
 numpy_linalg_function_names = ['inv', 'solve', 'eigh', 'qr']
 
 

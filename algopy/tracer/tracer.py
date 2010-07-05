@@ -1,5 +1,5 @@
 import numpy
-
+import algopy
 from algopy.base_type import Ring
 
 class NotSet:
@@ -564,11 +564,20 @@ class Function(Ring):
             return out
 
     def log(self):
-         return Function.push_forward(self.x.__class__.log, [self])
+         return Function.push_forward(algopy.log, [self])
 
     def exp(self):
-         return Function.push_forward(self.x.__class__.exp, [self])
-
+         return Function.push_forward(algopy.exp, [self])
+         
+    def sin(self):
+         return Function.push_forward(algopy.sin, [self])       
+         
+    def cos(self):
+         return Function.push_forward(algopy.cos, [self])         
+         
+    def sqrt(self):
+         return Function.push_forward(algopy.sqrt, [self])
+         
     def inv(self):
          return Function.push_forward(self.x.__class__.inv, [self])
          
