@@ -65,7 +65,7 @@ if os.path.exists('MANIFEST'): os.remove('MANIFEST')
 def write_version_py(filename='algopy/version.py'):
     try:
         gitfile = open('.git/refs/heads/master', 'r')
-        git_revision = '.dev' + gitfile.readline()
+        git_revision = '.dev' + gitfile.readline().split('\n')[0]
     
     except:
         git_revision = '.dev'    
@@ -79,7 +79,7 @@ version='%(version)s'
 release=%(isrelease)s
 
 if not release:
-    version += %(git_revision)s
+    version += '%(git_revision)s'
 """
 
 
