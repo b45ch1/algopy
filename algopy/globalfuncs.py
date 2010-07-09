@@ -6,7 +6,7 @@ from algopy import Function
 # override numpy definitions
 
 numpy_function_names = ['sin','cos', 'exp', 'log', 'sqrt', 'trace', 'dot', 'zeros_like', 'diag', 'triu']
-numpy_linalg_function_names = ['inv', 'solve', 'eigh', 'qr']
+numpy_linalg_function_names = ['inv', 'solve', 'eigh', 'qr', 'cholesky']
 
 
 function_template = string.Template('''
