@@ -63,6 +63,15 @@ if not ISRELEASED:
 if os.path.exists('MANIFEST'): os.remove('MANIFEST')
 
 def write_version_py(filename='algopy/version.py'):
+    try:
+        gitfile = open('.git/refs/heads/master', 'r')
+        git_revision = '.dev' + gitfile.readline()
+    
+    except:
+        git_revision = '.dev'    
+    
+    print git_revision
+    
     cnt = """
 # THIS FILE IS GENERATED FROM ALGOPY SETUP.PY
 short_version='%(version)s'
@@ -70,11 +79,13 @@ version='%(version)s'
 release=%(isrelease)s
 
 if not release:
-    version += '.dev'
+    version += %(git_revision)s
 """
+
+
     a = open(filename, 'w')
     try:
-        a.write(cnt % {'version': VERSION, 'isrelease': str(ISRELEASED)})
+        a.write(cnt % {'version': VERSION, 'isrelease': str(ISRELEASED), 'git_revision':git_revision})
     finally:
         a.close()
 
