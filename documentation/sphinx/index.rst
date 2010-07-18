@@ -118,6 +118,67 @@ and is simply the normal function evaluation. In the block `A.data[1]`
 one has the partial derivatives :math:`\frac{\partial A}{\partial x_1}`.
 Similarly for `y.data[0]` which is the normal function evaluation and
 `y.data[1]` is the partial derivative :math:`\frac{\partial \Phi}{\partial x_1}`.
+To compute the complete gradient one could repeat the above procedure but setting::
+    
+    x.data[1] = [0,1,0]
+    
+resp::
+    
+    x.data[1] = [0,0,1]
+    
+To reduce overhead, ALGOPY offers the possibility to propagate `P` directions 
+at once. It also allows to compute higher-order derivatives. I.e. compute not only
+the zeroth and first Taylor coefficients but the first `D` coefficients.
+Then the program would look like::
+    
+    import numpy
+    from algopy import UTPM, eigh, inv, dot
+    
+    D,P,Nx,M,N = 2,3,3,3,2
+    
+    x = UTPM(numpy.zeros((D,P,Nx)))
+    x.data[0,:] = [3,5,7]
+    x.data[1,:] = numpy.eye(Nx)
+    
+    A = UTPM(numpy.zeros((D,P,M,N)))
+    A[0,0] = numpy.sin(x[0])**2 + x[1]
+    A[0,1] = x[0]
+    A[1,0] = numpy.exp(x[0]/x[1])
+    A[1,1] = x[2]
+    A[2,0] = numpy.log(x[0] + x[2]*x[1])
+    
+    y = eigh(inv(dot(A.T, A)))[0][-1]
+    
+    print 'Phi(x) = ', y.data[0]
+    print 'd/dx_1 Phi(x) = ', y.data[1]
+
+which yields::
+    
+    >>> import numpy
+    >>> from algopy import UTPM, eigh, inv, dot
+    >>> 
+    >>> D,P,Nx,M,N = 2,3,3,3,2
+    >>> 
+    >>> x = UTPM(numpy.zeros((D,P,Nx)))
+    >>> x.data[0,:] = [3,5,7]
+    >>> x.data[1,:] = numpy.eye(Nx)
+    >>> 
+    >>> A = UTPM(numpy.zeros((D,P,M,N)))
+    >>> A[0,0] = numpy.sin(x[0])**2 + x[1]
+    >>> A[0,1] = x[0]
+    >>> A[1,0] = numpy.exp(x[0]/x[1])
+    >>> A[1,1] = x[2]
+    >>> A[2,0] = numpy.log(x[0] + x[2]*x[1])
+    >>> 
+    >>> y = eigh(inv(dot(A.T, A)))[0][-1]
+    >>> 
+    >>> print 'Phi(x) = ', y.data[0]
+    Phi(x) =  [ 0.04784897  0.04784897  0.04784897]
+    >>> print 'd/dx_1 Phi(x) = ', y.data[1]
+    d/dx_1 Phi(x) =  [ 0.01173805 -0.01228258 -0.00893191]
+
+
+
 
 
 
