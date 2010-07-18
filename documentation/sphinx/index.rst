@@ -1,0 +1,108 @@
+.. algopy documentation master file, created by
+   sphinx-quickstart on Sun Jul 18 16:23:52 2010.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+ALGOPY, Algorithmic Differentiation in Python
+=============================================
+
+
+Contents:
+
+.. toctree::
+   :maxdepth: 2
+   
+   getting_started.rst
+
+
+
+What is ALGOPY?
+---------------
+
+The purpose of ALGOPY is the evaluation of higher-order derivatives
+in the forward and reverse mode of Algorithmic Differentiation (AD). Particular
+focus are functions that contain numerical linear algebra functions as
+they often appear in statistically motivated functions.
+
+Illustrative Example:
+--------------------
+Consider the situation where the entries of a matrix :math:`A \equiv A(x)\in \mathbb R^{M \times N}` is computed
+by a computer program, where :math:`x \in \mathbb R^{N_x}`. To give an explicit example we consider
+
+.. math::
+   A(x) = \begin{pmatrix}
+   \sin(x_1)^2 + x_2 & x_1 \\
+   e^{x_1/x_2} & x_3 \\
+   \log(x_1 - x_3*x_2) & 0 \\
+   \end{pmatrix}
+
+In a second step it is desired to compute
+
+.. math::
+    \Phi(x) = \max( \lambda( (A(x)^T A(x))^{-1}) \;,
+    
+where :math:`\lambda(C)` computes all eigenvalues of the matrix :math:`C` and
+:math:`\max` returns the largest of the eigenvalues. The matrix inversion is not
+really necessary since one could as well invert the smallest eigenvalue. It is 
+used here simply to make the point that its easy to concatenate matrix functions
+together.
+
+We are interested in the numerical value of the gradient
+
+.. math::
+    \nabla_x \Phi(x)
+    
+at :math:`x=(3,5,7)^T`. At first we look at the forward mode of AD. E.g. we want to compute
+:math:`\frac{\partial \Phi}{\partial x_1}`.
+
+The corresponding code is::
+    
+import numpy
+from algopy import UTPM, eigh, inv, dot
+
+x = UTPM(numpy.zeros((2,1,3)))
+x.data[0,0] = [3,5,7]
+
+A = UTPM(numpy.zeros((2,1,3,2)))
+A[0,:] = [numpy.sin(x[0])**2 + x[1], x[0]]
+A[1,:] = [numpy.exp([x[0]/x[1]), x[2]]
+A[2,:] = [numpy.log(x[0] - x[2]*x[1]), 0]
+
+print A
+
+y = eigh(inv(dot(A.T, A)))[0][-1]
+
+Rationale:
+----------
+
+The central idea of ALGOPY is the computation on Taylor polynomials with scalar
+coefficients and with matrix coefficients. These algorithms are primarily used for
+Algorithmic Differentiation (AD)in the forward and reverse mode.
+
+The focus are univariate Taylor polynomials over matrices (UTPM),implemented in
+the class `algopy.utpm.UTPM`.
+
+To allow the use of the reverse mode of AD a simple code tracer has been implemented in
+`algopy.tracer`. The idea is to record the computation procedure in a datastructure s.t.
+the control flow sequence can walked in reverse order.
+
+ALGOPY is a research prototype where, to the best of authors'
+knowledge, some algorithms are implemented that cannot be found elsewhere.
+
+Most of ALGOPY is implemented in pure Python. However, some submodules are implemented
+in pure C. For these submodules Python bindings using ctypes are provided.
+
+The algorithms are quite well-tested and have been successfully used.
+However, since the user-base is currently quite small, it is possible that bugs
+may still be persistent.
+Also, not all submodules of ALGOPY are feature complete. The most important parts
+`algopy.tracer` and `algopy.upt.UTPM` are however fairly complete.
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+

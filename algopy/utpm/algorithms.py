@@ -187,6 +187,25 @@ class RawAlgorithmsMixIn:
         
         return y_data
         
+    @classmethod
+    def _sincos(cls, x_data, out = None):
+        """ computes sin and cos in Taylor arithmetic"""
+        if out == None:
+            raise NotImplementedError('should implement that')
+        s_data,c_data = out
+        D,P = x_data.shape[:2]
+        
+        # base point: d = 0
+        s_data[0] = numpy.sin(x_data[0])
+        c_data[0] = numpy.cos(x_data[0])
+        
+        # higher order coefficients: d > 0
+        for d in range(1,D):
+            s_data[d] = numpy.sum([k*x_data[k] * c_data[d-k] for k in range(1,d+1)])/d
+            c_data[d] = numpy.sum([-k*x_data[k] * s_data[d-k] for k in range(1,d+1)])/d
+            
+        return s_data, c_data
+        
 
     @classmethod
     def _dot(cls, x_data, y_data, out = None):
