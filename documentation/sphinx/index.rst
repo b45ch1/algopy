@@ -12,7 +12,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
    
-   getting_started.rst
+   examples_tracer.rst
 
 
 
