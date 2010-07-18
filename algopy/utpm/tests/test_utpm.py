@@ -216,6 +216,22 @@ class Test_Push_Forward(TestCase):
         Y = UTPM.exp(X)
         Z = UTPM.log(Y)
         assert_array_almost_equal(X.data, Z.data)
+        
+    def test_pow(self):
+        D,P,N = 4,2,2
+        X = UTPM(numpy.random.rand(D,P,N,N))
+        Y = X**3
+        Z = X*X*X
+        assert_array_almost_equal(Y.data, Z.data)
+        
+    def test_sin_cos(self):
+        D,P,M,N = 4,3,2,1
+        X = UTPM(numpy.random.rand(D,P,M,N))
+        Z = UTPM.sin(X)**2 + UTPM.cos(X)**2
+        # print Z
+        assert_array_almost_equal(Z.data[0], numpy.ones((P,M,N)))
+        assert_array_almost_equal(Z.data[1], numpy.zeros((P,M,N)))
+        
      
     def test_abs(self):
         D,P,N = 4,3,12

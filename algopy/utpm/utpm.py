@@ -248,6 +248,21 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         retval = self.clone()
         self._log(self.data, out = retval.data)
         return retval
+        
+    def sin(self):
+        retval = self.clone()
+        tmp = self.clone()
+        self._sincos(self.data, out = (retval.data, tmp.data))
+        return retval
+        
+    def cos(self):
+        retval = self.clone()
+        tmp = self.clone()
+        self._sincos(self.data, out = (tmp.data, retval.data))
+        return retval
+        
+    def __pow__(self,r):
+        return numpy.exp(numpy.log(self)*r)
 
     def __abs__(self):
         """ absolute value of polynomials

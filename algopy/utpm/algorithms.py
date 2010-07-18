@@ -201,11 +201,10 @@ class RawAlgorithmsMixIn:
         
         # higher order coefficients: d > 0
         for d in range(1,D):
-            s_data[d] = numpy.sum([k*x_data[k] * c_data[d-k] for k in range(1,d+1)])/d
-            c_data[d] = numpy.sum([-k*x_data[k] * s_data[d-k] for k in range(1,d+1)])/d
+            s_data[d] = numpy.sum([k*x_data[k] * c_data[d-k] for k in range(1,d+1)], axis = 0)/d
+            c_data[d] = numpy.sum([-k*x_data[k] * s_data[d-k] for k in range(1,d+1)], axis = 0)/d
             
         return s_data, c_data
-        
 
     @classmethod
     def _dot(cls, x_data, y_data, out = None):
