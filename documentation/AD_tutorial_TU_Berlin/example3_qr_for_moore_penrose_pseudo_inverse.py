@@ -1,3 +1,17 @@
+"""
+This is a simple test that differentiates the Moore-Penrose pseudo-inverse 
+computation. Explicitly:
+
+..math::
+    A^\dagger = (A^T A)^{-1} A^T
+
+Two methods are compared. First the naive approach by first computing A^T A,
+then invert it and then multiplication with A^T.
+Then the QR approach.
+
+"""
+
+
 import numpy
 from algopy import CGraph, Function, UTPM, dot, qr, eigh, inv, solve
 
