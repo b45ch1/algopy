@@ -1,18 +1,18 @@
 """
-ALGOPY, a library for Automatic Differentation (AD) in Python
+ALGOPY, a library for Algorithmic Differentation (AD) in Python
 -------------------------------------------------------------
 
 Rationale:
     ALGOPY is a research prototype striving to provide state of the art algorithms.
-    It is not (yet) geared towards end users.
+    
     The ultimative goal is to provide high performance algorithms
     that can be used to differentiate dynamic systems  (ODEs, DAEs, PDEs)
     and static systems (linear/nonlinear systems of equations).
     
-    ALGOPY focuses on the algebraic differentiation of elementary operations,
-    e.g. C = dot(A,B) where A,B,C are matrices, y = sin(x), z = x*y, etc.
-    to compute derivatives of functions composed of such elementary functions.
-    
+    ALGOPY focuses on the algorithmic differentiation of elementary functions,
+    e.g. C = dot(A,B), B = inv(A), Q,R = qr(A), lam,Q = eigh(A),where A,B,C are
+    dense matrices and element-wise operation such as y = sin(x), z = x*y, etc.
+        
     In particular, ALGOPY offers:
         
         Univariate Taylor Propagation:
