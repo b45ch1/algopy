@@ -20,14 +20,14 @@ Example:
     Compute directional derivatives of the function f(J)::
         
         import numpy
-        from algopy.utp import UTPM
+        from algopy.utp import UTPM, qr, solve, dot, eigh
         
         def f(J):
-            Q,R = UTPM.qr(J)
+            Q,R = qr(J)
             Id = numpy.eye(Np)
-            Rinv = UTPM.solve(R,Id)
-            C = UTPM.dot(Rinv,Rinv.T)
-            l,U = UTPM.eigh(C)
+            Rinv = solve(R,Id)
+            C = dot(Rinv,Rinv.T)
+            l,U = eigh(C)
             return l[0]
             
 Features:
@@ -66,6 +66,9 @@ Alternatives:
         
         * `PYADOLC`_ a Python wrapper for ADOL-C (C++)
         * `PYCPPAD`_ a Python wrapper for  CppAD (C++)
+        
+    However, their support for differentiation of Numerical Linear Algebra (NLA)
+    functions is only very limited.
 
     .. _PYADOLC: http://www.github.com/b45ch1/pyadolc
     .. _PYCPPAD: http://www.github.com/b45ch1/pycppad
