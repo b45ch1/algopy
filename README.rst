@@ -52,10 +52,10 @@ Dependencies:
 
     ALGOPY Core:
         * numpy
+        * scipy
 
     ALGOPY Examples:
         * pyadolc
-        * scipy
 
     Run tests:
         * Nose

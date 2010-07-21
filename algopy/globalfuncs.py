@@ -1,4 +1,5 @@
 import numpy
+import scipy; import scipy.linalg
 import string
 from algopy import UTPM
 from algopy import Function
@@ -48,3 +49,20 @@ def zeros( shape, dtype=float, order = 'C'):
         
     else:
         raise ValueError('don\'t know what to do with dtype = %s, type(dtype)=%s'%(str(dtype), str(type(dtype))))
+        
+
+def qr_full(A):
+    """ Q,R = qr_full(A) returns QR decomposition with quadratic Q 
+    calls internally UTPM.qr_full or Function.qr_full
+    """
+    if isinstance(A, UTPM):
+        return UTPM.qr_full(A)
+    
+    elif isinstance(A, Function):
+        return Function.qr_full(A)
+        
+    elif isinstance(A, numpy.ndarray):
+        return scipy.linalg.qr(A)
+        
+    else:
+        raise NotImplementedError('don\'t know what to do with this instance')
