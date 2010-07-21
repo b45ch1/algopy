@@ -29,6 +29,12 @@ Example:
             C = dot(Rinv,Rinv.T)
             l,U = eigh(C)
             return l[0]
+
+    For more examples have a look at:
+        1) the talks in the documentation folder
+        2) the examples in the documentation/examples folder
+        3) the sphinx documentation in documentation/sphinx
+
             
 Features:
 
@@ -59,6 +65,9 @@ Dependencies:
 
     Run tests:
         * Nose
+        
+    Documentation:
+        * sphinx
 
 Alternatives:
 
