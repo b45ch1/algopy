@@ -34,36 +34,15 @@ they often appear in statistically motivated functions.
 
 
 
+How does it work?:
+------------------
 
-
-
-
-
-Rationale:
-----------
-
-The central idea of ALGOPY is the computation on Taylor polynomials with scalar
-coefficients and with matrix coefficients. These algorithms are primarily used for
-Algorithmic Differentiation (AD)in the forward and reverse mode.
-
-The focus are univariate Taylor polynomials over matrices (UTPM),implemented in
-the class `algopy.utpm.UTPM`.
+The central idea of ALGOPY is the computation on (univariate) Taylor polynomials with with matrix coefficients.
+At the moment, also other possibilities exist, but the class `algopy.UTPM` is the main focus of ALGOPY.
 
 To allow the use of the reverse mode of AD a simple code tracer has been implemented in
 `algopy.tracer`. The idea is to record the computation procedure in a datastructure s.t.
 the control flow sequence can walked in reverse order.
-
-ALGOPY is a research prototype where, to the best of authors'
-knowledge, some algorithms are implemented that cannot be found elsewhere.
-
-Most of ALGOPY is implemented in pure Python. However, some submodules are implemented
-in pure C. For these submodules Python bindings using ctypes are provided.
-
-The algorithms are quite well-tested and have been successfully used.
-However, since the user-base is currently quite small, it is possible that bugs
-may still be persistent.
-Also, not all submodules of ALGOPY are feature complete. The most important parts
-`algopy.tracer` and `algopy.upt.UTPM` are however fairly complete.
 
 
 Indices and tables
