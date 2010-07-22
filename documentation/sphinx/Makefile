@@ -29,6 +29,9 @@ help:
 
 clean:
 	-rm -rf $(BUILDDIR)/*
+    
+runscripts:
+	python examples_tracer.py
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html

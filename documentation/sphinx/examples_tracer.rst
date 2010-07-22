@@ -1,4 +1,4 @@
-The Code Tracer:
+The Code Tracer
 ================
 
 ALGOPY features a simple code tracer. A trace of the executed code is necessary
