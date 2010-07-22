@@ -26,6 +26,7 @@ CLASSIFIERS = """\
 Intended Audience :: Science/Research
 Intended Audience :: Developers
 License :: OSI Approved
+Development Status :: 4 - Beta
 Programming Language :: C
 Programming Language :: Python
 Topic :: Software Development
@@ -38,6 +39,7 @@ MAINTAINER          = "Sebastian F. Walter"
 MAINTAINER_EMAIL    = "sebastian.walter@gmail.com"
 DESCRIPTION         = DOCLINES[0]
 LONG_DESCRIPTION    = "\n".join(DOCLINES[2:])
+KEYWORDS            = ['algorithmic differentiation', 'computational differentiation', 'automatic differentiation', 'forward mode', 'reverse mode', 'Taylor arithmetic']
 URL                 = "http://www.github.com/b45ch1/algopy"
 DOWNLOAD_URL        = "http://www.github.com/b45ch1/algopy"
 LICENSE             = 'BSD'
@@ -139,6 +141,7 @@ def setup_package():
           author=AUTHOR,
           platforms=PLATFORMS,
           author_email= AUTHOR_EMAIL,
+          keywords = KEYWORDS,
           url=URL,
           packages = packages,
           ext_package='algopy.ctps',
