@@ -18,6 +18,14 @@ Rationale:
     similar to NumPy and it is a design goal to have a one to one correspondence.
     I.e., in most cases code that can be differentiated using ALGOPY can also be
     evaluated with NumPy.
+
+Documentation:
+    Available at http://packages.python.org/algopy/
+
+    For more documentation have a look at:
+        1) the talks in the documentation folder
+        2) the examples in the documentation/examples folder
+    
     
 Example:
     Compute directional derivatives of the function f(J)::
@@ -33,10 +41,7 @@ Example:
             l,U = eigh(C)
             return l[0]
 
-    For more examples have a look at:
-        1) the talks in the documentation folder
-        2) the examples in the documentation/examples folder
-        3) the sphinx documentation in documentation/sphinx
+
 
             
 Features:
