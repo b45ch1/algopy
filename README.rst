@@ -17,7 +17,7 @@ Rationale:
     are implemented as Single Program Multiple Data (SPMD). The code is very 
     similar to NumPy and it is a design goal to have a one to one correspondence.
     I.e., in most cases code that can be differentiated using ALGOPY can also be
-    evaluated just with NumPy.
+    evaluated with NumPy.
     
 Example:
     Compute directional derivatives of the function f(J)::

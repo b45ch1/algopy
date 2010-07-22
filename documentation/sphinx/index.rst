@@ -13,6 +13,7 @@ Documentation:
    :maxdepth: 2
    
    getting_started.rst
+   datastructure_and_algorithms.rst
    examples_tracer.rst
    
 Documented Examples:
@@ -22,7 +23,8 @@ Documented Examples:
    
    examples/covariance_matrix_computation.rst
    examples/error_propagation.rst
-
+   examples/moore_penrose_pseudoinverse.rst
+   examples/explicit_euler.rst
 
 What is ALGOPY?
 ---------------
@@ -38,7 +40,8 @@ How does it work?:
 ------------------
 
 The central idea of ALGOPY is the computation on (univariate) Taylor polynomials with with matrix coefficients.
-At the moment, also other possibilities exist, but the class `algopy.UTPM` is the main focus of ALGOPY.
+ALGOPY has currently some submodules that compute on other algebraic classes,
+but the class `algopy.UTPM` is the main focus of ALGOPY.
 
 To allow the use of the reverse mode of AD a simple code tracer has been implemented in
 `algopy.tracer`. The idea is to record the computation procedure in a datastructure s.t.
