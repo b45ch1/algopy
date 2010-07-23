@@ -43,8 +43,6 @@ Features:
 
     Univariate Taylor Propagation:
     
-        * Univariate Taylor Propagation on Scalars  (UTPS)
-          Implementation in: `algopy.utps`
         * Univariate Taylor Propagation on Matrices (UTPM)
           Implementation in: `algopy.utpm`
         * Exact Interpolation of Higher Order Derivative Tensors:
@@ -55,6 +53,12 @@ Features:
         ALGOPY also features functionality for convenient differentiation of a given
         algorithm. For that, the sequence of operation is recorded by tracing the 
         evaluation of the algorithm. Implementation in: `./algopy/tracer.py`
+        
+Testing:
+
+    Uses numpy testing facilities. Simply run::
+        
+        $ python -c "import algopy; algopy.test()"
    
 
 Dependencies:
