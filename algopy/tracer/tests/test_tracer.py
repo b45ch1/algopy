@@ -1204,7 +1204,7 @@ class Test_CGraph_Plotting(TestCase):
 
         cg.independentFunctionList = [fx,fy]
         cg.dependentFunctionList = [fz]
-        cg.plot(os.path.join(Settings.output_dir,'test_simple.svg'))
+        # cg.plot(os.path.join(Settings.output_dir,'test_simple.svg'))
         
 
 
