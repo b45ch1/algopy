@@ -51,9 +51,7 @@ The covariance matrix of :math:`z` is defined as
 That means if we know :math:`J(y)`, we can approximately compute the confidence region if
 :math:`f(\hat y)` is sufficiently linear.
 
-To compute the Jacobian one can use the forward and the reverse mode of AD:
-In the forward mode of AD one computes Nm directional derivatives, i.e. P = Nm.
-In the reverse mode of AD one computes M adjoint derivatives, i.e. Q = M.
+To compute the Jacobian one can use the forward or the reverse mode of AD.
 
 
 .. literalinclude:: error_propagation.py

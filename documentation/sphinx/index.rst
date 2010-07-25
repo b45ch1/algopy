@@ -7,6 +7,8 @@ ALGOPY, Algorithmic Differentiation in Python
 =============================================
 
 
+
+
 Documentation:
 
 .. toctree::
@@ -40,8 +42,7 @@ How does it work?:
 ------------------
 
 The central idea of ALGOPY is the computation on (univariate) Taylor polynomials with with matrix coefficients.
-ALGOPY has currently some submodules that compute on other algebraic classes,
-but the class `algopy.UTPM` is the main focus of ALGOPY.
+these are implemented as (class) methods of `algopy.UTPM`.
 
 To allow the use of the reverse mode of AD a simple code tracer has been implemented in
 `algopy.tracer`. The idea is to record the computation procedure in a datastructure s.t.
