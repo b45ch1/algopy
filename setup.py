@@ -7,6 +7,9 @@ It is designed to be as compatible to numpy as possible. I.e. views, broadcastin
 functions of numpy can be performed on polynomial matrices. Exampels are dot,trace,qr,solve,
 inv,eigh.
 The reverse mode of AD is also supported by a simple code evaluation tracer.
+
+Documentation with examples is available at http://packages.python.org/algopy/.
+
 """
 
 DOCLINES = __doc__.split("\n")
