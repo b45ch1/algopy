@@ -23,6 +23,7 @@ trash
 *.log
 *.tap
 test_experimental.py
+MANIFEST
 
 version.py
 
