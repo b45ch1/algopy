@@ -48,8 +48,8 @@ AUTHOR              = "Sebastian F. Walter"
 AUTHOR_EMAIL        = "sebastian.walter@gmail.com"
 PLATFORMS           = ["Linux"]
 MAJOR               = 0
-MINOR               = 1 
-MICRO               = 0
+MINOR               = 1
+MICRO               = 1
 ISRELEASED          = False
 VERSION             = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
@@ -144,8 +144,8 @@ def setup_package():
           keywords = KEYWORDS,
           url=URL,
           packages = packages,
-          ext_package='algopy.ctps',
-          ext_modules=[Extension('libctps', ['algopy/ctps/src/ctps.c'])],
+          # ext_package='algopy.ctps',
+          # ext_modules=[Extension('libctps', ['algopy/ctps/src/ctps.c'])],
          )
 
     finally:

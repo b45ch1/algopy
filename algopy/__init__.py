@@ -39,6 +39,9 @@ Rationale:
 
 """
 
+import os
+__install_path__ = os.path.realpath(__file__)
+
 # testing
 from numpy.testing import Tester
 test = Tester().test
@@ -59,5 +62,7 @@ try:
 
 except ImportError:
     __version__ = 'nobuild'
+    
+
     
 

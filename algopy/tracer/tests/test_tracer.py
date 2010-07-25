@@ -4,8 +4,6 @@ import os
 
 from algopy.tracer.tracer import *
 from algopy.utpm import UTPM
-from algopy.utps import UTPS
-from algopy.ctps import CTPS
 
 from algopy import dot, eigh, qr, trace, solve, inv
 
@@ -216,22 +214,7 @@ class Test_CGgraph_on_numpy_operations(TestCase):
         fv2 = (fv1 * fx + fy)*fv1
         cg.independentFunctionList = [fx,fy]
         cg.dependentFunctionList = [fv2]
-        
-        
-class TestCGraph_on_UTPS(TestCase):
-    def test_forward(self):
-        cg = CGraph()
-        ax = UTPS([3.,1.])
-        ay = UTPS([7.,0.])
-        fx = Function(ax)
-        fy = Function(ay)
-        fv1 = fx * fy
-        fv2 = (fv1 * fx + fy)*fv1
-        cg.independentFunctionList = [fx,fy]
-        cg.dependentFunctionList = [fv2]
-        cg.push_forward([ax,ay])
-        assert_array_almost_equal(cg.dependentFunctionList[0].x.data, ((ax*ay * ax + ay)*ax*ay).data)        
-        
+             
         
 class Test_CGgraph_on_UTPM(TestCase):
     def test_push_forward(self):
@@ -1202,25 +1185,7 @@ class Test_CGgraph_on_UTPM(TestCase):
         h1 = y.x.data[2]
         h2 = numpy.array(tmp)
         assert_array_almost_equal(2*h1, h2)
-        
-        
-
-
-class TestCGraphOnCTPS(TestCase):
-    def test_forward(self):
-        cg = CGraph()
-        ax = CTPS([3.,1.,0.,0.])
-        ay = CTPS([7.,0.,0.,0.])
-        fx = Function(ax)
-        fy = Function(ay)
-        fv1 = fx * fy
-        fv2 = (fv1 * fx + fy)*fv1
-        cg.independentFunctionList = [fx,fy]
-        cg.dependentFunctionList = [fv2]
-        cg.push_forward([ax,ay])
-        assert_array_almost_equal(cg.dependentFunctionList[0].x.data, ((ax*ay * ax + ay)*ax*ay).data)
-
-        
+               
         
 class Test_CGraph_Plotting(TestCase):
     def test_simple(self):
