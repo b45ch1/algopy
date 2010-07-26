@@ -102,11 +102,29 @@ def broadcast_arrays_shape(x_shp,y_shp):
     
     return z_shp
     
-    
-    
-
-
 class RawAlgorithmsMixIn:
+    
+    @classmethod
+    def _broadcast_arrays(cls, x_data, y_data):
+        """ UTPM equivalent of numpy.broadcast_arrays """
+        
+        # transpose arrays s.t. numpy.broadcast can be used
+        Lx = len(x_data.shape)
+        Ly = len(y_data.shape)
+        x_data = x_data.transpose( tuple(range(2,Lx)) + (0,1))
+        y_data = y_data.transpose( tuple(range(2,Ly)) + (0,1))
+        
+        # broadcast arrays
+        x_data, y_data = broadcast_arrays(x_data, y_data)
+        
+        
+        # transpose into the original format
+        Lx = len(x_data.shape)
+        Ly = len(y_data.shape)
+        x_data = x_data.transpose( (Lx-2, Lx-1) +  tuple(range(Lx-2)) )
+        y_data = y_data.transpose( (Ly-2, Ly-1) +  tuple(range(Lx-2)) )
+        
+        return x_data, y_data
     
     
     @classmethod
@@ -120,7 +138,7 @@ class RawAlgorithmsMixIn:
 
         (D,P) = z_data.shape[:2]
         for d in range(D):
-            z_data[d,:,...] =  numpy.sum(x_data[:d+1,:,...] * y_data[d+1::-1,:,...], axis=0)
+            z_data[d,:,...] =  numpy.sum(x_data[:d+1,:,...] * y_data[d::-1,:,...], axis=0)
     
   
     @classmethod

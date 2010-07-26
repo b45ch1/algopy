@@ -12,7 +12,7 @@ import numpy.linalg
 import numpy
 
 from ..base_type import Ring
-from algorithms import RawAlgorithmsMixIn
+from algorithms import RawAlgorithmsMixIn, broadcast_arrays_shape
 
 class UTPM(Ring, RawAlgorithmsMixIn):
     """
@@ -118,42 +118,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         ybar[sl].data[...] = 0.
         # print 'funcargs=',funcargs
         # print y[funcargs[0]]
-        
-        
-    @classmethod
-    def broadcast(cls, x,y):
-        """ supposed to work like numpy.broadcast but for UTPM instances
-        FIXME: returns the shape at the moment! 
-        """
-        D,P = x.data.shape[:2]
-        class Dummy:
-            shape = (D,P) + numpy.broadcast(x.data[0,0,...], y.data[0,0,...]).shape
-
-        return Dummy()
-        
-    @classmethod
-    def postpend_ones(cls, x, y):
-        """
-        a helper function for broadcasting. The problem is that numpy broadcasting
-        prepends ones if necessary, however, the memory layout of UTPM.data
-        requires to postpend ones.
-        
-        This function postpends these ones and returns a new UTPM instance without
-        copying memory or the like.
-        
-        Example:
-        
-        x.data.shape = (2,3,4,5)
-        y.data.shape = (2,3)
-        
-        then postpend_ones returns two UTPM instances u,v with
-        u.data.shape = (2,3,4,5)
-        v.data.shape = (2,3,1,1)
-        """
-        return cls(x.data.reshape(x.data.shape + tuple([1]*(y.data.ndim - x.data.ndim)))),\
-                cls(y.data.reshape(y.data.shape + tuple([1]*(x.data.ndim - y.data.ndim))))
-        
-
     
     def __add__(self,rhs):
         if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
@@ -172,14 +136,22 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             return UTPM(self.data - rhs.data)
 
     def __mul__(self,rhs):
-        retval = self.clone()
-        retval.__imul__(rhs)
-        return retval
+        if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
+            return UTPM( self.data * rhs)
+        
+        x_data, y_data = UTPM._broadcast_arrays(self.data, rhs.data)
+        z_data = numpy.zeros_like(x_data)
+        self._mul(x_data, y_data, z_data)
+        return self.__class__(z_data)
 
     def __div__(self,rhs):
-        retval = self.clone()
-        retval.__idiv__(rhs)
-        return retval
+        if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
+            return UTPM( self.data/rhs)
+        
+        x_data, y_data = UTPM._broadcast_arrays(self.data, rhs.data)
+        z_data = numpy.zeros_like(x_data)
+        self._div(x_data, y_data, z_data)
+        return self.__class__(z_data)
 
     def __radd__(self,rhs):
         return self + rhs
