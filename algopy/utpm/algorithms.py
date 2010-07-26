@@ -1,6 +1,6 @@
 import numpy
 import scipy.linalg
-
+from numpy.lib.stride_tricks import as_strided, broadcast_arrays
 
 def vdot(x,y, z = None):
     """
@@ -86,9 +86,57 @@ def truncated_triple_dot(X,Y,Z, D):
     else:
         return retval[0]
 
+def output_size(x_data,y_data):
+    """ compute from the shapes of x_data and y_data the output size of z_data
+    using the numpy broadcasting rules
+    """
+    x_shp = x_data.shape
+    y_shp = y_data.shape
+    
+    raise NotImplementedError('')
+    
+    
 
 
 class RawAlgorithmsMixIn:
+    
+    
+    @classmethod
+    def _mul(cls, x_data, y_data, out = None):
+        """
+        z = x*y
+        """
+        z_data = out
+        if out == None:
+            return NotImplementedError('')
+
+        (D,P) = z_data.shape[:2]
+        for d in range(D):
+            z_data[d,:,...] =  numpy.sum(x_data[:d+1,:,...] * y_data[d+1::-1,:,...], axis=0)
+    
+  
+    @classmethod
+    def _idiv(cls, z_data, x_data):
+        (D,P) = z_data.shape[:2]
+        tmp_data = z_data.copy()
+        for d in range(D):
+            tmp_data[d,:,...] = 1./ x_data[0,:,...] * ( z_data[d,:,...] - numpy.sum(tmp_data[:d,:,...] * x_data[d:0:-1,:,...], axis=0))
+        z_data[...] = tmp_data[...]
+
+    @classmethod
+    def _div(cls, x_data, y_data, out = None):
+        """
+        z = x/y
+        """
+        z_data = out
+        if out == None:
+            return NotImplementedError('')
+
+        (D,P) = z_data.shape[:2]
+        for d in range(D):
+            z_data[d,:,...] = 1./ y_data[0,:,...] * ( x_data[d,:,...] - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
+                    
+    
     @classmethod
     def _max(cls, x_data, axis = None, out = None):
 
@@ -118,27 +166,7 @@ class RawAlgorithmsMixIn:
         return numpy.argmax(a_data[0].reshape((P,numpy.prod(a_shp[2:]))), axis = 1)
 
 
-    @classmethod
-    def _idiv(cls, z_data, x_data):
-        (D,P) = z_data.shape[:2]
-        tmp_data = z_data.copy()
-        for d in range(D):
-            tmp_data[d,:,...] = 1./ x_data[0,:,...] * ( z_data[d,:,...] - numpy.sum(tmp_data[:d,:,...] * x_data[d:0:-1,:,...], axis=0))
-        z_data[...] = tmp_data[...]
 
-    @classmethod
-    def _div(cls, x_data, y_data, out = None):
-        """
-        z = x/y
-        """
-        z_data = out
-        if out == None:
-            return NotImplementedError('')
-
-        (D,P) = z_data.shape[:2]
-        for d in range(D):
-            z_data[d,:,...] = 1./ y_data[0,:,...] * ( x_data[d,:,...] - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
-            
     @classmethod
     def _sqrt(cls, x_data, out = None):
         if out == None:

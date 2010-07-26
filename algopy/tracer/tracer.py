@@ -73,9 +73,11 @@ class CGraph:
         
     def trace_on(self):
         Function.cgraph = self
+        return self
     
     def trace_off(self):
         Function.cgraph = None
+        return self
         
     def append(self, func):
         self.functionCount += 1
