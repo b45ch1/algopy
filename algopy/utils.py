@@ -1,8 +1,7 @@
 import numpy
 import numpy.testing
 from utpm import UTPM
-    
-     
+
 
 def utps2base_and_dirs(x):
     """

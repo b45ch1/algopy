@@ -4,6 +4,23 @@ import numpy
 from algopy.utpm import *
 
 class Test_Push_Forward(TestCase):
+    
+    def test_as_utpm(self):
+        D,P,N,M = 2,3,5,7
+    
+        A = numpy.zeros((3,4),dtype=object)
+        for n in range(3):
+            for m in range(4):
+                A[n,m] = UTPM(numpy.random.rand(D,P,N,M))
+        
+        z = UTPM.as_utpm(A)
+        
+        
+        for n in range(3):
+            for m in range(4):
+                assert_array_almost_equal(z[0,0].data, A[0,0].data)
+    
+    
     def test_UTPM_in_a_stupid_way(self):
         """
         this checks _only_ if calling the operations is ok

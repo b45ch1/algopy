@@ -101,7 +101,41 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             out[0][sl] = ybar
             
         return out
+    
+    
+    @classmethod
+    def as_utpm(cls, x):
+        """ tries to convert a container (e.g. list or numpy.array) with UTPM elements as instances to a UTPM instance"""
         
+        x_shp = numpy.shape(x)
+        xr = numpy.ravel(x)
+        D,P = xr[0].data.shape[:2]
+        shp = xr[0].data.shape[2:]
+        
+        if not isinstance(shp, tuple): shp = (shp,)
+        if not isinstance(x_shp, tuple): x_shp = (x_shp,)
+        
+        y = UTPM(numpy.zeros((D,P) + x_shp + shp))
+        
+        yr = UTPM( y.data.reshape((D,P) + (numpy.prod(x_shp),) + shp))
+        
+        # print yr.shape
+        # print yr.data.shape
+        
+        for n in range(len(xr)):
+            # print yr[n].shape
+            # print xr[n].shape
+            yr[n] = xr[n]
+            
+        return y
+            
+        
+    def get_flat(self):
+        return UTPM(self.data.reshape(self.data.shape[:2] + (numpy.prod(self.data.shape[2:]),) ))
+        
+    flat = property(get_flat)
+    
+    
     @classmethod
     def pb___setitem__(cls, y, sl, x, out = None):
         """
