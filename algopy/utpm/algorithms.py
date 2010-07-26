@@ -86,14 +86,22 @@ def truncated_triple_dot(X,Y,Z, D):
     else:
         return retval[0]
 
-def output_size(x_data,y_data):
-    """ compute from the shapes of x_data and y_data the output size of z_data
-    using the numpy broadcasting rules
-    """
-    x_shp = x_data.shape
-    y_shp = y_data.shape
+def broadcast_arrays_shape(x_shp,y_shp):
     
-    raise NotImplementedError('')
+    if len(x_shp) < len(y_shp):
+        tmp = x_shp
+        x_shp = y_shp
+        y_shp = tmp
+       
+    z_shp = numpy.array(x_shp,dtype=int)
+    for l in range(1,len(y_shp)-1):
+        if z_shp[-l] == 1: z_shp[-l] = y_shp[-l]
+        elif z_shp[-l] != 1 and y_shp[-l] != 1 and z_shp[-l] != y_shp[-l]:
+            raise ValueError('cannot broadcast arrays')
+             
+    
+    return z_shp
+    
     
     
 
