@@ -650,7 +650,22 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         ybar -= zbar
 
         return (xbar,ybar)
-
+        
+        
+    @classmethod
+    def broadcast(cls, x,y):
+        if numpy.isscalar(x) or isinstance(x,numpy.ndarray):
+            return x,y
+        
+        if numpy.isscalar(y) or isinstance(y,numpy.ndarray):
+            return x,y
+            
+        # broadcast xbar and ybar
+        x2_data, y2_data = cls._broadcast_arrays(x.data,y.data)
+        
+        x2 = UTPM(x2_data)
+        y2 = UTPM(y2_data)
+        return x2, y2
 
     @classmethod
     def pb_mul(cls, zbar, x, y , z, out = None):
@@ -661,9 +676,12 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         
         else:
             xbar, ybar = out
+            
+        xbar2, tmp = cls.broadcast(xbar, zbar)
+        ybar2, tmp = cls.broadcast(ybar, zbar)
         
-        xbar += zbar * y
-        ybar += zbar * x
+        xbar2 += zbar * y
+        ybar2 += zbar * x
 
         return (xbar,ybar)
         
@@ -676,12 +694,15 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         
         else:
             xbar, ybar = out
+            
+        xbar2, tmp = cls.broadcast(xbar, zbar)
+        ybar2, tmp = cls.broadcast(ybar, zbar)            
         
         tmp  = zbar.clone()
         tmp /= y
-        xbar += tmp
+        xbar2 += tmp
         tmp *= z
-        ybar -= tmp
+        ybar2 -= tmp
 
         return (xbar,ybar)
         
@@ -694,7 +715,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         
         else:
             xbar, ybar = out
-        
+
         cls._dot_pullback(zbar.data, x.data, y.data, z.data, out = (xbar.data, ybar.data))
         return (xbar,ybar)
         

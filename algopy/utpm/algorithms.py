@@ -139,6 +139,20 @@ class RawAlgorithmsMixIn:
         (D,P) = z_data.shape[:2]
         for d in range(D):
             z_data[d,:,...] =  numpy.sum(x_data[:d+1,:,...] * y_data[d::-1,:,...], axis=0)
+            
+    @classmethod
+    def _amul(cls, x_data, y_data, out = None):
+        """
+        z += x*y
+        """
+        z_data = out
+        if out == None:
+            return NotImplementedError('')
+
+        (D,P) = z_data.shape[:2]
+        for d in range(D):
+            z_data[d,:,...] +=  numpy.sum(x_data[:d+1,:,...] * y_data[d::-1,:,...], axis=0)            
+            
     
   
     @classmethod
@@ -284,6 +298,17 @@ class RawAlgorithmsMixIn:
                 for c in range(d+1):
                     z_data[d,p,...] += numpy.dot(x_data[c,p,...], y_data[d-c,p,...])
 
+        return out
+
+    @classmethod
+    def _dot_pullback(cls, zbar_data, x_data, y_data, z_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        
+        (xbar_data, ybar_data) = out
+        
+        xbar_data += cls._dot(zbar_data, cls._transpose(y_data), out = xbar_data.copy())
+        ybar_data += cls._dot(cls._transpose(x_data), zbar_data, out = ybar_data.copy())
 
         return out
 
@@ -330,15 +355,27 @@ class RawAlgorithmsMixIn:
         return out
         
     @classmethod
-    def _dot_pullback(cls, zbar_data, x_data, y_data, z_data, out = None):
+    def _outer(cls, x_data, y_data, out = None):
+        """
+        z = outer(x,y)
+        """
+
         if out == None:
             raise NotImplementedError('should implement that')
+
+        z_data = out
+        z_data[...] = 0.
+
+        D,P = x_data.shape[:2]
+
+        for d in range(D):
+            for p in range(P):
+                for c in range(d+1):
+                    z_data[d,p,...] += numpy.outer(x_data[c,p,...], y_data[d-c,p,...])
+
+        return out                
         
-        (xbar_data, ybar_data) = out
-        
-        xbar_data += cls._dot(zbar_data, cls._transpose(y_data), out = xbar_data.copy())
-        ybar_data += cls._dot(cls._transpose(x_data), zbar_data, out = ybar_data.copy())
-        return out
+
         
 
     @classmethod
