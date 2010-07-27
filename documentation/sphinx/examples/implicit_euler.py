@@ -82,6 +82,7 @@ pyplot.plot(ts, x_analytical(ts,p.data[0,0]), 'k-.', label = r'analytic $x(t)$')
 pyplot.plot(ts, xs[:,1,0,0], ',r-', label = r'$x_p(t)$')
 pyplot.plot(ts, x_p_analytical(ts,p.data[0,0]), 'r-.', label = r'analytic $x_p(t)$')
 
+pyplot.title('analytical and implicit Euler solution')
 pyplot.xlabel('time $t$')
 pyplot.legend(loc='best')
 pyplot.grid()

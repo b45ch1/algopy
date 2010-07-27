@@ -26,7 +26,7 @@ Documented Examples:
    examples/covariance_matrix_computation.rst
    examples/error_propagation.rst
    examples/moore_penrose_pseudoinverse.rst
-   examples/explicit_euler.rst
+   examples/ode_solvers.rst
    examples/comparison_forward_reverse_mode.rst
 
 What is ALGOPY?
