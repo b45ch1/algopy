@@ -1,5 +1,5 @@
 import numpy; from numpy import sin,cos; from algopy import UTPM, zeros
-D,P = 2,1
+D,P = 4,1
 x = UTPM(numpy.zeros((D,P,2)))
 x.data[0,:,0] = 1
 p = UTPM(numpy.zeros((D,P)))
@@ -33,6 +33,10 @@ pyplot.plot(ts, xs[:,0,0,0], ',k-', label = r'$x(t)$')
 pyplot.plot(ts, x_analytical(ts,p.data[0,0]), 'k-.', label = r'analytic $x(t)$')
 pyplot.plot(ts, xs[:,1,0,0], ',r-', label = r'$x_p(t)$')
 pyplot.plot(ts, x_p_analytical(ts,p.data[0,0]), 'r-.', label = r'analytic $x_p(t)$')
+pyplot.plot(ts, xs[:,2,0,0], ',b-', label = r'$x_{pp}(t)$')
+pyplot.plot(ts, xs[:,3,0,0], ',m-', label = r'$x_{ppp}(t)$')
+
+
 
 pyplot.xlabel('time $t$')
 pyplot.legend(loc='best')
