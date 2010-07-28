@@ -51,11 +51,6 @@ the control flow sequence can walked in reverse order.
 
 Current Issues:
 ---------------
-
-    * broadcasting for UTPM instances is not implemented yet. i.e.
-      x = UTPM(numpy.random.rand((2,3,4))
-      y = dot(x,x) + x
-      will most likely raise an error
       
     * some algorithms require vectors to be columns of a matrix.
       I.e. if x is a vector it should be initialized as
@@ -68,7 +63,12 @@ Current Issues:
       adjoint directions at once. However, this is not implemented yet, i.e. one
       has to repeat the procedure M times.
       
+Unit Test
+---------
 
+ALGOPY uses the same testing facilitities as NumPy. I.e., one can run the complete
+unit test with::
+    $ python -c "import algopy; algopy.test()"
 
 
 Indices and tables
