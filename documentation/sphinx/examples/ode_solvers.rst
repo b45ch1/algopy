@@ -19,7 +19,7 @@ harmonic oscillator described by the ODE
     \dot x(t) = \begin{pmatrix} x_2 \\ -p  x_1 \end{pmatrix} \;.
 
     
-Explict Euler:
+Explict Euler
 ~~~~~~~~~~~~~~
     
 To illustrate the idea, we use the
@@ -31,7 +31,7 @@ explict Euler integration scheme.
     :align: center
     :scale: 100
 
-Implicit Euler:
+Implicit Euler
 ~~~~~~~~~~~~~~
 
 Since in practice often implicit integration schemes (stiff ODEs) are necessary,
