@@ -30,11 +30,10 @@ Intended Audience :: Science/Research
 Intended Audience :: Developers
 License :: OSI Approved
 Development Status :: 4 - Beta
-Programming Language :: C
+Operating System :: OS Independent
 Programming Language :: Python
 Topic :: Software Development
 Topic :: Scientific/Engineering
-Operating System :: Linux
 """
 
 NAME                = 'algopy'
@@ -49,7 +48,7 @@ LICENSE             = 'BSD'
 CLASSIFIERS         = filter(None, CLASSIFIERS.split('\n'))
 AUTHOR              = "Sebastian F. Walter"
 AUTHOR_EMAIL        = "sebastian.walter@gmail.com"
-PLATFORMS           = ["Linux"]
+PLATFORMS           = ["all"]
 MAJOR               = 0
 MINOR               = 2
 MICRO               = 1
