@@ -49,6 +49,34 @@ To allow the use of the reverse mode of AD a simple code tracer has been impleme
 `algopy.tracer`. The idea is to record the computation procedure in a datastructure s.t.
 the control flow sequence can walked in reverse order.
 
+
+Example Session:
+----------------
+
+Consider the contrived example that appears in similar form often in statistically
+motivated functions. It is the goal to compute derivatives of the function `y = f(x)`::
+
+    import numpy; from numpy import log, exp, sin, cos
+    import algopy; from algopy import UTPM, dot, inv, zeros
+    
+    def f(x):
+        A = zeros((2,2),dtype=x)
+        A[0,0] = numpy.log(x[0]*x[1])
+        A[0,1] = numpy.log(x[1]) + exp(x[0])
+        A[1,0] = sin(x[1])**2 + cos(x[0])**3.1
+        A[1,1] = x[0]**cos(x[1])
+        return log( dot(x.T,  dot( inv(A), x)))
+    
+    
+    x = UTPM(zeros((2,1,2),dtype=float))
+    x.data[0,0] = [1,2]
+    x.data[1,0] = [1,0]
+    y = f(x)
+    
+    print 'normal function evaluation f(x) = ',y.data[0,0]
+    print 'directional derivative df/dx1 = ',y.data[1,0]
+
+
 Current Issues:
 ---------------
       
