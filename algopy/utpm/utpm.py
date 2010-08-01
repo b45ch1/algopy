@@ -897,6 +897,35 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         UTPM._eigh( l.data, Q.data, A.data, epsilon = epsilon)
       
         return l,Q
+        
+    @classmethod
+    def eigh1(cls, A, out = None, epsilon = 10**-8):
+        """
+        computes the relaxed eigenvalue decompositin of level 1
+        of a symmetrical matrix A with distinct eigenvalues
+        
+        (L,Q,b) = UTPM.eig1(A)
+        
+        """
+        
+        D,P,M,N = numpy.shape(A.data)
+        
+        if out == None:
+            L = cls(cls.__zeros__((D,P,N,N), dtype=A.data.dtype))
+            Q = cls(cls.__zeros__((D,P,N,N), dtype=A.data.dtype))
+            
+        else:
+            L,Q = out
+        
+        b_list = []
+        for p in range(P):
+            b = UTPM._eigh1( L.data[:,p], Q.data[:,p], A.data[:,p], epsilon = epsilon)
+            b_list.append(b)
+      
+        return L,Q,b_list
+        
+        
+        
 
     @classmethod
     def pb_eigh(cls, lbar, Qbar,  A, l, Q,  out = None):
