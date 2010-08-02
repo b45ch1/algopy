@@ -1239,6 +1239,52 @@ class RawAlgorithmsMixIn:
 
 
     @classmethod
+    def _eigh1_pullback(cls, Lambar_data, Qbar_data, b_list, A_data, Lam_data, Q_data, out = None):
+
+        if out == None:
+            raise NotImplementedError('need to implement that...')
+
+        Abar_data = out
+
+        A_shp = A_data.shape
+        D,P,M,N = A_shp
+        
+        
+        E = numpy.zeros((P,N,N))
+        tmp1 = numpy.zeros((D,P,N,N), dtype=float)
+        tmp2 = numpy.zeros((D,P,N,N), dtype=float)        
+        
+        
+        for p in range(P):
+            lam0 = numpy.diag(Lam_data[0,p])
+            
+            E[p] += lam0;  E[p] = (E[p].T - lam0).T
+        H = 1./E
+        for p in range(P):
+            b = b_list[p]
+            for nb in range(b.size-1):
+                H[p, b[nb]:b[nb+1], b[nb]:b[nb+1] ] = 0
+                
+            
+        # STEP 2: compute Lbar +  H * Q^T Qbar
+        cls._dot(cls._transpose(Q_data), Qbar_data, out = tmp1)
+        tmp1[...] *= H[...]
+        tmp1[...] += Lambar_data[...]
+
+        # STEP 3: compute Q ( Lbar +  H * Q^T Qbar ) Q^T
+        cls._dot(Q_data, tmp1, out = tmp2)
+        cls._dot(tmp2, cls._transpose(Q_data), out = tmp1)
+
+        Abar_data += tmp1
+        
+        
+        
+        
+        
+        
+        
+
+    @classmethod
     def _qr_pullback(cls, Qbar_data, Rbar_data, A_data, Q_data, R_data, out = None):
         """
         computes the pullback of the qr decomposition (Q,R) = qr(A)    <===>    QR = A

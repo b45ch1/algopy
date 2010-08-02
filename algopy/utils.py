@@ -131,3 +131,21 @@ def sym_vec(A):
     
     return v
 
+def vec_sym(v):
+    """
+    returns a full symmetric matrix filled
+    the distinct elements of v, filled row-wise
+    """
+    
+    Nv = v.size
+    N = (int(numpy.sqrt(1 + 8*Nv)) - 1)//2
+
+    A = globalfuncs.zeros( (N,N), dtype=v)
+    
+    count = 0
+    for row in range(N):
+        for col in range(row,N):
+            A[row,col] = A[col,row] = v[count]
+            count +=1
+    
+    return A
