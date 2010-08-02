@@ -170,8 +170,15 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             return UTPM(self.data - rhs.data)
 
     def __mul__(self,rhs):
-        if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
+        if numpy.isscalar(rhs):
             return UTPM( self.data * rhs)
+
+        elif isinstance(rhs,numpy.ndarray):
+            rhs_shape = rhs.shape
+            if numpy.isscalar(rhs_shape):
+                rhs_shape = (rhs_shape,)
+            return UTPM( (self.data.T * rhs.reshape((1,1) + rhs_shape).T).T)
+
         
         x_data, y_data = UTPM._broadcast_arrays(self.data, rhs.data)
         z_data = numpy.zeros_like(x_data)
@@ -394,6 +401,11 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def get_shape(self):
         return numpy.shape(self.data[0,0,...])
     shape = property(get_shape)
+    
+    
+    def get_size(self):
+        return numpy.size(self.data[0,0,...])
+    size = property(get_size)
     
     def get_ndim(self):
         return numpy.ndim(self.data[0,0,...])

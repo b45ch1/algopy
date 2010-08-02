@@ -34,6 +34,9 @@ def zeros( shape, dtype=float, order = 'C'):
     create a zero instance
     """
     
+    if numpy.isscalar(shape):
+        shape = (shape,)
+        
     if isinstance(dtype,type):
         return numpy.zeros(shape, dtype=dtype,order=order)
     
@@ -42,6 +45,7 @@ def zeros( shape, dtype=float, order = 'C'):
 
     elif isinstance(dtype, UTPM):
         D,P = dtype.data.shape[:2]
+
         return dtype.__class__(numpy.zeros((D,P) + shape ,dtype = float))
         
     elif isinstance(dtype, Function):

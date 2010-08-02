@@ -1,7 +1,7 @@
 import numpy
 import numpy.testing
 from utpm import UTPM
-
+import globalfuncs
 
 def utps2base_and_dirs(x):
     """
@@ -110,4 +110,24 @@ def base_and_dirs2utpm(x,V):
     tc[1:,...] = V.transpose((axes_ids[-1],axes_ids[-2]) + axes_ids[:-2])
     
     return UTPM(tc)
+    
+def sym_vec(A):
+    """ returns the distinct elements of a symmetric matrix A as vector
+    
+    i.e. the upper triangular part of A as vector
+    """
+    
+    N,M = A.shape
+    
+    assert N == M
+    
+    v = globalfuncs.zeros( ((N+1)*N)//2, dtype=A)
+    
+    count = 0
+    for row in range(N):
+        for col in range(row,N):
+            v[count] = A[row,col]
+            count +=1
+    
+    return v
 
