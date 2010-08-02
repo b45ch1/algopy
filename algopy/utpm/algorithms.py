@@ -1031,7 +1031,7 @@ class RawAlgorithmsMixIn:
                     L_hat_data = numpy.zeros((DT-D, stop-start, stop-start), dtype = A_data.dtype)
                     
                     
-                    tmp_b = cls._eigh_relaxed(L_hat_data, Q_hat_data, L_tilde_data[D:, start:stop, start:stop], epsilon = epsilon)
+                    tmp_b = cls._eigh1(L_hat_data, Q_hat_data, L_tilde_data[D:, start:stop, start:stop], epsilon = epsilon)
                     tmp_b_list.append( tmp_b)
                     
                     # compute L_tilde
@@ -1067,7 +1067,7 @@ class RawAlgorithmsMixIn:
 
 
     @classmethod
-    def _eigh_relaxed(cls, L_data, Q_data, A_data, epsilon = 10**-8, full_output = False):
+    def _eigh1(cls, L_data, Q_data, A_data, epsilon = 10**-8, full_output = False):
         """
         computes the solution of the relaxed problem of order 1
 
