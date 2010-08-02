@@ -205,7 +205,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     def __rdiv__(self, rhs):
         tmp = self.zeros_like()
-        tmp.data[0,:,:,:] = rhs
+        tmp.data[0,...] = rhs
         return tmp/self
         
     def __iadd__(self,rhs):
