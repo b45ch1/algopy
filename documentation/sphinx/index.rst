@@ -50,8 +50,98 @@ To allow the use of the reverse mode of AD a simple code tracer has been impleme
 the control flow sequence can walked in reverse order.
 
 
-Example Session:
-----------------
+
+Example 1: univariate Taylor Series Expansions
+-----------------------------------------------
+ALGOPY can be used to compute Taylor series expansions of arbitrary complicated
+functions. To show some easy examples from calculus, we look at the series expansion
+of sin(t) and cos(t). The mathematical formula is given as:
+
+.. math::
+    \sin(t) &= x - \frac{t^3}{3!} + \frac{t^5}{5!} - \frac{t^7}{7!} + \cdots   = \sum_{d=0}^\infty \frac{(-1)^d}{(2d+1)!}t^{2d+1}\\
+    \cos(t) &= 1 - \frac{t^2}{2!} + \frac{t^4}{4!} - \frac{t^6}{6!} + \cdots  = \sum_{d=0}^\infty \frac{(-1)^d}{(2d)!}t^{2d}
+
+With ALGOPY you can compute series expansions of the form
+
+.. math::
+    y(t) &= \sin(x(t)) \;.
+    
+That means, to compute the series expansion of sine and cosine, one initializes
+as follows.
+
+.. math::
+    x(t) = 0 + 1t + 0 t^2 + 0 t^3 + \dots + 0 t^{D-1} \equiv [x]_D
+    
+
+This mathematical problem is formulated in Python as follows::
+    
+    import numpy; from numpy import sin,cos
+    from algopy import UTPM
+    
+    D = 10; P = 1
+    x = UTPM(numpy.zeros((D,P)))
+    x.data[1] = 1
+    
+    y1 = sin(x)
+    y2 = cos(x)
+    
+    print 'y1 = ',y1
+    print 'y2 = ',y2
+        
+and obtains the output::
+    
+        y1 =  [[  0.00000000e+00]
+     [  1.00000000e+00]
+     [  0.00000000e+00]
+     [ -1.66666667e-01]
+     [  0.00000000e+00]
+     [  8.33333333e-03]
+     [  0.00000000e+00]
+     [ -1.98412698e-04]
+     [  0.00000000e+00]
+     [  2.75573192e-06]]
+    y2 =  [[  1.00000000e+00]
+     [ -0.00000000e+00]
+     [ -5.00000000e-01]
+     [ -0.00000000e+00]
+     [  4.16666667e-02]
+     [  0.00000000e+00]
+     [ -1.38888889e-03]
+     [  0.00000000e+00]
+     [  2.48015873e-05]
+     [  0.00000000e+00]]
+
+    
+Newcomers to ALGOPY often find the quantity P confusing. It allows to compute
+the same function with several inputs at once. For now we use P=1.
+
+Computing the series expansion of 
+
+.. math::
+    y(t) = \sin(\cos(x(t)) + \sin(x(t)))
+    
+is similarily easy::
+    
+    z = sin(cos(x) + sin(x))
+    print 'z=',z
+    
+yields the output::
+    
+    z= [[ 0.84147098]
+     [ 0.54030231]
+     [-0.69088665]
+     [ 0.24063472]
+     [ 0.22771075]
+     [-0.18881401]
+     [-0.03015159]
+     [ 0.05744564]
+     [-0.00974531]
+     [-0.01153149]]
+
+
+
+Advanced Example Session:
+-------------------------
 
 Consider the contrived example that appears in similar form often in statistically
 motivated functions. It is the goal to compute derivatives of the function `y = f(x)`::

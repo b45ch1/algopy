@@ -831,7 +831,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return xbar
 
     @classmethod
-    def qr(cls, A, out = None, work = None):
+    def qr(cls, A, out = None, work = None, epsilon = 10**-14):
         D,P,M,N = numpy.shape(A.data)
         K = min(M,N)
         
@@ -842,7 +842,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         else:
             Q,R = out
         
-        UTPM._qr(A.data, out = (Q.data, R.data))
+        UTPM._qr(A.data, out = (Q.data, R.data), epsilon = epsilon)
         return Q,R
         
     @classmethod

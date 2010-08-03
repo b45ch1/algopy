@@ -726,7 +726,7 @@ class RawAlgorithmsMixIn:
         return numpy.zeros(shp, dtype = dtype)
         
     @classmethod
-    def _qr(cls,  A_data, out = None,  work = None):
+    def _qr(cls,  A_data, out = None,  work = None, epsilon = 10**-14):
         """
         computes the qr decomposition (Q,R) = qr(A)    <===>    QR = A
 
@@ -756,7 +756,7 @@ class RawAlgorithmsMixIn:
             R1_data = R_data[:,:,:,:M]
             R2_data = R_data[:,:,:,M:]
             
-            cls._qr_rectangular(A1_data, out = (Q_data, R1_data))
+            cls._qr_rectangular(A1_data, out = (Q_data, R1_data), epsilon = epsilon)
             # print 'QR1 - A1 = ', cls._dot(Q_data, R1_data, numpy.zeros_like(A_data[:,:,:,:M])) - A_data[:,:,:,:M]
             # print 'R2_data=',R2_data
             cls._dot(cls._transpose(Q_data), A2_data, out=R2_data)
@@ -767,7 +767,7 @@ class RawAlgorithmsMixIn:
             cls._qr_rectangular(A_data, out = (Q_data, R_data))
 
     @classmethod
-    def _qr_rectangular(cls,  A_data, out = None,  work = None):
+    def _qr_rectangular(cls,  A_data, out = None,  work = None, epsilon = 10**-14):
         """
         computation of qr(A) where A.shape(M,N) with M >= N
         
@@ -813,7 +813,7 @@ class RawAlgorithmsMixIn:
         for p in range(P):
             rank = 0
             for n in range(N):
-                if abs(R_data[0,p,n,n]) > 10**-16:
+                if abs(R_data[0,p,n,n]) > epsilon:
                     rank += 1
 
             Rinv[p] = 0.
