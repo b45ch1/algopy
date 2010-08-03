@@ -953,6 +953,19 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return Abar
 
     @classmethod
+    def pb_eigh1(cls, Lbar, Qbar,  A, L, Q, b,  out = None):
+        D,P,M,N = numpy.shape(A.data)
+        
+        if out == None:
+            Abar = A.zeros_like()
+        
+        else:
+            Abar, = out
+        
+        UTPM._eigh1_pullback( Lbar.data,  Qbar.data, A.data,  L.data, Q.data, b, out = Abar.data)
+        return Abar
+
+    @classmethod
     def diag(cls, v, k = 0, out = None):
         """Extract a diagonal or construct  diagonal UTPM instance"""
         return cls(cls._diag(v.data))

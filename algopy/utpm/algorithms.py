@@ -1239,7 +1239,7 @@ class RawAlgorithmsMixIn:
 
 
     @classmethod
-    def _eigh1_pullback(cls, Lambar_data, Qbar_data, b_list, A_data, Lam_data, Q_data, out = None):
+    def _eigh1_pullback(cls, Lambar_data, Qbar_data, A_data, Lam_data, Q_data, b_list, out = None):
 
         if out == None:
             raise NotImplementedError('need to implement that...')
@@ -1277,7 +1277,7 @@ class RawAlgorithmsMixIn:
 
         Abar_data += tmp1
         
-        
+        return out
         
         
         
