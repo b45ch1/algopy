@@ -953,7 +953,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return Abar
 
     @classmethod
-    def pb_eigh1(cls, Lbar, Qbar,  A, L, Q, b,  out = None):
+    def pb_eigh1(cls, Lbar, Qbar,  A, L, Q, b_list,  out = None):
         D,P,M,N = numpy.shape(A.data)
         
         if out == None:
@@ -962,7 +962,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         else:
             Abar, = out
         
-        UTPM._eigh1_pullback( Lbar.data,  Qbar.data, A.data,  L.data, Q.data, b, out = Abar.data)
+        UTPM._eigh1_pullback( Lbar.data,  Qbar.data, A.data,  L.data, Q.data, b_list, out = Abar.data)
         return Abar
 
     @classmethod

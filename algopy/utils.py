@@ -112,9 +112,25 @@ def base_and_dirs2utpm(x,V):
     return UTPM(tc)
     
 def sym_vec(A):
-    """ returns the distinct elements of a symmetric matrix A as vector
+    """ 
     
-    i.e. the upper triangular part of A as vector
+    returns the distinct elements of a symmetrized square matrix A as vector
+    
+    Example 1:
+    ~~~~~~~~~~
+        
+        A = [[0,1,2],[1,3,4],[2,4,5]]
+        v = sym_vec(A)
+        returns v = [0,1,2,3,4,5]
+        
+    Example 2:
+    ~~~~~~~~~~
+        
+        A = [[1,2],[3,4]]
+        is not symmetric and symmetrized, yielding
+        v = [1, (2+3)/2, 4]
+        as output
+
     """
     
     N,M = A.shape
@@ -126,9 +142,8 @@ def sym_vec(A):
     count = 0
     for row in range(N):
         for col in range(row,N):
-            v[count] = A[row,col]
+            v[count] = 0.5* (A[row,col] + A[col,row])
             count +=1
-    
     return v
 
 def vec_sym(v):
@@ -149,3 +164,5 @@ def vec_sym(v):
             count +=1
     
     return A
+    
+
