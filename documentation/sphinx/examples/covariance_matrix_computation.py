@@ -1,14 +1,7 @@
 import numpy
 from algopy import CGraph, Function, UTPM, dot, qr, eigh, inv, solve
 
-# first order derivatives, one directional derivative
-# D - 1 is the degree of the Taylor polynomial
-# P directional derivatives at once
-# M number of rows of J1
-# N number of cols of J1
-# K number of rows of J2 (must be smaller than N)
-D,P,M,N,K,Nx = 2,1,100,3,1,1
-
+D,P,M,N,K,Nx = 2,1,5,3,1,1
 
 # METHOD 1: nullspace method
 cg1 = CGraph()
@@ -51,18 +44,17 @@ cg2.dependentFunctionList = [C2]
 print 'covariance matrix: C =\n',C2
 print 'difference between image and nullspace method:\n',C - C2
 
-Cbar = UTPM(numpy.random.rand(D,P,N,N))
+Cbar = UTPM(numpy.zeros((D,P,N,N)))
+Cbar.data[0,0,1,2] = 1
 
 cg1.pullback([Cbar])
-
 cg2.pullback([Cbar])
-print 'J1\n',cg2.independentFunctionList[0].xbar - cg1.independentFunctionList[0].xbar
-print 'J2\n',cg2.independentFunctionList[1].xbar - cg1.independentFunctionList[1].xbar
 
+print 'difference of the two possibilities dC_23/dJ1=\n',cg2.independentFunctionList[0].xbar - cg1.independentFunctionList[0].xbar
+print 'difference of the two possibilities dC_23/dJ2=\n',cg2.independentFunctionList[1].xbar - cg1.independentFunctionList[1].xbar
 
-
-
-
+print 'dC_23/dJ1=\n',cg2.independentFunctionList[0].xbar.data[0,0]
+print 'dC_23/dJ2=\n',cg2.independentFunctionList[1].xbar.data[0,0]
 
 
 
