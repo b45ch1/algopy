@@ -275,6 +275,15 @@ class RawAlgorithmsMixIn:
         return s_data, c_data
 
     @classmethod
+    def _pb_sincos(cls, sbar_data, cbar_data, x_data, s_data, c_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        
+        xbar_data = out
+        cls._amul(sbar_data, c_data, xbar_data)
+        cls._amul(cbar_data, s_data, xbar_data)
+
+    @classmethod
     def _dot(cls, x_data, y_data, out = None):
         """
         z = dot(x,y)

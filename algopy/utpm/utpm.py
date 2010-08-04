@@ -262,17 +262,64 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         self._log(self.data, out = retval.data)
         return retval
         
+    def sincos(self):
+        retsin = self.clone()
+        retcos = self.clone()
+        self._sincos(self.data, out = (retsin.data, retcos.data))
+        return retsin, retcos        
+        
+    @classmethod
+    def pb_sincos(cls, sbar, cbar, x, s, c, out = None):
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+        
+        else:
+            xbar, = out
+            
+        cls._pb_sincos(sbar.data, cbar.data, x.data, s.data, c.data, out = xbar.data)
+        
+        return out        
+        
     def sin(self):
         retval = self.clone()
         tmp = self.clone()
         self._sincos(self.data, out = (retval.data, tmp.data))
         return retval
         
+    @classmethod
+    def pb_sin(cls, sbar, x, s,  out = None):
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+        
+        else:
+            xbar, = out
+            
+        c = x.cos()
+        cbar = x.zeros_like()
+        cls._pb_sincos(sbar.data, cbar.data, x.data, s.data, c.data, out = xbar.data)
+        return out
+        
     def cos(self):
         retval = self.clone()
         tmp = self.clone()
         self._sincos(self.data, out = (tmp.data, retval.data))
         return retval
+        
+    @classmethod
+    def pb_cos(cls, cbar, x, c,  out = None):
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+        
+        else:
+            xbar, = out
+            
+        s = x.sin()
+        sbar = x.zeros_like()
+        cls._pb_sincos(sbar.data, cbar.data, x.data, s.data, c.data, out = xbar.data)
+        return out        
         
     def __pow__(self,r):
         return numpy.exp(numpy.log(self)*r)
@@ -751,7 +798,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         ybar2 -= tmp
 
         return (xbar,ybar)
-        
+
+
     @classmethod
     def pb_dot(cls, zbar, x, y, z, out = None):
         if out == None:
