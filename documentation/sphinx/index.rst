@@ -57,7 +57,7 @@ functions. To show some easy examples from calculus, we look at the series expan
 of sin(t) and cos(t). The mathematical formula is given as:
 
 .. math::
-    \sin(t) &= x - \frac{t^3}{3!} + \frac{t^5}{5!} - \frac{t^7}{7!} + \cdots   = \sum_{d=0}^\infty \frac{(-1)^d}{(2d+1)!}t^{2d+1}\\
+    \sin(t) &= t - \frac{t^3}{3!} + \frac{t^5}{5!} - \frac{t^7}{7!} + \cdots   = \sum_{d=0}^\infty \frac{(-1)^d}{(2d+1)!}t^{2d+1}\\
     \cos(t) &= 1 - \frac{t^2}{2!} + \frac{t^4}{4!} - \frac{t^6}{6!} + \cdots  = \sum_{d=0}^\infty \frac{(-1)^d}{(2d)!}t^{2d}
 
 With ALGOPY you can compute series expansions of the form
