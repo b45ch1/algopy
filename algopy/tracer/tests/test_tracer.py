@@ -268,7 +268,24 @@ class Test_CGgraph_on_UTPM(TestCase):
         R = cg.dependentFunctionList[1].x
         
         assert_array_almost_equal(x.data,UTPM.dot(Q,R).data)
+
+    def test_pullback_symvec_vecsym(self):
+        (D,P,N) = 2,1,6
+        cg = CGraph()
+        v = Function(UTPM(numpy.random.rand(*(D,P,N))))
+        A = Function.vecsym(v)
+        w = Function.symvec(A)
+        cg.trace_off()
+        cg.independentFunctionList = [v]
+        cg.dependentFunctionList = [w]
         
+        
+        wbar = UTPM(numpy.random.rand(*(D,P,N)))
+        cg.pullback([wbar])
+        
+        assert_array_almost_equal( wbar.data, v.xbar.data)
+
+
         
     def test_pullback(self):
         """

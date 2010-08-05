@@ -650,6 +650,12 @@ class Function(Ring):
     def transpose(self):
         return Function.push_forward(self.x.__class__.transpose, [self])
         
+    def symvec(self):
+        return Function.push_forward(self.x.__class__.symvec, [self])
+        
+    def vecsym(self):
+        return Function.push_forward(self.x.__class__.vecsym, [self])        
+        
     T = property(transpose)
     
     def get_shape(self):

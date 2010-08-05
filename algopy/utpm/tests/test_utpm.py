@@ -29,6 +29,18 @@ class Test_Push_Forward(TestCase):
         B = UTPM.vecsym(v)
         
         assert_array_almost_equal(A.data, B.data)
+        
+        
+    def test_symvec_vecsym_pullback(self):
+        (D,P,N) = 2,1,6
+        v = UTPM(numpy.random.rand(*(D,P,N)))
+        A = UTPM.vecsym(v)
+        w = UTPM.symvec(A)
+        wbar = UTPM(numpy.random.rand(*(D,P,N)))
+        Abar = UTPM.pb_symvec(wbar, A, w)
+        vbar = UTPM.pb_vecsym(Abar, v, A)
+        
+        assert_array_almost_equal(wbar.data, vbar.data)
     
     
     def test_UTPM_in_a_stupid_way(self):

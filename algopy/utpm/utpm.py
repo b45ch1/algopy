@@ -1049,6 +1049,18 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return v
             
     @classmethod
+    def pb_symvec(cls, vbar, A, v, out = None):
+        
+        if out == None:
+            Abar = A.zeros_like()
+        
+        else:
+            Abar ,= out
+        
+        Abar += cls.vecsym(vbar)
+        return Abar
+            
+    @classmethod
     def vecsym(cls, v):
         """
         returns a full symmetric matrix filled
@@ -1056,7 +1068,12 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         """
         D,P = v.data.shape[:2]
         Nv = v.data[0,0].size
-        N = (int(numpy.sqrt(1 + 8*Nv)) - 1)//2
+        
+        tmp = numpy.sqrt(1 + 8*Nv)
+        if abs(int(tmp) - tmp) > 10**-16:
+            # hackish way to check that the input length of v makes sense
+            raise ValueError('size of v does not match any possible symmetric matrix')
+        N = (int(tmp) - 1)//2
         A = cls(numpy.zeros((D,P,N,N)))
         
         count = 0
@@ -1067,17 +1084,19 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         
         return A
             
-            
-            
-                
     @classmethod
-    def pb_symvec(cls, vbar, A, v, out = None):
+    def pb_vecsym(cls, Abar, v, A, out = None):
         
         if out == None:
-            Abar = x.zeros_like()
+            vbar = v.zeros_like()
         
-        Abar += vecsym(vbar)
+        else:
+            vbar ,= out
         
+        vbar += cls.symvec(Abar)
+        return vbar
+                
+
         
     @classmethod
     def iouter(cls, x, y, out):
