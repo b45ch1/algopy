@@ -1088,6 +1088,34 @@ class Test_QR_Decomposition(TestCase):
 
         
 class Test_Eigenvalue_Decomposition(TestCase):
+    
+    def test_eigh1_pushforward(self):
+        (D,P,N) = 2,1,2
+        A = UTPM(numpy.zeros((D,P,N,N)))
+        A.data[0,0] = numpy.eye(N)
+        A.data[1,0] = numpy.diag([3,4])
+        
+        L,Q,b = UTPM.eigh1(A)
+        
+        assert_array_almost_equal(UTPM.dot(Q, UTPM.dot(L,Q.T)).data, A.data, decimal = 13)
+        
+        Lbar = UTPM.diag(UTPM(numpy.zeros((D,P,N))))
+        Lbar.data[0,0] = [0.5,0.5]
+        Qbar = UTPM(numpy.random.rand(*(D,P,N,N)))
+        
+        Abar = UTPM.pb_eigh1( Lbar, Qbar, A, L, Q, b)
+        
+        Abar = Abar.data[0,0]
+        Adot = A.data[1,0]
+        
+        Lbar = Lbar.data[0,0]
+        Ldot = L.data[1,0]
+        
+        Qbar = Qbar.data[0,0]
+        Qdot = Q.data[1,0]
+        
+        assert_almost_equal(numpy.trace(numpy.dot(Abar.T, Adot)), numpy.trace( numpy.dot(Lbar.T, Ldot) + numpy.dot(Qbar.T, Qdot)))    
+    
 
     def test_push_forward(self):
         (D,P,N) = 3,2,5
