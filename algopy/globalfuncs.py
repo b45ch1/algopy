@@ -70,3 +70,14 @@ def qr_full(A):
         
     else:
         raise NotImplementedError('don\'t know what to do with this instance')
+        
+        
+def eigh1(A):
+    if isinstance(A, UTPM):
+        return UTPM.eigh1(A)
+    
+    elif isinstance(A, Function):
+        return Function.eigh1(A)
+        
+    else:
+        raise NotImplementedError('don\'t know what to do with this instance')

@@ -837,6 +837,50 @@ class Test_CGgraph_on_UTPM(TestCase):
         cg.pullback([zbar])
         assert_array_almost_equal(numpy.sum(z.x.data[1,0] * zbar.data[0,0]), numpy.sum(x.x.data[1,0] * x.xbar.data[0,0]) + numpy.sum(A.x.data[1,0] * A.xbar.data[0,0]))
 
+
+    def test_eigh1_pullback(self):
+        (D,P,N) = 2,1,2
+        A = UTPM(numpy.zeros((D,P,N,N)))
+        A.data[0,0] = numpy.eye(N)
+        A.data[1,0] = numpy.diag([3,4])
+        
+        cg = CGraph()
+        FA = Function(A)
+        
+        # print A
+        
+        FL,FQ,Fb = Function.eigh1(FA)
+        cg.trace_off()
+        cg.independentFunctionList = [FA]
+        cg.dependentFunctionList = [FL]
+        
+        Lbar = UTPM.diag(UTPM(numpy.zeros((D,P,N))))
+        Lbar.data[0,0] = [0.5,0.5]
+                         
+        # print cg
+        cg.pullback([Lbar])
+        L = FL.x; Q = FQ.x; b = Fb.x
+        assert_array_almost_equal(dot(Q, dot(L,Q.T)).data, A.data, decimal = 13)
+        
+        Qbar = UTPM(numpy.zeros((D,P,N,N)))
+        
+        Abar = UTPM.pb_eigh1( Lbar, Qbar, None, A, L, Q, b)
+        
+        assert_array_almost_equal(Abar.data, FA.xbar.data)
+        
+        Abar = Abar.data[0,0]
+        Adot = A.data[1,0]
+        
+        Lbar = Lbar.data[0,0]
+        Ldot = L.data[1,0]
+        
+        Qbar = Qbar.data[0,0]
+        Qdot = Q.data[1,0]
+        
+        assert_almost_equal(numpy.trace(numpy.dot(Abar.T, Adot)), numpy.trace( numpy.dot(Lbar.T, Ldot) + numpy.dot(Qbar.T, Qdot)))
+    
+    
+    
         
     def test_buffered_operations(self):
         """

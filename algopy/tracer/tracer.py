@@ -47,16 +47,15 @@ class CGraph:
         
     The push forward can propagate any data structure.
     For instance:
-        * univariate Taylor polynomials over scalars (e.g. implemented in algopy.utps)
-        * univariate Taylor polynomials over matrices (e.g. implemented in algopy.utpm)
-        * cross Taylor polynomials over scalars (e.g. implemented in algopy.ctps_c)
-        * multivariate Taylor polynomials (not implemented)
+        * univariate Taylor polynomials over scalars 
+        * univariate Taylor polynomials over matrices 
+        * cross Taylor polynomials over scalars
+        * multivariate Taylor polynomials
         
     Relaxing the definition of the push forward one could also supply:
         * intervals arithmetic
         * slopes
         * etc.
-        
         
     The pullback is specifically the pullback of an element of the cotangent space that linearizes
     the computational procedure.
@@ -369,10 +368,7 @@ class Function(Ring):
             Fout.setitem = setitem
         
         return Fout
-                     
-             
-            
-            
+
     @classmethod
     def pullback(cls, F):
         """
@@ -427,17 +423,27 @@ class Function(Ring):
         elif numpy.isscalar(F.x):
             return lambda x: None
     
-        else:
+        elif isinstance(F.x, algopy.UTPM):
+            
             # case if the function F has output, e.g. y1 = F(x)
             args = [F.xbar] + args + [F.x]
-                
+            
+            # print func_name
+            
+            # print F.x
+            # print F.xbar
+            
             # get the pullback function
             f = eval('__import__("algopy.utpm").utpm.'+F.x.__class__.__name__+'.pb_'+func_name)
 
+        elif func_name == '__getitem__':
+            return  lambda x: None
+            # raise NotImplementedError('should implement that')
         
         # STEP 2: call the pullback function
         kwargs = {'out': list(argsbar)}
         
+        # print 'func_name = ',func_name
         # print 'calling pullback function f=',f
         # print 'args = ',args
         # print 'kwargs = ',kwargs
@@ -469,15 +475,47 @@ class Function(Ring):
             return cls(x)
     
     def xbar_from_x(self):
+        """
+        
+        Warning for the faint-hearted: this function is quite a hack and should be refactored
+        
+        each Function instance has the attribute x.
+        xbar_from_x creates a corresponding attribute xbar that is a copy of x but filled with zeros.
+        
+        it also supports functions with multiple outputs of the form
+        
+        (y1, y2) = f(x1,x2,x3)
+        
+        i.e. f.x = (y1, y2) hence the corresponding bar value is
+        f.xbar = (y1bar, y2bar)
+        
+        
+        In the case that e.g. y2 is not an UTPM instance, this function generates
+        f.xbar = (y1bar, None)
+        
+        """
         if numpy.isscalar(self.x):
             self.xbar = 0.
-            
+        
+        
+        # case that the function f had a tuple of outputs
         elif isinstance(self.x, tuple):
-            self.xbar = tuple( [xi.zeros_like() for xi in self.x])
+            tmp = []
+            
+            for xi in self.x:
+                if isinstance(xi, algopy.UTPM):
+                    tmp.append(xi.zeros_like())
+                else:
+                    tmp.append(None)
+            self.xbar = tuple(tmp)
+            # self.xbar = tuple( [xi.zeros_like() for xi in self.x])
             
         elif self.x == None:
             pass
-        else:
+        
+        # case that the output of the function is an UTPM instance
+        elif isinstance(self.x, algopy.UTPM):
+
             if self.x.owndata == True or self.func == self.Id:
                 self.xbar = self.x.zeros_like()
             else:
@@ -503,7 +541,12 @@ class Function(Ring):
                 # print len(self.args)
                 # print self.args[0].x.strides
                 # raise NotImplementedError('should implement that')
+          
+        else:
+            import copy
             
+            # this is a hack to get L,Q,b = eigh1 to work, should be fixed soon!
+            self.xbar = None # copy.deepcopy(self.x)
             
     def __getitem__(self, sl):
         return Function.push_forward(self.x.__class__.__getitem__,[self,sl])
@@ -594,6 +637,9 @@ class Function(Ring):
 
     def eigh(self):
          return Function.push_forward(self.x.__class__.eigh, [self])
+         
+    def eigh1(self):
+         return Function.push_forward(self.x.__class__.eigh1, [self])         
 
     def solve(self,rhs):
         return Function.push_forward(self.x.__class__.solve, [self,rhs])
