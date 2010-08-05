@@ -1029,8 +1029,56 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             xbar, = out
 
         return cls(cls._diag_pullback(ybar.data, x.data, y.data, k = k, out = xbar.data))        
+
+
+    @classmethod
+    def symvec(cls, A):
+        """
+        maps a symmetric matrix to a vector containing the distinct elements
+        """
+        D,P,N,M = A.data.shape
+        assert N == M
         
-    
+        v = cls(numpy.zeros( (D,P,((N+1)*N)//2)))
+        
+        count = 0
+        for row in range(N):
+            for col in range(row,N):
+                v[count] = 0.5* (A[row,col] + A[col,row])
+                count +=1
+        return v
+            
+    @classmethod
+    def vecsym(cls, v):
+        """
+        returns a full symmetric matrix filled
+        the distinct elements of v, filled row-wise
+        """
+        D,P = v.data.shape[:2]
+        Nv = v.data[0,0].size
+        N = (int(numpy.sqrt(1 + 8*Nv)) - 1)//2
+        A = cls(numpy.zeros((D,P,N,N)))
+        
+        count = 0
+        for row in range(N):
+            for col in range(row,N):
+                A[row,col] = A[col,row] = v[count]
+                count +=1
+        
+        return A
+            
+            
+            
+                
+    @classmethod
+    def pb_symvec(cls, vbar, A, v, out = None):
+        
+        if out == None:
+            Abar = x.zeros_like()
+        
+        Abar += vecsym(vbar)
+        
+        
     @classmethod
     def iouter(cls, x, y, out):
         cls._iouter(x.data, y.data, out.data)
