@@ -14,8 +14,7 @@ def f_fcn(x):
 h = 10**-20
 x0 = numpy.array([3,2],dtype=float)
 x1 = numpy.array([1,0])
-x0c = x0 + 1j * h * x1
-yc = numpy.imag((f_fcn(x0c) - f_fcn(x0))/h)
+yc = numpy.imag(f_fcn(x0 + 1j * h * x1) - f_fcn(x0 - 1j * h * x1))/(2*h)
 
 # Method 2: univariate Taylor polynomial arithmetic (UTP)
 ax = algopy.UTPM(numpy.zeros((2,1,2)))
