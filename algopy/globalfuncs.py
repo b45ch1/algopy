@@ -1,6 +1,7 @@
 import numpy
 import scipy; import scipy.linalg
 import string
+import utils
 from algopy import UTPM
 from algopy import Function
 
@@ -67,6 +68,43 @@ def qr_full(A):
         
     elif isinstance(A, numpy.ndarray):
         return scipy.linalg.qr(A)
+        
+    else:
+        raise NotImplementedError('don\'t know what to do with this instance')
+        
+        
+def eigh1(A):
+    if isinstance(A, UTPM):
+        return UTPM.eigh1(A)
+    
+    elif isinstance(A, Function):
+        return Function.eigh1(A)
+        
+    else:
+        raise NotImplementedError('don\'t know what to do with this instance')
+        
+def symvec(A):
+    if isinstance(A, UTPM):
+        return UTPM.symvec(A)
+    
+    elif isinstance(A, Function):
+        return Function.symvec(A)
+        
+    elif isinstance(A, numpy.ndarray):
+        return utils.symvec(A)
+        
+    else:
+        raise NotImplementedError('don\'t know what to do with this instance')
+        
+def vecsym(v):
+    if isinstance(v, UTPM):
+        return UTPM.vecsym(v)
+    
+    elif isinstance(v, Function):
+        return Function.vecsym(v)
+        
+    elif isinstance(v, numpy.ndarray):
+        return utils.vecsym(v)
         
     else:
         raise NotImplementedError('don\'t know what to do with this instance')

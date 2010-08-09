@@ -1,6 +1,6 @@
 import numpy
 import numpy.testing
-from utpm import UTPM
+
 import globalfuncs
 
 def utps2base_and_dirs(x):
@@ -110,8 +110,8 @@ def base_and_dirs2utpm(x,V):
     tc[1:,...] = V.transpose((axes_ids[-1],axes_ids[-2]) + axes_ids[:-2])
     
     return UTPM(tc)
-    
-def sym_vec(A):
+
+def symvec(A):
     """ 
     
     returns the distinct elements of a symmetrized square matrix A as vector
@@ -120,7 +120,7 @@ def sym_vec(A):
     ~~~~~~~~~~
         
         A = [[0,1,2],[1,3,4],[2,4,5]]
-        v = sym_vec(A)
+        v = symvec(A)
         returns v = [0,1,2,3,4,5]
         
     Example 2:
@@ -146,7 +146,7 @@ def sym_vec(A):
             count +=1
     return v
 
-def vec_sym(v):
+def vecsym(v):
     """
     returns a full symmetric matrix filled
     the distinct elements of v, filled row-wise

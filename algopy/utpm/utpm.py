@@ -1001,7 +1001,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return Abar
 
     @classmethod
-    def pb_eigh1(cls, Lbar, Qbar,  A, L, Q, b_list,  out = None):
+    def pb_eigh1(cls, Lbar, Qbar, bbar_list, A, L, Q, b_list,  out = None):
         D,P,M,N = numpy.shape(A.data)
         
         if out == None:
@@ -1029,8 +1029,75 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             xbar, = out
 
         return cls(cls._diag_pullback(ybar.data, x.data, y.data, k = k, out = xbar.data))        
+
+
+    @classmethod
+    def symvec(cls, A):
+        """
+        maps a symmetric matrix to a vector containing the distinct elements
+        """
+        D,P,N,M = A.data.shape
+        assert N == M
         
-    
+        v = cls(numpy.zeros( (D,P,((N+1)*N)//2)))
+        
+        count = 0
+        for row in range(N):
+            for col in range(row,N):
+                v[count] = 0.5* (A[row,col] + A[col,row])
+                count +=1
+        return v
+            
+    @classmethod
+    def pb_symvec(cls, vbar, A, v, out = None):
+        
+        if out == None:
+            Abar = A.zeros_like()
+        
+        else:
+            Abar ,= out
+        
+        Abar += cls.vecsym(vbar)
+        return Abar
+            
+    @classmethod
+    def vecsym(cls, v):
+        """
+        returns a full symmetric matrix filled
+        the distinct elements of v, filled row-wise
+        """
+        D,P = v.data.shape[:2]
+        Nv = v.data[0,0].size
+        
+        tmp = numpy.sqrt(1 + 8*Nv)
+        if abs(int(tmp) - tmp) > 10**-16:
+            # hackish way to check that the input length of v makes sense
+            raise ValueError('size of v does not match any possible symmetric matrix')
+        N = (int(tmp) - 1)//2
+        A = cls(numpy.zeros((D,P,N,N)))
+        
+        count = 0
+        for row in range(N):
+            for col in range(row,N):
+                A[row,col] = A[col,row] = v[count]
+                count +=1
+        
+        return A
+            
+    @classmethod
+    def pb_vecsym(cls, Abar, v, A, out = None):
+        
+        if out == None:
+            vbar = v.zeros_like()
+        
+        else:
+            vbar ,= out
+        
+        vbar += cls.symvec(Abar)
+        return vbar
+                
+
+        
     @classmethod
     def iouter(cls, x, y, out):
         cls._iouter(x.data, y.data, out.data)
