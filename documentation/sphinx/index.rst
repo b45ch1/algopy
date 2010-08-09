@@ -51,6 +51,11 @@ To allow the use of the reverse mode of AD a simple code tracer has been impleme
 `algopy.tracer`. The idea is to record the computation procedure in a datastructure s.t.
 the control flow sequence can walked in reverse order.
 
+There has been a winterschool for Algorithmic Differentiation where some tutorials
+are a good introduction to what ALGOPY does.
+
+http://www.sintef.no/Projectweb/eVITA/English/eSCience-Meeting-2010/Winter-School/
+
 
 
 Example 1: univariate Taylor Series Expansions
