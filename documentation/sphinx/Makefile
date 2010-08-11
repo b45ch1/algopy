@@ -32,6 +32,9 @@ clean:
     
 runscripts:
 	python examples_tracer.py
+	python examples/series_expansion.py
+	python examples/explicit_euler.py
+	python examples/implicit_euler.py
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html

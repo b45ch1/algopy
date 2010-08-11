@@ -175,8 +175,24 @@ class RawAlgorithmsMixIn:
         (D,P) = z_data.shape[:2]
         for d in range(D):
             z_data[d,:,...] = 1./ y_data[0,:,...] * ( x_data[d,:,...] - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
-                    
-    
+
+    @classmethod
+    def _pow_real(cls, x_data, r, out = None):
+        """ y = x**r, where r is scalar """
+        y_data = out
+        if out == None:
+            return NotImplementedError('')
+        (D,P) = y_data.shape[:2]
+        
+        y_data[0] = x_data[0]**r
+        for d in range(1,D):
+            y_data[d] = r * numpy.sum([y_data[d-k] * k * x_data[k] for k in range(1,d+1)], axis = 0) - \
+                numpy.sum([ x_data[d-k] * k * y_data[k] for k in range(1,d)], axis = 0)
+                
+            y_data[d] /= x_data[0]
+            y_data[d] /= d
+            
+            
     @classmethod
     def _max(cls, x_data, axis = None, out = None):
 

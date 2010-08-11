@@ -161,6 +161,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         else:
             return UTPM(self.data + rhs.data)
 
+            
     def __sub__(self,rhs):
         if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
             retval = UTPM(numpy.copy(self.data))
@@ -193,6 +194,16 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         z_data = numpy.zeros_like(x_data)
         self._div(x_data, y_data, z_data)
         return self.__class__(z_data)
+        
+    def __pow__(self,r):
+        if isinstance(r, UTPM):
+            return numpy.exp(numpy.log(self)*r)
+        else:
+            x_data = self.data
+            y_data = numpy.zeros_like(x_data)
+            self._pow_real(x_data, r, y_data)
+            return self.__class__(y_data)
+        
 
     def __radd__(self,rhs):
         return self + rhs
@@ -321,8 +332,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         cls._pb_sincos(sbar.data, cbar.data, x.data, s.data, c.data, out = xbar.data)
         return out        
         
-    def __pow__(self,r):
-        return numpy.exp(numpy.log(self)*r)
+
+            
 
     def __abs__(self):
         """ absolute value of polynomials

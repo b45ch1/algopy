@@ -28,7 +28,7 @@ def x_p_analytical(t,p):
 
 xs = numpy.array(x_list)
 print xs.shape
-import matplotlib.pyplot as pyplot
+import matplotlib.pyplot as pyplot; import os
 pyplot.plot(ts, xs[:,0,0,0], ',k-', label = r'$x(t)$')
 pyplot.plot(ts, x_analytical(ts,p.data[0,0]), 'k-.', label = r'analytic $x(t)$')
 pyplot.plot(ts, xs[:,1,0,0], ',r-', label = r'$x_p(t)$')
@@ -41,6 +41,6 @@ pyplot.plot(ts, xs[:,3,0,0], ',m-', label = r'$x_{ppp}(t)$')
 pyplot.xlabel('time $t$')
 pyplot.legend(loc='best')
 pyplot.grid()
-pyplot.savefig('explicit_euler.png')
-pyplot.show()
+pyplot.savefig(os.path.join(os.path.dirname(os.path.realpath(__file__)),'explicit_euler.png'))
+# pyplot.show()
     

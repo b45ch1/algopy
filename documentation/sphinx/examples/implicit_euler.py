@@ -76,7 +76,7 @@ def x_p_analytical(t,p):
     return -0.5*numpy.sin(numpy.sqrt(p)*t)*p**(-0.5)*t
 
 print xs.shape
-import matplotlib.pyplot as pyplot
+import matplotlib.pyplot as pyplot; import os
 pyplot.plot(ts, xs[:,0,0,0], ',k-', label = r'$x(t)$')
 pyplot.plot(ts, x_analytical(ts,p.data[0,0]), 'k-.', label = r'analytic $x(t)$')
 pyplot.plot(ts, xs[:,1,0,0], ',r-', label = r'$x_p(t)$')
@@ -88,6 +88,6 @@ pyplot.title('analytical and implicit Euler solution')
 pyplot.xlabel('time $t$')
 pyplot.legend(loc='best')
 pyplot.grid()
-pyplot.savefig('implicit_euler.png')
-pyplot.show()
+pyplot.savefig(os.path.join(os.path.dirname(os.path.realpath(__file__)),'implicit_euler.png'))
+# pyplot.show()
      

@@ -17,6 +17,14 @@ Documentation:
    datastructure_and_algorithms.rst
    examples_tracer.rst
    
+Simple Examples:
+
+.. toctree::
+   :maxdepth: 1
+   
+   examples/series_expansion.rst
+   examples/first_order_forward.rst
+   
 Advanced Examples:
 
 .. toctree::
@@ -57,118 +65,14 @@ are a good introduction to what ALGOPY does.
 http://www.sintef.no/Projectweb/eVITA/English/eSCience-Meeting-2010/Winter-School/
 
 
-
-Example 1: univariate Taylor Series Expansions
------------------------------------------------
-
-As an easy example we want to compute the Taylor series expansion of
-
-.. math::
-    y = f(x) = \sin(\cos(x) + \sin(x))
-    
-about :math:`x_0 = 0.3`. The first thing to notice is that we can as well compute the
-Taylor series expansion of
-
-.. math::
-    y = f(x_0 + t) = \sin(\cos(x_0 + t) + \sin(x_0 + t))
-    
-about :math:`t = 0`. Taylor's theorem yields
-
-.. math::
-    f(x_0 + t) &= \sum_{d=0}^{D-1} y_d t^d + R_{D}(t) \\
-    \mbox{where } \quad y_d &= \left. \frac{1}{d!} \frac{d^d }{d t^d}f(x_0 + t) \right|_{t = 0} \;.
-    
-and :math:`R_D(x)` is the remainder term.
-
-Slightly rewritten one has
-
-.. math::
-    y(t) = f(x(t)) + \mathcal O(t^D)
-    
-i.e., one has a polynomial :math:`x(t) = \sum_{d=0}^{D-1} x_d t^d` as input and
-computes a polynomial :math:`y(t) = \sum_{d=0}^{D-1} y_d t^d + \mathcal O(t^d)` as output.
-
-This is now formulated in a way that can be used with ALGOPY.
-    
-.. literalinclude:: index.py
-    :lines: 0-13
-
-Don't be confused by the P. It can be used to evaluate several Taylor series expansions
-at once. The important point to notice is that the D in the code is the same D
-as in the formula above. I.e., it is the number of coefficients in the polynomials.
-The important point is
-
-.. warning:: The coefficients of the univariate Taylor polynomial (UTP) are stored in
-          the attribute UTPM.data. It is a x.ndarray with shape (D,P) + shape of the coefficient.
-          In this example, the coefficients :math:`x_d` are scalars and thus x.data.shape = (D,P).
-          However, if the the coefficients were vectors of size N, then x.data.shape would be (D,P,N), 
-          and if the coefficients were matrices with shape (M,N), then x.data.shape would be (D,P,M,N).
-          
-          
+Getting Started:
+----------------
 
 
-To see that ALGOPY indeed computes the correct Taylor series expansion we plot
-the original function and the Taylor polynomials evaluated at different orders.
-
-.. literalinclude:: index.py
-    :lines: 14-34
 
 
-.. figure:: taylor_approximation.png
-    :align: center
-    :scale: 50
-    
-    This plot shows Taylor approximations of different orders. 
-    The point :math:`x_0 = 0.3` is plotted as a red dot and the original
-    function is plotted as black dots. One can see that the higher the order,
-    the better the approximation.
-    
 
 
-Example 2: Forward Mode of Algorithmic Differentiation
-------------------------------------------------------
-In this example we want to show how one can extract derivatives
-from the computed univariate Taylor polynomials (UTP). For simplicity we only show
-first-order derivatives but ALGOPY also supports the computation of higher-order
-derivatives by an interpolation-evaluation approach.
-
-The basic observation is that by use of the chain rule one obtains functions
-:math:`F: \mathbb R^N \rightarrow \mathbb R^M`
-
-.. math::
-    \left. \frac{d}{d t} F(x_0 + x_1 t) \right|_{t=0} = \left. \frac{d}{d x} f(x) \right|_{x = x_0} \cdot x_1\;.
-
-i.e. a Jacobian-vector product.
-
-Again, we look a simple contrived example and we want to compute the first column
-of the Jacobian, i.e., :math:`x_1 = (1,0,0)`.
-
-.. literalinclude:: index.py
-    :lines: 35-60
-
-As output one gets::
-    
-    y0 =  [  3.  15.   5.]
-    y  =  [[[  3.  15.   5.]]
-    
-     [[  3.   0.   5.]]]
-    y.shape = (3,)
-    y.data.shape = (2, 1, 3)
-    dF/dx(x0) * x1 = [ 3.  0.  5.]
-
-
-and the question is how to interpret this result. First off, y0 is just the usual
-function evaluation using numpy but y represent a univariate Taylor polynomial (UTP).
-One can see that each coefficient of the polynomial has the shape (3,). We extract
-the directional derivative as the first coefficient of the UTP.
-
-One can see that this is indeed the numerical value of first column of the Jacobian J(1,3,5)::
-    
-    def J(x):
-        ret = numpy.zeros((3,3),dtype=float)
-        ret[0,:] = [x[1], x[0],  0  ]
-        ret[1,:] = [0,  , x[2], x[1]]
-        ret[2,:] = [x[2],   0 , x[0]]
 
 
 
@@ -219,6 +123,7 @@ Unit Test
 
 ALGOPY uses the same testing facilitities as NumPy. I.e., one can run the complete
 unit test with::
+    
     $ python -c "import algopy; algopy.test()"
 
 
