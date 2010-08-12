@@ -184,6 +184,16 @@ class RawAlgorithmsMixIn:
             return NotImplementedError('')
         (D,P) = y_data.shape[:2]
         
+        if type(r) == int:
+            if r == 2:
+                return cls._mul(x_data, x_data, y_data)
+                
+            if r == 3:
+                tmp = numpy.zeros_like(x_data)
+                cls._mul(x_data, x_data, tmp)
+                return cls._mul(x_data, tmp, y_data)
+            
+        
         y_data[0] = x_data[0]**r
         for d in range(1,D):
             y_data[d] = r * numpy.sum([y_data[d-k] * k * x_data[k] for k in range(1,d+1)], axis = 0) - \
