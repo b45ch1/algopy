@@ -49,8 +49,10 @@ they often appear in statistically motivated functions.
 How does it work?:
 ------------------
 
-The central idea of ALGOPY is the computation on (univariate) Taylor polynomials with with matrix coefficients.
-these are implemented as (class) methods of `algopy.UTPM`.
+The central idea of ALGOPY is the computation on (univariate) Taylor polynomials
+with with matrix coefficients. More precisely, ALGOPY supports univariate Taylor
+polynomial (UTP) arithmetic where the coefficients of the polynomial are numpy.ndarrays.
+The algorithms are implemented as (class) methods of `algopy.UTPM`.
 
 If the input UTPs are correctly initialized one can interpret the coefficients of
 the resulting polynomial as higher-order derivatives.
@@ -67,21 +69,38 @@ http://www.sintef.no/Projectweb/eVITA/English/eSCience-Meeting-2010/Winter-Schoo
 
 Getting Started:
 ----------------
+For the impatient, we show a minimalistic example how ALGOPY can be used to compute
+a gradient of a simple function and compare the result to the symbolically computed
+gradient.
 
+.. literalinclude:: getting_started.py
+    :lines: 1-
 
+If one executes that code one obtains as output::
+    
+    $ python getting_started.py 
+    gradient computed with ALGOPY using UTP arithmetic =  [ 135.42768462   41.08553692   15.        ]
+    evaluated symbolic gradient =  [ 135.42768462   41.08553692   15.        ]
+    difference = [ 0.  0.  0.]
 
-
-
-
-
-
-
-Example 3: First-order directional Derivatives through Numerical Linear Algebra Functions
+We skip here an explanation of what exactly ALGOPY is doing internally here,
+and just note that the derivative computed with ALGOPY is up to machine precision
+the same as the symbolically computed gradient.
+    
+    
+Example 2: First-order directional Derivatives through Numerical Linear Algebra Functions
 -----------------------------------------------------------------------------------------
 
-ALGOPY can be used to compute series expansions through complicated functions that also contain numerical linear algebra functions.
+ALGOPY can not only be used to compute series expansions of simple functions
+as shown above. A particular strenght of ALGOPY is that it allows to compute series
+expansions through numerical linear algebra functions.
 Consider the contrived example that appears in similar form in statistically
-motivated functions. It is the goal to compute derivatives of the function `y = f(x)`::
+motivated functions. It is the goal to compute the directional derivative
+
+.. math::
+    \nabla_x f((3,5)) \cdot \begin{pmatrix} 7 \\ 11 \end{pmatrix}
+    
+The code is::
 
     import numpy; from numpy import log, exp, sin, cos
     import algopy; from algopy import UTPM, dot, inv, zeros
@@ -96,8 +115,8 @@ motivated functions. It is the goal to compute derivatives of the function `y = 
     
     
     x = UTPM(zeros((2,1,2),dtype=float))
-    x.data[0,0] = [1,2]
-    x.data[1,0] = [1,0]
+    x.data[0,0] = [3,5]
+    x.data[1,0] = [7,11]
     y = f(x)
     
     print 'normal function evaluation f(x) = ',y.data[0,0]
