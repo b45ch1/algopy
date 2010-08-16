@@ -30,7 +30,7 @@ computes a polynomial :math:`y(t) = \sum_{d=0}^{D-1} y_d t^d + \mathcal O(t^d)` 
 
 This is now formulated in a way that can be used with ALGOPY.
     
-.. literalinclude:: index.py
+.. literalinclude:: series_expansion.py
     :lines: 0-13
 
 Don't be confused by the P. It can be used to evaluate several Taylor series expansions
@@ -50,8 +50,8 @@ The important point is
 To see that ALGOPY indeed computes the correct Taylor series expansion we plot
 the original function and the Taylor polynomials evaluated at different orders.
 
-.. literalinclude:: index.py
-    :lines: 14-34
+.. literalinclude:: series_expansion.py
+    :lines: 14-
 
 
 .. figure:: taylor_approximation.png

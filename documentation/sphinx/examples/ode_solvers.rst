@@ -1,8 +1,17 @@
-Differentiation of ODE Solutions
+Differentiation of ODE Solvers
 ================================
 
-It is very easy to use AD techniques to obtain derivatives of the form :math:`\frac{d x(t)}{d p}`,
-where :math:`x(t) \equiv x(t; x_0, p) \in \mathbb R^{N_x}` is solution of the ordinary differential equation
+It is easy to use AD techniques to differentiate time integrations schemes, e.g.
+for Ordinary Differential Equations (ODEs) or Differential Algebraic Equations (DAEs).
+Here we illustrate the approach at ODE solvers. For simplicity we treat the explict Euler
+and the implicit Euler. These two schemes already already show many aspects that can
+also be found in more sophisticated solvers.
+For a details discussion see [Eberhard99]_ and dedicated software
+for semi-implicit DAEs `SolvIND <www.solvind.org>`_.
+
+The goal is to compute  derivatives of the form :math:`\frac{d x(t)}{d p}`,
+where :math:`x(t) \equiv x(t; x_0, p) \in \mathbb R^{N_x}` is solution of the
+ordinary differential equation
 
 .. math::
     \dot x(t) = f(t, x, p) \\
@@ -81,3 +90,7 @@ ODE integrators would yield better results.
 .. image:: implicit_euler.png
     :align: center
     :scale: 100
+    
+.. [Eberhard99] Automatic Differentiation of Numerical Integration Algorithms, http://www.jstor.org/pss/2585052
+
+
