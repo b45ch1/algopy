@@ -98,10 +98,12 @@ Forward Mode of AD:
     The :math:`T` is an indeterminate, i.e. a formal/dummy variable. Roughly speaking, this is the UTP equivalent to the imaginary number :math:`i` in complex arithmetic. The `P` can be used to compute several Taylor expansions at once. I.e., a vectorization to avoid the recomputation of the same functions with different inputs.
 
     If the input UTPs are correctly initialized one can interpret the coefficients of
-    the resulting polynomial as higher-order derivatives. Have a look at the Taylor series expansion example
-    for a more detailed discussion_.
+    the resulting polynomial as higher-order derivatives. Have a look at the `Taylor series expansion example`_
+    for a more detailed discussion.
 
-.. _discussion: examples/series_expansion.rst
+
+.. _`Taylor series expansion example`: ./examples/series_expansion.html
+
 
 Reverse Mode of AD:
 
