@@ -89,6 +89,12 @@ def multi_index_binomial(z,k):
 
 def multi_index_abs(z):
     return numpy.sum(z)
+    
+def multi_index_pow(x,i):
+    """ computes :math:`x^i`, where x is an array of size N and i a multi-index of size N"""
+    N = numpy.size(x)
+    i = numpy.transpose(i)
+    return numpy.prod([x[n]**i[n] for n in range(N)], axis=0)
 
 
 def convert_multi_indices_to_pos(in_I):
