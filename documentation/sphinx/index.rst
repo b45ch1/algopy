@@ -6,36 +6,6 @@
 ALGOPY, Algorithmic Differentiation in Python
 =============================================
 
-
-
-
-Documentation:
-
-.. toctree::
-   :maxdepth: 1
-   
-   datastructure_and_algorithms.rst
-   examples_tracer.rst
-   
-Simple Examples:
-
-.. toctree::
-   :maxdepth: 1
-   
-   examples/series_expansion.rst
-   examples/first_order_forward.rst
-   
-Advanced Examples:
-
-.. toctree::
-   :maxdepth: 1
-   
-   examples/covariance_matrix_computation.rst
-   examples/error_propagation.rst
-   examples/moore_penrose_pseudoinverse.rst
-   examples/ode_solvers.rst
-   examples/comparison_forward_reverse_mode.rst
-
 What is ALGOPY?
 ---------------
 
@@ -44,33 +14,23 @@ in the forward and reverse mode of Algorithmic Differentiation (AD). Particular
 focus are functions that contain numerical linear algebra functions as
 they often appear in statistically motivated functions.
 
+Disclaimer
+----------
 
-
-How does it work?:
-------------------
-
-The central idea of ALGOPY is the computation on (univariate) Taylor polynomials
-with with matrix coefficients. More precisely, ALGOPY supports univariate Taylor
-polynomial (UTP) arithmetic where the coefficients of the polynomial are numpy.ndarrays.
-The algorithms are implemented as (class) methods of `algopy.UTPM`.
-
-If the input UTPs are correctly initialized one can interpret the coefficients of
-the resulting polynomial as higher-order derivatives.
-
-To allow the use of the reverse mode of AD a simple code tracer has been implemented in
-`algopy.tracer`. The idea is to record the computation procedure in a datastructure s.t.
-the control flow sequence can walked in reverse order.
-
-There has been a winterschool for Algorithmic Differentiation where some tutorials
-are a good introduction to what ALGOPY does.
-
-http://www.sintef.no/Projectweb/eVITA/English/eSCience-Meeting-2010/Winter-School/
+At the moment, ALGOPY offers only rather low-level functions. I.e., the user needs
+some background knowledge of AD and how ALGOPY works. This documentation should
+explain most of what is necessary to know. Unfortunately, it is not very well structured at the moment.
+So, if you have any questions or
+suggestions don't hesitate to write me an email (sebastian.walter@gmail.com).
+This will make it much easier for me to provide a text that is easy to understand.
+Also, is planned to add a user-friendly API on top of the low-level functions to compute
+the Jacobian, the Hessian and the gradient.
 
 
 Getting Started:
 ----------------
 For the impatient, we show a minimalistic example how ALGOPY can be used to compute
-a gradient of a simple function and compare the result to the symbolically computed
+a gradient of a simple function in the forward mode of AD and compare the result to the symbolically computed
 gradient.
 
 .. literalinclude:: getting_started.py
@@ -86,9 +46,9 @@ If one executes that code one obtains as output::
 We skip here an explanation of what exactly ALGOPY is doing internally here,
 and just note that the derivative computed with ALGOPY is up to machine precision
 the same as the symbolically computed gradient.
+
     
-    
-Example 2: First-order directional Derivatives through Numerical Linear Algebra Functions
+First-order directional Derivatives through Numerical Linear Algebra Functions
 -----------------------------------------------------------------------------------------
 
 ALGOPY can not only be used to compute series expansions of simple functions
@@ -122,7 +82,60 @@ The code is::
     print 'normal function evaluation f(x) = ',y.data[0,0]
     print 'directional derivative df/dx1 = ',y.data[1,0]
 
+      
+Unit Test
+---------
 
+ALGOPY uses the same testing facilitities as NumPy. I.e., one can run the complete
+unit test with::
+    
+    $ python -c "import algopy; algopy.test()"
+
+
+
+Further Documentation:
+----------------------
+
+The Forward Mode of Algorithmic Differentiation:
+
+.. toctree::
+   :maxdepth: 1
+   
+   examples/series_expansion.rst
+   examples/first_order_forward.rst
+
+The Reverse Mode of Algorithmic Differentiation:
+
+    Todo
+   
+Advanced Examples:
+
+.. toctree::
+   :maxdepth: 1
+   
+   examples/covariance_matrix_computation.rst
+   examples/error_propagation.rst
+   examples/moore_penrose_pseudoinverse.rst
+   examples/ode_solvers.rst
+   examples/comparison_forward_reverse_mode.rst
+   
+   
+Further Reading:
+
+.. toctree::
+   :maxdepth: 1
+   
+   datastructure_and_algorithms.rst
+   examples_tracer.rst
+
+
+
+
+
+
+   
+    
+    
 Current Issues:
 ---------------
       
@@ -136,14 +149,6 @@ Current Issues:
       derivatives at once. In the reverse mode one would like to propagate M
       adjoint directions at once. However, this is not implemented yet, i.e. one
       has to repeat the procedure M times.
-      
-Unit Test
----------
-
-ALGOPY uses the same testing facilitities as NumPy. I.e., one can run the complete
-unit test with::
-    
-    $ python -c "import algopy; algopy.test()"
 
 
 Indices and tables

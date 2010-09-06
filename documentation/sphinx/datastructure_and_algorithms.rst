@@ -1,5 +1,4 @@
-Datastructure, Algorithms and Syntactic Sugar
-=============================================
+Datastructure and Algorithms
 
 The mathematical object is a Univariate Taylor Polynomial over Matrices (UTPM)
 
