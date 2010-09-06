@@ -10,31 +10,28 @@ What is ALGOPY?
 ---------------
 
 The purpose of ALGOPY is the evaluation of higher-order derivatives
-in the forward and reverse mode of Algorithmic Differentiation (AD). Particular
-focus are functions that contain numerical linear algebra functions as
+in the forward and reverse mode of Algorithmic Differentiation (AD) of functions that are implemented as Python programs.
+Particular focus are functions that contain numerical linear algebra functions as
 they often appear in statistically motivated functions.
 
-Disclaimer
-----------
-
-At the moment, ALGOPY offers only rather low-level functions. I.e., the user needs
-some background knowledge of AD and how ALGOPY works. This documentation should
-explain most of what is necessary to know. Unfortunately, it is not very well structured at the moment.
-So, if you have any questions or
-suggestions don't hesitate to write me an email (sebastian.walter@gmail.com).
-This will make it much easier for me to provide a text that is easy to understand.
-Also, is planned to add a user-friendly API on top of the low-level functions to compute
-the Jacobian, the Hessian and the gradient.
-
+Help improve ALGOPY
+-------------------
+If you have any questions or suggestions donâ€™t hesitate to write me an email (sebastian.walter@gmail.com). This will make it much easier for me to provide code/documentation that is easy to understand. Of course, you are also welcome to contribute code and bugfixes. For instance, an nice addition
+would be a set of high-level functions that make it easier for new users to compute the gradient, Jacobian, Jacobian-vector, vector-Jacobian, Hessian, Hessian-vector.
 
 Getting Started:
 ----------------
 For the impatient, we show a minimalistic example how ALGOPY can be used to compute
-a gradient of a simple function in the forward mode of AD and compare the result to the symbolically computed
+a gradient in the forward mode of AD of a simple function and compare the result to the symbolically computed
 gradient.
 
 .. literalinclude:: getting_started.py
     :lines: 1-
+
+Some words on what's going on: Instead of computing the function `f(x)` with a `x = numpy.array([3.,5.,7.])` as input we want to compute with a Univariate Taylor Polynomial (*UTP*) of degree 1. Operator overloading is used to redefine the functions `+,-,*,/,sin,cos,...` for `algopy.UTPM` instances. That means, when `x` is an `algopy.UTPM` instance then `f(x)` is also an `algopy.UTPM` instance.
+The coefficients of the polynomial are stored in the attribute `data`. 
+
+The integers `D=2,P=3,N=3` have the following meaning: The UTP has degree 1, i.e. `D=2` coefficients are necessary to describe it. `N=3` is the dimension of `x`. `P=3` allows us to evaluate three different Taylor polynomials at once, i.e., it vectorizes the operation.
 
 If one executes that code one obtains as output::
     
@@ -43,12 +40,11 @@ If one executes that code one obtains as output::
     evaluated symbolic gradient =  [ 135.42768462   41.08553692   15.        ]
     difference = [ 0.  0.  0.]
 
-We skip here an explanation of what exactly ALGOPY is doing internally here,
-and just note that the derivative computed with ALGOPY is up to machine precision
+The derivative computed with ALGOPY is up to machine precision
 the same as the symbolically computed gradient.
-
     
-First-order directional Derivatives through Numerical Linear Algebra Functions
+    
+Example 2: First-order directional Derivatives through Numerical Linear Algebra Functions
 -----------------------------------------------------------------------------------------
 
 ALGOPY can not only be used to compute series expansions of simple functions
@@ -82,31 +78,53 @@ The code is::
     print 'normal function evaluation f(x) = ',y.data[0,0]
     print 'directional derivative df/dx1 = ',y.data[1,0]
 
-      
-Unit Test
----------
 
-ALGOPY uses the same testing facilitities as NumPy. I.e., one can run the complete
-unit test with::
+How does it work?:
+------------------
+ALGOPY offers the forward mode and the reverse mode of AD.
+
+Forward Mode of AD:
+
+    The basic idea is the computation on (univariate) Taylor polynomials
+    with with matrix coefficients. More precisely, ALGOPY supports univariate Taylor
+    polynomial (UTP) arithmetic where the coefficients of the polynomial are numpy.ndarrays.
+    To distinguish Taylor polynomials from real vectors resp. matrices they are written with enclosing brackets:
     
-    $ python -c "import algopy; algopy.test()"
+    .. math::
+        [x]_D = [x_0, \dots, x_{D-1}] = \sum_{d=0}^{D-1} x_d T^d \;,
+        
+    where each :math:`x_0, x_1, \dots` are arrays, e.g. a (5,7) array.
+    This mathematical object is described by numpy.ndarray with shape (D,P, 5,7).
+    The :math:`T` is an indeterminate, i.e. a formal/dummy variable. Roughly speaking, this is the UTP equivalent to the imaginary number :math:`i` in complex arithmetic. The `P` can be used to compute several Taylor expansions at once. I.e., a vectorization to avoid the recomputation of the same functions with different inputs.
+
+    If the input UTPs are correctly initialized one can interpret the coefficients of
+    the resulting polynomial as higher-order derivatives. Have a look at the `Taylor series expansion example`_
+    for a more detailed discussion.
 
 
+.. _`Taylor series expansion example`: ./examples/series_expansion.html
 
-Further Documentation:
-----------------------
 
-The Forward Mode of Algorithmic Differentiation:
+Reverse Mode of AD:
+
+    To allow the use of the reverse mode of AD a simple code tracer has been implemented in
+    `algopy.tracer`. The idea is to record the computation procedure in a datastructure s.t.
+    the control flow sequence can walked in reverse order.
+    There is no complete documentation for the reverse mode yet.
+
+Further Reading
+---------------
+
+There has been a winterschool for Algorithmic Differentiation. Some tutorials explain Taylor polynomial arithmetic.
+http://www.sintef.no/Projectweb/eVITA/English/eSCience-Meeting-2010/Winter-School/
+
+Simple Examples:
 
 .. toctree::
    :maxdepth: 1
    
    examples/series_expansion.rst
    examples/first_order_forward.rst
-
-The Reverse Mode of Algorithmic Differentiation:
-
-    Todo
    
 Advanced Examples:
 
@@ -118,9 +136,8 @@ Advanced Examples:
    examples/moore_penrose_pseudoinverse.rst
    examples/ode_solvers.rst
    examples/comparison_forward_reverse_mode.rst
-   
-   
-Further Reading:
+
+Additional Information:
 
 .. toctree::
    :maxdepth: 1
@@ -128,14 +145,6 @@ Further Reading:
    datastructure_and_algorithms.rst
    examples_tracer.rst
 
-
-
-
-
-
-   
-    
-    
 Current Issues:
 ---------------
       
@@ -149,6 +158,14 @@ Current Issues:
       derivatives at once. In the reverse mode one would like to propagate M
       adjoint directions at once. However, this is not implemented yet, i.e. one
       has to repeat the procedure M times.
+      
+Unit Test
+---------
+
+ALGOPY uses the same testing facilitities as NumPy. I.e., one can run the complete
+unit test with::
+    
+    $ python -c "import algopy; algopy.test()"
 
 
 Indices and tables
