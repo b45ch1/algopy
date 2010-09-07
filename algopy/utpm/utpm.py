@@ -313,7 +313,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         retsin = self.clone()
         retcos = self.clone()
         self._sincos(self.data, out = (retsin.data, retcos.data))
-        return retsin, retcos        
+        return retsin, retcos
 
     def sum(self, axis=None, dtype=None, out=None):
         if dtype != None or out != None:
@@ -324,6 +324,19 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             return UTPM(numpy.sum(self.data.reshape(self.data.shape[:2] + (tmp,)), axis = 2))
         else:
             return UTPM(numpy.sum(self.data, axis = axis + 2))
+    
+    @classmethod
+    def pb_sum(cls, ybar, x, y, axis, dtype, out2, out = None):
+        
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+        
+        else:
+            xbar = out[0]
+           
+        tmp = xbar.data.T
+        tmp += ybar.data.T
 
 
     @classmethod

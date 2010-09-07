@@ -114,6 +114,31 @@ class Test_Function_on_UTPM(TestCase):
         
         assert_array_almost_equal( x.xbar.data, (2 * ybar * x.x).data)
         
+    def test_sum(self):
+        D,P,N = 2,1,4
+        cg1 = CGraph()
+        x1 = Function(UTPM(numpy.random.rand(D,P,N)))
+        y1 = numpy.sum(x1)
+        cg1.trace_off()
+        cg1.independentFunctionList = [x1]
+        cg1.dependentFunctionList = [y1]
+        
+        cg2 = CGraph()
+        x2 = Function(UTPM(numpy.random.rand(D,P,N)))
+        y2 = algopy.zeros((),dtype=x2)
+        for n in range(N):
+            y2 += x2[n]
+        cg2.trace_off()
+        cg2.independentFunctionList = [x2]
+        cg2.dependentFunctionList = [y2]
+        
+        ybar = UTPM(numpy.random.rand(D,P))
+        cg1.pullback([ybar])
+        cg2.pullback([ybar])
+        
+        assert_array_almost_equal(x1.xbar.data, x2.xbar.data)
+
+        
     def test_get_item(self):
         D,P,N = 2,5,7
         ax = UTPM(numpy.random.rand(D,P,N,N))
