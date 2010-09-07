@@ -213,7 +213,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             rhs_shape = rhs.shape
             if numpy.isscalar(rhs_shape):
                 rhs_shape = (rhs_shape,)
-            return UTPM((self.data.T / rhs.reshape((1,1) + rhs_shape ).T).T )            
+            return UTPM((self.data.T / rhs.reshape((1,1) + rhs_shape ).T).T )
         
         x_data, y_data = UTPM._broadcast_arrays(self.data, rhs.data)
         z_data = numpy.zeros_like(x_data)
@@ -228,7 +228,18 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             y_data = numpy.zeros_like(x_data)
             self._pow_real(x_data, r, y_data)
             return self.__class__(y_data)
+
+    @classmethod
+    def pb___pow__(cls, ybar, x, r, y, out = None):
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
         
+        else:
+            xbar, = out
+            
+        cls.pb_pow_real(ybar.data, x.data, r, y.data, out = xbar.data)
+        return xbar
 
     def __radd__(self,rhs):
         return self + rhs

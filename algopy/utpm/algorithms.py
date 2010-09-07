@@ -137,7 +137,7 @@ class RawAlgorithmsMixIn:
             return NotImplementedError('')
 
         (D,P) = z_data.shape[:2]
-        for d in range(D):
+        for d in range(D)[::-1]:
             z_data[d,:,...] =  numpy.sum(x_data[:d+1,:,...] * y_data[d::-1,:,...], axis=0)
             
     @classmethod
@@ -202,6 +202,22 @@ class RawAlgorithmsMixIn:
             y_data[d] /= x_data[0]
             y_data[d] /= d
             
+    @classmethod
+    def pb_pow_real(cls, ybar_data, x_data, r, y_data, out = None):
+        """ pullback function of y = pow(x,r) """
+        if out == None:
+            raise NotImplementedError('should implement that')
+        
+        xbar_data = out
+        (D,P) = y_data.shape[:2]
+        
+        if r == 0:
+            raise NotImplementedError('x**0 is special and has not been implemented')
+        
+        cls._div(y_data, x_data, xbar_data)
+        cls._mul(ybar_data, xbar_data, xbar_data)
+        xbar_data *= r
+
             
     @classmethod
     def _max(cls, x_data, axis = None, out = None):

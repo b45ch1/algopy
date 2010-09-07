@@ -290,6 +290,26 @@ class Test_Push_Forward(TestCase):
         Z = X*X*X
         assert_array_almost_equal(Y.data, Z.data)
         
+        
+    def test_pow_pullback(self):
+        D,P,N = 4,2,2
+        x = UTPM(numpy.random.rand(D,P,N))
+        
+        r = 2
+        y = x**r
+        ybar = UTPM(numpy.random.rand(D,P,N))
+        xbar = UTPM.pb___pow__(ybar, x, r, y)
+        
+        assert_array_almost_equal((r * ybar * x**(r-1)).data, xbar.data)
+        
+        
+        r = 3.1
+        y = x**r
+        ybar = UTPM(numpy.random.rand(D,P,N))
+        xbar = UTPM.pb___pow__(ybar, x, r, y)
+        
+        assert_array_almost_equal((r * ybar * x**(r-1)).data, xbar.data)
+        
     def test_sin_cos(self):
         D,P,M,N = 4,3,2,1
         X = UTPM(numpy.random.rand(D,P,M,N))

@@ -622,6 +622,12 @@ class Function(Ring):
          
     def sqrt(self):
          return Function.push_forward(algopy.sqrt, [self])
+    
+    def __pow__(self, r):
+         return Function.push_forward(self.x.__class__.__pow__, [self, r])
+         
+    def sum(self, axis=None, dtype=None, out=None):
+         return Function.push_forward(numpy.sum, [self, axis, dtype, out])
          
     def inv(self):
          return Function.push_forward(self.x.__class__.inv, [self])
