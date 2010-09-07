@@ -125,6 +125,7 @@ Simple Examples:
    
    examples/series_expansion.rst
    examples/first_order_forward.rst
+   examples/posterior_log_probability.rst
    
 Advanced Examples:
 
