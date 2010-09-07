@@ -99,6 +99,21 @@ class Test_Function_on_UTPM(TestCase):
         assert_almost_equal(fx.xbar.data, (fz.xbar * fy.xbar).data)
         assert_almost_equal(fy.xbar.data, (fz.xbar * fx.xbar).data)
         
+    def test_pow(self):
+        D,P,N = 4,2,2
+        cg = CGraph()
+        x = Function(UTPM(numpy.random.rand(D,P,N)))
+        r = 2
+        y = x**r
+        cg.trace_off()
+        cg.independentFunctionList = [x]
+        cg.dependentFunctionList = [y]
+        
+        ybar = UTPM(numpy.random.rand(D,P,N))
+        cg.pullback([ybar])
+        
+        assert_array_almost_equal( x.xbar.data, (2 * ybar * x.x).data)
+        
     def test_get_item(self):
         D,P,N = 2,5,7
         ax = UTPM(numpy.random.rand(D,P,N,N))

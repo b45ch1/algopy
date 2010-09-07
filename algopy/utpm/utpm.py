@@ -236,7 +236,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             xbar = x.zeros_like()
         
         else:
-            xbar, = out
+            xbar = out[0]
             
         cls.pb_pow_real(ybar.data, x.data, r, y.data, out = xbar.data)
         return xbar
