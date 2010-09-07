@@ -1,4 +1,4 @@
-import numpy; from algopy import UTPM, zeros, Function, CGraph
+import numpy; from algopy import UTPM, zeros, Function, CGraph; import os
 
 def LogNormalLikelihood(x, mu, sigma):
    return sigma *(x - mu)**2  - numpy.log(.5*sigma/numpy.pi)
@@ -31,15 +31,17 @@ out = logp(x, mu, sigma)
 cg.trace_off()
 cg.independentFunctionList = [mu]
 cg.dependentFunctionList = [out]
+cg.plot(os.path.join(os.path.dirname(os.path.realpath(__file__)),'posterior_log_probability_cgraph.png'))
 
 # reverse mode with ALGOPY
 outbar = UTPM([[1.],[0],[0]])
 cg.pullback([outbar])
     
-cg.plot('/tmp/cgraph.svg')
 gradient =  mu.xbar.data[0,0]
 Hess_vec =  mu.xbar.data[1,0]
 
 print 'gradient = ', gradient
 print 'Hessian vector product = ', Hess_vec
+
+
 

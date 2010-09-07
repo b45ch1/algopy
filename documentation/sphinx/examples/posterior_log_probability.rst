@@ -19,5 +19,16 @@ as output one obtains::
     44.0612893726
     gradient =  44.0612882911
     Hessian vector product =  94.0
+    
+
+and the computational graph:
+
+.. image:: posterior_log_probability_cgraph.png
+    :align: center
+    :scale: 50
+
+
+
+
 
 
