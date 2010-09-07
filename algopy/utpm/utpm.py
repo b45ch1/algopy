@@ -337,6 +337,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
            
         tmp = xbar.data.T
         tmp += ybar.data.T
+        
+        return xbar
 
 
     @classmethod
@@ -775,8 +777,13 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         else:
             xbar, ybar = out
         
-        ybar += zbar
-        xbar += zbar
+        xbar2,zbar2 = cls.broadcast(xbar, zbar)
+        ybar2,zbar2 = cls.broadcast(ybar, zbar)
+        
+        # print 'ybar2.data.shape=',ybar2.data.shape
+        
+        ybar2 += zbar2
+        xbar2 += zbar2
 
         return (xbar,ybar)
         
@@ -809,28 +816,16 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         
         else:
             xbar, ybar = out
+            
+        xbar2,zbar2 = cls.broadcast(xbar, zbar)
+        ybar2,zbar2 = cls.broadcast(ybar, zbar)
         
-        xbar += zbar
-        ybar -= zbar
+        xbar2 += zbar2
+        ybar2 -= zbar2
 
         return (xbar,ybar)
         
         
-    @classmethod
-    def broadcast(cls, x,y):
-        if numpy.isscalar(x) or isinstance(x,numpy.ndarray):
-            return x,y
-        
-        if numpy.isscalar(y) or isinstance(y,numpy.ndarray):
-            return x,y
-            
-        # broadcast xbar and ybar
-        x2_data, y2_data = cls._broadcast_arrays(x.data,y.data)
-        
-        x2 = UTPM(x2_data)
-        y2 = UTPM(y2_data)
-        return x2, y2
-
     @classmethod
     def pb_mul(cls, zbar, x, y , z, out = None):
         if out == None:
@@ -860,7 +855,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             xbar, ybar = out
             
         xbar2, tmp = cls.broadcast(xbar, zbar)
-        ybar2, tmp = cls.broadcast(ybar, zbar)            
+        ybar2, tmp = cls.broadcast(ybar, zbar)
         
         tmp  = zbar.clone()
         tmp /= y
@@ -869,7 +864,26 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         ybar2 -= tmp
 
         return (xbar,ybar)
-
+        
+        
+        
+    @classmethod
+    def broadcast(cls, x,y):
+        """
+        this is the UTPM equivalent to numpy.broadcast_arrays
+        """
+        if numpy.isscalar(x) or isinstance(x,numpy.ndarray):
+            return x,y
+        
+        if numpy.isscalar(y) or isinstance(y,numpy.ndarray):
+            return x,y
+            
+        # broadcast xbar and ybar
+        x2_data, y2_data = cls._broadcast_arrays(x.data,y.data)
+        
+        x2 = UTPM(x2_data)
+        y2 = UTPM(y2_data)
+        return x2, y2
 
     @classmethod
     def pb_dot(cls, zbar, x, y, z, out = None):
