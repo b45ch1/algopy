@@ -420,7 +420,7 @@ class Function(Ring):
             # case if the function F has no output, e.g. None = F(x)
             f = eval('__import__("algopy.utpm").utpm.'+F.args[0].x.__class__.__name__+'.pb_'+func_name)
     
-        elif numpy.isscalar(F.x):
+        elif numpy.isscalar(F.x) or isinstance(F.x, numpy.ndarray):
             return lambda x: None
     
         elif isinstance(F.x, algopy.UTPM):
@@ -439,7 +439,11 @@ class Function(Ring):
         elif func_name == '__getitem__':
             return  lambda x: None
             # raise NotImplementedError('should implement that')
-        
+            
+        # elif func_name == '__getitem__':
+        #     return  lambda x: None
+            # raise NotImplementedError('should implement that')
+            
         # STEP 2: call the pullback function
         kwargs = {'out': list(argsbar)}
         

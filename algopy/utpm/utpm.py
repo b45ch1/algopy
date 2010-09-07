@@ -777,13 +777,15 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         else:
             xbar, ybar = out
         
-        xbar2,zbar2 = cls.broadcast(xbar, zbar)
-        ybar2,zbar2 = cls.broadcast(ybar, zbar)
-        
+        if isinstance(xbar, UTPM):
+            xbar2,zbar2 = cls.broadcast(xbar, zbar)
+            xbar2 += zbar2
+            
+        if isinstance(ybar, UTPM):
+            ybar2,zbar2 = cls.broadcast(ybar, zbar)
+            ybar2 += zbar2
         # print 'ybar2.data.shape=',ybar2.data.shape
         
-        ybar2 += zbar2
-        xbar2 += zbar2
 
         return (xbar,ybar)
         

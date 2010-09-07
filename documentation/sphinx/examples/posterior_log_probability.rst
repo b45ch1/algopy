@@ -11,10 +11,13 @@ as output one obtains::
     
     walter@wronski$ python examples/posterior_log_probability.py
     function evaluation =
-    134.752794884
-    function evaluation + 1st directional derivative =
-    [[ 134.75279488]
-     [  49.85643448]]
+    138.692022348
+    function evaluation = 138.692022
+    1st directional derivative = 44.061288
+    2nd directional derivative = 94.000000
     finite differences derivative =
-    49.8564304507
+    44.0612893726
+    gradient =  44.0612882911
+    Hessian vector product =  94.0
+
 
