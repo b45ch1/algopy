@@ -206,7 +206,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return self.__class__(z_data)
 
     def __div__(self,rhs):
-        if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
+        if numpy.isscalar(rhs):
             return UTPM( self.data/rhs)
             
         elif isinstance(rhs, numpy.ndarray):
