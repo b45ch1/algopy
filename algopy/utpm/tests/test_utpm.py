@@ -19,7 +19,34 @@ class Test_Push_Forward(TestCase):
         for n in range(3):
             for m in range(4):
                 assert_array_almost_equal(z[0,0].data, A[0,0].data)
-                
+
+    def test_sum(self):
+        # check sum
+        D,P,N,M = 2,3,4,5
+        x = UTPM(numpy.arange(D*P*N*M).reshape((D,P,N,M)))
+        
+        y0 = numpy.sum(x).data
+        y1 = numpy.sum(x,axis=0).data
+        y2 = numpy.sum(x,axis=1).data
+        
+        for d in range(D):
+            for p in range(P):
+                assert_array_almost_equal(numpy.sum(x.data[d,p]), y0[d,p])
+                assert_array_almost_equal(numpy.sum(x.data[d,p], axis=0), y1[d,p])
+                assert_array_almost_equal(numpy.sum(x.data[d,p], axis=1), y2[d,p])
+        
+
+    def test_broadcasting(self):
+        #check 1
+        x1 = numpy.array([1.,2.,3.])
+        y1 = UTPM([[5],[7]])
+        
+        z11 = x1 - y1
+        z12 = -(y1 - x1)
+        
+        z_data = numpy.array([[[-4,-3,-2]],[[-7,-7,-7]]])
+        assert_array_almost_equal(z_data, z11.data)
+        assert_array_almost_equal(z_data, z12.data)
                 
     def test_symvec_vecsym(self):
         (D,P,N) = 2,1,5

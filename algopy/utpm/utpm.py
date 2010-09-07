@@ -154,19 +154,38 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         # print y[funcargs[0]]
     
     def __add__(self,rhs):
-        if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
+        if numpy.isscalar(rhs):
             retval = UTPM(numpy.copy(self.data))
             retval.data[0,:] += rhs
             return retval
+        elif isinstance(rhs, numpy.ndarray):
+            rhs_shape = rhs.shape
+            if numpy.isscalar(rhs_shape):
+                rhs_shape = (rhs_shape,)
+            x_data, y_data = UTPM._broadcast_arrays(self.data, rhs.reshape((1,1)+rhs_shape))
+            z_data = x_data.copy()
+            z_data[0] += y_data[0]
+            return UTPM(z_data)
+
         else:
             return UTPM(self.data + rhs.data)
 
             
     def __sub__(self,rhs):
-        if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
+        if numpy.isscalar(rhs):
             retval = UTPM(numpy.copy(self.data))
             retval.data[0,:] -= rhs
             return retval
+            
+        elif isinstance(rhs, numpy.ndarray):
+            rhs_shape = rhs.shape
+            if numpy.isscalar(rhs_shape):
+                rhs_shape = (rhs_shape,)
+            x_data, y_data = UTPM._broadcast_arrays(self.data, rhs.reshape((1,1)+rhs_shape))
+            z_data = x_data.copy()
+            z_data[0] -= y_data[0]
+            return UTPM(z_data)         
+            
         else:
             return UTPM(self.data - rhs.data)
 
@@ -189,6 +208,12 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def __div__(self,rhs):
         if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
             return UTPM( self.data/rhs)
+            
+        elif isinstance(rhs, numpy.ndarray):
+            rhs_shape = rhs.shape
+            if numpy.isscalar(rhs_shape):
+                rhs_shape = (rhs_shape,)
+            return UTPM((self.data.T / rhs.reshape((1,1) + rhs_shape ).T).T )            
         
         x_data, y_data = UTPM._broadcast_arrays(self.data, rhs.data)
         z_data = numpy.zeros_like(x_data)
@@ -278,7 +303,18 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         retcos = self.clone()
         self._sincos(self.data, out = (retsin.data, retcos.data))
         return retsin, retcos        
+
+    def sum(self, axis=None, dtype=None, out=None):
+        if dtype != None or out != None:
+            raise NotImplementedError('not implemented yet')
         
+        if axis == None:
+            tmp = numpy.prod(self.data.shape[2:])
+            return UTPM(numpy.sum(self.data.reshape(self.data.shape[:2] + (tmp,)), axis = 2))
+        else:
+            return UTPM(numpy.sum(self.data, axis = axis + 2))
+
+
     @classmethod
     def pb_sincos(cls, sbar, cbar, x, s, c, out = None):
         if out == None:
