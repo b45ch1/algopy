@@ -133,6 +133,7 @@ def setup_package():
             data_files.append([dirpath, [os.path.join(dirpath, f) for f in filenames]])
 
     from distutils.core import setup, Extension
+    from setuptools import setup
     
     try:
         setup(name=NAME,
@@ -148,6 +149,7 @@ def setup_package():
           packages = packages,
           # ext_package='algopy.ctps',
           # ext_modules=[Extension('libctps', ['algopy/ctps/src/ctps.c'])],
+           entry_points = {"distutils.commands": ["upload_sphinx = sphinx_pypi_upload:UploadDoc",]}
          )
 
     finally:

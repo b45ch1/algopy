@@ -35,6 +35,7 @@ runscripts:
 	python examples/series_expansion.py
 	python examples/explicit_euler.py
 	python examples/implicit_euler.py
+	python examples/posterior_log_probability.py
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
