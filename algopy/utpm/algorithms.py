@@ -188,10 +188,11 @@ class RawAlgorithmsMixIn:
             if r == 2:
                 return cls._mul(x_data, x_data, y_data)
                 
-            if r == 3:
-                tmp = numpy.zeros_like(x_data)
-                cls._mul(x_data, x_data, tmp)
-                return cls._mul(x_data, tmp, y_data)
+            if r >= 3:
+                y_data[...] = x_data[...]
+                for nr in range(r-1):
+                    cls._mul(x_data, y_data, y_data)
+                return
             
         
         y_data[0] = x_data[0]**r

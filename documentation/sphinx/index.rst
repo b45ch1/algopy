@@ -16,7 +16,7 @@ they often appear in statistically motivated functions.
 
 Help improve ALGOPY
 -------------------
-If you have any questions or suggestions donâ€™t hesitate to write me an email (sebastian.walter@gmail.com). This will make it much easier for me to provide code/documentation that is easy to understand. Of course, you are also welcome to contribute code and bugfixes. For instance, an nice addition
+If you have any questions or suggestions don't hesitate to write me an email (sebastian.walter@gmail.com). This will make it much easier for me to provide code/documentation that is easy to understand. Of course, you are also welcome to contribute code and bugfixes. For instance, an nice addition
 would be a set of high-level functions that make it easier for new users to compute the gradient, Jacobian, Jacobian-vector, vector-Jacobian, Hessian, Hessian-vector.
 
 Getting Started:
