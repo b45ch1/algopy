@@ -72,10 +72,10 @@ class TestExactInterpolation(TestCase):
         true_perms = numpy.array([[1, 2, 3],[2, 1, 3],[2, 3, 1],[1, 3, 2],[3, 1, 2],[3, 2, 1]],dtype=int)
         assert numpy.prod(computed_perms == true_perms)
 
-    def test_generate_Gamma(self):
-        i = numpy.array([1,1],dtype=int)
-        (Gamma,J) = generate_Gamma(i)
-        assert_array_almost_equal(Gamma, [ - 0.25, 1., -0.25])
+    # def test_generate_Gamma(self):
+        # i = numpy.array([1,1],dtype=int)
+        # (Gamma,J) = generate_Gamma(i)
+        # assert_array_almost_equal(Gamma, [ - 0.25, 1., -0.25])
 
     # def test_tensor(self):
     #     def f(x):

@@ -15,9 +15,27 @@ We use the same notation as in the book since the notation in asci is easier to 
 """
 from __future__ import division
 import numpy
+import scipy
 
 def generate_multi_indices(N,deg):
-    """
+    """ generate_multi_indices(N,deg)
+
+    Create a 2D array of all possible multi-indices i with |i| = deg
+    and :math:`i \in \mathbb N_0^N`.
+
+    Parameters
+    ----------
+    N : int
+        size of the multi-indices i
+    deg : degree 
+    
+    Returns
+    -------
+    multi_indices: numpy.ndarray
+        an array with the shape (binomial(N + deg - 1, deg), N)
+    
+    Examples
+    ---------
     generates 2D array of all possible multi-indices with |i| = deg
     e.g.
     N=3, deg=2
@@ -52,24 +70,36 @@ def generate_multi_indices(N,deg):
     D = deg # renaming
     
     T = []
-    def rec(r,n,N,D):
+    def rec(r,n,N,deg):
         j = r.copy()
         if n == N-1:
-            j[N-1] = D - numpy.sum(j[:])
+            j[N-1] = deg - numpy.sum(j[:])
             T.append(j.copy())
             return
-        for a in range( D - numpy.sum( j [:] ), -1,-1 ):
+        for a in range( deg - numpy.sum( j [:] ), -1,-1 ):
             j[n]=a
-            rec(j,n+1,N,D)
+            rec(j,n+1,N,deg)
     r = numpy.zeros(N,dtype=int)
-    rec(r,0,N,D)
+    rec(r,0,N,deg)
     return numpy.array(T)
 
 
 def multi_index_binomial(z,k):
     """
-    This is a helper function.
+    computes a binomial coefficient binomial(z,k) where z and k multi-indices
+
+    Parameters
+    ----------
+    z: numpy.ndarray
+        array with shape (N,)
     
+    k: numpy.ndarray
+        array with shape (N,)
+        
+    Returns
+    -------
+    binomial_coefficient: scalar
+
     n and k are multi-indices, i.e.
     n = [n1,n2,...]
     k = [k1,k2,...]
@@ -119,8 +149,8 @@ def convert_multi_indices_to_pos(in_I):
     """
     I = in_I.copy()
     M,N = numpy.shape(I)
-    D = numpy.sum(I[0,:])
-    retval = numpy.zeros((M,D),dtype=int)
+    deg = numpy.sum(I[0,:])
+    retval = numpy.zeros((M,deg),dtype=int)
     for m in range(M):
         i = 0
         for n in range(N):
@@ -133,26 +163,32 @@ def convert_multi_indices_to_pos(in_I):
 def gamma(i,j):
     """ Compute gamma(i,j), where gamma(i,j) is define as in Griewanks book in Eqn (13.13)"""
     N = len(i)
-    D = numpy.sum(j)
+    i = numpy.asarray(i)
+    j = numpy.asarray(j)
+    deg = numpy.sum(j)
     retval = [0.]
-        
-    def binomial(z,k):
-        """ computes z!/[(z-k)! k!] """
-        u = int(numpy.prod([z-i for i in range(k) ]))
-        d = int(numpy.prod([i for i in range(1,k+1)]))
-        return u//d
-    
+   
+    print 'deg=',deg
     def alpha(i,j,k):
         """ computes one element of the sum in the evaluation of gamma,
         i.e. the equation below 13.13 in Griewanks Book"""
         term1 = (1-2*(numpy.sum(abs(i-k))%2))
         term2 = 1
         for n in range(N):
-            term2 *= binomial(i[n],k[n])
+            term2 *= scipy.comb(i[n],k[n],exact=True)
         term3 = 1
         for n in range(N):
-            term3 *= binomial(D*k[n]// numpy.sum(abs(k)), j[n] )
-        term4 = (numpy.sum(abs(k))/D)**(numpy.sum(abs(i)))
+            term3 *= scipy.comb(1.*deg*k[n]/numpy.sum(abs(k)), j[n] , exact = False)
+        term4 = (1.*numpy.sum(k)/deg)**(numpy.sum(i))
+        
+        # print 'i=', i
+        # print 'j=', j
+        # print 'k=', k
+        # print 'term1', term1
+        # print 'term2', term2
+        # print 'term3', term3
+        # print 'term4', term4
+
         return term1*term2*term3*term4
         
     def sum_recursion(in_k, n):
@@ -170,6 +206,7 @@ def gamma(i,j):
             
     # putting everyting together here
     k = numpy.zeros(N,dtype=int)
+    k[0] = 1
     sum_recursion(k,0)
     return retval[0]
     
@@ -199,39 +236,40 @@ def generate_permutations(in_x):
                 yield perm[:i] + x[0:1] + perm[i:]
                 
                 
-def generate_Gamma(i):
+def generate_Gamma_and_rays(N,deg, S = None):
     """
-    generates a big matrix Gamma with elements gamma(i,j)
+    generates a big matrix Gamma with elements gamma(i,j) and rays
     
-    e.g. 
-    i  = [1,3,0,6]
-    means that a function f: R^4 -> R^M should be differentiated as
+    Parameters
+    ----------
+    N: int
+    deg: int
+    S: numpy.ndarray with shape (M,N) (optional)
+        seed matrix, if None it is set to numpy.eye(N)
     
-    d^10f/(dx1^1 dx2^3 dx4^6)
-    
-    to do so, the following univariate Taylor polynomials are propagated
-    f(x + j t)
-    
-    INPUTS:
-    i           (N,) int-array            multiindex to compute f_i
-    
-    OUTPUTS:
-    J           (Nj,N) int-array            rayvalues
-    Gamma       (NJ,)  int-array            interpolation matrix
+    Returns
+    -------
+    Gamma        numpy.ndarray
+        interpolation matrix
+        
+    rays    numpy.ndarray
+        input rays
     """
     
-    i = numpy.asarray(i, dtype=int)
+    if S == None:
+        S = numpy.eye(N)
     
-    if i.ndim != 1:
-        raise ValueError('Expected 1D array but provided i.shape = ',i.shape)
+    J = generate_multi_indices(N,deg)
     
-    N = i.size
-    D = numpy.sum(i)
-    J = generate_multi_indices(N,D)
+    print J.shape
+    
+    rays = numpy.dot(J, S)
     NJ = J.shape[0]
-    out = numpy.zeros(NJ)
-    for nj in range(NJ):
-        j = J[nj,:]
-        out[nj] = gamma(i,j)
+    Gamma = numpy.zeros((NJ,NJ))
+    for ni in range(NJ):
+        for nj in range(NJ):
+            i = J[ni,:]
+            j = J[nj,:]
+            Gamma[ni, nj] = gamma(i,j)/numpy.prod(scipy.factorial(i))
             
-    return (out,J)
+    return (Gamma, rays)
