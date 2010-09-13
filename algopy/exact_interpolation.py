@@ -160,55 +160,96 @@ def convert_multi_indices_to_pos(in_I):
                 i+=1
     return retval
 
-def gamma(i,j):
+def increment(i,k):
+    """ this is a helper function for a summation of the type :math:`\sum_{0 \leq k \leq i}`,
+        where i and k are multi-indices.
+        
+        Parameters
+        ----------
+        i: numpy.ndarray
+            integer array, i.size = N
+            
+        k: numpy.ndarray
+            integer array, k.size = N
+        
+        Returns
+        -------
+        changes k on return
+        
+        
+        Example
+        -------
+        
+        k = [1,0,1]
+        i = [2,0,2]
+        
+        _increment(i, k) # changes k to [1,0,2]
+        _increment(i, k) # changes k to [2,0,0]
+        _increment(i, k) # changes k to [2,0,1]
+        
+    """
+    
+    carryover = 1
+    
+    if len(k) != len(i):
+        raise ValueError('size of i and k do not match up')
+
+    for n in range(len(k))[::-1]:
+        if i[n] == 0:
+            continue
+        
+        tmp = k[n] + carryover
+        # print 'tmp=',tmp
+        carryover = tmp // (i[n]+1)
+        # print 'carryover=',carryover
+        k[n]      = tmp  % (i[n]+1)
+        
+        if carryover == 0:
+            break
+    
+    
+
+def gamma(i,j,deg):
     """ Compute gamma(i,j), where gamma(i,j) is define as in Griewanks book in Eqn (13.13)"""
     N = len(i)
-    i = numpy.asarray(i)
-    j = numpy.asarray(j)
-    deg = numpy.sum(j)
-    retval = [0.]
+    i = numpy.asarray(i, dtype=int)
+    j = numpy.asarray(j, dtype=int)
    
-    print 'deg=',deg
     def alpha(i,j,k):
         """ computes one element of the sum in the evaluation of gamma,
         i.e. the equation below 13.13 in Griewanks Book"""
-        term1 = (1-2*(numpy.sum(abs(i-k))%2))
-        term2 = 1
+        term1 = (1-2*(numpy.sum(i-k)%2))
+        term2 = 1.
         for n in range(N):
-            term2 *= scipy.comb(i[n],k[n],exact=True)
-        term3 = 1
+            term2 *= scipy.comb(i[n],k[n],exact=False)
+        term3 = 1.
         for n in range(N):
-            term3 *= scipy.comb(1.*deg*k[n]/numpy.sum(abs(k)), j[n] , exact = False)
-        term4 = (1.*numpy.sum(k)/deg)**(numpy.sum(i))
+            term3 *= scipy.comb(float(deg*k[n])/numpy.sum(k), j[n] , exact = False)
+        term4 = (float(numpy.sum(k))/deg)**(numpy.sum(i))
         
-        # print 'i=', i
-        # print 'j=', j
-        # print 'k=', k
-        # print 'term1', term1
-        # print 'term2', term2
-        # print 'term3', term3
-        # print 'term4', term4
+        if numpy.allclose(i,[2,1]) and numpy.allclose(j,[0,3]):
+            # print 'i=', i
+            # print 'j=', j
+            # print 'k=', k
+            # print 'term1', term1
+            # print 'term2', term2
+            # print 'term3', term3
+            # print 'term4', term4
+            pass
 
         return term1*term2*term3*term4
         
-    def sum_recursion(in_k, n):
-        """ computes gamma(i,j).
-            The summation 0<k<i, where k and i multi-indices makes it necessary to do this 
-            recursively.
-        """
-        k = in_k.copy()
-        if n==N:
-            retval[0] += alpha(i,j,k)
-            return
-        for a in range(i[n]+1):
-            k[n]=a
-            sum_recursion(k,n+1)
             
     # putting everyting together here
     k = numpy.zeros(N,dtype=int)
-    k[0] = 1
-    sum_recursion(k,0)
-    return retval[0]
+    retval = 0
+    while True:
+        increment(i,k)
+        retval += alpha(i,j,k)
+        # print 'k=',k
+        if (i == k).all() == True:
+            break
+    return retval
     
 def generate_permutations(in_x):
     """
@@ -261,7 +302,6 @@ def generate_Gamma_and_rays(N,deg, S = None):
     
     J = generate_multi_indices(N,deg)
     
-    print J.shape
     
     rays = numpy.dot(J, S)
     NJ = J.shape[0]
@@ -270,6 +310,7 @@ def generate_Gamma_and_rays(N,deg, S = None):
         for nj in range(NJ):
             i = J[ni,:]
             j = J[nj,:]
-            Gamma[ni, nj] = gamma(i,j)/numpy.prod(scipy.factorial(i))
+            Gamma[ni, nj] = gamma(i,j, deg)
+            # print 'i,j=',i,j, Gamma[ni, nj]
             
     return (Gamma, rays)
