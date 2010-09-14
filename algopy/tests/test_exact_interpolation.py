@@ -7,6 +7,7 @@ Not working ATM.
 from numpy.testing import *
 import numpy
 
+from algopy import UTPM
 from algopy.exact_interpolation import *
 
 
@@ -62,6 +63,33 @@ class TestExactInterpolation(TestCase):
         #print true_pos_mat
         #print computed_pos_mat
         assert numpy.prod(true_pos_mat == computed_pos_mat) #all entries have to be the same
+        
+        
+    def test_multi_index_binomial(self):
+        i1 = numpy.array([0],dtype=int)
+        i2 = numpy.array([0],dtype=int)
+        i3 = numpy.array([1],dtype=int)
+        i4 = numpy.array([1.5],dtype=float)
+        
+        assert_array_almost_equal([1], multi_index_binomial(i1,i2))
+        assert_array_almost_equal([1], multi_index_binomial(i3,i1))
+        assert_array_almost_equal([1], multi_index_binomial(i4,i1))
+        assert_array_almost_equal([1.5], multi_index_binomial(i4,i3))
+        
+
+    def test_increment(self):
+        i = numpy.array([1,2,3],dtype=int)
+        k = numpy.zeros(3,dtype=int)
+        
+        count = 1
+        while True:
+            increment(i,k)
+            count += 1
+            if numpy.allclose(i,k):
+                break
+        
+        assert_array_almost_equal(numpy.prod(i+1),count)
+
 
     def test_generate_permutations(self):
         x = [1,2,3]
@@ -71,6 +99,31 @@ class TestExactInterpolation(TestCase):
         computed_perms = numpy.array(computed_perms)
         true_perms = numpy.array([[1, 2, 3],[2, 1, 3],[2, 3, 1],[1, 3, 2],[3, 1, 2],[3, 2, 1]],dtype=int)
         assert numpy.prod(computed_perms == true_perms)
+        
+    def test_interpolation(self):
+        def f(x):
+            return x[0] + x[1] + 3.*x[0]*x[1] + 7.*x[1]*x[1] + 17.*x[0]*x[0]*x[0]
+        
+        N = 2
+        D = 5
+        deg_list = [0,1,2,3,4]
+        coeff_list = []
+        for n,deg in enumerate(deg_list):
+            Gamma, rays = generate_Gamma_and_rays(N,deg)
+            x = UTPM(numpy.zeros((D,) + rays.shape))
+            x.data[1,:,:] = rays
+            y = f(x)
+            coeff_list.append(numpy.dot(Gamma, y.data[deg]))
+            
+        assert_array_almost_equal([0], coeff_list[0])
+        assert_array_almost_equal([1,1], coeff_list[1])
+        assert_array_almost_equal([0,3,7], coeff_list[2])
+        assert_array_almost_equal([17,0,0,0], coeff_list[3])        
+        
+        
+        
+        
+        
 
     # def test_generate_Gamma(self):
         # i = numpy.array([1,1],dtype=int)

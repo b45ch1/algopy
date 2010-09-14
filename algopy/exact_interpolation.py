@@ -84,38 +84,31 @@ def generate_multi_indices(N,deg):
     return numpy.array(T)
 
 
-def multi_index_binomial(z,k):
+def multi_index_factorial(i):
+    return numpy.prod([scipy.factorial(ii) for ii in i]) 
+
+def multi_index_binomial(i,j):
     """
-    computes a binomial coefficient binomial(z,k) where z and k multi-indices
+    computes a binomial coefficient binomial(i,j) where i and j multi-indices
 
     Parameters
     ----------
-    z: numpy.ndarray
+    i: numpy.ndarray
         array with shape (N,)
     
-    k: numpy.ndarray
+    j: numpy.ndarray
         array with shape (N,)
         
     Returns
     -------
     binomial_coefficient: scalar
-
-    n and k are multi-indices, i.e.
-    n = [n1,n2,...]
-    k = [k1,k2,...]
-    and computes
-    n1!/[(n1-k1)! k1!] * n2!/[(n2-k2)! k2!] * ....
     """
-    def binomial(z,k):
-        """ computes z!/[(z-k)! k!] """
-        u = int(numpy.prod([z-i for i in range(k) ]))
-        d = numpy.prod([i for i in range(1,k+1)])
-        return u/d
-
-    assert numpy.shape(z) == numpy.shape(k)
-    N = numpy.shape(z)[0]
-
-    return numpy.prod([ binomial(z[n],k[n]) for n in range(N)])
+    
+    def mybinomial(i,j):
+        return numpy.prod([ (i-k)/(j-k) for k in range(j)])
+    
+    N = len(i)
+    return numpy.prod([mybinomial(i[n],j[n]) for n in range(N)] )
 
 def multi_index_abs(z):
     return numpy.sum(z)
@@ -183,9 +176,9 @@ def increment(i,k):
         k = [1,0,1]
         i = [2,0,2]
         
-        _increment(i, k) # changes k to [1,0,2]
-        _increment(i, k) # changes k to [2,0,0]
-        _increment(i, k) # changes k to [2,0,1]
+        increment(i, k) # changes k to [1,0,2]
+        increment(i, k) # changes k to [2,0,0]
+        increment(i, k) # changes k to [2,0,1]
         
     """
     
@@ -207,7 +200,7 @@ def increment(i,k):
         if carryover == 0:
             break
     
-    
+    return k
 
 def gamma(i,j,deg):
     """ Compute gamma(i,j), where gamma(i,j) is define as in Griewanks book in Eqn (13.13)"""
@@ -215,17 +208,13 @@ def gamma(i,j,deg):
     i = numpy.asarray(i, dtype=int)
     j = numpy.asarray(j, dtype=int)
    
-    def alpha(i,j,k):
+    def alpha(i, j, k, deg):
         """ computes one element of the sum in the evaluation of gamma,
         i.e. the equation below 13.13 in Griewanks Book"""
-        term1 = (1-2*(numpy.sum(i-k)%2))
-        term2 = 1.
-        for n in range(N):
-            term2 *= scipy.comb(i[n],k[n],exact=False)
-        term3 = 1.
-        for n in range(N):
-            term3 *= scipy.comb(float(deg*k[n])/numpy.sum(k), j[n] , exact = False)
-        term4 = (float(numpy.sum(k))/deg)**(numpy.sum(i))
+        term1 = (-1.)**multi_index_abs(i - k)
+        term2 = multi_index_binomial(i,k)
+        term3 = multi_index_binomial((1.*deg*k)/multi_index_abs(k),j) 
+        term4 = (multi_index_abs(k)/deg)**multi_index_abs(i)
         
         if numpy.allclose(i,[2,1]) and numpy.allclose(j,[0,3]):
             # print 'i=', i
@@ -245,7 +234,7 @@ def gamma(i,j,deg):
     retval = 0
     while True:
         increment(i,k)
-        retval += alpha(i,j,k)
+        retval += alpha(i,j,k, deg)
         # print 'k=',k
         if (i == k).all() == True:
             break
@@ -310,7 +299,7 @@ def generate_Gamma_and_rays(N,deg, S = None):
         for nj in range(NJ):
             i = J[ni,:]
             j = J[nj,:]
-            Gamma[ni, nj] = gamma(i,j, deg)
+            Gamma[ni, nj] = gamma(i,j, deg)/multi_index_factorial(i)
             # print 'i,j=',i,j, Gamma[ni, nj]
             
     return (Gamma, rays)
