@@ -215,29 +215,19 @@ def gamma(i,j,deg):
         term2 = multi_index_binomial(i,k)
         term3 = multi_index_binomial((1.*deg*k)/multi_index_abs(k),j) 
         term4 = (multi_index_abs(k)/deg)**multi_index_abs(i)
-        
-        if numpy.allclose(i,[2,1]) and numpy.allclose(j,[0,3]):
-            # print 'i=', i
-            # print 'j=', j
-            # print 'k=', k
-            # print 'term1', term1
-            # print 'term2', term2
-            # print 'term3', term3
-            # print 'term4', term4
-            pass
-
+ 
         return term1*term2*term3*term4
         
             
     # putting everyting together here
     k = numpy.zeros(N,dtype=int)
+    # increment(i,k)
+    
     retval = 0
-    while True:
+    while (i == k).all() == False:
         increment(i,k)
         retval += alpha(i,j,k, deg)
-        # print 'k=',k
-        if (i == k).all() == True:
-            break
+
     return retval
     
 def generate_permutations(in_x):
