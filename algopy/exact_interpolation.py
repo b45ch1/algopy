@@ -202,11 +202,13 @@ def increment(i,k):
     
     return k
 
-def gamma(i,j,deg):
+def gamma(i,j):
     """ Compute gamma(i,j), where gamma(i,j) is define as in Griewanks book in Eqn (13.13)"""
     N = len(i)
+    deg = multi_index_abs(j)
     i = numpy.asarray(i, dtype=int)
     j = numpy.asarray(j, dtype=int)
+   
    
     def alpha(i, j, k, deg):
         """ computes one element of the sum in the evaluation of gamma,
@@ -228,7 +230,7 @@ def gamma(i,j,deg):
         increment(i,k)
         retval += alpha(i,j,k, deg)
 
-    return retval
+    return retval/multi_index_factorial(i)
     
 def generate_permutations(in_x):
     """
@@ -289,7 +291,7 @@ def generate_Gamma_and_rays(N,deg, S = None):
         for nj in range(NJ):
             i = J[ni,:]
             j = J[nj,:]
-            Gamma[ni, nj] = gamma(i,j, deg)/multi_index_factorial(i)
+            Gamma[ni, nj] = gamma(i,j)
             # print 'i,j=',i,j, Gamma[ni, nj]
             
     return (Gamma, rays)
