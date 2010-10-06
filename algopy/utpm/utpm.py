@@ -13,9 +13,10 @@ import numpy
 
 from ..base_type import Ring
 from algorithms import RawAlgorithmsMixIn, broadcast_arrays_shape
-
+           
 class UTPM(Ring, RawAlgorithmsMixIn):
     """
+   
     UTPM == Univariate Taylor Polynomial of Matrices
     This class implements univariate Taylor arithmetic on matrices, i.e.
     [A] = \sum_{d=0}^D A_d t^d
@@ -53,8 +54,11 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     
     __array_priority__ = 2
     
-    def __init__(self, X, Xdot = None):
-        """ INPUT:	shape([X]) = (D,P,N,M)
+    def __init__(self, X):
+        """ 
+        
+        INPUT:
+        shape([X]) = (D,P,N,M)
         """
         Ndim = numpy.ndim(X)
         if Ndim >= 2:
@@ -1235,4 +1239,90 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             for c in range(Cb):
                 tc[:,:,rowsums[r]:rowsums[r+1], colsums[c]:colsums[c+1]] = in_X[r,c].data[:,:,:,:]
     
-        return UTPM(tc) 
+        return UTPM(tc)
+        
+        
+class UTP(UTPM):
+    """
+    UTP(X, vectorized=False)
+    
+    Univariate Taylor Polynomial (UTP)
+    with coefficients that are arbitrary numpy.ndarrays
+    
+    Attributes
+    ----------
+    data: numpy.ndarray
+        underlying datastructure, a numpy.array of shape (D,P) + UTP.shape
+        
+    coeff: numpy.ndarray like structure
+        is accessed just like UTP.data but has the shape (D,) + UTP.shape if
+        vectorized=False and exactly the same as UTP.data when vectorized=True
+    
+    vectorized: bool
+        whether the UTP is vectorized or not (default is False)
+        
+    All other attributes are motivated from numpy.ndarray and return 
+    size, shape, ndim of an individual coefficient of the UTP. E.g.,
+    
+    T: UTP
+        Transpose of the UTP
+    size: int
+        Number of elements in a UTP coefficient
+    shape: tuple of ints
+        Shape of a UTP coefficient
+    ndim: int
+        The number of dimensions of a UTP coefficient
+        
+    Parameters
+    ----------
+    
+    X: numpy.ndarray with shape (D, P, N1, N2, N3, ...) if vectorized=True
+       otherwise a (D, N1, N2, N3, ...) array
+        
+    
+    Remark:
+        This class provides an improved userinterface compared to the class UTPM.
+        
+        The difference is mainly the initialization.
+        
+        E.g.::
+        
+            x = UTP([1,2,3])
+            
+        is equivalent to::
+        
+            x = UTP([1,2,3], P=1)
+            x = UTPM([[1],[2],[3]])
+            
+        and::
+            x = UTP([[1,2],[2,3],[3,4]], P=2)
+        
+        is equivalent to::
+        
+            x = UTPM([[1,2],[2,3],[3,4]])
+    """
+    
+    def __init__(self, X, vectorized=False):
+        """ 
+        see self.__class__.__doc__ for information
+        """
+        Ndim = numpy.ndim(X)
+        self.vectorized = vectorized
+        if Ndim >= 1:
+            self.data = numpy.asarray(X)
+            if vectorized == False:
+                shp = self.data.shape
+                self.data = self.data.reshape(shp[:1] + (1,) + shp[1:])
+        else:
+            raise NotImplementedError
+            
+    @property
+    def coeff(self, *args, **kwargs):
+        if self.vectorized == False:
+            return self.data[:,0,...]
+        else:
+            return self.data
+            
+    def __str__(self):
+        """ return string representation """
+        return str(self.coeff)

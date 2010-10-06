@@ -51,7 +51,7 @@ import tracer
 from tracer import CGraph, Function
 
 import utpm
-from utpm import UTPM
+from utpm import UTPM, UTP
 
 import globalfuncs
 from globalfuncs import *
