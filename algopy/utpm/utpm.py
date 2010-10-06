@@ -172,8 +172,10 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             return UTPM(z_data)
 
         else:
-            return UTPM(self.data + rhs.data)
-
+            x_data, y_data = UTPM._broadcast_arrays(self.data, rhs.data)
+            z_data = x_data.copy()
+            z_data += y_data
+            return UTPM(z_data)
             
     def __sub__(self,rhs):
         if numpy.isscalar(rhs):
