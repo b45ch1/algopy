@@ -186,6 +186,9 @@ class CGraph:
         accepted methods
         method = 'dot'
         method = 'circo'
+        method = 'fdp'
+        method = 'twopi'
+        method = 'neato'
 
         accepted orientations:
         orientation = 'LR'
@@ -200,6 +203,8 @@ class CGraph:
             return
             
         import os
+        
+        method_list = ['dot','circo','fdp','twopi','neato']
 
         # checking filename and converting appropriately
         if filename == None:
@@ -208,7 +213,7 @@ class CGraph:
         if orientation != 'LR' and orientation != 'TD' :
             orientation = 'TD'
 
-        if method != 'dot' and method != 'circo':
+        if not any(['dot' == m for m in method_list]):
             method = 'dot'
         name, extension = filename.split('.')
         if extension != 'png' and extension != 'svg':
@@ -245,7 +250,7 @@ class CGraph:
         for f in self.dependentFunctionList:
             nodes[f.ID].shape = yapgvb.shapes.octagon
         
-        g.layout(yapgvb.engines.circo)
+        g.layout(method)
         g.render(filename)
 
 class Function(Ring):

@@ -1,7 +1,6 @@
 import numpy
 import numpy.testing
-
-import globalfuncs
+import algopy
 
 def utps2base_and_dirs(x):
     """
@@ -109,7 +108,7 @@ def base_and_dirs2utpm(x,V):
     axes_ids = tuple(numpy.arange(NVshp))    
     tc[1:,...] = V.transpose((axes_ids[-1],axes_ids[-2]) + axes_ids[:-2])
     
-    return UTPM(tc)
+    return algopy.UTPM(tc)
 
 def symvec(A):
     """ 
