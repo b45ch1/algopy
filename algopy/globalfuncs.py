@@ -30,7 +30,7 @@ for function_name in numpy_linalg_function_names:
 
 def zeros( shape, dtype=float, order = 'C'):
     """
-    generalization of numpy.zeros
+    generic generalization of numpy.zeros
     
     create a zero instance
     """

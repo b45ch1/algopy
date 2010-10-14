@@ -10,6 +10,10 @@ The reverse mode of AD is also supported by a simple code evaluation tracer.
 
 Documentation with examples is available at http://packages.python.org/algopy/.
 
+Upload to pypi::
+
+    python setup.py sdist --formats=gztar,zip
+
 """
 
 DOCLINES = __doc__.split("\n")
@@ -51,7 +55,7 @@ AUTHOR_EMAIL        = "sebastian.walter@gmail.com"
 PLATFORMS           = ["all"]
 MAJOR               = 0
 MINOR               = 2
-MICRO               = 1
+MICRO               = 3
 ISRELEASED          = False
 VERSION             = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
