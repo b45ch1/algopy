@@ -2,6 +2,7 @@ import numpy
 import numpy.testing
 import algopy
 
+
 def utps2base_and_dirs(x):
     """
     Conversion function from algopy.utps to adolc.hov_forward input argument format.

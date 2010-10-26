@@ -14,11 +14,13 @@ in the forward and reverse mode of Algorithmic Differentiation (AD) of functions
 Particular focus are functions that contain numerical linear algebra functions as
 they often appear in statistically motivated functions.
 
-Current version is 2.2.2.
+Current version is 0.2.2.
 
 Help improve ALGOPY
 -------------------
-If you have any questions or suggestions don't hesitate to write me an email (sebastian.walter@gmail.com). This will make it much easier for me to provide code/documentation that is easy to understand. Of course, you are also welcome to contribute code and bugfixes. For instance, an nice addition
+If you have any questions or suggestions please use the mailing list 
+http://groups.google.com/group/algopy?msg=new&lnk=gcis
+or alternatively write me an email(sebastian.walter@gmail.com). This will make it much easier for me to provide code/documentation that is easy to understand. Of course, you are also welcome to contribute code and bugfixes. For instance, an nice addition
 would be a set of high-level functions that make it easier for new users to compute the gradient, Jacobian, Jacobian-vector, vector-Jacobian, Hessian, Hessian-vector.
 
 Getting Started:
@@ -128,6 +130,7 @@ Simple Examples:
    examples/series_expansion.rst
    examples/first_order_forward.rst
    examples/posterior_log_probability.rst
+   examples/leastsquaresfitting.rst
    
 Advanced Examples:
 
@@ -168,6 +171,8 @@ Version Changelog
     * fixed some broadcasting bugs with UTPM instances
     * fixed a bug in algopy.zeros
 
+* Version 0.2.3
+    * added UTPM.init_jacobian and UTPM.extract_jacobian
 
       
 Unit Test

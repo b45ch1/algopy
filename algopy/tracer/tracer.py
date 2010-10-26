@@ -213,7 +213,7 @@ class CGraph:
         if orientation != 'LR' and orientation != 'TD' :
             orientation = 'TD'
 
-        if not any(['dot' == m for m in method_list]):
+        if not any([method == m for m in method_list]):
             method = 'dot'
         name, extension = filename.split('.')
         if extension != 'png' and extension != 'svg':

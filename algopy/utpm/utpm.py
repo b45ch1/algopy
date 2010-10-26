@@ -598,6 +598,25 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         
         return out
         
+    @classmethod
+    def init_jacobian(cls, x):
+        """ initializes this UTPM instance to compute the Jacobian
+        """
+        
+        shp = numpy.shape(x)
+        data = numpy.zeros(numpy.hstack( [2, numpy.size(x), shp]))
+        data[0] = x
+        data[1,:].flat = numpy.eye(numpy.size(x))
+        
+        return cls(data)
+
+    @classmethod
+    def extract_jacobian(cls, x):
+        """ extracts the Jacobian from a UTPM instance
+        if x.ndim == 1 it is equivalent to the gradient
+        """
+        return x.data[1,...].transpose([i for i in range(1,x.data[1,...].ndim)] + [0])
+        
     
     @classmethod
     def dot(cls, x, y, out = None):
