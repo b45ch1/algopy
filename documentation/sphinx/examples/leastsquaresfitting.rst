@@ -14,6 +14,7 @@ We provide the Jacobian of the error function using ALGOPY and compare
     2) when the Jacobian is provided to scipy.optimize.leastsq
 
 As output one obtains::
+    
     $ python leastsquaresfitting.py 
     Estimates from leastsq 
     [  6.79548889e-02   3.68922501e-01   7.55565769e-02   1.41378227e+02
