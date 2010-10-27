@@ -619,6 +619,53 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         
     
     @classmethod
+    def init_hessian(cls, x):
+        """ initializes this UTPM instance to compute the Hessian
+        """
+        
+        import algopy.exact_interpolation as exint
+        x = numpy.asarray(x)
+        
+        if x.ndim != 1:
+            raise NotImplementedError('non vector inputs are not implemented yet')
+
+        N = numpy.size(x)
+        Gamma, rays = exint.generate_Gamma_and_rays(N,2)
+        
+        data = numpy.zeros(numpy.hstack([3,rays.shape]))
+        data[0] = x
+        data[1] = rays
+        return cls(data)
+
+    @classmethod
+    def extract_hessian(cls, N, y, as_full_matrix = True):
+        """ extracts the Hessian of shape (N,N) from the UTPM instance y
+        """
+        
+        import algopy.exact_interpolation as exint
+        Gamma, rays = exint.generate_Gamma_and_rays(N,2)
+        tmp = numpy.dot(Gamma,y.data[2])
+        
+        if as_full_matrix == False:
+            return tmp
+            
+        else:
+            retval = numpy.zeros((N,N))
+            mi = exint.generate_multi_indices(N,2)
+            pos = exint.convert_multi_indices_to_pos(mi)
+            
+            for ni in range(mi.shape[0]):
+                # print 'ni=',ni, mi[ni], pos[ni], tmp[ni]
+                for perm in exint.generate_permutations(list(pos[ni])):
+                    retval[perm[0],perm[1]] = tmp[ni]*numpy.max(mi[ni])
+             
+            return retval
+            
+        
+
+        
+    
+    @classmethod
     def dot(cls, x, y, out = None):
         """
         out = dot(x,y)

@@ -7,6 +7,7 @@ Not working ATM.
 from numpy.testing import *
 import numpy
 
+import algopy
 from algopy import UTPM
 from algopy.exact_interpolation import *
 
@@ -121,7 +122,17 @@ class TestExactInterpolation(TestCase):
         assert_array_almost_equal([17,0,0,0], coeff_list[3])        
         
         
+class TestForwardDrivers(TestCase):
+    def test_hessian(self):
+        N = 5
+        A = numpy.random.rand(N,N)
+        A = numpy.dot(A.T,A)
+        x = algopy.UTPM.init_hessian(numpy.arange(N))
+        assert_array_almost_equal(A, 0.5*algopy.UTPM.extract_hessian(N, algopy.dot(x, algopy.dot(A,x))))
         
+
+
+
         
         
 

@@ -172,7 +172,8 @@ Version Changelog
     * fixed a bug in algopy.zeros
 
 * Version 0.2.3
-    * added UTPM.init_jacobian and UTPM.extract_jacobian
+    * added UTPM.init_jacobian and UTPM.extract_jacobian, UTPM.init_hessian and UTPM.extract_hessian
+    * fixed a bug in algopy.dot(x,y) in the case when x is a numpy.ndarray and y is a UTPM instance
 
       
 Unit Test
