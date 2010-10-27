@@ -13,10 +13,19 @@ numpy_linalg_function_names = ['inv', 'solve', 'eigh', 'qr', 'cholesky']
 
 function_template = string.Template('''
 def $function_name(*args):
-    if isinstance(args[0], numpy.ndarray):
+    case,arg = 0,0
+    for na,a in enumerate(args):
+        if hasattr(a.__class__, '$function_name'):
+            case = 1
+            arg  = na
+            break
+            
+    if case==1:
+        return getattr(args[arg].__class__, '$function_name')(*args)
+
+    elif case==0:
         return $namespace.__getattribute__('$function_name')(*args)
-    elif hasattr(args[0].__class__, '$function_name'):
-        return getattr(args[0].__class__, '$function_name')(*args)
+
     else:
         return $namespace.__getattribute__('$function_name')(*args)
 ''')
