@@ -128,8 +128,20 @@ class TestForwardDrivers(TestCase):
         A = numpy.random.rand(N,N)
         A = numpy.dot(A.T,A)
         x = algopy.UTPM.init_hessian(numpy.arange(N))
-        assert_array_almost_equal(A, 0.5*algopy.UTPM.extract_hessian(N, algopy.dot(x, algopy.dot(A,x))))
+        H = algopy.UTPM.extract_hessian(N, algopy.dot(x, algopy.dot(A,x)))
+        assert_array_almost_equal(A, 0.5*H)
         
+
+    def test_tensor_for_hessian_computation(self):
+        N = 3
+        A = numpy.random.rand(N,N)
+        A = numpy.dot(A.T,A)
+        x = algopy.UTPM.init_tensor(2, numpy.arange(N))
+        y = 0.5*algopy.dot(x, algopy.dot(A,x))
+        H = algopy.UTPM.extract_tensor(N, algopy.dot(x, algopy.dot(A,x)))
+        assert_array_almost_equal(A, 0.5*H)
+
+
 
 
 
