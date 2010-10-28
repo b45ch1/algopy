@@ -537,6 +537,9 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return numpy.ndim(self.data[0,0,...])
     ndim = property(get_ndim)
     
+    def __len__(self):
+        return self.shape[0]
+    
     def reshape(self, dims):
         return UTPM(self.data.reshape(self.data.shape[0:2] + dims))
 
