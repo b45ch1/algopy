@@ -617,10 +617,11 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         """
         return x.data[1,...].transpose([i for i in range(1,x.data[1,...].ndim)] + [0])
         
-    
+        
     @classmethod
-    def init_hessian(cls, x):
-        """ initializes this UTPM instance to compute the Hessian
+    def init_tensor(cls, d, x):
+        """ initializes this UTPM instance to compute the dth degree derivative tensor,
+        e.g. d=2 is the Hessian
         """
         
         import algopy.exact_interpolation as exint
@@ -630,28 +631,29 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             raise NotImplementedError('non vector inputs are not implemented yet')
 
         N = numpy.size(x)
-        Gamma, rays = exint.generate_Gamma_and_rays(N,2)
+        Gamma, rays = exint.generate_Gamma_and_rays(N,d)
         
-        data = numpy.zeros(numpy.hstack([3,rays.shape]))
+        data = numpy.zeros(numpy.hstack([d+1,rays.shape]))
         data[0] = x
         data[1] = rays
         return cls(data)
-
+        
     @classmethod
-    def extract_hessian(cls, N, y, as_full_matrix = True):
+    def extract_tensor(cls, N, y, as_full_matrix = True):
         """ extracts the Hessian of shape (N,N) from the UTPM instance y
         """
         
         import algopy.exact_interpolation as exint
-        Gamma, rays = exint.generate_Gamma_and_rays(N,2)
-        tmp = numpy.dot(Gamma,y.data[2])
+        d = y.data.shape[0]-1
+        Gamma, rays = exint.generate_Gamma_and_rays(N,d)
+        tmp = numpy.dot(Gamma,y.data[d])
         
         if as_full_matrix == False:
             return tmp
             
         else:
             retval = numpy.zeros((N,N))
-            mi = exint.generate_multi_indices(N,2)
+            mi = exint.generate_multi_indices(N,d)
             pos = exint.convert_multi_indices_to_pos(mi)
             
             for ni in range(mi.shape[0]):
@@ -660,7 +662,52 @@ class UTPM(Ring, RawAlgorithmsMixIn):
                     retval[perm[0],perm[1]] = tmp[ni]*numpy.max(mi[ni])
              
             return retval
-            
+
+    
+    @classmethod
+    def init_hessian(cls, x):
+        """ initializes this UTPM instance to compute the Hessian
+        """
+        
+        x = numpy.ravel(x)
+        
+        # generate directions
+        N = x.size
+        M = (N*(N+1))/2
+        L = (N*(N-1))/2
+        S = numpy.zeros((N,M))
+    
+        s = 0
+        i = 0
+        for n in range(1,N+1):
+            S[-n:,s:s+n] = numpy.eye(n)
+            S[-n,s:s+n] = numpy.ones(n)
+            s+=n
+            i+=1
+        S = S[::-1].T
+        
+        data = numpy.zeros(numpy.hstack([3,S.shape]))
+        data[0] = x
+        data[1] = S
+        return cls(data)
+
+    @classmethod
+    def extract_hessian(cls, N, y, as_full_matrix = True):
+        """ extracts the Hessian of shape (N,N) from the UTPM instance y
+        """
+
+        H = numpy.zeros((N,N))
+        for n in range(N):
+            for m in range(n):
+                a =  sum(range(n+1))
+                b =  sum(range(m+1))
+                k =  sum(range(n+2)) - m - 1
+                #print 'k,a,b=', k,a,b
+                if n!=m:
+                    H[m,n]= H[n,m]= (y.data[2,k] - y.data[2,a] - y.data[2,b])
+            a =  sum(range(n+1))
+            H[n,n] = 2*y.data[2,a]
+        return H
         
 
         
