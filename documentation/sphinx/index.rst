@@ -14,7 +14,7 @@ in the forward and reverse mode of Algorithmic Differentiation (AD) of functions
 Particular focus are functions that contain numerical linear algebra functions as
 they often appear in statistically motivated functions.
 
-Current version is 0.2.2.
+Current version is 0.2.3.
 
 Help improve ALGOPY
 -------------------
@@ -129,8 +129,7 @@ Simple Examples:
    
    examples/series_expansion.rst
    examples/first_order_forward.rst
-   examples/posterior_log_probability.rst
-   examples/leastsquaresfitting.rst
+
    
 Advanced Examples:
 
@@ -142,6 +141,16 @@ Advanced Examples:
    examples/moore_penrose_pseudoinverse.rst
    examples/ode_solvers.rst
    examples/comparison_forward_reverse_mode.rst
+   
+Application Examples:
+
+.. toctree::
+   :maxdepth: 1
+   
+   examples/posterior_log_probability.rst
+   examples/leastsquaresfitting.rst
+   examples/hessian_of_potential_function.rst
+   
 
 Additional Information:
 
