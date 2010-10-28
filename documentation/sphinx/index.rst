@@ -172,7 +172,10 @@ Version Changelog
     * fixed a bug in algopy.zeros
 
 * Version 0.2.3
-    * added UTPM.init_jacobian and UTPM.extract_jacobian, UTPM.init_hessian and UTPM.extract_hessian
+    * added UTPM.init_jacobian and UTPM.extract_jacobian
+    * added UTPM.init_hessian and UTPM.extract_hessian
+    * added UTPM.init_tensor and UTPM.extract_tensor
+    * added UTPM.__len__, i.e. len(x) works now for x a UTPM instance
     * fixed a bug in algopy.dot(x,y) in the case when x is a numpy.ndarray and y is a UTPM instance
 
       

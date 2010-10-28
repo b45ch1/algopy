@@ -14,8 +14,11 @@ import matplotlib.pyplot as plt
 from scipy import *
 from scipy import linalg, optimize, constants
 
-import adolc
 import numpy
+import algopy
+import time
+
+
 
 #-----------------------------------------------------------------------------------------
 #       Hamiltonian      H=sum_i(p_i^2/(2m)+ 1/2 * m * w^2 x_i^2)+ sum_(i!=j)(a/|x_i-x_j|)
@@ -30,16 +33,12 @@ class classicalHamiltonian:
        self.C = (4*pi*constants.epsilon_0)**(-1)*constants.e**2        #C is a scalar, it's the Coulomb constant times the electronic charge in SI
        self.m = 39.96*1.66e-27                                         #m is the mass of a single trapped ion in the chain
 
-
-
-
    def potential(self, positionvector):                                    #Defines the potential that is going to be minimized
 
        x= positionvector                                               #x is an 1-d array (vector) of lenght N that contains the positions of the N ions
        w= self.w
        C= self.C
        m= self.m
-
 
        #First we consider the potential of the harmonic osszilator
        Vx = 0.5 * m * (w**2) * sum(x**2)
@@ -61,21 +60,14 @@ class classicalHamiltonian:
        normal_modes = sqrt(eigenvalues/m)
        return normal_modes
 
-#C=(4*pi*constants.epsilon_0)**(-1)*constants.e**2
 c=classicalHamiltonian()
-#print c.potential(array([-0.5, 0.5]))
 xopt = optimize.fmin(c.potential, c.initialposition(), xtol = 1e-10)
 
-adolc.trace_on(0)
-x = adolc.adouble(c.initialposition())
-adolc.independent(x)
-y = c.potential(x)
-adolc.dependent(y)
-adolc.trace_off()
 
-hessian = adolc.hessian(0, xopt)
-print 'hessian=\n',hessian
-eigenvalues = linalg.eigvals(hessian)
-normal_modes = c.normal_modes(eigenvalues)
+x = algopy.UTPM.init_hessian(xopt)
+y = c.potential(x)
+hessian = algopy.UTPM.extract_hessian(2, y)
+
+print hessian
 
 
