@@ -55,7 +55,7 @@ AUTHOR_EMAIL        = "sebastian.walter@gmail.com"
 PLATFORMS           = ["all"]
 MAJOR               = 0
 MINOR               = 2
-MICRO               = 3
+MICRO               = 4
 ISRELEASED          = False
 VERSION             = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
@@ -76,7 +76,7 @@ def write_version_py(filename='algopy/version.py'):
         git_revision = '.dev' + gitfile.readline().split('\n')[0]
     
     except:
-        git_revision = '.dev'    
+        git_revision = '.dev'
     
     print git_revision
     
