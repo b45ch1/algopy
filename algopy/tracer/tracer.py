@@ -163,14 +163,16 @@ class CGraph:
         Warning: this function does _not_ compute the Jacobian.
         """
         
-        utpm_x_list = [UTPM(numpy.reshape(x, (1,1) + numpy.shape(x))) for x in x_list]
+        utpm_x_list = [algopy.UTPM(x.reshape((1,1) + x.shape)) for x in x_list]
         
-        print utpm_x_list
+        # print utpm_x_list
+        self.push_forward(utpm_x_list)
+        ybar =  self.dependentFunctionList[0].x.zeros_like()
+        ybar.data[0,:] = 1.
+        self.pullback([ybar])
         
-        # self.push_forward(utpm_x_list)
-        # ybar =  self.independentFunctionList[0].x.zeros_like()
-        # ybar.data[0,:] = 1.
-        
+        return [x.xbar.data[0,0] for x in self.independentFunctionList]
+        # print self
         
         
 
