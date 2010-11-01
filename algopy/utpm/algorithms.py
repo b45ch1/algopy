@@ -215,7 +215,9 @@ class RawAlgorithmsMixIn:
         if r == 0:
             raise NotImplementedError('x**0 is special and has not been implemented')
         
+
         cls._div(y_data, x_data, xbar_data)
+        xbar_data[...] = numpy.nan_to_num(xbar_data)
         cls._mul(ybar_data, xbar_data, xbar_data)
         xbar_data *= r
 
