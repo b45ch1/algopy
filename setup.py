@@ -10,11 +10,11 @@ The reverse mode of AD is also supported by a simple code evaluation tracer.
 
 Documentation with examples is available at http://packages.python.org/algopy/.
 
-Upload to pypi::
-
-    python setup.py sdist --formats=gztar,zip
-
 """
+
+#Upload to pypi::
+#
+#    python setup.py sdist --formats=gztar,zip upload
 
 DOCLINES = __doc__.split("\n")
 
