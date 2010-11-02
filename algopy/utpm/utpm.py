@@ -106,6 +106,9 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             
         return out
     
+    @classmethod
+    def pb_getitem(cls, ybar, x, sl, y, out = None):
+        return cls.pb___getitem__(ybar, x, sl, y, out = out)
     
     @classmethod
     def as_utpm(cls, x):
@@ -156,6 +159,10 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         ybar[sl].data[...] = 0.
         # print 'funcargs=',funcargs
         # print y[funcargs[0]]
+        
+    @classmethod
+    def pb_setitem(cls, y, sl, x, out = None):
+        return cls.pb___setitem__(y, sl, x, out = out)
     
     def __add__(self,rhs):
         if numpy.isscalar(rhs):
@@ -246,6 +253,11 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             
         cls.pb_pow_real(ybar.data, x.data, r, y.data, out = xbar.data)
         return xbar
+        
+    @classmethod
+    def pb_pow(cls, ybar, x, r, y, out = None):
+        return cls.pb___pow__(ybar, x, r, y, out = out)
+        
 
     def __radd__(self,rhs):
         return self + rhs
@@ -588,7 +600,11 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return str(self.data)
 
     def __repr__(self):
-        return self.__str__()
+        return 'UTPM(' + self.__str__() + ')'
+        
+    @classmethod
+    def pb_zeros(cls, *args, **kwargs):
+        pass
         
     @classmethod
     def triu(cls, x, out = None):

@@ -50,19 +50,19 @@ class Test_Function_on_numpy_types(TestCase):
         fx = Function(x)
         assert_array_almost_equal(fx.x,x)
         
-    def test_push_forward_add(self):
+    def test_pushforward_add(self):
         x,y = 1.,2.
         fx = Function(x)
         fy = Function(y)
         
-        fz = Function.push_forward(numpy.add, [fx,fy])
+        fz = Function.pushforward(numpy.add, [fx,fy])
         assert_almost_equal(fz.x, x + y)
         
         
-    def test_push_forward_qr(self):
+    def test_pushforward_qr(self):
         x = numpy.random.rand(3,3)
         fx = Function(x)
-        fy = Function.push_forward(numpy.linalg.qr, [fx])
+        fy = Function.pushforward(numpy.linalg.qr, [fx])
         y  = numpy.linalg.qr(x)
         assert_array_almost_equal(fy.x, y)
         
@@ -72,14 +72,14 @@ class Test_Function_on_UTPM(TestCase):
         D,P = 3,4
         x = UTPM(numpy.ones((D,P)))
         
-    def test_push_forward_add(self):
+    def test_pushforward_add(self):
         D,P,N,M = 2,3,4,5
         x = UTPM(numpy.random.rand(D,P,N,M))
         y = UTPM(numpy.random.rand(D,P,N,M))
         fx = Function(x)
         fy = Function(y)
         
-        fz = Function.push_forward(UTPM.add, [fx,fy])
+        fz = Function.pushforward(UTPM.add, [fx,fy])
         assert_almost_equal(fz.x.data, (x + y).data)
         
         
@@ -90,7 +90,7 @@ class Test_Function_on_UTPM(TestCase):
         fx = Function(x)
         fy = Function(y)
         
-        fz = Function.push_forward(UTPM.add, [fx,fy])
+        fz = Function.pushforward(UTPM.add, [fx,fy])
         fz.xbar = fz.x.zeros_like()
         fx.xbar = fx.x.zeros_like()
         fy.xbar = fy.x.zeros_like()
@@ -207,20 +207,20 @@ class Test_Mixed_Function_Operations(TestCase):
         assert_array_almost_equal(fx.x.data[1:,...], 0)
 
 class Test_CGgraph_on_numpy_operations(TestCase):
-    def test_push_forward(self):
+    def test_pushforward(self):
         cg = CGraph()
         fx = Function(1.)
         fy = Function(2.)
         
-        fz = Function.push_forward(numpy.add, [fx,fy])
-        fz = Function.push_forward(numpy.multiply, [fz,fy])
+        fz = Function.pushforward(numpy.add, [fx,fy])
+        fz = Function.pushforward(numpy.multiply, [fz,fy])
 
         cg.independentFunctionList = [fx,fy]
         cg.dependentFunctionList = [fz]
         
         x = 32.23
         y = 235.
-        cg.push_forward([x,y])
+        cg.pushforward([x,y])
         assert_array_almost_equal( cg.dependentFunctionList[0].x,  (x + y) * y)
         
         
@@ -243,7 +243,7 @@ class Test_CGgraph_on_numpy_operations(TestCase):
 
         x = 23.
         y = 23523.
-        cg.push_forward([x,y])
+        cg.pushforward([x,y])
         assert_almost_equal(cg.dependentFunctionList[0].x, (x*y * x + y)*x*y)
         
     def test_gradient(self):
@@ -257,7 +257,7 @@ class Test_CGgraph_on_numpy_operations(TestCase):
              
         
 class Test_CGgraph_on_UTPM(TestCase):
-    def test_push_forward(self):
+    def test_pushforward(self):
         cg = CGraph()
         D,P,N,M = 2,5,7,11
         aX = UTPM(numpy.random.rand(D,P,N,M))
@@ -268,7 +268,7 @@ class Test_CGgraph_on_UTPM(TestCase):
         fV2 = (fV1 * fX + fY)*fV1
         cg.independentFunctionList = [fX,fY]
         cg.dependentFunctionList = [fV2]
-        cg.push_forward([aX,aY])
+        cg.pushforward([aX,aY])
         assert_array_almost_equal(cg.dependentFunctionList[0].x.data, ((aX*aY * aX + aY)*aX*aY).data)
    
 
@@ -290,7 +290,7 @@ class Test_CGgraph_on_UTPM(TestCase):
         cg.pullback([Xbar, Ybar])
         assert_array_almost_equal(x.xbar.data, 2* UTPM.diag(Xbar).data)
         
-    def test_push_forward_of_qr(self):
+    def test_pushforward_of_qr(self):
         cg = CGraph()
         D,P,N,M = 1,1,3,3
         x = UTPM(numpy.random.rand(D,P,N,M))
@@ -303,7 +303,7 @@ class Test_CGgraph_on_UTPM(TestCase):
         cg.dependentFunctionList = [fQ,fR]
         
         x = UTPM(numpy.random.rand(D,P,N,M))
-        cg.push_forward([x])
+        cg.pushforward([x])
         Q = cg.dependentFunctionList[0].x
         R = cg.dependentFunctionList[1].x
         
@@ -693,7 +693,7 @@ class Test_CGgraph_on_UTPM(TestCase):
         ax = UTPM(numpy.random.rand(D,P,N,M))
         ay = UTPM(numpy.random.rand(D,P,M,N))
         azbar = UTPM(numpy.random.rand(*fz.x.data.shape))
-        cg.push_forward([ax,ay])
+        cg.pushforward([ax,ay])
         cg.pullback([azbar])
         
         xbar_reverse = cg.independentFunctionList[0].xbar
@@ -718,7 +718,7 @@ class Test_CGgraph_on_UTPM(TestCase):
         assert_array_equal(fy.shape, (M,N))
         assert_array_equal(fy.x.data.shape, (D,P,M,N))
         
-        cg.push_forward([ax])
+        cg.pushforward([ax])
         assert_array_equal(cg.dependentFunctionList[0].shape, (M,N))
         assert_array_equal(cg.dependentFunctionList[0].x.data.shape, (D,P,M,N))
         
@@ -734,7 +734,7 @@ class Test_CGgraph_on_UTPM(TestCase):
         assert_array_equal(fy.shape, (M,N))
         assert_array_equal(fy.x.data.shape, (D,P,M,N))
         
-        cg.push_forward([ax])
+        cg.pushforward([ax])
         assert_array_equal(cg.dependentFunctionList[0].shape, (M,N))
         assert_array_equal(cg.dependentFunctionList[0].x.data.shape, (D,P,M,N))        
     
@@ -748,7 +748,7 @@ class Test_CGgraph_on_UTPM(TestCase):
         cg.dependentFunctionList = [FPhi]
         
         assert_array_equal(FPhi.shape, (M,M))
-        cg.push_forward(MJs)
+        cg.pushforward(MJs)
         assert_array_equal(cg.dependentFunctionList[0].x.data.shape, [D,P,M,M])
         
         
@@ -868,7 +868,7 @@ class Test_CGgraph_on_UTPM(TestCase):
         cg.independentFunctionList = [fx]
         cg.dependentFunctionList = [fz]
                 
-        cg.push_forward([UTPM(numpy.random.rand(D,P,N))])
+        cg.pushforward([UTPM(numpy.random.rand(D,P,N))])
        
         zbar = UTPM(numpy.zeros((D,P)))
         zbar.data[0,:] = 1.
@@ -978,7 +978,7 @@ class Test_CGgraph_on_UTPM(TestCase):
         # check correctness of the push forward
         ax2 = UTPM(numpy.random.rand(D,P,3))
         az = zfcn(ax2)
-        cg.push_forward([ ax2 ])
+        cg.pushforward([ ax2 ])
         
         assert_array_almost_equal(az.data, fy[5].x.data)
 
@@ -1010,7 +1010,7 @@ class Test_CGgraph_on_UTPM(TestCase):
         cg.dependentFunctionList = [FPHI]
         
         assert_array_equal(FPHI.shape, ())
-        cg.push_forward([J])
+        cg.pushforward([J])
         PHIbar = UTPM(numpy.random.rand(*(D,P)))
         
         # pullback using the tracer
@@ -1104,7 +1104,7 @@ class Test_CGgraph_on_UTPM(TestCase):
         cg.dependentFunctionList = [FPHI]
         
         assert_array_equal(FPHI.shape, ())
-        # cg.push_forward(MJs)
+        # cg.pushforward(MJs)
         
         # pullback using the tracer
         PHIbar = UTPM(numpy.ones((D,P)))
@@ -1170,7 +1170,7 @@ class Test_CGgraph_on_UTPM(TestCase):
         cg.dependentFunctionList = [FPHI]
         
         assert_array_equal(FPHI.shape, ())
-        # cg.push_forward(F1p_list)
+        # cg.pushforward(F1p_list)
         PHIbar = UTPM(numpy.zeros((D,P)))
         PHIbar.data[0,:] = 1.
         
@@ -1216,7 +1216,7 @@ class Test_CGgraph_on_UTPM(TestCase):
         cg.dependentFunctionList = [Fy]
         
         assert_array_almost_equal(Fy.x.data[0], x.data[0])
-        cg.push_forward([x])
+        cg.pushforward([x])
         assert_array_almost_equal(Fy.x.data[0], x.data[0])
 
 
@@ -1302,6 +1302,24 @@ class Test_CGgraph_on_UTPM(TestCase):
         h1 = y.x.data[2]
         h2 = numpy.array(tmp)
         assert_array_almost_equal(2*h1, h2)
+        
+        
+    def test_gradient(self):
+        x = numpy.array([3.,7.])
+
+        cg = algopy.CGraph()
+        Fx = algopy.Function(x)
+        Fy = algopy.zeros(2, Fx)
+        Fy[0] = Fx[0]
+        Fy[1] = Fy[0]*Fx[1]
+        Fz = 2*Fy[1]**2
+        cg.trace_off()
+        
+        cg.independentFunctionList = [Fx]
+        cg.dependentFunctionList = [Fz]
+        
+        x = numpy.array([11,13.])
+        assert_array_almost_equal([4*x[1]**2 * x[0], 4*x[0]**2 * x[1]], cg.gradient([x])[0])
                
         
 class Test_CGraph_Plotting(TestCase):

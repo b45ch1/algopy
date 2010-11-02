@@ -773,7 +773,7 @@ class Test_Cholesky_Decomposition(TestCase):
         
 
 class Test_QR_Decomposition(TestCase):
-    def test_push_forward(self):
+    def test_pushforward(self):
         (D,P,N) = 3,5,10
         A_data = numpy.random.rand(D,P,N,N)
 
@@ -841,7 +841,7 @@ class Test_QR_Decomposition(TestCase):
         
             assert_almost_equal(numpy.trace(numpy.dot(Ab.T,Ad)), numpy.trace(numpy.dot(Q2b.T,Q2d)) + numpy.trace(numpy.dot(R2b.T,R2d)))
 
-    def test_push_forward_rectangular_A(self):
+    def test_pushforward_rectangular_A(self):
         (D,P,M,N) = 5,3,15,3
         A_data = numpy.random.rand(D,P,M,N)
 
@@ -902,7 +902,7 @@ class Test_QR_Decomposition(TestCase):
         Q2 = Q[:,N:]
         assert_array_almost_equal(0, UTPM.dot(A.T, Q2).data)
         
-    def test_push_forward_more_cols_than_rows(self):
+    def test_pushforward_more_cols_than_rows(self):
         """
         A.shape = (3,11)
         """
@@ -1186,7 +1186,7 @@ class Test_Eigenvalue_Decomposition(TestCase):
         assert_almost_equal(numpy.trace(numpy.dot(Abar.T, Adot)), numpy.trace( numpy.dot(Lbar.T, Ldot) + numpy.dot(Qbar.T, Qdot)))    
     
 
-    def test_push_forward(self):
+    def test_pushforward(self):
         (D,P,N) = 3,2,5
         A_data = numpy.zeros((D,P,N,N))
         for d in range(D):
@@ -1204,7 +1204,7 @@ class Test_Eigenvalue_Decomposition(TestCase):
 
         assert_array_almost_equal(UTPM.dot(Q, UTPM.dot(L,Q.T)).data, A.data, decimal = 12)
 
-    def test_push_forward_repeated_eigenvalues(self):
+    def test_pushforward_repeated_eigenvalues(self):
         D,P,N = 3,1,6
         A = UTPM(numpy.zeros((D,P,N,N)))
         V = UTPM(numpy.random.rand(D,P,N,N))
@@ -1222,7 +1222,7 @@ class Test_Eigenvalue_Decomposition(TestCase):
 
         assert_array_almost_equal(UTPM.dot(Q, UTPM.dot(L,Q.T)).data, A.data, decimal = 12)
 
-    def test_push_forward_repeated_eigenvalues_higher_order_multiple_direction(self):
+    def test_pushforward_repeated_eigenvalues_higher_order_multiple_direction(self):
         D,P,N = 4,7,6
         A = UTPM(numpy.zeros((D,P,N,N)))
         V = UTPM(numpy.random.rand(D,P,N,N))

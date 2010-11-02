@@ -96,7 +96,7 @@ class Test_Helper_Functions(TestCase):
         
 
 
-class Test_push_forward_class_functions(TestCase):
+class Test_pushforward_class_functions(TestCase):
     """
     Test the push forward class functions that operate directly on data.
     """

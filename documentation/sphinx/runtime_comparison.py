@@ -47,7 +47,7 @@ time_trace_cgraph = end_time - start_time
 x = UTP(numpy.random.rand(D,N))
 start_time = time.time()
 for rep in range(reps):
-    cg.push_forward([x])
+    cg.pushforward([x])
 end_time = time.time()
 time_hos_forward_algopy = end_time - start_time
 
@@ -73,7 +73,7 @@ time_hos_forward_cgraph = end_time - start_time
 x = UTPM(numpy.random.rand(D,P,N))
 start_time = time.time()
 for rep in range(reps):
-    cg.push_forward([x])
+    cg.pushforward([x])
 end_time = time.time()
 time_hov_forward_algopy = end_time - start_time
 

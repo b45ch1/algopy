@@ -1,5 +1,6 @@
 import numpy
 import algopy
+import operator
 from algopy.base_type import Ring
 
 class NotSet:
@@ -92,6 +93,8 @@ class CGraph:
                 else:
                     arg_IDs.append('c(%s)'%str(a))
             retval += '\n\n%s: IDs: %s <- %s\n'%(str(f.func.__name__), str(f.ID), str(arg_IDs))
+            retval += 'class:    %s \n'%( str(f.x.__class__))
+
             retval += 'x:\n    %s \n'%( str(f.x))
             if is_set(f.xbar):
                 retval += 'xbar:\n %s \n'%(str(f.xbar))
@@ -104,7 +107,7 @@ class CGraph:
         retval += '\n'
         return retval
         
-    def push_forward(self,x_list):
+    def pushforward(self,x_list):
         """
         Apply a global push forward of the computational procedure defined by
         the computational graph saved in this CGraph instance.
@@ -118,7 +121,7 @@ class CGraph:
 
         # traverse the computational tree
         for f in self.functionList:
-            f.__class__.push_forward(f.func, f.args, Fout = f)
+            f.__class__.pushforward(f.func, f.args, Fout = f)
 
 
     def pullback(self, xbar_list):
@@ -166,7 +169,7 @@ class CGraph:
         utpm_x_list = [algopy.UTPM(x.reshape((1,1) + x.shape)) for x in x_list]
         
         # print utpm_x_list
-        self.push_forward(utpm_x_list)
+        self.pushforward(utpm_x_list)
         ybar =  self.dependentFunctionList[0].x.zeros_like()
         ybar.data[0,:] = 1.
         self.pullback([ybar])
@@ -299,7 +302,10 @@ class Function(Ring):
 
 
     def __repr__(self):
-        return str(self)
+        retstr = 'Function:\n'
+        retstr += 'ID = %s\n'%str(self.get_ID())
+        retstr += 'function = %s\n'%str(self.func)
+        return retstr
 
     def __str__(self):
         return '%s'%str(self.x)
@@ -335,7 +341,7 @@ class Function(Ring):
         return f
         
     @classmethod
-    def push_forward(cls, func, Fargs, Fout = None, setitem = None):
+    def pushforward(cls, func, Fargs, Fout = None, setitem = None):
         """
         Computes the push forward of func
         
@@ -357,11 +363,13 @@ class Function(Ring):
                 args.append(fa)
         
         # STEP 2: call the function
+        # print 'func=',func
+        # print 'args=',args
         out  = func(*args)
         
         # STEP 3: create new Function instance for output
         if Fout == None:
-            # this is called when push_forward is called by a function like mul,add, ...
+            # this is called when pushforward is called by a function like mul,add, ...
             Fout = cls.create(out, Fargs, func)
             # return retval
         
@@ -443,7 +451,7 @@ class Function(Ring):
             # get the pullback function
             f = eval('__import__("algopy.utpm").utpm.'+F.x.__class__.__name__+'.pb_'+func_name)
 
-        elif func_name == '__getitem__':
+        elif func_name == '__getitem__' or func_name == 'getitem':
             return  lambda x: None
             # raise NotImplementedError('should implement that')
             
@@ -560,39 +568,39 @@ class Function(Ring):
             self.xbar = None # copy.deepcopy(self.x)
             
     def __getitem__(self, sl):
-        return Function.push_forward(self.x.__class__.__getitem__,[self,sl])
+        return Function.pushforward(operator.getitem ,[self,sl])
 
     def __setitem__(self, sl, rhs):
         rhs = self.totype(rhs)
-        store = self.x.__class__.__getitem__(self.x,sl).copy()
+        store = operator.getitem(self.x,sl).copy()
         # print 'storing ', store
         # print 'rhs = ',rhs
-        return Function.push_forward(self.x.__class__.__setitem__,[self,sl,rhs], setitem = (sl,store))
+        return Function.pushforward(operator.setitem,[self,sl,rhs], setitem = (sl,store))
 
     def __neg__(self):
-        return Function.push_forward(self.x.__class__.__neg__,[self])
+        return Function.pushforward(self.x.__class__.__neg__,[self])
     
     # FIXME: implement the inplace operations for better efficiency    
     # def __iadd__(self,rhs):
         # rhs = self.totype(rhs)
-        # return Function.push_forward(self.x.__class__.__iadd__,[self,rhs])
+        # return Function.pushforward(self.x.__class__.__iadd__,[self,rhs])
         
         
     def __add__(self,rhs):
         rhs = self.totype(rhs)
-        return Function.push_forward(self.x.__class__.__add__,[self,rhs])
+        return Function.pushforward(operator.add,[self,rhs])
 
     def __sub__(self,rhs):
         rhs = self.totype(rhs)
-        return Function.push_forward(self.x.__class__.__sub__,[self,rhs])
+        return Function.pushforward(operator.sub,[self,rhs])
 
     def __mul__(self,rhs):
         rhs = self.totype(rhs)
-        return Function.push_forward(self.x.__class__.__mul__,[self,rhs])
+        return Function.pushforward(operator.mul,[self,rhs])
 
     def __div__(self,rhs):
         rhs = self.totype(rhs)
-        return Function.push_forward(self.x.__class__.__div__,[self,rhs])
+        return Function.pushforward(operator.div,[self,rhs])
         
     def __radd__(self,lhs):
         return self + lhs
@@ -612,66 +620,62 @@ class Function(Ring):
         lhs = cls.totype(lhs)
         rhs = cls.totype(rhs)
         
-        try:
-            out = Function.push_forward(lhs.x.__class__.dot, [lhs,rhs])
-            return out
-        except:
-            out = Function.push_forward(rhs.x.__class__.dot, [lhs,rhs])
-            return out
+        out = Function.pushforward(algopy.dot, [lhs,rhs])
+        return out
 
     def log(self):
-         return Function.push_forward(algopy.log, [self])
+         return Function.pushforward(algopy.log, [self])
 
     def exp(self):
-         return Function.push_forward(algopy.exp, [self])
+         return Function.pushforward(algopy.exp, [self])
          
     def sin(self):
-         return Function.push_forward(algopy.sin, [self])       
+         return Function.pushforward(algopy.sin, [self])
          
     def cos(self):
-         return Function.push_forward(algopy.cos, [self])         
+         return Function.pushforward(algopy.cos, [self])
          
     def sqrt(self):
-         return Function.push_forward(algopy.sqrt, [self])
+         return Function.pushforward(algopy.sqrt, [self])
     
     def __pow__(self, r):
-         return Function.push_forward(self.x.__class__.__pow__, [self, r])
+         return Function.pushforward(operator.pow, [self, r])
          
     def sum(self, axis=None, dtype=None, out=None):
-         return Function.push_forward(numpy.sum, [self, axis, dtype, out])
+         return Function.pushforward(numpy.sum, [self, axis, dtype, out])
          
     def inv(self):
-         return Function.push_forward(self.x.__class__.inv, [self])
+         return Function.pushforward(algopy.inv, [self])
          
     def qr(self):
-         return Function.push_forward(self.x.__class__.qr, [self])
+         return Function.pushforward(algopy.qr, [self])
          
     def qr_full(self):
-         return Function.push_forward(self.x.__class__.qr_full, [self])
+         return Function.pushforward(algopy.qr_full, [self])
          
     def diag(self):
-         return Function.push_forward(self.x.__class__.diag, [self])         
+         return Function.pushforward(algopy.diag, [self])         
 
     def eigh(self):
-         return Function.push_forward(self.x.__class__.eigh, [self])
+         return Function.pushforward(algopy.eigh, [self])
          
     def eigh1(self):
-         return Function.push_forward(self.x.__class__.eigh1, [self])         
+         return Function.pushforward(algopy.eigh1, [self])         
 
     def solve(self,rhs):
-        return Function.push_forward(self.x.__class__.solve, [self,rhs])
+        return Function.pushforward(algopy.solve, [self,rhs])
         
     def trace(self):
-        return Function.push_forward(self.x.__class__.trace, [self])
+        return Function.pushforward(algopy.trace, [self])
         
     def transpose(self):
-        return Function.push_forward(self.x.__class__.transpose, [self])
-        
+        return Function.pushforward(algopy.transpose, [self])
+                
     def symvec(self):
-        return Function.push_forward(self.x.__class__.symvec, [self])
+        return Function.pushforward(self.x.__class__.symvec, [self])
         
     def vecsym(self):
-        return Function.push_forward(self.x.__class__.vecsym, [self])        
+        return Function.pushforward(self.x.__class__.vecsym, [self])
         
     T = property(transpose)
     

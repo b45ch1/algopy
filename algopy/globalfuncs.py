@@ -7,8 +7,8 @@ from algopy import Function
 
 # override numpy definitions
 
-numpy_function_names = ['sin','cos', 'exp', 'log', 'sqrt', 'trace', 'dot', 'zeros_like', 'diag', 'triu']
-numpy_linalg_function_names = ['inv', 'solve', 'eigh', 'qr', 'cholesky']
+numpy_function_names = ['sin','cos', 'exp', 'log', 'sqrt', 'pow', 'trace', 'dot', 'zeros_like', 'diag', 'triu']
+numpy_linalg_function_names = ['inv', 'solve', 'eigh', 'qr', 'cholesky','transpose']
 
 
 function_template = string.Template('''
@@ -59,7 +59,9 @@ def zeros( shape, dtype=float, order = 'C'):
         return dtype.__class__(numpy.zeros((D,P) + shape ,dtype = float))
         
     elif isinstance(dtype, Function):
-        return dtype.__class__(zeros(shape, dtype=dtype.x, order = order))
+        # dtype.create(zeros(shape, dtype=dtype.x, order = order), fargs, zeros):
+        return dtype.pushforward(zeros, [shape, dtype, order])
+        # return dtype.__class__(zeros(shape, dtype=dtype.x, order = order))
         
     else:
         raise ValueError('don\'t know what to do with dtype = %s, type(dtype)=%s'%(str(dtype), str(type(dtype))))

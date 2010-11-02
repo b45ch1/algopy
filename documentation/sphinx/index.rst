@@ -187,6 +187,10 @@ Version Changelog
     * added UTPM.__len__, i.e. len(x) works now for x a UTPM instance
     * fixed a bug in algopy.dot(x,y) in the case when x is a numpy.ndarray and y is a UTPM instance
 
+* Version 0.3.0:
+    * renamed push_forward to pushforward, this is more consistent to the pullback
+    * UTPM.__repr__ now returns a string of the form `UTPM(...)`
+    * refactored the tracer: it is not largely possible to trace the function evaluation with normal numpy.ndarrays. After that, one can use cg.pushforward with UTPM instances or call cg.gradient, etc.
       
 Unit Test
 ---------
