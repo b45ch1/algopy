@@ -3,7 +3,7 @@ Least-Squares Fitting
 
 This is an example from the Scipy-User mailing list. The original discussion 
 can be found on
-http://permalink.gmane.org/gmane.comp.python.scientific.user/26551 .
+http://permalink.gmane.org/gmane.comp.python.scientific.user/26494 .
 
 .. literalinclude:: leastsquaresfitting.py
     :lines: 0-

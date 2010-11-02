@@ -150,6 +150,7 @@ Application Examples:
    examples/posterior_log_probability.rst
    examples/leastsquaresfitting.rst
    examples/hessian_of_potential_function.rst
+   examples/minimal_surface.rst
    
 
 Additional Information:
