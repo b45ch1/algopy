@@ -12,6 +12,7 @@ import numpy.linalg
 import numpy
 
 from ..base_type import Ring
+
 from algorithms import RawAlgorithmsMixIn, broadcast_arrays_shape
            
 class UTPM(Ring, RawAlgorithmsMixIn):
@@ -1034,6 +1035,31 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         
         else:
             xbar, ybar = out
+            
+        # print 'x = ', type(x)
+        # print 'y = ',type(y)
+        # print 'z = ',type(z)
+        
+        # print 'xbar = ', type(xbar)
+        # print 'ybar = ',type(ybar)
+        # print 'zbar = ',type(zbar)                    
+            
+        if not isinstance(x,cls):
+            D,P = z.data.shape[:2]
+            tmp = cls(numpy.zeros((D,P) + x.shape,dtype=z.data.dtype))
+            tmp[...] = x[...]
+            x = tmp
+            
+        if not isinstance(xbar,cls):
+            xbar = cls(numpy.zeros((D,P) + x.shape,dtype=z.data.dtype))
+
+        if not isinstance(y,cls):
+            tmp = cls(numpy.zeros((D,P) + y.shape,dtype=z.data.dtype))
+            tmp[...] = y[...]
+            y = tmp
+            
+        if not isinstance(ybar,cls):
+            ybar = cls(numpy.zeros((D,P) + y.shape,dtype=z.data.dtype))
 
         cls._dot_pullback(zbar.data, x.data, y.data, z.data, out = (xbar.data, ybar.data))
         return (xbar,ybar)

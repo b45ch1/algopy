@@ -14,7 +14,6 @@ in the forward and reverse mode of Algorithmic Differentiation (AD) of functions
 Particular focus are functions that contain numerical linear algebra functions as
 they often appear in statistically motivated functions.
 
-Current version is 0.2.3.
 
 Help improve ALGOPY
 -------------------
@@ -22,6 +21,27 @@ If you have any questions or suggestions please use the mailing list
 http://groups.google.com/group/algopy?msg=new&lnk=gcis
 or alternatively write me an email(sebastian.walter@gmail.com). This will make it much easier for me to provide code/documentation that is easy to understand. Of course, you are also welcome to contribute code and bugfixes. For instance, an nice addition
 would be a set of high-level functions that make it easier for new users to compute the gradient, Jacobian, Jacobian-vector, vector-Jacobian, Hessian, Hessian-vector.
+
+Installation and Upgrade:
+-------------------------
+
+Current version is 0.3.0
+
+Official releases:
+    * available at:  http://pypi.python.org/pypi/algopy
+    * if you have easy_install you can use the shell command
+        - `$ easy_install --upgrade algopy` for installation
+        - `$ easy_install --upgrade algopy` to upgrade to the newest version
+
+Bleeding edge:
+    * the most recent version is available at https://github.com/b45ch1/algopy .
+    * includes additional documentation, e.g. talks and additional examples and the sphinx *.rst documents
+    
+Dependencies:
+    * numpy
+    * scipy
+    * nose
+
 
 Getting Started:
 ----------------
@@ -119,9 +139,16 @@ Reverse Mode of AD:
 Further Reading
 ---------------
 
+Information on the web:
+
 There has been a winterschool for Algorithmic Differentiation. Some tutorials explain Taylor polynomial arithmetic.
 http://www.sintef.no/Projectweb/eVITA/English/eSCience-Meeting-2010/Winter-School/
 
+Talks:
+    * :download:`Informal talk at the IWR Heidelberg, April 29th, 2010<./talks/informal_talk_iwr_heidelberg_theory_and_tools_for_algorithmic_differentiation.pdf>`.
+    * :download:`Univariate Taylor polynomial arithmetic applied to matrix factorizations in the forward and reverse mode of algorithmic differentiation, June 3rd, 2010, EuroAD in Paderborn<./talks/walter_euroad2010_paderborn_univariate_taylor_polynomial_arithmetic_applied_to_matrix_factorizations_in_the_forward_and_reverse_mode_of_algorithmic_differentiation.pdf>`.
+
+    
 Simple Examples:
 
 .. toctree::

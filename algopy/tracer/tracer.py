@@ -170,6 +170,8 @@ class CGraph:
         
         # print utpm_x_list
         self.pushforward(utpm_x_list)
+        
+        # print self
         ybar =  self.dependentFunctionList[0].x.zeros_like()
         ybar.data[0,:] = 1.
         self.pullback([ybar])
