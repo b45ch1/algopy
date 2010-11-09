@@ -13,6 +13,9 @@ class EVAL:
         adolc.dependent(y)
         adolc.trace_off()
         
+    def function(self, x):
+        return adolc.function(0,x)
+        
     def gradient(self, x):
         return adolc.gradient(0,x)
 

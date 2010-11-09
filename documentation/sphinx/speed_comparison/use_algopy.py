@@ -15,6 +15,9 @@ class EVAL:
         cg.dependentFunctionList = [y]
         self.cg = cg
         
+    def function(self, x):
+        return self.cg.function(x)
+        
     def gradient(self, x):
         return self.cg.gradient(x)
 
@@ -36,6 +39,10 @@ class EVAL2:
         cg.dependentFunctionList = [y]
         self.cg = cg
         
+        
+    def function(self, x):
+        return self.cg.function(x)
+        
     def gradient(self, x):
         return self.cg.gradient([x])
         
@@ -43,8 +50,12 @@ class EVAL2:
         tmp = algopy.UTPM.init_jacobian(x)
         return algopy.UTPM.extract_jacobian(self.f(tmp))
 
-    # def hessian(self, x):
-    #     return adolc.hessian(0,x)
+    def hessian(self, x):
+        return self.cg.hessian([x])
+    
+    def forwardhessian(self, x):
+        tmp = algopy.UTPM.init_hessian(x)
+        return algopy.UTPM.extract_hessian(len(x), self.f(tmp))
 
 
 
