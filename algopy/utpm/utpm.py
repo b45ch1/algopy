@@ -1354,13 +1354,12 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         cls._iouter(x.data, y.data, out.data)
         return out
 
-    @classmethod
-    def reshape(cls, a, newshape, order = 'C'):
-
+    def reshape(self,  newshape, order = 'C'):
         if order != 'C':
             raise NotImplementedError('should implement that')
-        
-        return cls(cls._reshape(a.data, newshape, order = order))
+        cls = self.__class__
+        return cls(cls._reshape(self.data, newshape, order = order))
+
     
     @classmethod
     def combine_blocks(cls, in_X):
