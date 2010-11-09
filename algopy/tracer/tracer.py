@@ -156,6 +156,20 @@ class CGraph:
             # print 'pullback of f=',f.func.__name__
             f.__class__.pullback(f)
             # print self
+            
+    def function(self, x_list):
+        """ computes the function of a function y = f(x_list), where y is a scalar 
+        and x_list is a list or tuple of input arguments.
+        
+        The computation is performed using the stored computational graph.
+        Using this function one can check if the CGraph is correct by comparing the value
+        to the normal function evaluation in Python.
+        """
+
+        self.pushforward(x_list)
+        return [x.x for x in self.dependentFunctionList]
+            
+            
 
     def gradient(self, x_list):
         """ computes the gradient of a function y = f(x_list), where y is a scalar 
@@ -178,6 +192,41 @@ class CGraph:
         
         return [x.xbar.data[0,0] for x in self.independentFunctionList]
         # print self
+        
+    def hessian(self, x_list):
+        """ computes the hessian of a function y = f(x_list), where y is a scalar 
+        and x_list is a list or tuple of input arguments.
+        The computation is performed in thein the reverse mode of AD.
+        x_list contains the independent variables at which the gradient should be evaluated.
+        
+        Warning: this function does _not_ compute the Jacobian.
+        """
+        
+        tmp = [x.ravel() for x in x_list]
+        
+        tmp = numpy.concatenate(tmp)
+        
+        # print tmp
+        tmp = algopy.UTPM.init_jacobian(x)
+        
+        utpm_x_list = []
+        a = 0
+        for x in x_list:
+            b = numpy.prod(x.shape)
+            utpm_x_list.append(tmp[a:b].reshape(x.shape))
+        
+        # print utpm_x_list
+        
+        # # print utpm_x_list
+        self.pushforward(utpm_x_list)
+        
+        # # print self
+        ybar =  self.dependentFunctionList[0].x.zeros_like()
+        ybar.data[0,:] = 1.
+        self.pullback([ybar])
+        
+        return numpy.array([x.xbar.data[1,:] for x in self.independentFunctionList])
+        # # print self
         
         
 
