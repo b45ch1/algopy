@@ -19,8 +19,9 @@ Help improve ALGOPY
 -------------------
 If you have any questions or suggestions please use the mailing list 
 http://groups.google.com/group/algopy?msg=new&lnk=gcis
-or alternatively write me an email(sebastian.walter@gmail.com). This will make it much easier for me to provide code/documentation that is easy to understand. Of course, you are also welcome to contribute code and bugfixes. For instance, an nice addition
-would be a set of high-level functions that make it easier for new users to compute the gradient, Jacobian, Jacobian-vector, vector-Jacobian, Hessian, Hessian-vector.
+or alternatively write me an email(sebastian.walter@gmail.com). This will make it much easier for me to provide code/documentation that is easy to understand. 
+Of course, you are also welcome to contribute code, bugfixes, examples, success stories ;), ...
+
 
 Installation and Upgrade:
 -------------------------
@@ -30,7 +31,7 @@ Current version is 0.3.0
 Official releases:
     * available at:  http://pypi.python.org/pypi/algopy
     * if you have easy_install you can use the shell command
-        - `$ easy_install --upgrade algopy` for installation
+        - `$ easy_install algopy` for installation
         - `$ easy_install --upgrade algopy` to upgrade to the newest version
 
 Bleeding edge:
@@ -40,7 +41,8 @@ Bleeding edge:
 Dependencies:
     * numpy
     * scipy
-    * nose
+    * (optional/recommended) nose
+    * (optional/recommended) yapgvb (to generate plots of the computational graph)
 
 
 Getting Started:
@@ -66,42 +68,7 @@ If one executes that code one obtains as output::
 
 The derivative computed with ALGOPY is up to machine precision
 the same as the symbolically computed gradient.
-    
-    
-Example 2: First-order directional Derivatives through Numerical Linear Algebra Functions
------------------------------------------------------------------------------------------
-
-ALGOPY can not only be used to compute series expansions of simple functions
-as shown above. A particular strenght of ALGOPY is that it allows to compute series
-expansions through numerical linear algebra functions.
-Consider the contrived example that appears in similar form in statistically
-motivated functions. It is the goal to compute the directional derivative
-
-.. math::
-    \nabla_x f((3,5)) \cdot \begin{pmatrix} 7 \\ 11 \end{pmatrix}
-    
-The code is::
-
-    import numpy; from numpy import log, exp, sin, cos
-    import algopy; from algopy import UTPM, dot, inv, zeros
-    
-    def f(x):
-        A = zeros((2,2),dtype=x)
-        A[0,0] = numpy.log(x[0]*x[1])
-        A[0,1] = numpy.log(x[1]) + exp(x[0])
-        A[1,0] = sin(x[1])**2 + cos(x[0])**3.1
-        A[1,1] = x[0]**cos(x[1])
-        return log( dot(x.T,  dot( inv(A), x)))
-    
-    
-    x = UTPM(zeros((2,1,2),dtype=float))
-    x.data[0,0] = [3,5]
-    x.data[1,0] = [7,11]
-    y = f(x)
-    
-    print 'normal function evaluation f(x) = ',y.data[0,0]
-    print 'directional derivative df/dx1 = ',y.data[1,0]
-
+  
 
 How does it work?:
 ------------------
@@ -219,7 +186,8 @@ Version Changelog
     * renamed push_forward to pushforward, this is more consistent to the pullback
     * UTPM.__repr__ now returns a string of the form `UTPM(...)`
     * refactored the tracer: it is not largely possible to trace the function evaluation with normal numpy.ndarrays. After that, one can use cg.pushforward with UTPM instances or call cg.gradient, etc.
-      
+    * UTPM.reshape is now a method, not a class method
+    
 Unit Test
 ---------
 

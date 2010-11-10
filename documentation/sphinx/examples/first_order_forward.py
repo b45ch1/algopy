@@ -27,3 +27,25 @@ print 'y  = ', y
 print 'y.shape =', y.shape
 print 'y.data.shape =', y.data.shape
 print 'dF/dx(x0) * x1 =', y.data[1,0]
+
+
+
+import numpy; from numpy import log, exp, sin, cos, abs
+import algopy; from algopy import UTPM, dot, inv, zeros
+
+def f(x):
+    A = zeros((2,2),dtype=x)
+    A[0,0] = numpy.log(x[0]*x[1])
+    A[0,1] = numpy.log(x[1]) + exp(x[0])
+    A[1,0] = sin(x[0])**2 + abs(cos(x[0]))**3.1
+    A[1,1] = x[0]**cos(x[1])
+    return log( dot(x.T,  dot( inv(A), x)))
+
+x = numpy.array([3.,7.])
+x = UTPM.init_jacobian(x)
+
+y = f(x)
+
+print 'normal function evaluation f(x) = ',y.data[0,0]
+print 'Jacobian df/dx = ', UTPM.extract_jacobian(y)
+
