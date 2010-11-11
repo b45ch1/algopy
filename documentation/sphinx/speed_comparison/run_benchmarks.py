@@ -8,11 +8,9 @@ import use_uncertainties
 import use_algopy
 import use_numdifftools
 import use_funcdesigner
+import use_theano
 
-
-
-
-method = {'algopy_reverse_utps':0, 'algopy_reverse_utpm':1, 'pyadolc':2, 'scientific':3, 'uncertainties':4, 'numdifftools':5, 'algopy_forward_utpm':6, 'python':7, 'algopy_forward_utps':8, 'funcdesigner':9}
+method = {'algopy_reverse_utps':0, 'algopy_reverse_utpm':1, 'pyadolc':2, 'scientific':3, 'uncertainties':4, 'numdifftools':5, 'algopy_forward_utpm':6, 'python':7, 'algopy_forward_utps':8, 'funcdesigner':9, 'theano':10}
 
 
 # FUNCTION COMPUTATION
@@ -83,7 +81,7 @@ gradient_N_list = [2,4,8,16,32,64,96,128]
 results_gradient_list = []
 for N in gradient_N_list:
     print 'N=',N
-    results_gradient = np.zeros((10,2))
+    results_gradient = np.zeros((11,2))
     
     # pyadolc
     f = benchmark1.F(N)
@@ -148,24 +146,32 @@ for N in gradient_N_list:
     g = a.gradient(3*np.ones(N))
     end_time = time.time()
     results_gradient[method['funcdesigner']] = end_time - start_time, np.linalg.norm(g - ref_g)
-    
+
+    # theano
+    f = benchmark1.F(N)
+    a = use_theano.EVAL(f, np.ones(N))
+    start_time = time.time()
+    g = a.gradient(3*np.ones(N))
+    end_time = time.time()
+    results_gradient[method['theano']] = end_time - start_time, np.linalg.norm(g - ref_g)
     
     
     results_gradient_list.append(results_gradient)
 
 results_gradients = np.array(results_gradient_list)
 
+print results_gradients[:,method['theano']]
 
 # HESSIAN COMPUTATION
 # -------------------
-
+print 'starting hessian computation '
 results_hessian_list = []
-hessian_N_list = [1,2,4,8,16,32,64,96]
+hessian_N_list = [1,2,4,8,16,32,64]
 hessian_N_list = [1,2]
 
 for N in hessian_N_list:
     print 'N=',N
-    results_hessian = np.zeros((7,2))
+    results_hessian = np.zeros((11,2))
     
     # pyadolc
     f = benchmark1.F(N)
@@ -181,8 +187,7 @@ for N in hessian_N_list:
     start_time = time.time()
     H =  a.hessian(3*np.ones(N))
     end_time = time.time()
-    results_hessian[method['numdifftools']] = end_time - start_time, 0
-    results_hessian_list.append(results_hessian)
+    results_hessian[method['numdifftools']] = end_time - start_time, np.linalg.norm( (H-ref_H).ravel())
     
     # algopy forward utpm variant
     f = benchmark1.G(N)
@@ -190,7 +195,7 @@ for N in hessian_N_list:
     start_time = time.time()
     g = a.forwardhessian(3*np.ones(N))
     end_time = time.time()
-    results_hessian[method['algopy_forward_utpm']] = end_time - start_time, 0
+    results_hessian[method['algopy_forward_utpm']] = end_time - start_time,  np.linalg.norm( (H-ref_H).ravel())
     
     # algopy forward/reverse utpm variant
     f = benchmark1.G(N)
@@ -198,10 +203,24 @@ for N in hessian_N_list:
     start_time = time.time()
     g = a.hessian(3*np.ones(N))
     end_time = time.time()
-    results_hessian[method['algopy_reverse_utpm']] = end_time - start_time, 0
+    results_hessian[method['algopy_reverse_utpm']] = end_time - start_time, np.linalg.norm( (H-ref_H).ravel())
+    
+    # theano
+    f = benchmark1.F(N)
+    a = use_theano.EVAL(f, np.ones(N))
+    start_time = time.time()
+    H =  a.hessian(3*np.ones(N))
+    end_time = time.time()
+    results_hessian[method['theano']] = end_time - start_time,  np.linalg.norm( (H-ref_H).ravel())
+    
+    
+    results_hessian_list.append(results_hessian)
+    
 
 results_hessians = np.array(results_hessian_list)
 
+print hessian_N_list
+print 'results_hessians=\n',results_hessians
 
 
 # PLOT RESULTS
@@ -240,6 +259,8 @@ pyplot.loglog(gradient_N_list, results_gradients[:,method['algopy_forward_utpm']
 pyplot.loglog(gradient_N_list, results_gradients[:,method['uncertainties'],0], '--kh', markerfacecolor='None', label = 'uncertainties')
 pyplot.loglog(gradient_N_list, results_gradients[:,method['numdifftools'],0], '--ks', markerfacecolor='None', label = 'numdifftools')
 pyplot.loglog(gradient_N_list, results_gradients[:,method['funcdesigner'],0], '--kd', markerfacecolor='None', label = 'funcdesigner')
+pyplot.loglog(gradient_N_list, results_gradients[:,method['theano'],0], '-.k1', markerfacecolor='None', label = 'theano')
+
 
 pyplot.ylabel('time $t$ [seconds]')
 pyplot.xlabel('problem size $N$')
@@ -257,6 +278,7 @@ pyplot.loglog(hessian_N_list, results_hessians[:,method['pyadolc'],0], '-ko', ma
 pyplot.loglog(hessian_N_list, results_hessians[:,method['algopy_forward_utpm'],0], '-.k>', markerfacecolor='None', label = 'algopy (fo)')
 pyplot.loglog(hessian_N_list, results_hessians[:,method['algopy_reverse_utpm'],0], '-.k<', markerfacecolor='None', label = 'algopy (fo/rev)')
 pyplot.loglog(hessian_N_list, results_hessians[:,method['numdifftools'],0], '--ks', markerfacecolor='None', label = 'numdifftools')
+pyplot.loglog(hessian_N_list, results_hessians[:,method['theano'],0], '-.k1', markerfacecolor='None', label = 'theano')
 pyplot.ylabel('time $t$ [seconds]')
 pyplot.xlabel('problem size $N$')
 pyplot.grid()
