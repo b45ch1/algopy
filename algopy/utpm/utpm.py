@@ -79,7 +79,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         if isinstance(rhs, UTPM):
             if type(sl) == int or sl == Ellipsis or isinstance(sl, slice):
                 sl = (sl,)
-            return self.data.__setitem__((slice(None),slice(None)) + sl, rhs.data)
+            x_data, y_data = UTPM._broadcast_arrays(self.data.__getitem__((slice(None),slice(None)) + sl), rhs.data)
+            return x_data.__setitem__(Ellipsis, y_data)
         else:
             if type(sl) == int or sl == Ellipsis or isinstance(sl, slice):
                 sl = (sl,)

@@ -36,7 +36,7 @@ class Test_Push_Forward(TestCase):
                 assert_array_almost_equal(numpy.sum(x.data[d,p], axis=1), y2[d,p])
         
 
-    def test_broadcasting(self):
+    def test_broadcasting_sub(self):
         #check 1
         x1 = numpy.array([1.,2.,3.])
         y1 = UTPM([[5],[7]])
@@ -47,6 +47,29 @@ class Test_Push_Forward(TestCase):
         z_data = numpy.array([[[-4,-3,-2]],[[-7,-7,-7]]])
         assert_array_almost_equal(z_data, z11.data)
         assert_array_almost_equal(z_data, z12.data)
+        
+        
+    def test_broadcasting_setitem(self):
+        x = UTPM(numpy.arange(2*1*3*4).reshape((2,1,3,4)))
+        y = UTPM(numpy.arange(2*1).reshape((2,1)))
+        x[0, :] = y
+        x[:, 1] = y
+        
+        assert_array_almost_equal(0, x.data[0,:,0,:])
+        assert_array_almost_equal(1, x.data[1,:,0,:])
+        assert_array_almost_equal(0, x.data[0,:,:,1])
+        assert_array_almost_equal(1, x.data[1,:,:,1])
+        
+        x[0, :] = 3.
+        x[:, 1] = 3.
+        
+        assert_array_almost_equal(3, x.data[0,:,0,:])
+        assert_array_almost_equal(0, x.data[1,:,0,:])
+        assert_array_almost_equal(3, x.data[0,:,:,1])
+        assert_array_almost_equal(0, x.data[1,:,:,1])
+
+    
+
                 
     def test_symvec_vecsym(self):
         (D,P,N) = 2,1,5

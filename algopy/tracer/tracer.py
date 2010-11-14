@@ -180,6 +180,9 @@ class CGraph:
         Warning: this function does _not_ compute the Jacobian.
         """
         
+        if self.dependentFunctionList[0].ndim != 0:
+            raise Exception('you are trying to compute the gradient of a non-scalar valued function')
+        
         utpm_x_list = [algopy.UTPM(x.reshape((1,1) + x.shape)) for x in x_list]
         
         # print utpm_x_list
@@ -705,13 +708,13 @@ class Function(Ring):
          return Function.pushforward(algopy.qr_full, [self])
          
     def diag(self):
-         return Function.pushforward(algopy.diag, [self])         
+         return Function.pushforward(algopy.diag, [self])
 
     def eigh(self):
          return Function.pushforward(algopy.eigh, [self])
          
     def eigh1(self):
-         return Function.pushforward(algopy.eigh1, [self])         
+         return Function.pushforward(algopy.eigh1, [self])
 
     def solve(self,rhs):
         return Function.pushforward(algopy.solve, [self,rhs])
@@ -733,4 +736,8 @@ class Function(Ring):
     def get_shape(self):
         return self.x.shape
     shape = property(get_shape)
+    
+    def get_ndim(self):
+        return numpy.ndim(self.x)
+    ndim = property(get_ndim)
  
