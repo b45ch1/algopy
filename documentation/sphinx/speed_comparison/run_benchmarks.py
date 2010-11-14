@@ -76,7 +76,7 @@ results_functions = np.array(results_function_list)
 # --------------------
 
 gradient_N_list = [2,4,8,16,32,64,96,128]
-# gradient_N_list = [2,4]
+gradient_N_list = [2,4]
 
 results_gradient_list = []
 for N in gradient_N_list:
@@ -160,7 +160,7 @@ for N in gradient_N_list:
 
 results_gradients = np.array(results_gradient_list)
 
-print results_gradients[:,method['theano']]
+print results_gradients[:,method['funcdesigner']]
 
 # HESSIAN COMPUTATION
 # -------------------
