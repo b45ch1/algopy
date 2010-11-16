@@ -56,7 +56,7 @@ def zeros( shape, dtype=float, order = 'C'):
     elif isinstance(dtype, UTPM):
         D,P = dtype.data.shape[:2]
 
-        return dtype.__class__(numpy.zeros((D,P) + shape ,dtype = float))
+        return dtype.__class__(numpy.zeros((D,P) + shape ,dtype = dtype.data.dtype))
         
     elif isinstance(dtype, Function):
         # dtype.create(zeros(shape, dtype=dtype.x, order = order), fargs, zeros):

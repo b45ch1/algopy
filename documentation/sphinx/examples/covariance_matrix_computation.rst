@@ -23,7 +23,7 @@ Two possibilities are compared:
        of the upper left part of the matrix
     
     2) Computation of the Nullspace of J2 with a QR decomposition.
-       The formula is :math:`C = Q_2^T( Q_2 J_1^T J1 Q_2^T)^{-1} Q_2`.
+       The formula is :math:`C = Q_2^T( Q_2 J_1^T J_1 Q_2^T)^{-1} Q_2`.
 
        Potentially, using the QR decomposition twice, i.e. once to compute :math:`Q_2` and
        then for :math:`J_1` compute :math:`Q_2^T` to avoid the multiplication which would square the condition

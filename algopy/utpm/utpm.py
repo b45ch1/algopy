@@ -620,12 +620,25 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return out
         
     @classmethod
-    def init_jacobian(cls, x):
-        """ initializes this UTPM instance to compute the Jacobian
+    def init_jacobian(cls, x, dtype=None):
+        """ initializes this UTPM instance to compute the Jacobian,
+        
+        it is possible to force the dtype to a certain dtype,
+        if no dtype is provided, the dtype is inferred from x
         """
         
+        x = numpy.asarray(x)
+        
+        if dtype==None:
+            # try to infer the dtype from x
+            dtype= x.dtype
+            
+            if dtype==int:
+                dtype=float
+            
+        
         shp = numpy.shape(x)
-        data = numpy.zeros(numpy.hstack( [2, numpy.size(x), shp]))
+        data = numpy.zeros(numpy.hstack( [2, numpy.size(x), shp]), dtype=dtype)
         data[0] = x
         data[1,:].flat = numpy.eye(numpy.size(x))
         

@@ -185,10 +185,11 @@ Version Changelog
 * Version 0.3.0:
     * renamed push_forward to pushforward, this is more consistent w.r.t. the pullback
     * UTPM.__repr__ now returns a string of the form `UTPM(...)`
-    * refactored the tracer: it is not largely possible to trace the function evaluation with normal numpy.ndarrays. After that, one can use cg.pushforward with UTPM instances or call cg.gradient, etc.
+    * refactored the tracer: it should now be possible to trace the function evaluation with normal numpy.ndarrays. After that, one can use cg.pushforward with UTPM instances or call cg.gradient, etc.
     * UTPM.reshape is now a method, not a class method
     * added broadcasting support for __setitem__
     * added Function.ndim
+    * added preliminary complex numbers support
 
     
 Unit Test
