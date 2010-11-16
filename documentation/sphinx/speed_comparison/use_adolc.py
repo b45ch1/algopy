@@ -2,7 +2,7 @@ import numpy
 import adolc
 
 class EVAL:
-    def __init__(self, f, x):
+    def __init__(self, f, x, test = 'f'):
         self.f = f
         self.x = x
 

@@ -7,7 +7,7 @@ import numpy
 import adolc
 
 class EVAL:
-    def __init__(self, f, x):
+    def __init__(self, f, x, test = 'f'):
         self.f = f
         self.x = x
         self.A = f.A
@@ -15,14 +15,20 @@ class EVAL:
         x = theano.tensor.dvector('x')
         A = theano.tensor.dmatrix('A')
         y = 0.5*theano.dot(x*x,theano.dot(A,x))
-        gy = theano.tensor.grad(y,x)
-        hy = theano.tensor.grad(gy,x)
-        self.eval_grad = theano.function([x,A], gy)
-        self.eval_hess = theano.function([x,A], hy)
         
+        if test == 'f':
+            self.eval_f = theano.function([x,A], y)
         
-    # def function(self, x):
-    #     return adolc.function(0,x)
+        elif test == 'g':
+            gy = theano.tensor.grad(y,x)
+            self.eval_grad = theano.function([x,A], gy)
+        elif test == 'h':
+            gy = theano.tensor.grad(y,x)
+            hy, updates = theano.scan( lambda i, gy, x,A: theano.tensor.grad(gy[i], x), sequences = theano.tensor.arange(gy.shape[0]), non_sequences = [gy,x,A])
+            self.eval_hess = theano.function([x,A], hy)
+        
+    def function(self, x):
+        return float(self.eval_f(x,self.A))
         
     def gradient(self, x):
         return self.eval_grad(x,self.A)

@@ -17,7 +17,7 @@ they often appear in statistically motivated functions.
 
 Help improve ALGOPY
 -------------------
-If you have any questions or suggestions please use the mailing list 
+If you have any questions, suggestions or bug reports  please use the mailing list 
 http://groups.google.com/group/algopy?msg=new&lnk=gcis
 or alternatively write me an email(sebastian.walter@gmail.com). This will make it much easier for me to provide code/documentation that is easy to understand. 
 Of course, you are also welcome to contribute code, bugfixes, examples, success stories ;), ...
