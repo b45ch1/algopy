@@ -746,7 +746,10 @@ class RawAlgorithmsMixIn:
 
         if order != 'C':
             raise NotImplementedError('should implement that')
-
+        
+        if isinstance(newshape,int):
+            newshape = (newshape,)
+            
         return numpy.reshape(a_data, a_data.shape[:2] + newshape)
 
     @classmethod
