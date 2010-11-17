@@ -18,7 +18,7 @@ method = {'algopy_reverse_utps':0, 'algopy_reverse_utpm':1, 'pyadolc':2, 'scient
 # --------------------
 
 function_N_list = [1,2,4,8,16,32,64,128,256]
-function_N_list = [2]
+# function_N_list = [2]
 
 
 results_function_list = []

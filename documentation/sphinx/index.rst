@@ -190,6 +190,7 @@ Version Changelog
     * added broadcasting support for __setitem__
     * added Function.ndim
     * added preliminary complex numbers support
+    * UTPM.reshape now can also take integers as input, not only tuples of integers
 
     
 Unit Test
