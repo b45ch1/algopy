@@ -7,7 +7,7 @@ from algopy import Function
 
 # override numpy definitions
 
-numpy_function_names = ['sin','cos','tan', 'exp', 'log', 'sqrt', 'pow', 'arcsin', 'arccos', 'sinh', 'cosh', 'trace', 'dot', 'zeros_like', 'diag', 'triu']
+numpy_function_names = ['sin','cos','tan', 'exp', 'log', 'sqrt', 'pow', 'arcsin', 'arccos', 'sinh', 'cosh', 'tanh', 'trace', 'dot', 'zeros_like', 'diag', 'triu']
 numpy_linalg_function_names = ['inv', 'solve', 'eigh', 'qr', 'cholesky','transpose']
 
 

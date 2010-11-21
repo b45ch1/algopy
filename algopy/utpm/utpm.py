@@ -380,17 +380,17 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return out                
         
         
-    def tansec(self):
-        """ computes simultaneously y = tan(x) and z = sec(x)  in UTP arithmetic"""
+    def tansec2(self):
+        """ computes simultaneously y = tan(x) and z = sec^2(x)  in UTP arithmetic"""
         rettan = self.clone()
         retsec = self.clone()
-        self._tansec(self.data, out = (rettan.data, retsec.data))
+        self._tansec2(self.data, out = (rettan.data, retsec.data))
         return rettan, retset
         
     def tan(self):
         retval = self.zeros_like()
         tmp = self.zeros_like()
-        self._tansec(self.data, out = (retval.data, tmp.data))
+        self._tansec2(self.data, out = (retval.data, tmp.data))
         return retval
         
     @classmethod
@@ -480,6 +480,13 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         retval = self.clone()
         tmp = self.clone()
         self._sinhcosh(self.data, out = (tmp.data, retval.data))
+        return retval
+        
+    def tanh(self):
+        """ computes y = tanh(x) in UTP arithmetic """
+        retval = self.clone()
+        tmp = self.clone()
+        self._tanhsech2(self.data, out = (retval.data, tmp.data))
         return retval
             
 

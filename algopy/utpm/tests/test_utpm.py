@@ -378,6 +378,16 @@ class Test_Push_Forward(TestCase):
         y = UTPM.sinh(x)
         z = UTPM.cosh(x)
         assert_array_almost_equal(0., (z**2 - y**2 - 1.).data)
+        
+    def test_tanh(self):
+        D,P,N,M = 5,3,4,5
+        x = UTPM(numpy.random.random((D,P,M,N)))
+        
+        s = UTPM.sinh(x)
+        c = UTPM.cosh(x)
+        t = UTPM.tanh(x)
+        assert_array_almost_equal(t.data, (s/c).data)
+        
 
      
     def test_abs(self):

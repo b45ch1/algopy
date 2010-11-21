@@ -301,7 +301,7 @@ class RawAlgorithmsMixIn:
         return y_data
         
     @classmethod
-    def _tansec(cls, x_data, out = None):
+    def _tansec2(cls, x_data, out = None):
         """ computes tan and sec in Taylor arithmetic"""
         if out == None:
             raise NotImplementedError('should implement that')
@@ -412,7 +412,23 @@ class RawAlgorithmsMixIn:
             
         return s_data, c_data
         
+    @classmethod
+    def _tanhsech2(cls, x_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        y_data,z_data = out
+        D,P = x_data.shape[:2]
         
+        # base point: d = 0
+        y_data[0] = numpy.tanh(x_data[0])
+        z_data[0] = 1-y_data[0]*y_data[0]
+        
+        # higher order coefficients: d > 0
+        for d in range(1,D):
+            y_data[d] = (numpy.sum([k*x_data[k] * z_data[d-k] for k in range(1,d+1)], axis = 0))/d
+            z_data[d] = -2*(numpy.sum([k*y_data[k] * y_data[d-k] for k in range(1,d+1)], axis = 0))/d
+            
+        return y_data, z_data
         
 
     @classmethod
