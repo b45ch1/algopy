@@ -191,7 +191,7 @@ Version Changelog
     * added Function.ndim
     * added preliminary complex numbers support for arithmetic with UTPM instances (reverse mode using the tracer is definitely not supported yet)
     * UTPM.reshape now can also take integers as input, not only tuples of integers
-    * added UTPM.tan, UTPM.arcsin, UTPM.arccos, UTPM.sinh, UTPM.cosh, UTPM.tanh
+    * added UTPM.tan, UTPM.arcsin, UTPM.arccos, UTPM.arctan, UTPM.sinh, UTPM.cosh, UTPM.tanh
     
 Unit Test
 ---------

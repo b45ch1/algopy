@@ -461,6 +461,14 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         self._arccos(self.data, out = (rety.data, retz.data))
         return rety
         
+    def arctan(self):
+        """ computes y = arctan(x) in UTP arithmetic"""
+        rety = self.clone()
+        retz = self.clone()
+        self._arctan(self.data, out = (rety.data, retz.data))
+        return rety
+        
+        
     def sinhcosh(self):
         """ simultaneously computes s = sinh(x) and c = cosh(x) in UTP arithmetic"""
         rets = self.clone()
