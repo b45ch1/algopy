@@ -358,8 +358,26 @@ class Test_Push_Forward(TestCase):
         y2 = UTPM.arcsin(x2)
         
         assert_array_almost_equal(x.data, x2.data)
-        assert_array_almost_equal(y.data, y2.data)        
+        assert_array_almost_equal(y.data, y2.data)
+        
+    def test_arcsin(self):
+        D,P,N,M = 5,3,4,5
+        x = UTPM(numpy.random.random((D,P,M,N)))
+        
+        y = UTPM.arccos(x)
+        x2 = UTPM.cos(y)
+        y2 = UTPM.arccos(x2)
+        
+        assert_array_almost_equal(x.data, x2.data)
+        assert_array_almost_equal(y.data, y2.data)
+        
 
+    def test_sinhcosh(self):
+        D,P,N,M = 5,3,4,5
+        x = UTPM(numpy.random.random((D,P,M,N)))
+        y = UTPM.sinh(x)
+        z = UTPM.cosh(x)
+        assert_array_almost_equal(0., (z**2 - y**2 - 1.).data)
 
      
     def test_abs(self):

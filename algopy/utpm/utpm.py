@@ -448,12 +448,39 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return out
         
     def arcsin(self):
-        """ simultanteously computes y = arcsin(x) and z = -sin(x) in UTP arithmetic"""
+        """ computes y = arcsin(x) in UTP arithmetic"""
         rety = self.clone()
         retz = self.clone()
         self._arcsin(self.data, out = (rety.data, retz.data))
         return rety
 
+    def arccos(self):
+        """ computes y = arccos(x) in UTP arithmetic"""
+        rety = self.clone()
+        retz = self.clone()
+        self._arccos(self.data, out = (rety.data, retz.data))
+        return rety
+        
+    def sinhcosh(self):
+        """ simultaneously computes s = sinh(x) and c = cosh(x) in UTP arithmetic"""
+        rets = self.clone()
+        retc = self.clone()
+        self._sinhcosh(self.data, out = (rets.data, retc.data))
+        return rets, retc
+        
+    def sinh(self):
+        """ computes y = sinh(x) in UTP arithmetic """
+        retval = self.clone()
+        tmp = self.clone()
+        self._sinhcosh(self.data, out = (retval.data, tmp.data))
+        return retval
+        
+    def cosh(self):
+        """ computes y = cosh(x) in UTP arithmetic """
+        retval = self.clone()
+        tmp = self.clone()
+        self._sinhcosh(self.data, out = (tmp.data, retval.data))
+        return retval
             
 
     def __abs__(self):

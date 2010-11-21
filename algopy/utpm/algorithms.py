@@ -376,6 +376,44 @@ class RawAlgorithmsMixIn:
             
         return y_data, z_data
         
+    @classmethod
+    def _arccos(cls, x_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        y_data,z_data = out
+        D,P = x_data.shape[:2]
+        
+        # base point: d = 0
+        y_data[0] = numpy.arccos(x_data[0])
+        z_data[0] = -numpy.sin(y_data[0])
+        
+        # higher order coefficients: d > 0
+        for d in range(1,D):
+            y_data[d] = (d*x_data[d] - numpy.sum([k*y_data[k] * z_data[d-k] for k in range(1,d)], axis = 0))/(z_data[0]*d)
+            z_data[d] = -numpy.sum([k*y_data[k] * x_data[d-k] for k in range(1,d+1)], axis = 0)/d
+            
+        return y_data, z_data
+        
+    @classmethod
+    def _sinhcosh(cls, x_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        s_data,c_data = out
+        D,P = x_data.shape[:2]
+        
+        # base point: d = 0
+        s_data[0] = numpy.sinh(x_data[0])
+        c_data[0] = numpy.cosh(x_data[0])
+        
+        # higher order coefficients: d > 0
+        for d in range(1,D):
+            s_data[d] = (numpy.sum([k*x_data[k] * c_data[d-k] for k in range(1,d+1)], axis = 0))/d
+            c_data[d] = (numpy.sum([k*x_data[k] * s_data[d-k] for k in range(1,d+1)], axis = 0))/d
+            
+        return s_data, c_data
+        
+        
+        
 
     @classmethod
     def _dot(cls, x_data, y_data, out = None):
