@@ -43,7 +43,8 @@ class Test_Function_on_numpy_types(TestCase):
         fx = Function(2.)
         fy = Function(3.)
         fz = fx / fy
-        assert_almost_equal(fz.x, fx.x / fy.x)    
+        assert_almost_equal(fz.x, fx.x / fy.x)
+        
     
     def test_init(self):
         x = 1.
@@ -139,7 +140,7 @@ class Test_Function_on_UTPM(TestCase):
         assert_array_almost_equal(x1.xbar.data, x2.xbar.data)
 
         
-    def test_get_item(self):
+    def test_getitem(self):
         D,P,N = 2,5,7
         ax = UTPM(numpy.random.rand(D,P,N,N))
         fx = Function(ax)
@@ -148,7 +149,7 @@ class Test_Function_on_UTPM(TestCase):
             for c in range(N):
                 assert_array_almost_equal( fx[r,c].x.data, ax.data[:,:,r,c])
                 
-    def test_set_item(self):
+    def test_setitem(self):
         D,P,N = 2,5,7
         ax = UTPM(numpy.zeros((D,P,N)))
         ay = UTPM(numpy.random.rand(*(D,P,N)))
@@ -1320,7 +1321,22 @@ class Test_CGgraph_on_UTPM(TestCase):
         
         x = numpy.array([11,13.])
         assert_array_almost_equal([4*x[1]**2 * x[0], 4*x[0]**2 * x[1]], cg.gradient([x])[0])
-               
+
+    def test_tangent_gradient(self):
+        cg = CGraph()
+        x = Function(1.)
+        y1 = algopy.tan(x)
+        cg.trace_off()
+        cg.independentFunctionList = [x]
+        cg.dependentFunctionList = [y1]
+        g1 = cg.gradient([1.])[0]
+        
+        x = UTPM.init_jacobian(1.)
+        
+        assert_array_almost_equal(g1,UTPM.extract_jacobian(algopy.sin(x)/algopy.cos(x)))
+        assert_array_almost_equal(g1,UTPM.extract_jacobian(algopy.tan(x)))
+        
+
         
 class Test_CGraph_Plotting(TestCase):
     def test_simple(self):

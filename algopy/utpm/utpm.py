@@ -320,59 +320,24 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return retval
         
     def exp(self):
+        """ computes y = exp(x) in UTP arithmetic"""
+
         retval = self.clone()
         self._exp(self.data, out = retval.data)
         return retval
         
     def log(self):
+        """ computes y = log(x) in UTP arithmetic"""
         retval = self.clone()
         self._log(self.data, out = retval.data)
         return retval
         
     def sincos(self):
+        """ simultanteously computes s = sin(x) and c = cos(x) in UTP arithmetic"""
         retsin = self.clone()
         retcos = self.clone()
         self._sincos(self.data, out = (retsin.data, retcos.data))
         return retsin, retcos
-
-    def sum(self, axis=None, dtype=None, out=None):
-        if dtype != None or out != None:
-            raise NotImplementedError('not implemented yet')
-        
-        if axis == None:
-            tmp = numpy.prod(self.data.shape[2:])
-            return UTPM(numpy.sum(self.data.reshape(self.data.shape[:2] + (tmp,)), axis = 2))
-        else:
-            return UTPM(numpy.sum(self.data, axis = axis + 2))
-    
-    @classmethod
-    def pb_sum(cls, ybar, x, y, axis, dtype, out2, out = None):
-        
-        if out == None:
-            D,P = x.data.shape[:2]
-            xbar = x.zeros_like()
-        
-        else:
-            xbar = out[0]
-           
-        tmp = xbar.data.T
-        tmp += ybar.data.T
-        
-        return xbar
-
-
-    @classmethod
-    def pb_sincos(cls, sbar, cbar, x, s, c, out = None):
-        if out == None:
-            D,P = x.data.shape[:2]
-            xbar = x.zeros_like()
-        
-        else:
-            xbar, = out
-            
-        cls._pb_sincos(sbar.data, cbar.data, x.data, s.data, c.data, out = xbar.data)
-        
-        return out        
         
     def sin(self):
         retval = self.clone()
@@ -412,6 +377,74 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         s = x.sin()
         sbar = x.zeros_like()
         cls._pb_sincos(sbar.data, cbar.data, x.data, s.data, c.data, out = xbar.data)
+        return out                
+        
+        
+    def tansec(self):
+        """ computes simultaneously y = tan(x) and z = sec(x)  in UTP arithmetic"""
+        rettan = self.clone()
+        retsec = self.clone()
+        self._tansec(self.data, out = (rettan.data, retsec.data))
+        return rettan, retset
+        
+    def tan(self):
+        retval = self.zeros_like()
+        tmp = self.zeros_like()
+        self._tansec(self.data, out = (retval.data, tmp.data))
+        return retval
+        
+    @classmethod
+    def pb_tan(cls, ybar, x, y,  out = None):
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+        
+        else:
+            xbar, = out
+            
+        z = 1./x.cos(); z = z * z
+        zbar = x.zeros_like()
+        cls._pb_tansec(ybar.data, zbar.data, x.data, y.data, z.data, out = xbar.data)
+        return out
+        
+
+    def sum(self, axis=None, dtype=None, out=None):
+        if dtype != None or out != None:
+            raise NotImplementedError('not implemented yet')
+        
+        if axis == None:
+            tmp = numpy.prod(self.data.shape[2:])
+            return UTPM(numpy.sum(self.data.reshape(self.data.shape[:2] + (tmp,)), axis = 2))
+        else:
+            return UTPM(numpy.sum(self.data, axis = axis + 2))
+    
+    @classmethod
+    def pb_sum(cls, ybar, x, y, axis, dtype, out2, out = None):
+        
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+        
+        else:
+            xbar = out[0]
+           
+        tmp = xbar.data.T
+        tmp += ybar.data.T
+        
+        return xbar
+
+
+    @classmethod
+    def pb_sincos(cls, sbar, cbar, x, s, c, out = None):
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+        
+        else:
+            xbar, = out
+            
+        cls._pb_sincos(sbar.data, cbar.data, x.data, s.data, c.data, out = xbar.data)
+        
         return out        
         
 

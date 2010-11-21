@@ -333,14 +333,23 @@ class Test_Push_Forward(TestCase):
         
         assert_array_almost_equal((r * ybar * x**(r-1)).data, xbar.data)
         
-    def test_sin_cos(self):
+    def test_sincos(self):
         D,P,M,N = 4,3,2,1
         X = UTPM(numpy.random.rand(D,P,M,N))
         Z = UTPM.sin(X)**2 + UTPM.cos(X)**2
         # print Z
         assert_array_almost_equal(Z.data[0], numpy.ones((P,M,N)))
         assert_array_almost_equal(Z.data[1], numpy.zeros((P,M,N)))
+
+    def test_tansec(self):
+        D,P,M,N = 4,3,2,1
         
+        x = UTPM(numpy.random.random((D,P,M,N)))
+        y1 = UTPM.tan(x)
+        y2 = UTPM.sin(x)/UTPM.cos(x)
+        assert_array_almost_equal(y2.data, y1.data)
+
+
      
     def test_abs(self):
         D,P,N = 4,3,12

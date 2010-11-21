@@ -183,7 +183,7 @@ class CGraph:
         if self.dependentFunctionList[0].ndim != 0:
             raise Exception('you are trying to compute the gradient of a non-scalar valued function')
         
-        utpm_x_list = [algopy.UTPM(x.reshape((1,1) + x.shape)) for x in x_list]
+        utpm_x_list = [algopy.UTPM(numpy.asarray(x).reshape((1,1) + numpy.shape(x))) for x in x_list]
         
         # print utpm_x_list
         self.pushforward(utpm_x_list)
@@ -205,7 +205,7 @@ class CGraph:
         Warning: this function does _not_ compute the Jacobian.
         """
         
-        tmp = [x.ravel() for x in x_list]
+        tmp = [numpy.ravel(x) for x in x_list]
         
         tmp = numpy.concatenate(tmp)
         
@@ -216,7 +216,7 @@ class CGraph:
         a = 0
         for x in x_list:
             b = numpy.prod(x.shape)
-            utpm_x_list.append(tmp[a:b].reshape(x.shape))
+            utpm_x_list.append(numpy.reshape(tmp[a:b],x.shape))
         
         # print utpm_x_list
         
@@ -685,6 +685,9 @@ class Function(Ring):
          
     def sin(self):
          return Function.pushforward(algopy.sin, [self])
+         
+    def tan(self):
+         return Function.pushforward(algopy.tan, [self])
          
     def cos(self):
          return Function.pushforward(algopy.cos, [self])
