@@ -189,9 +189,9 @@ Version Changelog
     * UTPM.reshape is now a method, not a class method
     * added broadcasting support for __setitem__
     * added Function.ndim
-    * added preliminary complex numbers support
+    * added preliminary complex numbers support for arithmetic with UTPM instances (reverse mode using the tracer is definitely not supported yet)
     * UTPM.reshape now can also take integers as input, not only tuples of integers
-
+    * added UTPM.tan, UTPM.arcsin, UTPM.arccos, UTPM.sinh, UTPM.cosh, UTPM.tanh
     
 Unit Test
 ---------
