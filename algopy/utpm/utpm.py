@@ -445,8 +445,14 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             
         cls._pb_sincos(sbar.data, cbar.data, x.data, s.data, c.data, out = xbar.data)
         
-        return out        
+        return out
         
+    def arcsin(self):
+        """ simultanteously computes y = arcsin(x) and z = -sin(x) in UTP arithmetic"""
+        rety = self.clone()
+        retz = self.clone()
+        self._arcsin(self.data, out = (rety.data, retz.data))
+        return rety
 
             
 

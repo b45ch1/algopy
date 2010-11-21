@@ -357,6 +357,25 @@ class RawAlgorithmsMixIn:
         xbar_data = out
         cls._amul(sbar_data, c_data, xbar_data)
         cls._amul(cbar_data, s_data, xbar_data)
+        
+    @classmethod
+    def _arcsin(cls, x_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        y_data,z_data = out
+        D,P = x_data.shape[:2]
+        
+        # base point: d = 0
+        y_data[0] = numpy.arcsin(x_data[0])
+        z_data[0] = numpy.cos(y_data[0])
+        
+        # higher order coefficients: d > 0
+        for d in range(1,D):
+            y_data[d] = (d*x_data[d] - numpy.sum([k*y_data[k] * z_data[d-k] for k in range(1,d)], axis = 0))/(z_data[0]*d)
+            z_data[d] = -numpy.sum([k*y_data[k] * x_data[d-k] for k in range(1,d+1)], axis = 0)/d
+            
+        return y_data, z_data
+        
 
     @classmethod
     def _dot(cls, x_data, y_data, out = None):

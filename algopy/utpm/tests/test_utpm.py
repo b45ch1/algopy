@@ -348,6 +348,17 @@ class Test_Push_Forward(TestCase):
         y1 = UTPM.tan(x)
         y2 = UTPM.sin(x)/UTPM.cos(x)
         assert_array_almost_equal(y2.data, y1.data)
+        
+    def test_arcsin(self):
+        D,P,N,M = 5,3,4,5
+        x = UTPM(numpy.random.random((D,P,M,N)))
+        
+        y = UTPM.arcsin(x)
+        x2 = UTPM.sin(y)
+        y2 = UTPM.arcsin(x2)
+        
+        assert_array_almost_equal(x.data, x2.data)
+        assert_array_almost_equal(y.data, y2.data)        
 
 
      
