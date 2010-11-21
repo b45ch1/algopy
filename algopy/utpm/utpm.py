@@ -790,7 +790,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         N = x.size
         M = (N*(N+1))/2
         L = (N*(N-1))/2
-        S = numpy.zeros((N,M))
+        S = numpy.zeros((N,M), dtype=x.dtype)
     
         s = 0
         i = 0
@@ -801,7 +801,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             i+=1
         S = S[::-1].T
         
-        data = numpy.zeros(numpy.hstack([3,S.shape]))
+        data = numpy.zeros(numpy.hstack([3,S.shape]), dtype=x.dtype)
         data[0] = x
         data[1] = S
         return cls(data)
@@ -811,7 +811,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         """ extracts the Hessian of shape (N,N) from the UTPM instance y
         """
 
-        H = numpy.zeros((N,N))
+        H = numpy.zeros((N,N),dtype=y.data.dtype)
         for n in range(N):
             for m in range(n):
                 a =  sum(range(n+1))
