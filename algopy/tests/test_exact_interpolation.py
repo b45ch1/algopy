@@ -127,7 +127,7 @@ class TestForwardDrivers(TestCase):
         N = 5
         A = numpy.random.rand(N,N)
         A = numpy.dot(A.T,A)
-        x = algopy.UTPM.init_hessian(numpy.arange(N))
+        x = algopy.UTPM.init_hessian(numpy.arange(N,dtype=float))
         H = algopy.UTPM.extract_hessian(N, algopy.dot(x, algopy.dot(A,x)))
         assert_array_almost_equal(A, 0.5*H)
         

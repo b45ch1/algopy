@@ -110,6 +110,20 @@ def base_and_dirs2utpm(x,V):
     tc[1:,...] = V.transpose((axes_ids[-1],axes_ids[-2]) + axes_ids[:-2])
     
     return algopy.UTPM(tc)
+    
+def ndarray2utpm(A):
+    """ returns an UTPM instance from an array_like instance A with UTPM elements"""
+    from globalfuncs import zeros
+    shp = numpy.shape(A)
+    A = numpy.ravel(A)
+    retval = zeros(shp,dtype=A[0])
+    
+    for na, a in enumerate(A):
+        retval[na] = a
+        
+    return retval
+    
+    
 
 def symvec(A):
     """ 

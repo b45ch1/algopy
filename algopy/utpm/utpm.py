@@ -718,6 +718,17 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def pb_zeros(cls, *args, **kwargs):
         pass
+    
+    @classmethod
+    def tril(cls, x, out = None):
+        out = x.zeros_like()
+        D,P = out.data.shape[:2]
+        # print D,P
+        for d in range(D):
+            for p in range(P):
+                out.data[d,p] = numpy.tril(x.data[d,p])
+        
+        return out
         
     @classmethod
     def triu(cls, x, out = None):
