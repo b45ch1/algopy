@@ -521,20 +521,35 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return self.__class__.neg(self)
         
     def __lt__(self, other):
-        return numpy.all(self.data[0,...] < self.data[0,...])
+        if isinstance(other,self.__class__):
+            return numpy.all(self.data[0,...] < other.data[0,...])
+        else:
+            return numpy.all(self.data[0,...] < other)
         
     def __le__(self, other):
-        return numpy.all(self.data[0,...] <= self.data[0,...])
-        
+        if isinstance(other,self.__class__):
+            return numpy.all(self.data[0,...] <= other.data[0,...])
+        else:
+            return numpy.all(self.data[0,...] <= other)
+            
     def __gt__(self, other):
-        return numpy.all(self.data[0,...] > self.data[0,...])
-        
+        if isinstance(other,self.__class__):
+            return numpy.all(self.data[0,...] > other.data[0,...])
+        else:
+            return numpy.all(self.data[0,...] > other)
+            
     def __ge__(self, other):
-        return numpy.all(self.data[0,...] >= self.data[0,...])
-        
+        if isinstance(other,self.__class__):
+            return numpy.all(self.data[0,...] >= other.data[0,...])
+        else:
+            return numpy.all(self.data[0,...] >= other)
+            
     def __eq__(self, other):
-        return numpy.all(self.data[0,...] == self.data[0,...])
-        
+        if isinstance(other,self.__class__):
+            return numpy.all(self.data[0,...] == other.data[0,...])
+        else:
+            return numpy.all(self.data[0,...] == other)
+            
     @classmethod
     def neg(cls, x, out = None):
         return -1*x
