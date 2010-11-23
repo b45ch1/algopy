@@ -193,7 +193,7 @@ Version Changelog
     * UTPM.reshape now can also take integers as input, not only tuples of integers
     * added UTPM.tan, UTPM.arcsin, UTPM.arccos, UTPM.arctan, UTPM.sinh, UTPM.cosh, UTPM.tanh
     * made init_hessian and extract_hessian generic (to make it useful for complex valued functions)
-    
+    * added comparison operators <,>,<=,>=,== to UTPM
     
 Unit Test
 ---------

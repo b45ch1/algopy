@@ -520,6 +520,21 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def __neg__(self):
         return self.__class__.neg(self)
         
+    def __lt__(self, other):
+        return numpy.all(self.data[0,...] < self.data[0,...])
+        
+    def __le__(self, other):
+        return numpy.all(self.data[0,...] <= self.data[0,...])
+        
+    def __gt__(self, other):
+        return numpy.all(self.data[0,...] > self.data[0,...])
+        
+    def __ge__(self, other):
+        return numpy.all(self.data[0,...] >= self.data[0,...])
+        
+    def __eq__(self, other):
+        return numpy.all(self.data[0,...] == self.data[0,...])
+        
     @classmethod
     def neg(cls, x, out = None):
         return -1*x
