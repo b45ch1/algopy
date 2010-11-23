@@ -132,12 +132,12 @@ def symvec(A):
         as output
 
     """
-    
+    from globalfuncs import zeros
     N,M = A.shape
     
     assert N == M
     
-    v = globalfuncs.zeros( ((N+1)*N)//2, dtype=A)
+    v = zeros( ((N+1)*N)//2, dtype=A)
     
     count = 0
     for row in range(N):
@@ -151,11 +151,11 @@ def vecsym(v):
     returns a full symmetric matrix filled
     the distinct elements of v, filled row-wise
     """
-    
+    from globalfuncs import zeros
     Nv = v.size
     N = (int(numpy.sqrt(1 + 8*Nv)) - 1)//2
 
-    A = globalfuncs.zeros( (N,N), dtype=v)
+    A = zeros( (N,N), dtype=v)
     
     count = 0
     for row in range(N):
