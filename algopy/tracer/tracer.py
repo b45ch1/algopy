@@ -39,28 +39,6 @@ class CGraph:
         
         --- dependent variables
         [5]
-        
-        
-    One can perform to actions with a computational graph:
-    
-        1)  push forward
-        2)  pullback of the differential of the dependent variables
-        
-    The push forward can propagate any data structure.
-    For instance:
-        * univariate Taylor polynomials over scalars 
-        * univariate Taylor polynomials over matrices 
-        * cross Taylor polynomials over scalars
-        * multivariate Taylor polynomials
-        
-    Relaxing the definition of the push forward one could also supply:
-        * intervals arithmetic
-        * slopes
-        * etc.
-        
-    The pullback is specifically the pullback of an element of the cotangent space that linearizes
-    the computational procedure.
-        
     
     """
 
@@ -227,6 +205,8 @@ class CGraph:
         ybar =  self.dependentFunctionList[0].x.zeros_like()
         ybar.data[0,:] = 1.
         self.pullback([ybar])
+        
+        print [x.xbar.data[1,:] for x in self.independentFunctionList]
         
         return numpy.array([x.xbar.data[1,:] for x in self.independentFunctionList])
         # # print self
