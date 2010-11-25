@@ -25,6 +25,13 @@ class Model:
         x = algopy.UTPM.init_jacobian(x)
         return algopy.UTPM.extract_jacobian(self.eval_g(x))
         
+    def eval_jac_vec_g_forward(self, x, v):
+        x = algopy.UTPM.init_jac_vec(x, v)
+        return algopy.UTPM.extract_jac_vec(self.eval_g(x))
+        
+    def eval_grad_Lagrangian_forward(self, lam, x):
+        return self.eval_grad_f_forward(x) + algopy.dot(lam, self.eval_jac_g_forward(x))
+        
     def eval_hess_Lagrangian_forward(self, lam, x):
         x = algopy.UTPM.init_hessian(x)
         return algopy.UTPM.extract_hessian(6, self.eval_Lagrangian(lam, x))
@@ -40,6 +47,8 @@ class Model:
         
     def eval_grad_f_reverse(self, x):
         return self.cg.gradient([x])
+        
+        
 
 lam = numpy.array([1,1,1],dtype=float)
 x = numpy.array([1,2,3,4,0,1,1],dtype=float)
@@ -47,7 +56,10 @@ x = numpy.array([1,2,3,4,0,1,1],dtype=float)
 m = Model()
 print m.eval_grad_f_forward(x)
 print m.eval_jac_g_forward(x)
-print m.eval_hess_Lagrangian_forward(lam, x)
+print m.eval_jac_vec_g_forward(x,[1,0,0,0,0,0,0])
+print m.eval_grad_Lagrangian_forward(lam, x)
+
+# print m.eval_hess_Lagrangian_forward(lam, x)
 
 m.trace_eval_f(x)
 print m.eval_grad_f_reverse(x)

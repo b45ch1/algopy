@@ -773,6 +773,37 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         """
         return x.data[1,...].transpose([i for i in range(1,x.data[1,...].ndim)] + [0])
         
+    @classmethod
+    def init_jac_vec(cls, x, v, dtype=None):
+        """ initializes this UTPM instance to compute the Jacobian vector product J v,
+        
+        it is possible to force the dtype to a certain dtype,
+        if no dtype is provided, the dtype is inferred from x
+        """
+        
+        x = numpy.asarray(x)
+        
+        if dtype==None:
+            # try to infer the dtype from x
+            dtype= x.dtype
+            
+            if dtype==int:
+                dtype=float
+            
+        
+        shp = numpy.shape(x)
+        data = numpy.zeros(numpy.hstack( [2, 1, shp]), dtype=dtype)
+        data[0,0] = x
+        data[1,0] = v
+        return cls(data)
+        
+    @classmethod
+    def extract_jac_vec(cls, x):
+        """ extracts the Jacobian vector from a UTPM instance
+        if x.ndim == 1 it is equivalent to the gradient
+        """
+        return x.data[1,...].transpose([i for i in range(1,x.data[1,...].ndim)] + [0])[:,0]
+        
         
     @classmethod
     def init_tensor(cls, d, x):
