@@ -7,7 +7,7 @@ from algopy import Function
 
 # override numpy definitions
 
-numpy_function_names = ['sin','cos','tan', 'exp', 'log', 'sqrt', 'pow', 'arcsin', 'arccos', 'arctan', 'sinh', 'cosh', 'tanh', 'trace', 'dot', 'zeros_like', 'diag', 'triu', 'tril','sum']
+numpy_function_names = ['sin','cos','tan', 'exp', 'log', 'sqrt', 'pow', 'arcsin', 'arccos', 'arctan', 'sinh', 'cosh', 'tanh', 'trace', 'zeros_like', 'diag', 'triu', 'tril','sum']
 numpy_linalg_function_names = ['inv', 'solve', 'eigh', 'qr', 'cholesky','transpose']
 
 
@@ -65,7 +65,21 @@ def zeros( shape, dtype=float, order = 'C'):
         
     else:
         raise ValueError('don\'t know what to do with dtype = %s, type(dtype)=%s'%(str(dtype), str(type(dtype))))
+
+def dot(a,b):
+    """
+    Same as NumPy dot but in UTP arithmetic
+    """
+    if isinstance(a,Function) or isinstance(b,Function):
+        return Function.dot(a,b)
         
+    elif isinstance(a,UTPM) or isinstance(b,UTPM):
+        return UTPM.dot(a,b)
+        
+    else:
+        return numpy.dot(a,b)
+    
+
 
 def qr_full(A):
     """ Q,R = qr_full(A) returns QR decomposition with quadratic Q 
