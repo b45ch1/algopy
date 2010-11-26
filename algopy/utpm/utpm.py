@@ -279,14 +279,16 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
             self.data[0,...] += rhs
         else:
-            self.data[...] += rhs.data[...]
+            self_data, rhs_data = UTPM._broadcast_arrays(self.data, rhs.data)
+            self_data[...] += rhs_data[...]
         return self
         
     def __isub__(self,rhs):
         if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
             self.data[0,...] -= rhs
         else:
-            self.data[...] -= rhs.data[...]
+            self_data, rhs_data = UTPM._broadcast_arrays(self.data, rhs.data)
+            self_data[...] -= rhs_data[...]
         return self
         
     def __imul__(self,rhs):
