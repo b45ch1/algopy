@@ -125,10 +125,19 @@ def ndarray2utpm(A):
     
     
 
-def symvec(A):
-    """ 
+def symvec(A, UPLO='F'):
+    """ returns the distinct elements of a symmetrized square matrix A
+    as vector
     
-    returns the distinct elements of a symmetrized square matrix A as vector
+    Parameters
+    ----------
+    A: array_like
+        symmetric matrix stored in UPLO format
+    
+    UPLO: string
+        UPLO = 'F' fully populated symmetric matrix
+        UPLO = 'L' only the lower triangular part defines A
+        UPLO = 'U' only the upper triangular part defines A
     
     Example 1:
     ~~~~~~~~~~
@@ -153,11 +162,32 @@ def symvec(A):
     
     v = zeros( ((N+1)*N)//2, dtype=A)
     
-    count = 0
-    for row in range(N):
-        for col in range(row,N):
-            v[count] = 0.5* (A[row,col] + A[col,row])
-            count +=1
+    if UPLO=='F':
+        count = 0
+        for row in range(N):
+            for col in range(row,N):
+                v[count] = 0.5* (A[row,col] + A[col,row])
+                count +=1
+                
+    elif UPLO=='L':
+        count = 0
+        for n in range(N):
+            for m in range(n,N):
+                v[count] = A[m,n]
+                count +=1
+                
+    elif UPLO=='U':
+        count = 0
+        for n in range(N):
+            for m in range(n,N):
+                v[count] = A[n,m]
+                count +=1
+                
+    else:
+        err_str = "UPLO must be either 'F','L', or 'U'\n"
+        err_str+= "however, provided UPLO=%s"%UPLO
+        raise ValueError(err_str)
+                
     return v
 
 def vecsym(v):

@@ -94,15 +94,15 @@ def eigh1(A):
     else:
         raise NotImplementedError('don\'t know what to do with this instance')
         
-def symvec(A):
+def symvec(A, UPLO='F'):
     if isinstance(A, UTPM):
-        return UTPM.symvec(A)
+        return UTPM.symvec(A, UPLO=UPLO)
     
     elif isinstance(A, Function):
-        return Function.symvec(A)
+        return Function.symvec(A, UPLO=UPLO)
         
     elif isinstance(A, numpy.ndarray):
-        return utils.symvec(A)
+        return utils.symvec(A, UPLO=UPLO)
         
     else:
         raise NotImplementedError('don\'t know what to do with this instance')

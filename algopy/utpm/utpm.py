@@ -1450,30 +1450,21 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
 
     @classmethod
-    def symvec(cls, A):
+    def symvec(cls, A, UPLO = 'F'):
         """
         maps a symmetric matrix to a vector containing the distinct elements
         """
-        D,P,N,M = A.data.shape
-        assert N == M
-        
-        v = cls(numpy.zeros( (D,P,((N+1)*N)//2)))
-        
-        count = 0
-        for row in range(N):
-            for col in range(row,N):
-                v[count] = 0.5* (A[row,col] + A[col,row])
-                count +=1
-        return v
+        import algopy.utils
+        return algopy.utils.symvec(A, UPLO=UPLO)
             
     @classmethod
-    def pb_symvec(cls, vbar, A, v, out = None):
+    def pb_symvec(cls, vbar, A, UPLO, v, out = None):
         
         if out == None:
             Abar = A.zeros_like()
         
         else:
-            Abar ,= out
+            Abar = out[0]
         
         Abar += cls.vecsym(vbar)
         return Abar

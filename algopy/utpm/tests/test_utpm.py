@@ -87,7 +87,7 @@ class Test_Push_Forward(TestCase):
         A = UTPM.vecsym(v)
         w = UTPM.symvec(A)
         wbar = UTPM(numpy.random.rand(*(D,P,N)))
-        Abar = UTPM.pb_symvec(wbar, A, w)
+        Abar = UTPM.pb_symvec(wbar, A, 'F', w)
         vbar = UTPM.pb_vecsym(Abar, v, A)
         
         assert_array_almost_equal(wbar.data, vbar.data)

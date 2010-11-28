@@ -708,8 +708,8 @@ class Function(Ring):
     def transpose(self):
         return Function.pushforward(algopy.transpose, [self])
                 
-    def symvec(self):
-        return Function.pushforward(self.x.__class__.symvec, [self])
+    def symvec(self, UPLO='F'):
+        return Function.pushforward(self.x.__class__.symvec, [self, UPLO])
         
     def vecsym(self):
         return Function.pushforward(self.x.__class__.vecsym, [self])
