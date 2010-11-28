@@ -175,43 +175,76 @@ class CGraph:
         # print self
         
     def hessian(self, x_list):
-        """ computes the hessian of a function y = f(x_list), where y is a scalar 
-        and x_list is a list or tuple of input arguments.
-        The computation is performed in thein the reverse mode of AD.
-        x_list contains the independent variables at which the gradient should be evaluated.
+        """ computes the Hessian
         
-        Warning: this function does _not_ compute the Jacobian.
+        H = self.hessian(x_list)
+        
+        Parameters
+        ----------
+        x_list: list
+            inputs as in self.independentFunctionList
+            
+        Returns
+        -------
+        H: array
+            two-dimensional array containing the Hessian
+            
         """
+        if len(x_list) != 1:
+            raise NotImplementedError('')
         
         tmp = [numpy.ravel(x) for x in x_list]
-        
         tmp = numpy.concatenate(tmp)
-        
-        # print tmp
-        tmp = algopy.UTPM.init_jacobian(x)
+        tmp = algopy.UTPM.init_jacobian(tmp)
         
         utpm_x_list = []
         a = 0
         for x in x_list:
             b = numpy.prod(x.shape)
             utpm_x_list.append(numpy.reshape(tmp[a:b],x.shape))
-        
-        # print utpm_x_list
-        
-        # # print utpm_x_list
+
         self.pushforward(utpm_x_list)
         
-        # # print self
         ybar =  self.dependentFunctionList[0].x.zeros_like()
         ybar.data[0,:] = 1.
         self.pullback([ybar])
         
-        print [x.xbar.data[1,:] for x in self.independentFunctionList]
-        
         return numpy.array([x.xbar.data[1,:] for x in self.independentFunctionList])
-        # # print self
         
+    def hess_vec(self, x_list, v_list):
+        """ computes the Hessian vector product  dot(H,v)
         
+        Hv = self.hess_vec(x_list)
+        
+        Parameters
+        ----------
+        x_list: list
+            inputs as in self.independentFunctionList
+            
+        v_list: list
+            input directions
+            
+        Returns
+        -------
+        Hv: array
+            one-dimensional array containing the Hessian vector product
+            
+        """
+        if len(x_list) != 1 or  len(v_list) != 1:
+            raise NotImplementedError('')
+            
+        x = x_list[0]
+        v = v_list[0]
+        xtmp = numpy.zeros((2,1) + x.shape)
+        xtmp[0,0] = x; xtmp[1,0] = v
+        xtmp = algopy.UTPM(xtmp)
+        
+        self.pushforward([xtmp])
+        ybar =  self.dependentFunctionList[0].x.zeros_like()
+        ybar.data[0,:] = 1.
+        self.pullback([ybar])
+        
+        return self.independentFunctionList[0].xbar.data[1,0]
 
 
     def plot(self, filename = None, method = None, orientation = 'TD'):

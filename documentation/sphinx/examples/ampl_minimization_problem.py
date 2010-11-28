@@ -3,6 +3,8 @@ import numpy
 
 
 class Model:
+    
+    # Function evaluations
     def eval_f(self, x):
         return (x[0]-10)**2 + 5*(x[1]-12)**2 + x[2]**4 + 3*(x[3]-11)**2 + 10*x[4]**6
         + 7*x[5]**2 + x[6]**4 - 4*x[5]*x[6] - 10*x[5] - 8*x[6]
@@ -15,8 +17,10 @@ class Model:
         return out
     
     def eval_Lagrangian(self, lam,x):
-        return self.eval_f(x) #+ algopy.dot(lam, self.eval_g(x))
+        return self.eval_f(x) + algopy.dot(lam, self.eval_g(x))
         
+        
+    # Forward Mode Derivative Evaluations
     def eval_grad_f_forward(self, x):
         x = algopy.UTPM.init_jacobian(x)
         return algopy.UTPM.extract_jacobian(self.eval_f(x))
@@ -35,7 +39,9 @@ class Model:
     def eval_hess_Lagrangian_forward(self, lam, x):
         x = algopy.UTPM.init_hessian(x)
         return algopy.UTPM.extract_hessian(6, self.eval_Lagrangian(lam, x))
-    
+
+
+    # Reverse Mode Derivative Evaluations
     def trace_eval_f(self, x):
         cg = algopy.CGraph()
         x = algopy.Function(x)
@@ -48,21 +54,32 @@ class Model:
     def eval_grad_f_reverse(self, x):
         return self.cg.gradient([x])
         
+    def eval_hess_f_reverse(self, x):
+        return self.cg.hessian([x])
+        
+    def eval_hess_vec_f_reverse(self, x, v):
+        return self.cg.hess_vec([x],[v])
+        
         
 
 lam = numpy.array([1,1,1],dtype=float)
 x = numpy.array([1,2,3,4,0,1,1],dtype=float)
+v = numpy.array([1,1,1,1,1,1,1],dtype=float)
 
 m = Model()
+
+# print 'Forward Mode'
 print m.eval_grad_f_forward(x)
 print m.eval_jac_g_forward(x)
 print m.eval_jac_vec_g_forward(x,[1,0,0,0,0,0,0])
 print m.eval_grad_Lagrangian_forward(lam, x)
+print m.eval_hess_Lagrangian_forward(lam, x)
 
-# print m.eval_hess_Lagrangian_forward(lam, x)
-
+# print 'Reverse Mode'
 m.trace_eval_f(x)
 print m.eval_grad_f_reverse(x)
+print m.eval_hess_f_reverse(x)
+print m.eval_hess_vec_f_reverse(x,v)
 
 
 
