@@ -204,7 +204,7 @@ class RawAlgorithmsMixIn:
             y_data[d] /= d
             
     @classmethod
-    def pb_pow_real(cls, ybar_data, x_data, r, y_data, out = None):
+    def _pb_pow_real(cls, ybar_data, x_data, r, y_data, out = None):
         """ pullback function of y = pow(x,r) """
         if out == None:
             raise NotImplementedError('should implement that')
@@ -212,14 +212,28 @@ class RawAlgorithmsMixIn:
         xbar_data = out
         (D,P) = y_data.shape[:2]
         
-        if r == 0:
-            raise NotImplementedError('x**0 is special and has not been implemented')
+        # if r == 0:
+            # raise NotImplementedError('x**0 is special and has not been implemented')
+            
+        # if type(r) == int:
+            # if r == 2:
+                
+        # print 'r=',r
+        # print 'x_data=',x_data
+        # print 'y_data=',y_data
+        # print 'xbar_data=',xbar_data
+        # print 'ybar_data=',ybar_data    
         
-
-        cls._div(y_data, x_data, xbar_data)
-        xbar_data[...] = numpy.nan_to_num(xbar_data)
-        cls._mul(ybar_data, xbar_data, xbar_data)
-        xbar_data *= r
+        tmp = numpy.zeros_like(xbar_data)
+        
+        cls._div(y_data, x_data, tmp)
+        tmp[...] = numpy.nan_to_num(tmp)
+        cls._mul(ybar_data, tmp, tmp)
+        tmp *= r
+        
+        xbar_data += tmp
+        
+        # print 'xbar_data=',xbar_data
 
             
     @classmethod
@@ -278,6 +292,15 @@ class RawAlgorithmsMixIn:
         for d in range(1, D):
             y_data[d] = numpy.sum(y_data[:d][::-1]*xtctilde[:d], axis=0)/d
         return y_data
+        
+    @classmethod
+    def _pb_exp(cls, ybar_data, x_data, y_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        
+        xbar_data = out
+        cls._amul(ybar_data, y_data, xbar_data)
+        
         
     @classmethod
     def _log(cls, x_data, out = None):
@@ -356,7 +379,7 @@ class RawAlgorithmsMixIn:
         
         xbar_data = out
         cls._amul(sbar_data, c_data, xbar_data)
-        cls._amul(cbar_data, s_data, xbar_data)
+        cls._amul(cbar_data, -s_data, xbar_data)
         
     @classmethod
     def _arcsin(cls, x_data, out = None):

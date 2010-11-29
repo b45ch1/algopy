@@ -97,20 +97,28 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         where A,Q,R are Function objects
         """
         if out == None:
-            raise NotImplementedError('I\'m not sure if this makes sense')
+            raise NotImplementedError('I\'m not sure that this makes sense')
             
+        # workaround for qr and eigh
         if isinstance( out[0], tuple):
             tmp = list(out[0])
             tmp[sl] += ybar
-            
+        
+        # usual workflow
         else:
+            # print 'out=\n', out[0][sl]
+            # print 'ybar=\n',ybar
             out[0][sl] = ybar
             
         return out
     
     @classmethod
     def pb_getitem(cls, ybar, x, sl, y, out = None):
-        return cls.pb___getitem__(ybar, x, sl, y, out = out)
+        # print 'ybar=\n',ybar
+        retval = cls.pb___getitem__(ybar, x, sl, y, out = out)
+        # print 'retval=\n',retval[0]
+        return retval
+        
     
     @classmethod
     def as_utpm(cls, x):
@@ -253,12 +261,13 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         else:
             xbar = out[0]
             
-        cls.pb_pow_real(ybar.data, x.data, r, y.data, out = xbar.data)
+        cls._pb_pow_real(ybar.data, x.data, r, y.data, out = xbar.data)
         return xbar
         
     @classmethod
     def pb_pow(cls, ybar, x, r, y, out = None):
-        return cls.pb___pow__(ybar, x, r, y, out = out)
+        retval = cls.pb___pow__(ybar, x, r, y, out = out)
+        return retval
         
 
     def __radd__(self,rhs):
@@ -327,6 +336,19 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         retval = self.clone()
         self._exp(self.data, out = retval.data)
         return retval
+    
+    @classmethod    
+    def pb_exp(cls, ybar, x, y, out=None):
+        """ computes bar y dy = bar x dx in UTP arithmetic"""
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+        
+        else:
+            xbar, = out
+
+        cls._pb_exp(ybar.data, x.data, y.data, out = xbar.data)
+        return out     
         
     def log(self):
         """ computes y = log(x) in UTP arithmetic"""

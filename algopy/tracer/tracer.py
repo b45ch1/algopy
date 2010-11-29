@@ -174,6 +174,26 @@ class CGraph:
         return [x.xbar.data[0,0] for x in self.independentFunctionList]
         # print self
         
+    def jacobian(self, x_list):
+        """ computes the Jacobian of a function F:R^N --> R^M
+        """
+        M = self.dependentFunctionList[0].size
+        
+        utpm_x_list = []
+        for n,x in enumerate(x_list):
+            tmp = numpy.zeros((1,M) + numpy.shape(x))
+            tmp[0,...] = x
+            utpm_x_list.append(algopy.UTPM(tmp))
+
+        self.pushforward(utpm_x_list)
+        
+        ybar =  algopy.UTPM(numpy.zeros((1,M,M)))
+        ybar.data[0,:,:] = numpy.eye(M)
+        self.pullback([ybar])
+        
+        return [x.xbar.data[0,:] for x in self.independentFunctionList]
+        # print self        
+        
     def hessian(self, x_list):
         """ computes the Hessian
         
@@ -554,8 +574,8 @@ class Function(Ring):
             # case if the function F has output, e.g. y1 = F(x)
             args = [F.xbar] + args + [F.x]
             
+            # print '-------'
             # print func_name
-            
             # print F.x
             # print F.xbar
             
@@ -784,12 +804,18 @@ class Function(Ring):
         
     def transpose(self):
         return Function.pushforward(algopy.transpose, [self])
+        
+    def tril(self):
+        return Function.pushforward(algopy.tril, [self])
+
+    def triu(self):
+        return Function.pushforward(algopy.triu, [self])        
                 
     def symvec(self, UPLO='F'):
-        return Function.pushforward(self.x.__class__.symvec, [self, UPLO])
+        return Function.pushforward(algopy.symvec, [self, UPLO])
         
     def vecsym(self):
-        return Function.pushforward(self.x.__class__.vecsym, [self])
+        return Function.pushforward(algopy.vecsym, [self])
         
     T = property(transpose)
     
@@ -800,4 +826,8 @@ class Function(Ring):
     def get_ndim(self):
         return numpy.ndim(self.x)
     ndim = property(get_ndim)
+    
+    def get_size(self):
+        return self.x.size
+    size = property(get_size)    
  

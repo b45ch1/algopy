@@ -63,6 +63,9 @@ class Model:
     def eval_grad_f_reverse(self, x):
         return self.cg.gradient([x])
         
+    def eval_jac_g_reverse(self, x):
+        return self.cg2.jacobian([x])
+        
     def eval_hess_f_reverse(self, x):
         return self.cg.hessian([x])
         
@@ -71,8 +74,6 @@ class Model:
         
     def eval_lagra_hess_mat_g_reverse(self, lagra, x, V):
         return self.cg2.lagra_hess_mat(lagra, [x], [V])
-        
-        
 
 lam = numpy.array([1,1,1],dtype=float)
 x = numpy.array([1,2,3,4,0,1,1],dtype=float)
@@ -87,26 +88,22 @@ m.eval_f(x)
 m.eval_g(x)
 
 print 'Forward Mode'
-print m.eval_grad_f_forward(x)
+# print m.eval_grad_f_forward(x)
 print m.eval_jac_g_forward(x)
-print m.eval_jac_vec_g_forward(x,[1,0,0,0,0,0,0])
-print m.eval_grad_Lagrangian_forward(lam, x)
-print m.eval_hess_Lagrangian_forward(lam, x)
+# print m.eval_jac_vec_g_forward(x,[1,0,0,0,0,0,0])
+# print m.eval_grad_Lagrangian_forward(lam, x)
+# print m.eval_hess_Lagrangian_forward(lam, x)
 
 print 'Reverse Mode'
 m.trace_eval_f(x)
 m.trace_eval_g(x)
 
-print m.eval_grad_f_reverse(x)
-print m.eval_hess_f_reverse(x)
-print m.eval_hess_vec_f_reverse(x,v)
-print m.eval_lagra_hess_mat_g_reverse(lagra, x,V)
+# print m.eval_grad_f_reverse(x)
+print m.eval_jac_g_reverse(x)
 
+# print m.cg2
 
-
-
-
-
-
-
+# print m.eval_hess_f_reverse(x)
+# print m.eval_hess_vec_f_reverse(x,v)
+# print m.eval_lagra_hess_mat_g_reverse(lagra, x,V)
 

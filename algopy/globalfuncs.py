@@ -136,3 +136,4 @@ def vecsym(v):
         raise NotImplementedError('don\'t know what to do with this instance')
 vecsym.__doc__ = utils.vecsym.__doc__
 
+
