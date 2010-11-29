@@ -1489,8 +1489,36 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         
         else:
             Abar = out[0]
+            
+        N,M = A.shape
+            
+        if UPLO=='F':
+            count = 0
+            for row in range(N):
+                for col in range(row,N):
+                    Abar[row,col] += 0.5 * vbar[count]
+                    Abar[col,row] += 0.5 * vbar[count]
+                    count +=1
+                    
+        elif UPLO=='L':
+            count = 0
+            for n in range(N):
+                for m in range(n,N):
+                    Abar[m,n] = vbar[count]
+                    count +=1
+                    
+        elif UPLO=='U':
+            count = 0
+            for n in range(N):
+                for m in range(n,N):
+                    Abar[n,m] = vbar[count]
+                    count +=1
+                    
+        else:
+            err_str = "UPLO must be either 'F','L', or 'U'\n"
+            err_str+= "however, provided UPLO=%s"%UPLO
+            raise ValueError(err_str)
         
-        Abar += cls.vecsym(vbar)
         return Abar
             
     @classmethod
@@ -1525,8 +1553,18 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         
         else:
             vbar ,= out
+            
+        N = A.shape[0]
         
-        vbar += cls.symvec(Abar)
+        count = 0
+        for row in range(N):
+            vbar[count] += Abar[row,row]
+            count += 1
+            for col in range(row+1,N):
+                vbar[count] += Abar[col,row]
+                vbar[count] += Abar[row,col]
+                count +=1
+
         return vbar
                 
 

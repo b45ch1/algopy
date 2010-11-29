@@ -195,6 +195,7 @@ Version Changelog
     * made init_hessian and extract_hessian generic (to make it useful for complex valued functions)
     * added comparison operators <,>,<=,>=,== to UTPM
     * added UTPM.init_jac_vec and UTPM.extract_jac_vec
+    * added CGraph.function, CGraph.gradient, CGraph.hessian, CGraph.hess_vec
     
 Unit Test
 ---------
