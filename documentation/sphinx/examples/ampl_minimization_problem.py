@@ -51,6 +51,15 @@ class Model:
         cg.dependentFunctionList = [y]
         self.cg = cg
         
+    def trace_eval_g(self, x):
+        cg2 = algopy.CGraph()
+        x = algopy.Function(x)
+        y = self.eval_g(x)
+        cg2.trace_off()
+        cg2.independentFunctionList = [x]
+        cg2.dependentFunctionList = [y]
+        self.cg2 = cg2
+        
     def eval_grad_f_reverse(self, x):
         return self.cg.gradient([x])
         
@@ -60,26 +69,39 @@ class Model:
     def eval_hess_vec_f_reverse(self, x, v):
         return self.cg.hess_vec([x],[v])
         
+    def eval_lagra_hess_mat_g_reverse(self, lagra, x, V):
+        return self.cg2.lagra_hess_mat(lagra, [x], [V])
+        
         
 
 lam = numpy.array([1,1,1],dtype=float)
 x = numpy.array([1,2,3,4,0,1,1],dtype=float)
 v = numpy.array([1,1,1,1,1,1,1],dtype=float)
+lagra = numpy.array([1,2,0],dtype=float)
+V = numpy.eye(7)
 
 m = Model()
 
-# print 'Forward Mode'
+print 'normal function evaluation'
+m.eval_f(x)
+m.eval_g(x)
+
+print 'Forward Mode'
 print m.eval_grad_f_forward(x)
 print m.eval_jac_g_forward(x)
 print m.eval_jac_vec_g_forward(x,[1,0,0,0,0,0,0])
 print m.eval_grad_Lagrangian_forward(lam, x)
 print m.eval_hess_Lagrangian_forward(lam, x)
 
-# print 'Reverse Mode'
+print 'Reverse Mode'
 m.trace_eval_f(x)
+m.trace_eval_g(x)
+
 print m.eval_grad_f_reverse(x)
 print m.eval_hess_f_reverse(x)
 print m.eval_hess_vec_f_reverse(x,v)
+print m.eval_lagra_hess_mat_g_reverse(lagra, x,V)
+
 
 
 

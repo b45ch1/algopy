@@ -181,7 +181,7 @@ class CGraph:
         
         Parameters
         ----------
-        x_list: list
+        x_list: list of array_like
             inputs as in self.independentFunctionList
             
         Returns
@@ -214,14 +214,14 @@ class CGraph:
     def hess_vec(self, x_list, v_list):
         """ computes the Hessian vector product  dot(H,v)
         
-        Hv = self.hess_vec(x_list)
+        Hv = self.hess_vec(x_list, v_list)
         
         Parameters
         ----------
-        x_list: list
+        x_list: list of array_like
             inputs as in self.independentFunctionList
             
-        v_list: list
+        v_list: list of array_like
             input directions
             
         Returns
@@ -230,8 +230,8 @@ class CGraph:
             one-dimensional array containing the Hessian vector product
             
         """
-        if len(x_list) != 1 or  len(v_list) != 1:
-            raise NotImplementedError('')
+        if len(x_list) != 1 or len(v_list) != 1:
+            raise NotImplementedError('')        
             
         x = x_list[0]
         v = v_list[0]
@@ -245,6 +245,50 @@ class CGraph:
         self.pullback([ybar])
         
         return self.independentFunctionList[0].xbar.data[1,0]
+        
+        
+    def lagra_hess_mat(self, lagra, x_list, V_list):
+        """ computes  d^2(lagra F) V, where  F:R^N ---> R^M
+        
+        lHv = self.hess_vec(lagra, x, V)
+        
+        Parameters
+        ----------
+        lagra: array_like
+            "Lagrange multipliers"
+            
+        x_list: list of array_like
+            inputs as in self.independentFunctionList
+            
+        V_list: list of array_like
+            input directions
+            
+        Returns
+        -------
+        lHv: array
+            two-dimensional array containing the result
+            
+        """
+        if len(x_list) != 1 or len(V_list) != 1:
+            raise NotImplementedError('')            
+        
+        x = x_list[0]
+        V = V_list[0]
+        
+        P = V.shape[1]
+        
+        xtmp = numpy.zeros((2,P) + x.shape)
+        xtmp[0,:] = x; xtmp[1,...] = V
+        xtmp = algopy.UTPM(xtmp)
+        
+        self.pushforward([xtmp])
+        ybar =  self.dependentFunctionList[0].x.zeros_like()
+        print 'ybar.shape=',ybar.shape
+        ybar.data[0,...] = lagra
+        self.pullback([ybar])
+        
+        return self.independentFunctionList[0].xbar.data[1,:]            
+
 
 
     def plot(self, filename = None, method = None, orientation = 'TD'):
