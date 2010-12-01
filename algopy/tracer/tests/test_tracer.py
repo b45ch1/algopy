@@ -1337,6 +1337,51 @@ class Test_CGgraph_on_UTPM(TestCase):
         assert_array_almost_equal(g1,UTPM.extract_jacobian(algopy.tan(x)))
         
 
+class Test_UserFriendlyDrivers(TestCase):
+    
+    def test_jacobian_vec_hess(self):
+        class Model:
+            def eval_g(self, x):
+                out = algopy.zeros(2, dtype=x)
+                out[1] = numpy.sin(x[0]*x[1])
+                out[0] = numpy.exp(x[0]*numpy.cos(x[0]))
+                return out[...]
+                
+            def eval_jac_g_forward(self, x):
+                x = algopy.UTPM.init_jacobian(x)
+                return algopy.UTPM.extract_jacobian(self.eval_g(x))
+                
+            def eval_vec_hess_g_forward(self, w, x):
+                x = algopy.UTPM.init_hessian(x)
+                tmp = algopy.dot(w, self.eval_g(x))
+                return algopy.UTPM.extract_hessian(x.size, tmp)
+                
+            def trace_eval_g(self, x):
+                cg2 = algopy.CGraph()
+                x = algopy.Function(x)
+                y = self.eval_g(x)
+                cg2.trace_off()
+                cg2.independentFunctionList = [x]
+                cg2.dependentFunctionList = [y]
+                self.cg2 = cg2
+                
+            def eval_jac_g_reverse(self, x):
+                return self.cg2.jacobian([x])
+                
+            def eval_vec_hess_g_reverse(self, w, x):
+                return self.cg2.vec_hess(w, [x])
+                
+        
+        x = numpy.array([numpy.pi/2, 0],dtype=float)
+        w = numpy.array([1,2], dtype=float)
+        
+        m = Model()
+        m.trace_eval_g(x)
+        
+        assert_array_almost_equal(m.eval_jac_g_forward(x), m.eval_jac_g_reverse(x)[0])
+        assert_array_almost_equal(m.eval_vec_hess_g_forward(w,x), m.eval_vec_hess_g_reverse(w,x)[0])
+
+
         
 class Test_CGraph_Plotting(TestCase):
     def test_simple(self):

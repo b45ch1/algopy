@@ -266,11 +266,52 @@ class CGraph:
         
         return self.independentFunctionList[0].xbar.data[1,0]
         
+    def vec_hess(self, w, x_list):
+        """ computes  the hessian of dot(w, F(x)), where F:R^N ---> R^M
         
-    def lagra_hess_mat(self, lagra, x_list, V_list):
+        Hv = self.vec_hess(w, x_list)
+        
+        Parameters
+        ----------
+        w: array_like
+            
+        x_list: list of array_like
+            inputs as in self.independentFunctionList
+            
+        v_list: list of array_like
+            input directions
+            
+        Returns
+        -------
+        Hv: array
+            one-dimensional array containing the Hessian vector product
+            
+        """
+        if len(x_list) != 1:
+            raise NotImplementedError('')        
+            
+        tmp = [numpy.ravel(x) for x in x_list]
+        tmp = numpy.concatenate(tmp)
+        tmp = algopy.UTPM.init_jacobian(tmp)
+        
+        utpm_x_list = []
+        a = 0
+        for x in x_list:
+            b = numpy.prod(x.shape)
+            utpm_x_list.append(numpy.reshape(tmp[a:b],x.shape))
+
+        self.pushforward(utpm_x_list)
+        
+        ybar = self.dependentFunctionList[0].x.zeros_like()
+        ybar.data[0,:] = w
+        self.pullback([ybar])
+        
+        return numpy.array([x.xbar.data[1,:] for x in self.independentFunctionList])      
+        
+    def vec_hess_mat(self, lagra, x_list, V_list):
         """ computes  d^2(lagra F) V, where  F:R^N ---> R^M
         
-        lHv = self.hess_vec(lagra, x, V)
+        lHv = self.vec_hess_mat(w, x, V)
         
         Parameters
         ----------
@@ -290,7 +331,9 @@ class CGraph:
             
         """
         if len(x_list) != 1 or len(V_list) != 1:
-            raise NotImplementedError('')            
+            raise NotImplementedError('')
+            
+        raise NotImplementedError('this function does not work correctly yet')
         
         x = x_list[0]
         V = V_list[0]

@@ -38,8 +38,12 @@ class Model:
         
     def eval_hess_Lagrangian_forward(self, lam, x):
         x = algopy.UTPM.init_hessian(x)
-        return algopy.UTPM.extract_hessian(6, self.eval_Lagrangian(lam, x))
-
+        return algopy.UTPM.extract_hessian(x.size, self.eval_Lagrangian(lam, x))
+        
+    def eval_vec_hess_g_forward(self, w, x):
+        x = algopy.UTPM.init_hessian(x)
+        tmp = algopy.dot(w, self.eval_g(x))
+        return algopy.UTPM.extract_hessian(x.size, tmp)        
 
     # Reverse Mode Derivative Evaluations
     def trace_eval_f(self, x):
@@ -72,8 +76,8 @@ class Model:
     def eval_hess_vec_f_reverse(self, x, v):
         return self.cg.hess_vec([x],[v])
         
-    def eval_lagra_hess_mat_g_reverse(self, lagra, x, V):
-        return self.cg2.lagra_hess_mat(lagra, [x], [V])
+    def eval_vec_hess_g_reverse(self, w, x):
+        return self.cg2.vec_hess(w, [x])
 
 lam = numpy.array([1,1,1],dtype=float)
 x = numpy.array([1,2,3,4,0,1,1],dtype=float)
@@ -93,17 +97,19 @@ print m.eval_jac_g_forward(x)
 # print m.eval_jac_vec_g_forward(x,[1,0,0,0,0,0,0])
 # print m.eval_grad_Lagrangian_forward(lam, x)
 # print m.eval_hess_Lagrangian_forward(lam, x)
+print m.eval_vec_hess_g_forward(lagra, x)
+
 
 print 'Reverse Mode'
 m.trace_eval_f(x)
 m.trace_eval_g(x)
 
 # print m.eval_grad_f_reverse(x)
-print m.eval_jac_g_reverse(x)
+# print m.eval_jac_g_reverse(x)
 
 # print m.cg2
 
 # print m.eval_hess_f_reverse(x)
 # print m.eval_hess_vec_f_reverse(x,v)
-# print m.eval_lagra_hess_mat_g_reverse(lagra, x,V)
+print m.eval_vec_hess_g_reverse(lagra, x)
 
