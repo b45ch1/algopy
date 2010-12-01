@@ -324,6 +324,18 @@ class RawAlgorithmsMixIn:
         return y_data
         
     @classmethod
+    def _pb_log(cls, ybar_data, x_data, y_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        
+        xbar_data = out
+        
+        tmp = xbar_data.copy() 
+        cls._div(ybar_data, x_data, tmp) 
+        xbar_data += tmp        
+        return xbar_data        
+        
+    @classmethod
     def _tansec2(cls, x_data, out = None):
         """ computes tan and sec in Taylor arithmetic"""
         if out == None:
