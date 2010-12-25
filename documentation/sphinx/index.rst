@@ -3,24 +3,67 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-ALGOPY, Algorithmic Differentiation in Python
+AlgoPy, Algorithmic Differentiation in Python
 =============================================
 
-What is ALGOPY?
+What is AlgoPy?
 ---------------
 
-The purpose of ALGOPY is the evaluation of higher-order derivatives
-in the forward and reverse mode of Algorithmic Differentiation (AD) of functions that are implemented as Python programs.
+The purpose of AlgoPy is the evaluation of higher-order derivatives
+in the forward and reverse mode of Algorithmic Differentiation (AD) of functions
+that are implemented as Python programs.
 Particular focus are functions that contain numerical linear algebra functions as
 they often appear in statistically motivated functions.
 
+AlgoPy has been influenced by the following publications:
+    * "ADOL-C: A Package for the Automatic Differentiation of Algorithms Written
+      in C/C++", Andreas Griewank, David Juedes, H. Mitev, Jean Utke, Olaf Vogel,
+      Andrea Walther
+      
+    * "Evaluating Higher Derivative Tensors by Forward Propagation of Univariate
+     Taylor Series", Andreas Griewank, Jean Utke and Andrea Walther
 
-Help improve ALGOPY
+    * "Taylor series integration of
+      differential-algebraic equations: automatic differentiation as a tool for
+      simulating rigid body mechanical systems", Eric Phipps, phd thesis
+      
+    * "Collected Matrix Derivative Results for Forward and Reverse Mode
+      Algorithmic Differentiation", Mike Giles, 
+      http://www.springerlink.com/content/h1750t57160w2782/
+      
+      
+What can AlgoPy do for you?
+----------------------------
+    * evaluation of derivatives useful for nonlinear continuous optimization
+        * gradient
+        * Jacobian
+        * Hessian
+        * Jacobian vector product
+        * vector Jacobian product
+        * Hessian vector product
+        * vector Hessian vector product
+        * higher-order tensors
+        
+    * Taylor series evaluation
+        * for modelling higher-order processes
+        * for time integration of ODEs and DAEs
+
+Help improve AlgoPy
 -------------------
 If you have any questions, suggestions or bug reports  please use the mailing list 
 http://groups.google.com/group/algopy?msg=new&lnk=gcis
-or alternatively write me an email(sebastian.walter@gmail.com). This will make it much easier for me to provide code/documentation that is easy to understand. 
-Of course, you are also welcome to contribute code, bugfixes, examples, success stories ;), ...
+or alternatively write me an email(sebastian.walter@gmail.com).
+This will make it much easier for me to provide code/documentation that
+is easier to understand. Of course, you are also welcome to contribute code,
+bugfixes, examples, success stories ;), ...
+
+Potential Improvements
+----------------------
+    * better memory management to speed things up
+    * direct support for nested derivatives (requires the algorithms to be generic)
+    * better complex number support, in particular also the reverse mode
+    * support for sparse Jacobian and sparse Hessian computations using graph
+      coloring as explained in http://portal.acm.org/citation.cfm?id=1096222
 
 
 Installation and Upgrade:
@@ -47,7 +90,7 @@ Dependencies:
 
 Getting Started:
 ----------------
-For the impatient, we show a minimalistic example how ALGOPY can be used to compute
+For the impatient, we show a minimalistic example how AlgoPy can be used to compute
 a gradient in the forward mode of AD of a simple function and compare the result to the symbolically computed
 gradient.
 
@@ -62,22 +105,22 @@ The integers `D=2,P=3,N=3` have the following meaning: The UTP has degree 1, i.e
 If one executes that code one obtains as output::
     
     $ python getting_started.py 
-    gradient computed with ALGOPY using UTP arithmetic =  [ 135.42768462   41.08553692   15.        ]
+    gradient computed with AlgoPy using UTP arithmetic =  [ 135.42768462   41.08553692   15.        ]
     evaluated symbolic gradient =  [ 135.42768462   41.08553692   15.        ]
     difference = [ 0.  0.  0.]
 
-The derivative computed with ALGOPY is up to machine precision
+The derivative computed with AlgoPy is up to machine precision
 the same as the symbolically computed gradient.
   
 
 How does it work?:
 ------------------
-ALGOPY offers the forward mode and the reverse mode of AD.
+AlgoPy offers the forward mode and the reverse mode of AD.
 
 Forward Mode of AD:
 
     The basic idea is the computation on (univariate) Taylor polynomials
-    with with matrix coefficients. More precisely, ALGOPY supports univariate Taylor
+    with with matrix coefficients. More precisely, AlgoPy supports univariate Taylor
     polynomial (UTP) arithmetic where the coefficients of the polynomial are numpy.ndarrays.
     To distinguish Taylor polynomials from real vectors resp. matrices they are written with enclosing brackets:
     
@@ -200,7 +243,7 @@ Version Changelog
 Unit Test
 ---------
 
-ALGOPY uses the same testing facilitities as NumPy. I.e., one can run the complete
+AlgoPy uses the same testing facilitities as NumPy. I.e., one can run the complete
 unit test with::
     
     $ python -c "import algopy; algopy.test()"

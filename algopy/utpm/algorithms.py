@@ -138,7 +138,7 @@ class RawAlgorithmsMixIn:
 
         (D,P) = z_data.shape[:2]
         for d in range(D)[::-1]:
-            z_data[d,:,...] =  numpy.sum(x_data[:d+1,:,...] * y_data[d::-1,:,...], axis=0)
+            numpy.sum(x_data[:d+1,:,...] * y_data[d::-1,:,...], axis=0, out = z_data[d,:,...] )
             
     @classmethod
     def _amul(cls, x_data, y_data, out = None):

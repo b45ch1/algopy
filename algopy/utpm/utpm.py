@@ -179,6 +179,10 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             retval = UTPM(numpy.copy(self.data))
             retval.data[0,:] += rhs
             return retval
+            
+        elif isinstance(rhs,numpy.ndarray) and rhs.dtype == object:
+            raise NotImplementedError('should implement that')            
+            
         elif isinstance(rhs, numpy.ndarray):
             rhs_shape = rhs.shape
             if numpy.isscalar(rhs_shape):
@@ -200,6 +204,9 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             retval.data[0,:] -= rhs
             return retval
             
+        elif isinstance(rhs,numpy.ndarray) and rhs.dtype == object:
+            raise NotImplementedError('should implement that')            
+            
         elif isinstance(rhs, numpy.ndarray):
             rhs_shape = rhs.shape
             if numpy.isscalar(rhs_shape):
@@ -215,6 +222,9 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def __mul__(self,rhs):
         if numpy.isscalar(rhs):
             return UTPM( self.data * rhs)
+            
+        elif isinstance(rhs,numpy.ndarray) and rhs.dtype == object:
+            raise NotImplementedError('should implement that')
 
         elif isinstance(rhs,numpy.ndarray):
             rhs_shape = rhs.shape
@@ -231,6 +241,9 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def __div__(self,rhs):
         if numpy.isscalar(rhs):
             return UTPM( self.data/rhs)
+            
+        elif isinstance(rhs,numpy.ndarray) and rhs.dtype == object:
+            raise NotImplementedError('should implement that')            
             
         elif isinstance(rhs, numpy.ndarray):
             rhs_shape = rhs.shape
@@ -285,7 +298,10 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return tmp/self
         
     def __iadd__(self,rhs):
-        if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
+        if isinstance(rhs,numpy.ndarray) and rhs.dtype == object:
+            raise NotImplementedError('should implement that')        
+        
+        elif numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
             self.data[0,...] += rhs
         else:
             self_data, rhs_data = UTPM._broadcast_arrays(self.data, rhs.data)
@@ -293,7 +309,10 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return self
         
     def __isub__(self,rhs):
-        if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
+        if isinstance(rhs,numpy.ndarray) and rhs.dtype == object:
+            raise NotImplementedError('should implement that')            
+        
+        elif numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
             self.data[0,...] -= rhs
         else:
             self_data, rhs_data = UTPM._broadcast_arrays(self.data, rhs.data)
@@ -302,7 +321,11 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         
     def __imul__(self,rhs):
         (D,P) = self.data.shape[:2]
-        if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
+        
+        if isinstance(rhs,numpy.ndarray) and rhs.dtype == object:
+            raise NotImplementedError('should implement that')            
+        
+        elif numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
             for d in range(D):
                 for p in range(P):
                     self.data[d,p,...] *= rhs
@@ -316,7 +339,10 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         
     def __idiv__(self,rhs):
         (D,P) = self.data.shape[:2]
-        if numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
+        if isinstance(rhs,numpy.ndarray) and rhs.dtype == object:
+            raise NotImplementedError('should implement that')            
+        
+        elif numpy.isscalar(rhs) or isinstance(rhs,numpy.ndarray):
             self.data[...] /= rhs
         else:
             retval = self.clone()
@@ -1182,7 +1208,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             xbar, ybar = out
             
         xbar2, tmp = cls.broadcast(xbar, zbar)
-        ybar2, tmp = cls.broadcast(ybar, zbar)
+        ybar2, tmp = cls.broadcast(ybar, zbar)        
         
         xbar2 += zbar * y
         ybar2 += zbar * x

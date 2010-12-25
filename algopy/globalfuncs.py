@@ -49,7 +49,7 @@ def zeros( shape, dtype=float, order = 'C'):
         
     if isinstance(dtype,type):
         return numpy.zeros(shape, dtype=dtype,order=order)
-    
+                
     elif isinstance(dtype, numpy.ndarray):
         return numpy.zeros(shape,dtype=dtype.dtype, order=order)
 
@@ -64,7 +64,8 @@ def zeros( shape, dtype=float, order = 'C'):
         # return dtype.__class__(zeros(shape, dtype=dtype.x, order = order))
         
     else:
-        raise ValueError('don\'t know what to do with dtype = %s, type(dtype)=%s'%(str(dtype), str(type(dtype))))
+        return numpy.zeros(shape,dtype=type(dtype), order=order)
+        # raise ValueError('don\'t know what to do with dtype = %s, type(dtype)=%s'%(str(dtype), str(type(dtype))))
 
 def dot(a,b):
     """
@@ -104,6 +105,11 @@ def eigh1(A):
     
     elif isinstance(A, Function):
         return Function.eigh1(A)
+        
+    elif isinstance(A, numpy.ndarray):
+        A = UTPM(A.reshape((1,1) + A.shape))
+        retval = UTPM.eigh1(A)
+        return retval[0].data[0,0], retval[1].data[0,0],retval[2]
         
     else:
         raise NotImplementedError('don\'t know what to do with this instance')
