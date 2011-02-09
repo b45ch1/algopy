@@ -7,8 +7,8 @@ from algopy import Function
 
 # override numpy definitions
 
-numpy_function_names = ['sin','cos','tan', 'exp', 'log', 'sqrt', 'pow', 'arcsin', 'arccos', 'arctan', 'sinh', 'cosh', 'tanh', 'trace', 'zeros_like', 'diag', 'triu', 'tril','sum']
-numpy_linalg_function_names = ['inv', 'solve', 'eigh', 'qr', 'cholesky','transpose']
+numpy_function_names = ['sin','cos','tan', 'exp', 'log', 'sqrt', 'pow', 'arcsin', 'arccos', 'arctan', 'sinh', 'cosh', 'tanh', 'trace',  'zeros_like', 'diag', 'triu', 'tril']
+numpy_linalg_function_names = ['inv', 'solve', 'eigh', 'qr', 'cholesky','transpose', 'det']
 
 
 function_template = string.Template('''
@@ -36,6 +36,71 @@ for function_name in numpy_function_names:
 for function_name in numpy_linalg_function_names:
     exec function_template.substitute(function_name=function_name, namespace='numpy.linalg')
 
+
+def sum(x, axis=None, dtype=None, out=None):
+    """ generic sum function 
+    calls either numpy.sum or Function.sum resp. UTPM.sum depending on
+    the input
+    """
+    
+    if isinstance(x, numpy.ndarray) or numpy.isscalar(x):
+        return numpy.sum(x, axis=axis, dtype=dtype, out = out)
+
+    elif isinstance(x, UTPM) or isinstance(x, Function):
+       return x.sum(axis = axis, dtype = dtype, out = out)
+        
+    else:
+        raise ValueError('don\'t know what to do with this input!')
+        
+        
+def prod(x, axis=None, dtype=None, out=None):
+    """ generic prod function 
+    """
+    
+    if axis != None or dtype != None or out != None:
+        raise NotImplementedError('')
+        
+    elif isinstance(x, numpy.ndarray):
+        return numpy.prod(x)
+        
+    elif isinstance(x, Function) or  isinstance(x, UTPM):
+        y = zeros(1,dtype=x)
+        y[0] = x[0]
+        for xi in x[1:]:
+            y[0] = y[0] * xi
+        return y[0]
+                
+
+def coeff_op(x, sl, shp):
+    return x.coeff_op(sl, shp)
+    
+
+    
+def init_UTPM_jacobian(x):
+    # print 'type(x)=', type(x)
+    if isinstance(x, Function):
+        return x.init_UTPM_jacobian()
+        
+    elif isinstance(x, numpy.ndarray):
+        return UTPM.init_jacobian(x)
+        
+    elif isinstance(x, UTPM):
+        # print x.data.shape
+        return UTPM.init_UTPM_jacobian(x.data[0,0])
+        
+    else:
+        raise ValueError('don\'t know what to do with this input!')    
+        
+def extract_UTPM_jacobian(x):
+    if isinstance(x, Function):
+        return x.extract_UTPM_jacobian()
+        
+    elif isinstance(x, UTPM):
+        return UTPM.extract_UTPM_jacobian(x)        
+    else:
+        raise ValueError('don\'t know what to do with this input!')           
+        
+        
 
 def zeros( shape, dtype=float, order = 'C'):
     """
