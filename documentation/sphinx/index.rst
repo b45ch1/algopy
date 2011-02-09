@@ -14,6 +14,74 @@ in the forward and reverse mode of Algorithmic Differentiation (AD) of functions
 that are implemented as Python programs.
 Particular focus are functions that contain numerical linear algebra functions as
 they often appear in statistically motivated functions.
+The intended use of AlgoPy is for easy prototyping and not for high-performance
+evaluations. More precisely, the used algorithms are in principle suitable
+for high-performance computations but there is considerable overhead.
+
+What can AlgoPy do for you?
+----------------------------
+    * evaluation of derivatives useful for nonlinear continuous optimization
+        * gradient
+        * Jacobian
+        * Hessian
+        * Jacobian vector product
+        * vector Jacobian product
+        * Hessian vector product
+        * vector Hessian vector product
+        * higher-order tensors
+        
+    * Taylor series evaluation
+        * for modeling higher-order processes
+        * for time integration of ODEs and DAEs
+        
+        
+Getting Started:
+----------------
+For the impatient, we show a minimalistic example how AlgoPy can be used to compute
+derivatives.
+
+.. literalinclude:: getting_started.py
+    :lines: 1-
+
+If one executes that code one obtains as output::
+    
+    $ python getting_started.py
+    jacobian =  [ 135.42768462   41.08553692   15.        ]
+    gradient = [array([ 135.42768462,   41.08553692,   15.        ])]
+    Jacobian = [array([[ 135.42768462,   41.08553692,   15.        ]])]
+    Hessian = [[[ 100.42768462   27.08553692    5.        ]
+      [  27.08553692    0.            3.        ]
+      [   5.            3.            0.        ]]]
+    Hessian vector product = [ 567.13842308  126.34214769   35.        ]
+
+Help improve AlgoPy
+-------------------
+If you have any questions, suggestions or bug reports  please use the mailing list 
+http://groups.google.com/group/algopy?msg=new&lnk=gcis
+or alternatively write me an email(sebastian.walter@gmail.com).
+This will make it much easier for me to provide code/documentation that
+is easier to understand. Of course, you are also welcome to contribute code,
+bugfixes, examples, success stories ;), ...
+
+
+Current Issues
+--------------
+The class `algopy.UTPM` is a replacement for `numpy.ndarray`.
+However, it is possible to have `numpy.ndarray`s with `algopy.UTPM` instances as
+elements. However, it is currently not possible to mix these operations.
+
+
+Potential Improvements
+----------------------
+    * better memory management to speed things up
+    * direct support for nested derivatives (requires the algorithms to be generic)
+    * better complex number support, in particular also the reverse mode
+    * support for sparse Jacobian and sparse Hessian computations using graph
+      coloring as explained in http://portal.acm.org/citation.cfm?id=1096222
+
+      
+Related Work
+------------   
 
 AlgoPy has been influenced by the following publications:
     * "ADOL-C: A Package for the Automatic Differentiation of Algorithms Written
@@ -32,39 +100,6 @@ AlgoPy has been influenced by the following publications:
       http://www.springerlink.com/content/h1750t57160w2782/
       
       
-What can AlgoPy do for you?
-----------------------------
-    * evaluation of derivatives useful for nonlinear continuous optimization
-        * gradient
-        * Jacobian
-        * Hessian
-        * Jacobian vector product
-        * vector Jacobian product
-        * Hessian vector product
-        * vector Hessian vector product
-        * higher-order tensors
-        
-    * Taylor series evaluation
-        * for modelling higher-order processes
-        * for time integration of ODEs and DAEs
-
-Help improve AlgoPy
--------------------
-If you have any questions, suggestions or bug reports  please use the mailing list 
-http://groups.google.com/group/algopy?msg=new&lnk=gcis
-or alternatively write me an email(sebastian.walter@gmail.com).
-This will make it much easier for me to provide code/documentation that
-is easier to understand. Of course, you are also welcome to contribute code,
-bugfixes, examples, success stories ;), ...
-
-Potential Improvements
-----------------------
-    * better memory management to speed things up
-    * direct support for nested derivatives (requires the algorithms to be generic)
-    * better complex number support, in particular also the reverse mode
-    * support for sparse Jacobian and sparse Hessian computations using graph
-      coloring as explained in http://portal.acm.org/citation.cfm?id=1096222
-
 
 Installation and Upgrade:
 -------------------------
@@ -86,32 +121,6 @@ Dependencies:
     * scipy
     * (optional/recommended) nose
     * (optional/recommended) yapgvb (to generate plots of the computational graph)
-
-
-Getting Started:
-----------------
-For the impatient, we show a minimalistic example how AlgoPy can be used to compute
-a gradient in the forward mode of AD of a simple function and compare the result to the symbolically computed
-gradient.
-
-.. literalinclude:: getting_started.py
-    :lines: 1-
-
-Some words on what's going on: Instead of computing the function `f(x)` with a `x = numpy.array([3.,5.,7.])` as input we want to compute with a Univariate Taylor Polynomial (*UTP*) of degree 1. Operator overloading is used to redefine the functions `+,-,*,/,sin,cos,...` for `algopy.UTPM` instances. That means, when `x` is an `algopy.UTPM` instance then `f(x)` is also an `algopy.UTPM` instance.
-The coefficients of the polynomial are stored in the attribute `data`. 
-
-The integers `D=2,P=3,N=3` have the following meaning: The UTP has degree 1, i.e. `D=2` coefficients are necessary to describe it. `N=3` is the dimension of `x`. `P=3` allows us to evaluate three different Taylor polynomials at once, i.e., it vectorizes the operation.
-
-If one executes that code one obtains as output::
-    
-    $ python getting_started.py 
-    gradient computed with AlgoPy using UTP arithmetic =  [ 135.42768462   41.08553692   15.        ]
-    evaluated symbolic gradient =  [ 135.42768462   41.08553692   15.        ]
-    difference = [ 0.  0.  0.]
-
-The derivative computed with AlgoPy is up to machine precision
-the same as the symbolically computed gradient.
-  
 
 How does it work?:
 ------------------
@@ -239,6 +248,13 @@ Version Changelog
     * added comparison operators <,>,<=,>=,== to UTPM
     * added UTPM.init_jac_vec and UTPM.extract_jac_vec
     * added CGraph.function, CGraph.gradient, CGraph.hessian, CGraph.hess_vec
+    
+* Version 0.3.1
+    * replaced algopy.sum by a faster implementation
+    * fixed a bug in getitem of the UTPM instance: now works also with numpy.int64
+      as index
+    * added dedicated algopy.sum and algopy.prod
+    
     
 Unit Test
 ---------

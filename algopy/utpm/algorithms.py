@@ -301,6 +301,18 @@ class RawAlgorithmsMixIn:
         xbar_data = out
         cls._amul(ybar_data, y_data, xbar_data)
         
+    @classmethod
+    def _pb_sqrt(cls, ybar_data, x_data, y_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        
+        xbar_data = out
+        tmp = xbar_data.copy() 
+        cls._div(ybar_data, y_data, tmp)
+        tmp /= 2.
+        xbar_data += tmp
+        return xbar_data
+        
         
     @classmethod
     def _log(cls, x_data, out = None):

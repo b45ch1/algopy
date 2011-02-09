@@ -138,7 +138,63 @@ class Test_Function_on_UTPM(TestCase):
         cg2.pullback([ybar])
         
         assert_array_almost_equal(x1.xbar.data, x2.xbar.data)
+        
+        
+        
+        
+    def test_sqrt_in_norm_computation(self):    
+        def eval_f1(x):
+            return algopy.sqrt(algopy.sum(x*x))
+            
+        def eval_f2(x):
+            return (algopy.sum(x*x))**0.5
+        
+        
+        
+        cg1 = CGraph()
+        x1 = Function(1.)
+        y1 = eval_f1(x1)
+        cg1.trace_off()
+        cg1.independentFunctionList = [x1]
+        cg1.dependentFunctionList = [y1]
+        
+        cg2 = CGraph()
+        x2 = Function(1.)
+        y2 = eval_f2(x2)
+        cg2.trace_off()
+        cg2.independentFunctionList = [x2]
+        cg2.dependentFunctionList = [y2]
+        
+        x = numpy.random.rand(3)
+        g1 = cg1.gradient([x])[0]
+        g2 = cg2.gradient([x])[0]
+        
+        J1 = UTPM.extract_jacobian(eval_f1(UTPM.init_jacobian(x)))
+        J2 = UTPM.extract_jacobian(eval_f2(UTPM.init_jacobian(x)))
+        
+        assert_array_almost_equal(g1,g2)
+        assert_array_almost_equal(g2,J1)
+        assert_array_almost_equal(J1,J2)
+        assert_array_almost_equal(J2,g1)
 
+        
+        
+    def test_prod(self):
+        tmp = numpy.array([4.*10**-1,10**-20,3*10**10])
+        
+        cg = CGraph()
+        x = Function(tmp)
+        y = algopy.prod(x)
+        cg.trace_off()
+        cg.independentFunctionList = [x]
+        cg.dependentFunctionList = [y]
+        
+        
+        f = cg.function([tmp])[0]
+        g = cg.gradient([tmp])[0]
+        
+        assert_array_almost_equal(f, numpy.prod(tmp))
+        assert_array_almost_equal(g, [tmp[1]*tmp[2], tmp[0]*tmp[2], tmp[0]*tmp[1]])
         
     def test_getitem(self):
         D,P,N = 2,5,7

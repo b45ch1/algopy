@@ -20,10 +20,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
    
     UTPM == Univariate Taylor Polynomial of Matrices
     This class implements univariate Taylor arithmetic on matrices, i.e.
-    [A] = \sum_{d=0}^D A_d t^d
-    A_d = \frac{d^d}{dt^d}|_{t=0} \sum_{c=0}^D A_c t^c
+    [A]_D = \sum_{d=0}^{D-1} A_d T^d
 
-    in vector forward mode
     Input:
     in the most general form, the input is a 4-tensor.
     We use the notation:
@@ -69,7 +67,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             raise NotImplementedError
             
     def __getitem__(self, sl):
-        if type(sl) == int or sl == Ellipsis or isinstance(sl, slice):
+        if isinstance(sl, int) or sl == Ellipsis or isinstance(sl, slice):
             sl = (sl,)
         
         tmp = self.data.__getitem__((slice(None),slice(None)) + tuple(sl))
@@ -151,6 +149,52 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return UTPM(self.data.reshape(self.data.shape[:2] + (numpy.prod(self.data.shape[2:]),) ))
         
     flat = property(get_flat)
+    
+    def coeff_op(self, sl, shp):
+        """
+        operation to extract UTP coefficients of x 
+        defined by the slice sl creates a new
+        UTPM instance where the coefficients have the shape as defined
+        by shp
+        
+        Parameters
+        ----------
+        x: UTPM instance
+        sl: tuple of slice instance
+        shp: tuple
+        
+        Returns
+        -------
+        UTPM instance
+        
+        """
+        
+        tmp = self.data.__getitem__(sl)
+        tmp = tmp.reshape(shp)
+        return self.__class__(tmp)
+        
+    @classmethod
+    def pb_coeff_op(cls, ybar, x, sl, shp, out = None):
+        
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+        
+        else:
+            xbar = out[0]
+ 
+        # step 1: revert reshape
+        old_shp = x.data.__getitem__(sl).shape
+        tmp_data = ybar.data.reshape(old_shp)
+        
+        print 'tmp_data.shape=',tmp_data.shape
+        
+        # step 2: revert getitem
+        tmp2 = xbar.data[::-1].__getitem__(sl)
+        tmp2 += tmp_data[::-1,...]
+        
+        return xbar
+        
     
     
     @classmethod
@@ -356,6 +400,21 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         self._sqrt(self.data, out = retval.data)
         return retval
         
+    @classmethod    
+    def pb_sqrt(cls, ybar, x, y, out=None):
+        """ computes bar y dy = bar x dx in UTP arithmetic"""
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+        
+        else:
+            xbar, = out
+
+        cls._pb_sqrt(ybar.data, x.data, y.data, out = xbar.data)
+        return out             
+        
+        
+        
     def exp(self):
         """ computes y = exp(x) in UTP arithmetic"""
 
@@ -480,7 +539,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             return UTPM(numpy.sum(self.data.reshape(self.data.shape[:2] + (tmp,)), axis = 2))
         else:
             return UTPM(numpy.sum(self.data, axis = axis + 2))
-    
+            
     @classmethod
     def pb_sum(cls, ybar, x, y, axis, dtype, out2, out = None):
         
@@ -494,7 +553,44 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         tmp = xbar.data.T
         tmp += ybar.data.T
         
-        return xbar
+        return xbar 
+                
+            
+            
+    # def prod(self, axis=None, dtype=None, out=None):
+    #     if dtype != None or out != None:
+    #         raise NotImplementedError('not implemented yet')
+        
+    #     if axis == None:
+    #         D,P = self.data.shape[:2]
+    #         tmp = self.__class__(numpy.zeros((D,P)))
+    #         tmp.data[0] = 1.
+    #         for xi in self.flat:
+    #             tmp *= xi
+    #         return tmp
+    #     else:
+    #         raise NotImplementedError('should implement this case') 
+            
+    # @classmethod
+    # def pb_prod(cls, ybar, x, axis, dtype, dummy, y, out = None):
+    #     D,P = x.data.shape[:2]
+    #     if out == None:
+    #         xbar = x.zeros_like()
+        
+    #     else:
+    #         xbar = out[0]
+            
+    #     tmp = x.copy()
+        
+    #     tmp = y/x
+    #     xbar += tmp
+        
+    #     if numpy.any(numpy.isnan(xbar.data)):
+    #         raise NotImplementedError('should treat the case when one element of the product is zero')
+        
+        
+    #     return xbar 
+
 
 
     @classmethod
@@ -668,6 +764,29 @@ class UTPM(Ring, RawAlgorithmsMixIn):
                 retval[d,p] = numpy.trace(x.data[d,p,...])
         return UTPM(retval)
         
+    @classmethod
+    def det(cls, x):
+        """ returns a new UTPM in standard format, i.e. the matrices are 1x1 matrices"""
+        D,P = x.data.shape[:2]
+        L = cls.cholesky(x)
+        return numpy.prod(cls.diag(L))**2
+        
+    @classmethod
+    def pb_det(cls, ybar, x, y, out = None):
+        if out == None:
+            out = (x.zeros_like(),)
+            
+        raise NotImplementedError('should implement that')
+        
+        # xbar, = out
+        # Nx = xbar.shape[0]
+        # for nx in range(Nx):
+        #     xbar[nx,nx] += ybar
+        
+        # return xbar
+        
+        
+        
         
     def FtoJT(self):
         """
@@ -803,6 +922,30 @@ class UTPM(Ring, RawAlgorithmsMixIn):
                 out.data[d,p] = numpy.triu(x.data[d,p])
         
         return out
+        
+        
+    def init_UTPM_jacobian(self):
+        """ initializes this UTPM instance to compute the Jacobian,
+        
+        it is possible to force the dtype to a certain dtype,
+        if no dtype is provided, the dtype is inferred from x
+        """
+           
+        
+        shp = list(self.data.shape)
+        
+        if shp[0] != 1 or shp[1] != 1 or len(shp) != 3 :
+            raise NotImplementedError()
+        
+        D,P = 2, numpy.prod(shp)
+        new_shp = (D,P) + shp
+        
+        data = numpy.zeros(new_shp)
+        data[0] = x
+        data[1,:].flat = numpy.eye(numpy.size(x))
+        
+        return self.__class__(data)        
+                
         
     @classmethod
     def init_jacobian(cls, x, dtype=None):
@@ -1094,11 +1237,11 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             Abar = A.zeros_like()
         
         else:
-            Abar = out
+            Abar, = out
             
         cls._pb_cholesky(Lbar.data, A.data, L.data, out = Abar.data)
         return Abar
-        
+
 
     @classmethod
     def pb_Id(cls, ybar, x, y, out = None):

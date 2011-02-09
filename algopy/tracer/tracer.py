@@ -3,6 +3,7 @@ import algopy
 import operator
 from algopy.base_type import Ring
 
+
 class NotSet:
     def __init__(self, descr=None):
         if descr == None:
@@ -116,6 +117,8 @@ class CGraph:
             
         """
         
+        import time
+        
         if len(self.dependentFunctionList) == 0:
             raise Exception('You forgot to specify which variables are dependent!\n e.g. with cg.dependentFunctionList = [F1,F2]')
 
@@ -220,8 +223,8 @@ class CGraph:
         utpm_x_list = []
         a = 0
         for x in x_list:
-            b = numpy.prod(x.shape)
-            utpm_x_list.append(numpy.reshape(tmp[a:b],x.shape))
+            b = numpy.prod(numpy.shape(x))
+            utpm_x_list.append(numpy.reshape(tmp[a:b],numpy.shape(x)))
 
         self.pushforward(utpm_x_list)
         
@@ -253,8 +256,8 @@ class CGraph:
         if len(x_list) != 1 or len(v_list) != 1:
             raise NotImplementedError('')        
             
-        x = x_list[0]
-        v = v_list[0]
+        x = numpy.asarray(x_list[0])
+        v = numpy.asarray(v_list[0])
         xtmp = numpy.zeros((2,1) + x.shape)
         xtmp[0,0] = x; xtmp[1,0] = v
         xtmp = algopy.UTPM(xtmp)
@@ -350,10 +353,8 @@ class CGraph:
         ybar.data[0,...] = lagra
         self.pullback([ybar])
         
-        return self.independentFunctionList[0].xbar.data[1,:]            
-
-
-
+        return self.independentFunctionList[0].xbar.data[1,:]
+        
     def plot(self, filename = None, method = None, orientation = 'TD'):
         """
         accepted filenames, e.g.:
@@ -623,6 +624,7 @@ class Function(Ring):
             # print F.xbar
             
             # get the pullback function
+            
             f = eval('__import__("algopy.utpm").utpm.'+F.x.__class__.__name__+'.pb_'+func_name)
 
         elif func_name == '__getitem__' or func_name == 'getitem':
@@ -819,13 +821,19 @@ class Function(Ring):
          return Function.pushforward(operator.pow, [self, r])
          
     def sum(self, axis=None, dtype=None, out=None):
-         return Function.pushforward(numpy.sum, [self, axis, dtype, out])
+         return Function.pushforward(algopy.sum, [self, axis, dtype, out])
+         
+    def prod(self, axis=None, dtype=None, out=None):
+         return Function.pushforward(algopy.prod, [self, axis, dtype, out])
          
     def inv(self):
          return Function.pushforward(algopy.inv, [self])
          
     def qr(self):
          return Function.pushforward(algopy.qr, [self])
+         
+    def cholesky(self):
+         return Function.pushforward(algopy.cholesky, [self])
          
     def qr_full(self):
          return Function.pushforward(algopy.qr_full, [self])
@@ -844,6 +852,9 @@ class Function(Ring):
         
     def trace(self):
         return Function.pushforward(algopy.trace, [self])
+        
+    def det(self):
+        return Function.pushforward(algopy.det, [self])    
         
     def transpose(self):
         return Function.pushforward(algopy.transpose, [self])
@@ -872,5 +883,19 @@ class Function(Ring):
     
     def get_size(self):
         return self.x.size
-    size = property(get_size)    
+    size = property(get_size)
+    
+    def get_flat(self):
+        return self.x.flat
+    flat = property(get_flat)
+        
+    def coeff_op(self, sl, shp):
+        return Function.pushforward(algopy.coeff_op, [self, sl, shp])
+        
+    def init_UTPM_jacobian(self):
+        return Function.pushforward(algopy.init_jacobian, [self])
+        
+    def extract_UTPM_jacobian(self):
+        return Function.pushforward(algopy.extract_jacobian, [self])        
+
  

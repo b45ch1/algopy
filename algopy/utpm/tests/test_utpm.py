@@ -35,6 +35,12 @@ class Test_Push_Forward(TestCase):
                 assert_array_almost_equal(numpy.sum(x.data[d,p], axis=0), y1[d,p])
                 assert_array_almost_equal(numpy.sum(x.data[d,p], axis=1), y2[d,p])
         
+        
+    # def test_prod(self):
+    #     x = UTPM(numpy.random.random((2,5,3)))
+    #     y = UTPM.prod(x)
+    #     y2 = x[0]*x[1]*x[2]
+    #     assert_array_almost_equal(y.data, y2.data)        
 
     def test_broadcasting_sub(self):
         #check 1
