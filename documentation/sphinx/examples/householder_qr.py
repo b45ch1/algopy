@@ -81,18 +81,68 @@ def qr_house(A):
         Q = algopy.dot(Q,H)
         
     return Q, algopy.triu(A)
+
+def qr_house_basic(A):
+    """ computes QR decomposition using Householder relections
+    qr_house_basic and build_Q have the same effect as qr_house
     
-# def build_Q(betas, A, S):
-#     """ computes orthogonal matrix 
+    Parameters
+    ----------
+    A: array_like
+       shape(A) = (M, N), M >= N
+       overwritten on exit
     
-#     Parameters
-#     ----------
-#     betas: array_like
-#         b
+    Returns
+    -------
+    A: array_like
+        strict lower triangular part contains the Householder vectors v
+        upper triangular matrix R
     
+    betas: array_like
+        2-norms of the Householder vectors v
+    """
     
+    M,N = A.shape
+    beta_list = []
+    for n in range(N):
+        v,beta = house(A[n:,n:n+1])
+        A[n:,n:] -= beta * algopy.dot(v, algopy.dot(v.T,A[n:,n:]))
+        
+        beta_list.append(beta)
+        if n < M:
+            A[n+1:,n] = v[1:,0]
+    return A, numpy.asarray(beta_list)
     
-#     """
+def build_Q(A, betas):
+    """ computes orthogonal matrix from output of qr_house_basic
+    
+    Parameters
+    ----------
+    A: array_likse
+        shape(A) = (M,N)
+        upper triangular part contains R
+        lower triangular part contains v with v[0] = 1
+    betas: array_like
+        list of beta
+        
+    Returns
+    -------
+    Q: array_like
+        shape(Q) = (M,M)
+
+    """
+    
+    M,N = A.shape
+    Q = algopy.zeros((M,M),dtype=A)
+    Q += numpy.eye(M)
+    H = algopy.zeros((M,M),dtype=A)
+    for n in range(N):
+        v = A[n:,n:n+1].copy()
+        v[0] = 1
+        H[...] = numpy.eye(M)
+        H[n:,n:] -= betas[n] * algopy.dot(v,v.T)
+        Q = algopy.dot(Q,H)
+    return Q
     
     
 # def pb_qr_house(A, Abar, Q, Qbar, R, Rbar):
@@ -133,16 +183,57 @@ def qr_house(A):
 #     return Q, algopy.triu(A)
     
 
+import time
 
 D,P,M,N = 50,1,3,2
-A = algopy.UTPM(numpy.random.random((D,P,M,N)))
+# # STEP 1: qr_house_basic + build_Q
+# A = numpy.random.random((M,N))
+# B,betas = qr_house_basic(A.copy())
+# R = algopy.triu(B)
+# Q = build_Q(B,betas)
+# print algopy.dot(Q.T,Q) - numpy.eye(M)
+# print algopy.dot(Q,R) - A
+
+# # STEP 2: qr_house
 # Q,R = qr_house(A.copy())
 # print algopy.dot(Q.T,Q) - numpy.eye(M)
 # print algopy.dot(Q,R) - A
 
+# # STEP 3: qr_full
+# Q,R = algopy.qr_full(A.copy())
+# print algopy.dot(Q.T,Q) - numpy.eye(M)
+# print algopy.dot(Q,R) - A
+
+
+data = numpy.random.random((D,P,M,N))
+data = numpy.asarray(data, dtype=numpy.float64)
+A = algopy.UTPM(data)
+# # STEP 1: qr_house_basic + build_Q
+# print 'QR decomposition based on basic Householder'
+# st = time.time()
+# B,betas = qr_house_basic(A.copy())
+# R = algopy.triu(B)
+# Q = build_Q(B,betas)
+# # print algopy.dot(Q.T,Q) - numpy.eye(M)
+# # print algopy.dot(Q,R) - A
+# print 'runtime = ',time.time() - st
+
+# STEP 2: qr_house
+print 'QR decomposition based on Householder'
+st = time.time()
+Q2,R2 = qr_house(A.copy())
+print algopy.dot(Q2.T,Q2) - numpy.eye(M)
+print algopy.dot(Q2,R2) - A
+print 'runtime = ',time.time() - st
+
+# STEP 3: qr_full
+print 'QR decomposition based on defining equations'
+st = time.time()
+
 Q,R = algopy.qr_full(A.copy())
 print algopy.dot(Q.T,Q) - numpy.eye(M)
 print algopy.dot(Q,R) - A
+print 'runtime = ',time.time() - st
 
         
         
