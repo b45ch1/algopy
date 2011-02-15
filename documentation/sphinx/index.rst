@@ -32,7 +32,12 @@ What can AlgoPy do for you?
         
     * Taylor series evaluation
         * for modeling higher-order processes
-        * for time integration of ODEs and DAEs
+        * can in principle be used to compute Taylor series expansions useful for ODE/DAE integration.
+          Note that for efficient evaluation one would require to successively
+          increase the degree of the Taylor polynomial arithmetic. This is not
+          directly supported and thus AlgoPy requires :math:`d^3` instead of 
+          :math:`d^2` operations.
+          
         
         
 Getting Started:
@@ -91,8 +96,7 @@ AlgoPy has been influenced by the following publications:
     * "Evaluating Higher Derivative Tensors by Forward Propagation of Univariate
      Taylor Series", Andreas Griewank, Jean Utke and Andrea Walther
 
-    * "Taylor series integration of
-      differential-algebraic equations: automatic differentiation as a tool for
+    * "Taylor series integration of differential-algebraic equations: automatic differentiation as a tool for
       simulating rigid body mechanical systems", Eric Phipps, phd thesis
       
     * "Collected Matrix Derivative Results for Forward and Reverse Mode
@@ -254,7 +258,7 @@ Version Changelog
     * fixed a bug in getitem of the UTPM instance: now works also with numpy.int64
       as index
     * added dedicated algopy.sum and algopy.prod
-    
+    * added UTPM.pb_sqrt
     
 Unit Test
 ---------
