@@ -1085,9 +1085,14 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return cls(data)
 
     @classmethod
-    def extract_hessian(cls, N, y, as_full_matrix = True):
+    def extract_hessian(cls, N, y, as_full_matrix = True, use_mpmath=False):
         """ extracts the Hessian of shape (N,N) from the UTPM instance y
         """
+                
+        if use_mpmath:
+            import mpmath
+            mpmath.dps = 50
+
 
         H = numpy.zeros((N,N),dtype=y.data.dtype)
         for n in range(N):
@@ -1097,7 +1102,13 @@ class UTPM(Ring, RawAlgorithmsMixIn):
                 k =  sum(range(n+2)) - m - 1
                 #print 'k,a,b=', k,a,b
                 if n!=m:
-                    H[m,n]= H[n,m]= (y.data[2,k] - y.data[2,a] - y.data[2,b])
+                    
+                    if use_mpmath:
+                        tmp = (mpmath.mpf(y.data[2,k]) - mpmath.mpf(y.data[2,a]) - mpmath.mpf(y.data[2,b]))
+                    else:
+                        tmp = (y.data[2,k] - y.data[2,a] - y.data[2,b])
+                    
+                    H[m,n]= H[n,m]= tmp
             a =  sum(range(n+1))
             H[n,n] = 2*y.data[2,a]
         return H
