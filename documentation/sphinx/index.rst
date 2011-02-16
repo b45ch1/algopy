@@ -14,9 +14,11 @@ in the forward and reverse mode of Algorithmic Differentiation (AD) of functions
 that are implemented as Python programs.
 Particular focus are functions that contain numerical linear algebra functions as
 they often appear in statistically motivated functions.
-The intended use of AlgoPy is for easy prototyping and not for high-performance
-evaluations. More precisely, the used algorithms are in principle suitable
-for high-performance computations but there is considerable overhead.
+The intended use of AlgoPy is for easy prototyping at reasonable execution speeds.
+More precisely, for a typical program a directional derivative takes order 10
+times as much time as time as the function evaluation. This is approximately also
+true for the gradient.
+
 
 What can AlgoPy do for you?
 ----------------------------
