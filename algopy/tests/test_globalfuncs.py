@@ -49,6 +49,21 @@ class Test_Global_Functions_on_UTPM_instances(TestCase):
         y = zeros((N,M), dtype=x)
         assert_array_almost_equal(numpy.zeros((D,P,N,M)),y.data)
         
+        
+    def test_zeros_with_mpmath_instances_as_dtype(self):
+        skiptest = False
+        try:    
+            import mpmath
+            
+        except:
+            skiptest = True
+            
+        if skiptest == False:
+            x = UTPM(numpy.array([[mpmath.mpf(3)]]))
+            A = zeros((2,2),dtype=x)
+            assert_equal( True, isinstance(A.data[0,0,0,0], mpmath.mpf))
+
+        
     def test_global_zeros_like(self):
         D,P,N,M = 3,4,5,6
         x = UTPM(numpy.random.rand(*(D,P,N,M)))
