@@ -261,6 +261,7 @@ Version Changelog
       as index
     * added dedicated algopy.sum and algopy.prod
     * added UTPM.pb_sqrt
+    * fixed bug in tracing operations involving neg(x)
     
 Unit Test
 ---------

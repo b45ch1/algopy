@@ -754,7 +754,7 @@ class Function(Ring):
         return Function.pushforward(operator.setitem,[self,sl,rhs], setitem = (sl,store))
 
     def __neg__(self):
-        return Function.pushforward(self.x.__class__.__neg__,[self])
+        return Function.pushforward(operator.neg,[self])
     
     # FIXME: implement the inplace operations for better efficiency    
     # def __iadd__(self,rhs):
