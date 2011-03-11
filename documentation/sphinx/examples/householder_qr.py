@@ -174,18 +174,7 @@ def pb_qr_house(A, Abar, Q, Qbar, R, Rbar):
 
     """
     
-    M,N = A.shape
-    H = algopy.zeros((M,M),dtype=A)
-    Hbar = algopy.zeros((M,M),dtype=A)
-    
-    for n in range(N)[::-1]:
-        v,beta = house(A[n:,n:n+1])
-        A[n:,n:] -= beta * algopy.dot(v, algopy.dot(v.T,A[n:,n:]))
-        H[...] = numpy.eye(M)
-        H[n:,n:] -= beta * algopy.dot(v,v.T)
-        Q = algopy.dot(Q,H)
-        
-    return Q, algopy.triu(A)
+    raise NotImplementedError('')
     
 
 import time
@@ -210,9 +199,9 @@ D,P,M,N = 50,1,3,2
 # print algopy.dot(Q,R) - A
 
 
-data = numpy.random.random((D,P,M,N))
-data = numpy.asarray(data, dtype=numpy.float64)
-A = algopy.UTPM(data)
+# data = numpy.random.random((D,P,M,N))
+# data = numpy.asarray(data, dtype=numpy.float64)
+# A = algopy.UTPM(data)
 # # STEP 1: qr_house_basic + build_Q
 # print 'QR decomposition based on basic Householder'
 # st = time.time()
@@ -223,22 +212,67 @@ A = algopy.UTPM(data)
 # # print algopy.dot(Q,R) - A
 # print 'runtime = ',time.time() - st
 
-# STEP 2: qr_house
-print 'QR decomposition based on Householder'
-st = time.time()
-Q2,R2 = qr_house(A.copy())
+# # STEP 2: qr_house
+# print 'QR decomposition based on Householder'
+# st = time.time()
+# Q2,R2 = qr_house(A.copy())
 # print algopy.dot(Q2.T,Q2) - numpy.eye(M)
 # print algopy.dot(Q2,R2) - A
-print 'runtime = ',time.time() - st
+# print 'runtime = ',time.time() - st
 
-# STEP 3: qr_full
-print 'QR decomposition based on defining equations'
-st = time.time()
+# # STEP 3: qr_full
+# print 'QR decomposition based on defining equations'
+# st = time.time()
 
-Q,R = algopy.qr_full(A.copy())
+# Q,R = algopy.qr_full(A.copy())
 # print algopy.dot(Q.T,Q) - numpy.eye(M)
 # print algopy.dot(Q,R) - A
-print 'runtime = ',time.time() - st
+# print 'runtime = ',time.time() - st
 
-       
+
+# SAVE matrices in .mat format for Rene Lamour (who uses Matlab...)
+# -----------------------------------------------------------------
+# import scipy.io
+# scipy.io.savemat('matrix_polynomial.mat', {"A_coeffs": A.data,
+# "Q_coeffs_house":Q2.data,
+# "R_coeffs_house":R2.data,
+# "defect_QR_minus_A_house": (algopy.dot(Q2,R2) - A).data,
+# "defect_QTQ_minus_Id_house": (algopy.dot(Q2.T,Q2) - numpy.eye(M)).data,
+# "Q_coeffs":Q.data,
+# "R_coeffs":R.data,
+# "defect_QR_minus_A": (algopy.dot(Q,R) - A).data,
+# "defect_QTQ_minus_Id": (algopy.dot(Q.T,Q) - numpy.eye(M)).data
+# })
+
+
+import mpmath
+mpmath.mp.prec = 200 # increase lenght of mantissa
+print mpmath.mp
+
+print 'QR decomposition based on Householder'
+D,P,M,N = 50,1,3,2
+
+# in float64 arithmetic
+data = numpy.random.random((D,P,M,N))
+data = numpy.asarray(data, dtype=numpy.float64)
+A = algopy.UTPM(data)
+Q,R = qr_house(A.copy())
+
+# in multiprecision arithmetic
+data2 = numpy.asarray(data)*mpmath.mpf(1)
+A2 = algopy.UTPM(data2)
+Q2,R2 = qr_house(A2.copy())
+
+print '-'*20
+print A.data[-1]
+print '-'*20
+print (Q.data[-1] - Q2.data[-1])/Q2.data[-1]
+print '-'*20
+print algopy.dot(Q, R).data[-1] - A.data[-1]
+print '-'*20
+print algopy.dot(Q2, R2).data[-1] - A2.data[-1]
+
+
+# # print algopy.dot(Q2.T,Q2) - numpy.eye(M)
+# # print algopy.dot(Q2,R2) - A
         
