@@ -27,7 +27,7 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.pngmath', 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
-# The suffix of source filenames.
+## The suffix of source filenames._
 source_suffix = '.rst'
 
 # The encoding of source files.
@@ -186,6 +186,20 @@ latex_documents = [
 
 # Additional stuff for the LaTeX preamble.
 #latex_preamble = ''
+_PREAMBLE = r"""
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsxtra}
+\usepackage{amscls}
+"""
+latex_elements = {
+    'preamble': _PREAMBLE,
+    # other settings go here
+
+} 
+
+
 
 # Documents to append as an appendix to all manuals.
 #latex_appendices = []
