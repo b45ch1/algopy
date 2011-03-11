@@ -124,7 +124,7 @@ Bleeding edge:
     
 Dependencies:
     * numpy
-    * scipy
+    * (optional/recommended) scipy (needed to support some linear algebra functions)
     * (optional/recommended) nose
     * (optional/recommended) yapgvb (to generate plots of the computational graph)
 

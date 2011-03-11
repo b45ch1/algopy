@@ -15,7 +15,16 @@ We use the same notation as in the book since the notation in asci is easier to 
 """
 from __future__ import division
 import numpy
-import scipy
+
+try:
+    from scipy import factorial
+    
+except:
+    def factorial(n):
+        tmp = 1.
+        for ni in n:
+            tmp *= ni
+        return tmp
 
 def generate_multi_indices(N,deg):
     """ generate_multi_indices(N,deg)
@@ -85,7 +94,7 @@ def generate_multi_indices(N,deg):
 
 
 def multi_index_factorial(i):
-    return numpy.prod([scipy.factorial(ii) for ii in i]) 
+    return numpy.prod([factorial(ii) for ii in i]) 
 
 def multi_index_binomial(i,j):
     """

@@ -1,5 +1,10 @@
 import numpy
-import scipy; import scipy.linalg
+try:
+    import scipy; import scipy.linalg
+
+except:
+    pass
+
 import string
 import utils
 from algopy import UTPM

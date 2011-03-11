@@ -1,6 +1,11 @@
 import numpy
-import scipy.linalg
 from numpy.lib.stride_tricks import as_strided, broadcast_arrays
+
+try:
+    import scipy.linalg
+except:
+    pass
+
 
 def vdot(x,y, z = None):
     """
