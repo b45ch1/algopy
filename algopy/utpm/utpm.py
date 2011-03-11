@@ -655,7 +655,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         tmp = self.clone()
         self._tanhsech2(self.data, out = (retval.data, tmp.data))
         return retval
-            
+    
 
     def __abs__(self):
         """ absolute value of polynomials
@@ -675,6 +675,9 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         retval.data *= (-1)**tmp[0]
         
         return retval
+        
+    def fabs(self):
+        return self.__abs__()
 
     def __neg__(self):
         return self.__class__.neg(self)
