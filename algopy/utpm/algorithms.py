@@ -604,8 +604,17 @@ class RawAlgorithmsMixIn:
 
         return out                
         
-
+    @classmethod
+    def _outer_pullback(cls, zbar_data, x_data, y_data, z_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
         
+        (xbar_data, ybar_data) = out
+        
+        xbar_data += cls._dot(zbar_data, y_data, out = xbar_data.copy())
+        ybar_data += cls._dot(zbar_data, x_data, out = ybar_data.copy())
+
+        return out        
 
     @classmethod
     def _inv(cls, x_data, out = None):

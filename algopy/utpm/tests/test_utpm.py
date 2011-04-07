@@ -208,6 +208,14 @@ class Test_Push_Forward(TestCase):
         assert_array_almost_equal(UTPM.dot(ax,ay).data[0,0], UTPM.dot(x, ay).data[0,0])
 
 
+    def test_outer(self):
+        x = numpy.arange(16)
+        x = UTPM.init_jacobian(x)
+        x1 = x[:x.size//2]
+        x2 = x[x.size//2:]
+        y = UTPM.trace(UTPM.outer(x1,x2))
+        z = UTPM.dot(x1,x2)
+        assert_array_almost_equal(y.data, z.data)
 
     def test_scalar_operations(self):
         D,P,N,M = 2,3,4,5

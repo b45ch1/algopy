@@ -151,6 +151,19 @@ def dot(a,b):
     else:
         return numpy.dot(a,b)
     
+def outer(a,b):
+    """
+    Same as NumPy outer but in UTP arithmetic
+    """
+    if isinstance(a,Function) or isinstance(b,Function):
+        return Function.outer(a,b)
+        
+    elif isinstance(a,UTPM) or isinstance(b,UTPM):
+        return UTPM.outer(a,b)
+        
+    else:
+        return numpy.outer(a,b)
+
 
 
 def qr_full(A):

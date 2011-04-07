@@ -798,6 +798,14 @@ class Function(Ring):
         
         out = Function.pushforward(algopy.dot, [lhs,rhs])
         return out
+        
+    @classmethod
+    def outer(cls, lhs,rhs):
+        lhs = cls.totype(lhs)
+        rhs = cls.totype(rhs)
+        
+        out = Function.pushforward(algopy.outer, [lhs,rhs])
+        return out        
 
     def log(self):
          return Function.pushforward(algopy.log, [self])

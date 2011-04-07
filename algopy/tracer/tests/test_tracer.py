@@ -761,7 +761,31 @@ class Test_CGgraph_on_UTPM(TestCase):
         
         assert_array_almost_equal(xbar_reverse.data, xbar_symbolic.data)
         assert_array_almost_equal(ybar_reverse.data, ybar_symbolic.data)
+
+    def test_outer(self):
+        x = numpy.arange(4)
+
+        cg = algopy.CGraph()
+        x = algopy.Function(x)
+        x1 = x[:x.size//2]
+        x2 = x[x.size//2:]
+        y = algopy.trace(algopy.outer(x1,x2))
+        cg.trace_off()
+        cg.independentFunctionList = [x]
+        cg.dependentFunctionList = [y]
         
+        cg2 = algopy.CGraph()
+        x = algopy.Function(x)
+        x1 = x[:x.size//2]
+        x2 = x[x.size//2:]
+        z = algopy.dot(x1,x2)
+        cg2.trace_off()
+        cg2.independentFunctionList = [x]
+        cg2.dependentFunctionList = [z]
+        
+        
+        assert_array_almost_equal(cg.jacobian([numpy.arange(4)])[0], cg2.jacobian([numpy.arange(4)])[0])
+
         
     def test_transpose(self):
         cg = CGraph()

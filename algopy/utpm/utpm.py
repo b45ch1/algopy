@@ -1123,7 +1123,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def dot(cls, x, y, out = None):
         """
         out = dot(x,y)
-        
         """
         
         if isinstance(x, UTPM) and isinstance(y, UTPM):
@@ -1172,6 +1171,42 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             raise NotImplementedError('should implement that')
             
         return out
+        
+    @classmethod
+    def outer(cls, x, y, out = None):
+        """
+        out = outer(x,y)
+        """
+        
+        if isinstance(x, UTPM) and isinstance(y, UTPM):
+            x_shp = x.data.shape
+            y_shp = y.data.shape
+            
+            assert x_shp[:2] == y_shp[:2]
+            assert len(y_shp[2:]) == 1
+            
+            out_shp = x_shp + x_shp[-1:]
+            out = cls(cls.__zeros__(out_shp, dtype = x.data.dtype))
+            cls._outer( x.data, y.data, out = out.data)
+            
+        else:
+            raise NotImplementedError('this operation is not supported')
+            
+        return out        
+
+    @classmethod
+    def pb_outer(cls, zbar, x, y, z, out = None):
+        if out == None:
+            D,P = y.data.shape[:2]
+            xbar = x.zeros_like()
+            ybar = y.zeros_like()
+        
+        else:
+            xbar, ybar = out
+
+        cls._outer_pullback(zbar.data, x.data, y.data, z.data, out = (xbar.data, ybar.data))
+        return (xbar,ybar)
+        
     
     @classmethod
     def inv(cls, A, out = None):
