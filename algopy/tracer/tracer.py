@@ -152,100 +152,220 @@ class CGraph:
             
             
 
-    def gradient(self, x_list):
-        """ computes the gradient of a function y = f(x_list), where y is a scalar 
-        and x_list is a list or tuple of input arguments.
-        The computation is performed in thein the reverse mode of AD.
-        x_list contains the independent variables at which the gradient should be evaluated.
+    def gradient(self, x):
+        """ computes the gradient of a function f: R^N --> R
         
-        Warning: this function does _not_ compute the Jacobian.
+        g = gradient(self, x_list)
+        
+        Parameters
+        ----------
+        
+        x: array_like or list of array_like
+
+
+        Example 1
+        ---------
+        
+        import algopy
+        
+        def f(x):
+            return x**2
+            
+        cg = algopy.CGraph()
+        x = algopy.Function(3.)
+        y = f(x)
+        cg.trace_off()
+        cg.independentFunctionList = [x]
+        cg.dependentFunctionList = [y]
+        print cg.gradient(7.)
+        
+        
+        Example 2
+        ---------
+        
+        import algopy
+        
+        def f(x1, x2):
+            return x1*x2
+            
+        cg = algopy.CGraph()
+        x1 = algopy.Function(3.)
+        x2 = algopy.Function(5.)
+        y = f(x1, x2)
+        cg.trace_off()
+        cg.independentFunctionList = [x1, x2]
+        cg.dependentFunctionList = [y]
+        print cg.gradient([1.,2.])        
         """
         
         if self.dependentFunctionList[0].ndim != 0:
             raise Exception('you are trying to compute the gradient of a non-scalar valued function')
         
-        utpm_x_list = [algopy.UTPM(numpy.asarray(x).reshape((1,1) + numpy.shape(x))) for x in x_list]
+        if isinstance(x, list):
+            x_list = x
+        else:
+            x_list = [x]
         
-        # print utpm_x_list
+        utpm_x_list = [algopy.UTPM(numpy.asarray(xi).reshape((1,1) + numpy.shape(xi))) for xi in x_list]
+        
         self.pushforward(utpm_x_list)
         
-        # print self
         ybar =  self.dependentFunctionList[0].x.zeros_like()
         ybar.data[0,:] = 1.
         self.pullback([ybar])
         
-        return [x.xbar.data[0,0] for x in self.independentFunctionList]
-        # print self
+        if isinstance(x, list):
+            return [x.xbar.data[0,0] for x in self.independentFunctionList]
+        else:
+            return self.independentFunctionList[0].xbar.data[0,0]
         
-    def jacobian(self, x_list):
-        """ computes the Jacobian of a function F:R^N --> R^M
+    def jacobian(self, x):
+        """ computes the Jacobian of a function F:R^N --> R^M in the reverse mode
+        
+        J = self.jacobian(x)
+        
+        Parameters
+        ----------
+        x: array_like
+            x.ndim = 1
+            
+        Returns
+        -------
+        J: array_like
+            the Jacobian evaluated at x
+            J.ndim = 2 when M>=1 and J.ndim = 1 when M == 0
+            
+            
+        Example
+        -------
+        
+        import algopy
+        
+        def f(x):
+            return x**2
+            
+        cg = algopy.CGraph()
+        x = algopy.Function(numpy.array([3.,7.]))
+        y = f(x)
+        cg.trace_off()
+        cg.independentFunctionList = [x]
+        cg.dependentFunctionList = [y]
+        print cg.jacobian(numpy.array([1.,2.]))
+        
         """
         M = self.dependentFunctionList[0].size
-        
-        utpm_x_list = []
-        for n,x in enumerate(x_list):
-            tmp = numpy.zeros((1,M) + numpy.shape(x))
-            tmp[0,...] = x
-            utpm_x_list.append(algopy.UTPM(tmp))
+            
+        tmp = numpy.zeros((1,M) + numpy.shape(x))
+        tmp[0,...] = x
+        utpm_x_list = [algopy.UTPM(tmp)]
 
         self.pushforward(utpm_x_list)
         
         ybar =  algopy.UTPM(numpy.zeros((1,M,M)))
         ybar.data[0,:,:] = numpy.eye(M)
         self.pullback([ybar])
+
+        return self.independentFunctionList[0].xbar.data[0,:]
         
-        return [x.xbar.data[0,:] for x in self.independentFunctionList]
-        # print self        
+    def jac_vec(self, x, v):
+        """ computes the Jacobian-vector product J*v of a function
+        F:R^N --> R^M in the forward mode
         
-    def hessian(self, x_list):
-        """ computes the Hessian
-        
-        H = self.hessian(x_list)
+        Jv = self.jac_vec(x, v)
         
         Parameters
         ----------
-        x_list: list of array_like
-            inputs as in self.independentFunctionList
+        x: array_like
+            x.ndim = 1
             
+        v: array_like
+            w.ndim = 1
+            
+        Returns
+        -------
+        Jv: array_like
+            the Jacobian-vector product
+        """
+        N = self.independentFunctionList[0].size
+
+        tmp = numpy.zeros((2,1) + numpy.shape(x))
+        tmp[0,...] = x
+        tmp[1,0,...] = v
+        utpm_x_list = [algopy.UTPM(tmp)]
+
+        self.pushforward(utpm_x_list)
+        return  self.dependentFunctionList[0].x.data[1,0,...]
+        
+    def vec_jac(self, w, x):
+        """ computes the Jacobian-vector product w^T*J of a function
+        F:R^N --> R^M in the reverse mode
+        
+        wJ = self.vec_jac(w, x)
+        
+        Parameters
+        ----------
+        x: array_like
+            x.ndim = 1
+            
+        w: array_like
+            w.ndim = 1            
+            
+        Returns
+        -------
+        wJ: array_like
+            the vector-Jacobian product
+        """
+        M = self.dependentFunctionList[0].size
+            
+        tmp = numpy.zeros((1,1) + numpy.shape(x))
+        tmp[0,...] = x
+        utpm_x_list = [algopy.UTPM(tmp)]
+
+        self.pushforward(utpm_x_list)
+        
+        ybar =  algopy.UTPM(numpy.zeros((1,1,M)))
+        ybar.data[0,0,:] = w
+        self.pullback([ybar])
+
+        return self.independentFunctionList[0].xbar.data[0,0,...]    
+        
+    def hessian(self, x):
+        """ computes the Hessian
+        
+        H = self.hessian(x)
+        
+        Parameters
+        ----------
+        x: array_like
+            x.ndim == 1            
         Returns
         -------
         H: array
             two-dimensional array containing the Hessian
             
         """
-        if len(x_list) != 1:
-            raise NotImplementedError('')
         
-        tmp = [numpy.ravel(x) for x in x_list]
-        tmp = numpy.concatenate(tmp)
-        tmp = algopy.UTPM.init_jacobian(tmp)
-        
-        utpm_x_list = []
-        a = 0
-        for x in x_list:
-            b = numpy.prod(numpy.shape(x))
-            utpm_x_list.append(numpy.reshape(tmp[a:b],numpy.shape(x)))
-
+        utpm_x_list = [algopy.UTPM.init_jacobian(x)]
         self.pushforward(utpm_x_list)
         
         ybar =  self.dependentFunctionList[0].x.zeros_like()
         ybar.data[0,:] = 1.
         self.pullback([ybar])
         
-        return numpy.array([x.xbar.data[1,:] for x in self.independentFunctionList])
-        
-    def hess_vec(self, x_list, v_list):
+        return self.independentFunctionList[0].xbar.data[1,:]
+       
+    def hess_vec(self, x, v):
         """ computes the Hessian vector product  dot(H,v)
         
-        Hv = self.hess_vec(x_list, v_list)
+        Hv = self.hess_vec(x, v)
         
         Parameters
         ----------
-        x_list: list of array_like
-            inputs as in self.independentFunctionList
+        x: array_like
+            x.ndim == 1
             
-        v_list: list of array_like
-            input directions
+        v: array_like
+            x.ndim == 1
             
         Returns
         -------
@@ -253,11 +373,7 @@ class CGraph:
             one-dimensional array containing the Hessian vector product
             
         """
-        if len(x_list) != 1 or len(v_list) != 1:
-            raise NotImplementedError('')        
-            
-        x = numpy.asarray(x_list[0])
-        v = numpy.asarray(v_list[0])
+
         xtmp = numpy.zeros((2,1) + x.shape)
         xtmp[0,0] = x; xtmp[1,0] = v
         xtmp = algopy.UTPM(xtmp)
@@ -269,20 +385,20 @@ class CGraph:
         
         return self.independentFunctionList[0].xbar.data[1,0]
         
-    def vec_hess(self, w, x_list):
+    def vec_hess(self, w, x):
         """ computes  the hessian of dot(w, F(x)), where F:R^N ---> R^M
         
-        Hv = self.vec_hess(w, x_list)
+        Hv = self.vec_hess(w, x)
         
         Parameters
         ----------
         w: array_like
             
-        x_list: list of array_like
-            inputs as in self.independentFunctionList
+        x: array_like
+            x.ndim == 1
             
-        v_list: list of array_like
-            input directions
+        v: array_like
+            v.ndim == 1
             
         Returns
         -------
@@ -290,41 +406,27 @@ class CGraph:
             one-dimensional array containing the Hessian vector product
             
         """
-        if len(x_list) != 1:
-            raise NotImplementedError('')        
-            
-        tmp = [numpy.ravel(x) for x in x_list]
-        tmp = numpy.concatenate(tmp)
-        tmp = algopy.UTPM.init_jacobian(tmp)
-        
-        utpm_x_list = []
-        a = 0
-        for x in x_list:
-            b = numpy.prod(x.shape)
-            utpm_x_list.append(numpy.reshape(tmp[a:b],x.shape))
-
-        self.pushforward(utpm_x_list)
-        
+        self.pushforward([algopy.UTPM.init_jacobian(x)])
         ybar = self.dependentFunctionList[0].x.zeros_like()
         ybar.data[0,:] = w
         self.pullback([ybar])
+        return self.independentFunctionList[0].xbar.data[1,:]
         
-        return numpy.array([x.xbar.data[1,:] for x in self.independentFunctionList])      
+    def vec_hess_vec(self, w, x, v):
+        """ computes  d^2(w F) v, where  F:R^N ---> R^M
         
-    def vec_hess_mat(self, lagra, x_list, V_list):
-        """ computes  d^2(lagra F) V, where  F:R^N ---> R^M
-        
-        lHv = self.vec_hess_mat(w, x, V)
+        lHv = self.vec_hess_mat(w, x, v)
         
         Parameters
         ----------
         lagra: array_like
             "Lagrange multipliers"
             
-        x_list: list of array_like
-            inputs as in self.independentFunctionList
+        x: array_like
+            x.ndim = 1, base point
             
-        V_list: list of array_like
+        v: array_like
+            v.ndim = 1
             input directions
             
         Returns
@@ -333,27 +435,19 @@ class CGraph:
             two-dimensional array containing the result
             
         """
-        if len(x_list) != 1 or len(V_list) != 1:
-            raise NotImplementedError('')
             
-        raise NotImplementedError('this function does not work correctly yet')
-        
-        x = x_list[0]
-        V = V_list[0]
-        
-        P = V.shape[1]
-        
-        xtmp = numpy.zeros((2,P) + x.shape)
-        xtmp[0,:] = x; xtmp[1,...] = V
+        # raise NotImplementedError('this function does not work correctly yet')
+
+        xtmp = numpy.zeros((2,1) + x.shape)
+        xtmp[0,:] = x; xtmp[1,...] = v
         xtmp = algopy.UTPM(xtmp)
         
         self.pushforward([xtmp])
         ybar =  self.dependentFunctionList[0].x.zeros_like()
-        print 'ybar.shape=',ybar.shape
-        ybar.data[0,...] = lagra
+        ybar.data[0,0,...] = w
         self.pullback([ybar])
         
-        return self.independentFunctionList[0].xbar.data[1,:]
+        return self.independentFunctionList[0].xbar.data[1,0,:]
         
     def plot(self, filename = None, method = None, orientation = 'TD'):
         """

@@ -263,6 +263,8 @@ Version Changelog
     * added UTPM.pb_sqrt
     * fixed bug in tracing operations involving neg(x)
     * added algopy.outer
+    * changed API of CGraph.hessian, CGraph.jac_vec etc. One has now to write
+      CGraph.jacobian(x) instead of CGraph.jacobian([x]). 
     
 Unit Test
 ---------

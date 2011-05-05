@@ -74,7 +74,7 @@ def prod(x, axis=None, dtype=None, out=None):
         for xi in x[1:]:
             y[0] = y[0] * xi
         return y[0]
-                
+
 
 def coeff_op(x, sl, shp):
     return x.coeff_op(sl, shp)

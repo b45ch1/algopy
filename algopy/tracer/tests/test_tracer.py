@@ -784,7 +784,7 @@ class Test_CGgraph_on_UTPM(TestCase):
         cg2.dependentFunctionList = [z]
         
         
-        assert_array_almost_equal(cg.jacobian([numpy.arange(4)])[0], cg2.jacobian([numpy.arange(4)])[0])
+        assert_array_almost_equal(cg.jacobian(numpy.arange(4)), cg2.jacobian(numpy.arange(4)))
 
         
     def test_transpose(self):
@@ -1419,6 +1419,86 @@ class Test_CGgraph_on_UTPM(TestCase):
 
 class Test_UserFriendlyDrivers(TestCase):
     
+    def test_most_drivers(self):
+        def f(x):
+            return x[0]*x[1]*x[2] + 7*x[1]
+
+        def g(x):
+            out = algopy.zeros(3, dtype=x)
+            out[0] = 2*x[0]**2
+            out[1] = 7*x[0]*x[1]
+            out[2] = 23*x[0] + x[2]
+            return out
+        
+        x = numpy.array([1,2,3],dtype=float)
+        v = numpy.array([1,1,1],dtype=float)
+        w = numpy.array([4,5,6],dtype=float)
+        
+        # forward mode gradient
+        res1 = UTPM.extract_jacobian(f(UTPM.init_jacobian(x)))
+        # forward mode Jacobian
+        res2 = UTPM.extract_jacobian(g(UTPM.init_jacobian(x)))
+        # forward mode Jacobian-vector
+        res3 = UTPM.extract_jac_vec(g(UTPM.init_jac_vec(x, v)))
+        
+        # trace f
+        cg = algopy.CGraph()
+        fx = algopy.Function(x)
+        fy = f(fx)
+        cg.trace_off()
+        cg.independentFunctionList = [fx]
+        cg.dependentFunctionList = [fy]
+        
+        # trace g
+        cg2 = algopy.CGraph()
+        fx = algopy.Function(x)
+        fy = g(fx)
+        cg2.trace_off()
+        cg2.independentFunctionList = [fx]
+        cg2.dependentFunctionList = [fy]
+        
+        # reverse mode gradient
+        res4 = cg.gradient(x)
+        assert_array_almost_equal(numpy.array( [x[1]*x[2],
+                                                x[0]*x[2]+7,
+                                                x[0]*x[1]]), res4) 
+        
+        # forward/reverse mode Hessian
+        res5 = cg.hessian(x)
+        assert_array_almost_equal(numpy.array( [[0, x[2], x[1]],
+                                                [x[2], 0., x[0]],
+                                                [x[1], x[0], 0]]), res5)
+        
+        # forward/reverse mode Hessian-vector
+        res6 = cg.hess_vec(x,v)
+        assert_array_almost_equal(numpy.dot(res5, v), res6)
+        
+        # reverese mode Jacobian
+        res7 = cg2.jacobian(x)
+        assert_array_almost_equal(numpy.array( [[4*x[0], 0, 0],
+                                                [7*x[1], 7*x[0], 0],
+                                                [23., 0, 1]]), res7)        
+        
+        # reverse mode vector-Jacobian
+        res8 = cg2.vec_jac(w,x)
+        assert_array_almost_equal(numpy.dot(w,res7), res8)
+        
+        # forward mode Jacobian-vector
+        res9 = cg2.jac_vec(x,v)
+        assert_array_almost_equal(numpy.dot(res7,v), res9)
+        
+        # forward/reverse mode vector-Hessian-vector
+        res10 = cg2.vec_hess_vec(w,x,v)
+        assert_array_almost_equal(numpy.array([4*v[0]*w[0]+ 7*v[1]*w[1],
+                                               7*w[1],
+                                               0]), res10)
+                
+  
+                
+        
+        
+        
+    
     def test_jacobian_vec_hess(self):
         class Model:
             def eval_g(self, x):
@@ -1446,10 +1526,10 @@ class Test_UserFriendlyDrivers(TestCase):
                 self.cg2 = cg2
                 
             def eval_jac_g_reverse(self, x):
-                return self.cg2.jacobian([x])
+                return self.cg2.jacobian(x)
                 
             def eval_vec_hess_g_reverse(self, w, x):
-                return self.cg2.vec_hess(w, [x])
+                return self.cg2.vec_hess(w, x)
                 
         
         x = numpy.array([numpy.pi/2, 0],dtype=float)
@@ -1458,8 +1538,8 @@ class Test_UserFriendlyDrivers(TestCase):
         m = Model()
         m.trace_eval_g(x)
         
-        assert_array_almost_equal(m.eval_jac_g_forward(x), m.eval_jac_g_reverse(x)[0])
-        assert_array_almost_equal(m.eval_vec_hess_g_forward(w,x), m.eval_vec_hess_g_reverse(w,x)[0])
+        assert_array_almost_equal(m.eval_jac_g_forward(x), m.eval_jac_g_reverse(x))
+        assert_array_almost_equal(m.eval_vec_hess_g_forward(w,x), m.eval_vec_hess_g_reverse(w,x))
 
 
         
