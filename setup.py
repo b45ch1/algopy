@@ -55,7 +55,7 @@ AUTHOR_EMAIL        = "sebastian.walter@gmail.com"
 PLATFORMS           = ["all"]
 MAJOR               = 0
 MINOR               = 3
-MICRO               = 0
+MICRO               = 1
 ISRELEASED          = False
 VERSION             = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
@@ -65,7 +65,7 @@ if not ISRELEASED:
     # If in git or something, bypass the svn rev
     if os.path.exists('.svn'):
         FULLVERSION += svn_version()
-        
+
 # BEFORE importing distutils, remove MANIFEST. distutils doesn't properly
 # update it when the contents of directories change.
 if os.path.exists('MANIFEST'): os.remove('MANIFEST')
@@ -74,12 +74,12 @@ def write_version_py(filename='algopy/version.py'):
     try:
         gitfile = open('.git/refs/heads/master', 'r')
         git_revision = '.dev' + gitfile.readline().split('\n')[0]
-    
+
     except:
         git_revision = '.dev'
-    
+
     print git_revision
-    
+
     cnt = """
 # THIS FILE IS GENERATED FROM ALGOPY SETUP.PY
 short_version='%(version)s'
@@ -124,7 +124,7 @@ def setup_package():
     old_path = os.getcwd()
     os.chdir(src_path)
     sys.path.insert(0, src_path)
-    
+
     # find all files that should be included
     packages, data_files = [], []
     for dirpath, dirnames, filenames in os.walk('algopy'):
@@ -138,7 +138,7 @@ def setup_package():
 
     from distutils.core import setup, Extension
     from setuptools import setup
-    
+
     try:
         setup(name=NAME,
           version=VERSION,
