@@ -1,23 +1,27 @@
-ALGOPY, a library for Automatic Differentation (AD) in Python
+AlgoPy, a library for Automatic Differentation (AD) in Python
 -------------------------------------------------------------
 
 Description:
-    ALGOPY allows you to differentiate functions implemented as computer programs
+    AlgoPy allows you to differentiate functions implemented as computer programs
     by using Algorithmic Differentiation (AD) techniques in the forward and
     reverse mode.
+
+    The forward mode propagates univariate Taylor polynomials of arbitrary order.
+    Hence it is also possible to use AlgoPy to evaluate higher-order derivative tensors.
     
-    Speciality of ALGOPY is the possibility to differentiate functions that contain
+    Speciality of AlgoPy is the possibility to differentiate functions that contain
     matrix functions as +,-,*,/, dot, solve, qr, eigh, cholesky.
 
+
 Rationale:
-    ALGOPY is a research prototype striving to provide state of the art algorithms.
-    The ultimative goal is to provide high performance algorithms
-    that can be used to differentiate dynamic systems  (ODEs, DAEs, PDEs)
-    and static systems (linear/nonlinear systems of equations). Most algorithms
-    are implemented as Single Program Multiple Data (SPMD). The code is very 
-    similar to NumPy and it is a design goal to have a one to one correspondence.
-    I.e., in most cases code that can be differentiated using ALGOPY can also be
-    evaluated with NumPy.
+    Many programs for scientific computing make use of numerical linear algebra.
+    The defacto standard for array manipulations in Python is NumPy.
+    AlgoPy allows you to write code that can either be evaluated by NumPy, or with
+    AlgoPy with little or no modifications to your code.
+
+    Note that this does not mean that any code you wrote can be differentiated with AlgoPy,
+    but rather that you can write code that can be evaluated with or without AlgoPy.
+
 
 Documentation:
     Available at http://packages.python.org/algopy/
