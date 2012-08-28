@@ -24,10 +24,10 @@ cg.independentFunctionList = [x]
 cg.dependentFunctionList = [y]
 
 # STEP 2: use the computational graph to evaluate derivatives
-print 'gradient =', cg.gradient([[3.,5,7]])
-print 'Jacobian =', cg.jacobian([[3.,5,7]])
-print 'Hessian =', cg.hessian([[3.,5.,7.]])
-print 'Hessian vector product =', cg.hess_vec([[3.,5.,7.]],[[4,5,6]])
+print 'gradient =', cg.gradient([3.,5,7])
+print 'Jacobian =', cg.jacobian([3.,5,7])
+print 'Hessian =', cg.hessian([3.,5.,7.])
+print 'Hessian vector product =', cg.hess_vec([3.,5.,7.],[4,5,6])
 
 
 

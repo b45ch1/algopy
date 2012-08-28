@@ -202,7 +202,10 @@ class CGraph:
             raise Exception('you are trying to compute the gradient of a non-scalar valued function')
         
         if isinstance(x, list):
-            x_list = x
+            if isinstance(x[0], numpy.ndarray) or isinstance(x[0], list):
+                x_list = x                
+            else:
+                x_list = [numpy.asarray(x)]
         else:
             x_list = [x]
         
@@ -253,6 +256,12 @@ class CGraph:
         print cg.jacobian(numpy.array([1.,2.]))
         
         """
+
+        x = numpy.asarray(x)
+
+        if x.ndim != 1:
+            raise ValueError("x.ndim must be 1 but provided %d"%x.ndim)
+        
         M = self.dependentFunctionList[0].size
             
         tmp = numpy.zeros((1,M) + numpy.shape(x))
@@ -286,6 +295,20 @@ class CGraph:
         Jv: array_like
             the Jacobian-vector product
         """
+
+        x = numpy.asarray(x)
+        v = numpy.asarray(v)
+
+        if x.ndim != 1:
+            raise ValueError("x.ndim must be 1 but provided %d"%x.ndim)
+
+        if v.ndim != 1:
+            raise ValueError("v.ndim must be 1 but provided %d"%v.ndim)
+
+        if x.shape != v.shape:
+            raise ValueError("x.shape must be the same as v.shape but provided x.shape=%s, v.shape=%s "%(x.shape, v.shape))
+
+        
         N = self.independentFunctionList[0].size
 
         tmp = numpy.zeros((2,1) + numpy.shape(x))
@@ -315,6 +338,19 @@ class CGraph:
         wJ: array_like
             the vector-Jacobian product
         """
+
+        x = numpy.asarray(x)
+        w = numpy.asarray(w)
+
+        if x.ndim != 1:
+            raise ValueError("x.ndim must be 1 but provided %d"%x.ndim)
+
+        if w.ndim != 1:
+            raise ValueError("w.ndim must be 1 but provided %d"%w.ndim)
+
+        if x.shape != w.shape:
+            raise ValueError("x.shape must be the same w.shape, but provided x.shape=%s and w.shape=%s"%(x.shape, w.shape))
+        
         M = self.dependentFunctionList[0].size
             
         tmp = numpy.zeros((1,1) + numpy.shape(x))
@@ -344,6 +380,11 @@ class CGraph:
             two-dimensional array containing the Hessian
             
         """
+
+        x = numpy.asarray(x)
+
+        if x.ndim != 1:
+            raise ValueError("x.ndim must be 1 but provided %d"%x.ndim)
         
         utpm_x_list = [algopy.UTPM.init_jacobian(x)]
         self.pushforward(utpm_x_list)
@@ -374,7 +415,19 @@ class CGraph:
             
         """
 
-        xtmp = numpy.zeros((2,1) + x.shape)
+        x = numpy.asarray(x)
+        v = numpy.asarray(v)
+
+        if x.ndim != 1:
+            raise ValueError("x.ndim must be 1 but provided %d"%x.ndim)
+
+        if v.ndim != 1:
+            raise ValueError("v.ndim must be 1 but provided %d"%v.ndim)
+
+        if x.shape != v.shape:
+            raise ValueError("x.shape must be the same as v.shape, but provided x.shape=%s and v.shape=%s"%(x.shape, v.shape))
+
+        xtmp = numpy.zeros((2,1) + numpy.shape(x))
         xtmp[0,0] = x; xtmp[1,0] = v
         xtmp = algopy.UTPM(xtmp)
         
@@ -406,6 +459,19 @@ class CGraph:
             one-dimensional array containing the Hessian vector product
             
         """
+
+        x = numpy.asarray(x)
+        w = numpy.asarray(w)
+
+        if x.ndim != 1:
+            raise ValueError("x.ndim must be 1 but provided %d"%x.ndim)
+
+        if w.ndim != 1:
+            raise ValueError("w.ndim must be 1 but provided %d"%w.ndim)
+
+        if x.shape != w.shape:
+            raise ValueError("x.shape must be the same as w.shape, but provided x.shape=%s and w.shape=%s"%(x.shape, w.shape))
+        
         self.pushforward([algopy.UTPM.init_jacobian(x)])
         ybar = self.dependentFunctionList[0].x.zeros_like()
         ybar.data[0,:] = w
@@ -435,6 +501,23 @@ class CGraph:
             two-dimensional array containing the result
             
         """
+
+
+        x = numpy.asarray(x)
+        v = numpy.asarray(v)
+        w = numpy.asarray(w)
+
+        if x.ndim != 1:
+            raise ValueError("x.ndim must be 1 but provided %d"%x.ndim)
+
+        if v.ndim != 1:
+            raise ValueError("v.ndim must be 1 but provided %d"%v.ndim)
+
+        if w.ndim != 1:
+            raise ValueError("w.ndim must be 1 but provided %d"%w.ndim)
+        
+        if x.shape != v.shape or x.shape != w.shape:
+            raise ValueError("x.shape must be the same as v.shape or v.shape, but provided x.shape=%s, v.shape=%s and w.shape=%s"%(x.shape, v.shape, w.shape))
             
         # raise NotImplementedError('this function does not work correctly yet')
 

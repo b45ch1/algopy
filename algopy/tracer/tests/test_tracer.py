@@ -966,7 +966,8 @@ class Test_CGgraph_on_UTPM(TestCase):
         cg = CGraph()
         x = Function(x)
         A = Function(A)
-        z = A - dot(x,x.T)/A + A*x /dot(A[:,:1], A[1:,:])
+        #z = A - dot(x,x.T)/A + A*x /dot(A[:,:1], A[1:,:])
+        z = A - x
         cg.trace_off()
         cg.independentFunctionList = [x,A]
         cg.dependentFunctionList = [z]
