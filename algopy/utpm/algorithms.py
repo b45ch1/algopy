@@ -937,6 +937,13 @@ class RawAlgorithmsMixIn:
         return numpy.reshape(a_data, a_data.shape[:2] + newshape)
 
     @classmethod
+    def _pb_reshape(cls, ybar_data, x_data, y_data,  out=None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+
+        return numpy.reshape(out, x_data.shape)
+        
+    @classmethod
     def _iouter(cls, x_data, y_data, out_data):
         """
         computes dyadic product and adds it to out
@@ -1704,5 +1711,3 @@ class RawAlgorithmsMixIn:
                 out[d,p] += numpy.diag(ybar_data[d,p])
 
         return out
-
-

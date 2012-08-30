@@ -1485,7 +1485,20 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         cls._dot_pullback(zbar.data, x.data, y.data, z.data, out = (xbar.data, ybar.data))
         return (xbar,ybar)
-        
+
+    @classmethod
+    def pb_reshape(cls, ybar, x, newshape, y, out = None):
+        if out == None:
+            D,P = y.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar = out[0]
+
+        cls._pb_reshape(ybar.data, x.data, y.data, out = xbar.data)
+        return xbar
+
+     
     @classmethod
     def pb_inv(cls, ybar, x, y, out = None):
         if out == None:
