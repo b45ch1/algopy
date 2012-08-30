@@ -130,12 +130,24 @@ class CGraph:
         # print 'before pullback',self
 
         for nf,f in enumerate(self.dependentFunctionList):
-            f.xbar[...] = xbar_list[nf]
+            try:
+                f.xbar[...] = xbar_list[nf]
+            except Exception, e:
+                err_str  = 'tried to initialize the bar value of  cg.dependentFunctionList[%d], but some error occured:\n'%nf
+                err_str += 'the assignment:  f.xbar[...] = xbar_list[%d]\n'%(nf)
+                err_str += 'where f.xbar[...].shape =%s and type(f.xbar)=%s\n'%(str(f.xbar[...].shape), str(type(f.xbar)))
+                err_str += 'and xbar_list[%d].shape =%s and type(xbar_list[%d])=%s\n'%(nf, str(xbar_list[nf].shape), nf,  str(type(xbar_list[nf])))
+                err_str += 'results in the error\n%s\n'%e
+                raise Exception(err_str)
             
         # print self
-        for f in self.functionList[::-1]:
-            # print 'pullback of f=',f.func.__name__
-            f.__class__.pullback(f)
+        for i,f in enumerate(self.functionList[::-1]):
+            try:
+                f.__class__.pullback(f)
+            except Exception, e:
+                err_str = 'pullback of node %d failed (%s)'%(i,f.func.__name__)
+                err_str += 'reported error is:\n%s'%e
+                raise Exception(err_str)
             # print self
             
     def function(self, x_list):
@@ -815,10 +827,10 @@ class Function(Ring):
         # STEP 2: call the pullback function
         kwargs = {'out': list(argsbar)}
         
-        # print 'func_name = ',func_name
-        # print 'calling pullback function f=',f
-        # print 'args = ',args
-        # print 'kwargs = ',kwargs
+        #print 'func_name = ',func_name
+        #print 'calling pullback function f=',f
+        #print 'args = ',args
+        #print 'kwargs = ',kwargs
         
         f(*args, **kwargs )
         
@@ -1055,6 +1067,9 @@ class Function(Ring):
         
     def vecsym(self):
         return Function.pushforward(algopy.vecsym, [self])
+
+    def reshape(self, shape):
+        return Function.pushforward(algopy.reshape, [self, shape])
         
     T = property(transpose)
     
