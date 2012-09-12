@@ -30,7 +30,7 @@ cg.dependentFunctionList = [Fy]
 def dO_tilde(u):
     # use ALGOPY to compute the gradient
     g = cg.gradient([u])[0]
-    
+
     # on the edge the analytical solution is fixed
     # so search direction must be zero on the boundary
 
@@ -61,7 +61,7 @@ def projected_gradients(x0, ffcn,dffcn, box_constraints, beta = 0.5, delta = 10*
         b = U - x_alpha
         return x_alpha - 1.*(a<0) * a + b * 1. * (b<0)
 
-        
+
     s = - dffcn(x)
     k = 0
     while pgn(s)>epsilon and k<= max_iter:
@@ -100,7 +100,11 @@ Z,s = projected_gradients(u,O_tilde,dO_tilde,[L,U])
 
 # # Plot with MAYAVI
 x = y = range(numpy.shape(Z)[0])
-import enthought.mayavi.mlab as mlab
+
+try:
+    import enthought.mayavi.mlab as mlab
+except:
+    import mayavi.mlab as mlab
 mlab.figure()
 mlab.view(azimuth=130)
 s = mlab.surf(x, y, Z, representation='wireframe', warp_scale='auto', line_width=1.)

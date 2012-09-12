@@ -37,3 +37,4 @@ report
 
 # exceptions
 !.gitignore
+!.gitkeep

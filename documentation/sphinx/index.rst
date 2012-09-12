@@ -31,17 +31,13 @@ What can AlgoPy do for you?
         * Hessian vector product
         * vector Hessian vector product
         * higher-order tensors
-        
+
     * Taylor series evaluation
         * for modeling higher-order processes
-        * can in principle be used to compute Taylor series expansions useful for ODE/DAE integration.
-          Note that for efficient evaluation one would require to successively
-          increase the degree of the Taylor polynomial arithmetic. This is not
-          directly supported and thus AlgoPy requires :math:`d^3` instead of 
-          :math:`d^2` operations.
-          
-        
-        
+        * could be used to compute Taylor series expansions for ODE/DAE integration.
+
+
+
 Getting Started:
 ----------------
 For the impatient, we show a minimalistic example how AlgoPy can be used to compute
@@ -51,7 +47,7 @@ derivatives.
     :lines: 1-
 
 If one executes that code one obtains as output::
-    
+
     $ python getting_started.py
     jacobian =  [ 135.42768462   41.08553692   15.        ]
     gradient = [array([ 135.42768462,   41.08553692,   15.        ])]
@@ -63,7 +59,7 @@ If one executes that code one obtains as output::
 
 Help improve AlgoPy
 -------------------
-If you have any questions, suggestions or bug reports  please use the mailing list 
+If you have any questions, suggestions or bug reports  please use the mailing list
 http://groups.google.com/group/algopy?msg=new&lnk=gcis
 or alternatively write me an email(sebastian.walter@gmail.com).
 This will make it much easier for me to provide code/documentation that
@@ -71,11 +67,77 @@ is easier to understand. Of course, you are also welcome to contribute code,
 bugfixes, examples, success stories ;), ...
 
 
-Current Issues
---------------
-The class `algopy.UTPM` is a replacement for `numpy.ndarray`.
-However, it is possible to have `numpy.ndarray`s with `algopy.UTPM` instances as
-elements. However, it is currently not possible to mix these operations.
+Issues and common pitfalls
+---------------------------
+
+.. warning::
+
+    Do not use `numpy.ndarray` with `algopy.UTPM` or `algopy.Function` as
+    elements!
+
+    Example 1::
+
+        import numpy, algopy
+
+        x = algopy.Function(1)
+        y = algopy.Function(2)
+
+        # wrong
+        z = numpy.array([x,y])
+
+        # right
+        z = algopy.zeros(2, dtype=x)
+        z[0] = x
+        z[1] = y
+
+    Example 2::
+
+        x = algopy.UTPM(numpy.ones((2,1)))
+        y = algopy.UTPM(2*numpy.ones((2,1)))
+
+        # wrong
+        z = numpy.array([x,y])
+
+        # right
+        z = algopy.zeros(2, dtype=x)
+        z[0] = x
+        z[1] = y
+
+
+.. warning::
+
+    Broadcasting does not work in the reverse mode with NumPy 1.6!
+    (it used to work for NumPy 1.4 ...)
+
+    This is due to unexpected behavior of numpy, see discussion on
+    http://thread.gmane.org/gmane.comp.python.numeric.general/51379
+
+
+    Example::
+
+        import numpy, algopy
+
+        def f(x):
+            N, = x.shape
+            A = algopy.zeros((N,N), dtype=x)
+            A[0,0] = x[2]
+            A[1,2] = x[1]
+            return algopy.sum(A*x)
+
+
+        cg = algopy.CGraph()
+
+        x = algopy.Function(numpy.ones(3))
+        y = f(x)
+
+        cg.independentFunctionList = [x]
+        cg.dependentFunctionList = [y]
+
+        print cg.gradient(numpy.array([1.,2.,3.]))
+
+    Such code may give wrong results on your machine if you happen to have the
+    wrong NumPy version.
+
 
 
 Potential Improvements
@@ -86,26 +148,24 @@ Potential Improvements
     * support for sparse Jacobian and sparse Hessian computations using graph
       coloring as explained in http://portal.acm.org/citation.cfm?id=1096222
 
-      
+
 Related Work
-------------   
+------------
 
 AlgoPy has been influenced by the following publications:
     * "ADOL-C: A Package for the Automatic Differentiation of Algorithms Written
       in C/C++", Andreas Griewank, David Juedes, H. Mitev, Jean Utke, Olaf Vogel,
       Andrea Walther
-      
     * "Evaluating Higher Derivative Tensors by Forward Propagation of Univariate
-     Taylor Series", Andreas Griewank, Jean Utke and Andrea Walther
-
-    * "Taylor series integration of differential-algebraic equations: automatic differentiation as a tool for
+      Taylor Series", Andreas Griewank, Jean Utke and Andrea Walther
+    * "Taylor series integration of differential-algebraic equations:
+      automatic differentiation as a tool for
       simulating rigid body mechanical systems", Eric Phipps, phd thesis
-      
     * "Collected Matrix Derivative Results for Forward and Reverse Mode
-      Algorithmic Differentiation", Mike Giles, 
+      Algorithmic Differentiation", Mike Giles,
       http://www.springerlink.com/content/h1750t57160w2782/
-      
-      
+
+
 
 Installation and Upgrade:
 -------------------------
@@ -119,9 +179,10 @@ Official releases:
         - `$ easy_install --upgrade algopy` to upgrade to the newest version
 
 Bleeding edge:
-    * the most recent version is available at https://github.com/b45ch1/algopy .
-    * includes additional documentation, e.g. talks and additional examples and the sphinx *.rst documents
-    
+    * the most recent version is available at `https://github.com/b45ch1/algopy` .
+    * includes additional documentation, e.g. talks and additional examples and
+      the sphinx `*.rst` documents
+
 Dependencies:
     * numpy
     * (optional/recommended) scipy (needed to support some linear algebra functions)
@@ -138,10 +199,10 @@ Forward Mode of AD:
     with with matrix coefficients. More precisely, AlgoPy supports univariate Taylor
     polynomial (UTP) arithmetic where the coefficients of the polynomial are numpy.ndarrays.
     To distinguish Taylor polynomials from real vectors resp. matrices they are written with enclosing brackets:
-    
+
     .. math::
         [x]_D = [x_0, \dots, x_{D-1}] = \sum_{d=0}^{D-1} x_d T^d \;,
-        
+
     where each :math:`x_0, x_1, \dots` are arrays, e.g. a (5,7) array.
     This mathematical object is described by numpy.ndarray with shape (D,P, 5,7).
     The :math:`T` is an indeterminate, i.e. a formal/dummy variable. Roughly speaking, this is the UTP equivalent to the imaginary number :math:`i` in complex arithmetic. The `P` can be used to compute several Taylor expansions at once. I.e., a vectorization to avoid the recomputation of the same functions with different inputs.
@@ -173,56 +234,60 @@ Talks:
     * :download:`Informal talk at the IWR Heidelberg, April 29th, 2010<./talks/informal_talk_iwr_heidelberg_theory_and_tools_for_algorithmic_differentiation.pdf>`.
     * :download:`Univariate Taylor polynomial arithmetic applied to matrix factorizations in the forward and reverse mode of algorithmic differentiation, June 3rd, 2010, EuroAD in Paderborn<./talks/walter_euroad2010_paderborn_univariate_taylor_polynomial_arithmetic_applied_to_matrix_factorizations_in_the_forward_and_reverse_mode_of_algorithmic_differentiation.pdf>`.
 
-    
+
 Simple Examples:
 
 .. toctree::
    :maxdepth: 1
-   
+
+   getting_started.rst
    examples/series_expansion.rst
    examples/first_order_forward.rst
 
-   
+
 Advanced Examples:
 
 .. toctree::
    :maxdepth: 1
-   
+
    examples/covariance_matrix_computation.rst
    examples/error_propagation.rst
    examples/moore_penrose_pseudoinverse.rst
    examples/ode_solvers.rst
    examples/comparison_forward_reverse_mode.rst
-   
+   examples/ampl_minimization_problem.rst
+
 Application Examples:
 
 .. toctree::
    :maxdepth: 1
-   
+
    examples/posterior_log_probability.rst
    examples/leastsquaresfitting.rst
    examples/hessian_of_potential_function.rst
    examples/minimal_surface.rst
-   
+
 
 Additional Information:
 
 .. toctree::
    :maxdepth: 1
-   
+
    datastructure_and_algorithms.rst
    examples_tracer.rst
+   examples/polarization.rst
+   symbolic_differentiation.rst
 
 Current Issues:
 ---------------
-      
+
     * some algorithms require vectors to be columns of a matrix.
       I.e. if x is a vector it should be initialized as
       x = UTPM(numpy.random.rand(D,P,N,1) and not as
       UTPM(numpy.random.rand(D,P,N)) as one would typically do it using numpy.
-      
-    * there is no vectorized reverse mode yet. That means that one can compute 
-      columns of a Jacobian of dimension (M,N) by propagating N directional 
+
+    * there is no vectorized reverse mode yet. That means that one can compute
+      columns of a Jacobian of dimension (M,N) by propagating N directional
       derivatives at once. In the reverse mode one would like to propagate M
       adjoint directions at once. However, this is not implemented yet, i.e. one
       has to repeat the procedure M times.
@@ -254,7 +319,7 @@ Version Changelog
     * added comparison operators <,>,<=,>=,== to UTPM
     * added UTPM.init_jac_vec and UTPM.extract_jac_vec
     * added CGraph.function, CGraph.gradient, CGraph.hessian, CGraph.hess_vec
-    
+
 * Version 0.3.1
     * replaced algopy.sum by a faster implementation
     * fixed a bug in getitem of the UTPM instance: now works also with numpy.int64
@@ -264,14 +329,20 @@ Version Changelog
     * fixed bug in tracing operations involving neg(x)
     * added algopy.outer
     * changed API of CGraph.hessian, CGraph.jac_vec etc. One has now to write
-      CGraph.jacobian(x) instead of CGraph.jacobian([x]). 
-    
+      CGraph.jacobian(x) instead of CGraph.jacobian([x]).
+
+* Version 0.3.2
+    * improved error reporting in the reverse mode: when "something goes wrong"
+      in cg.gradient([1.,2.,3.]) one now gets a much more detailed traceback
+    * added A.reshape(...) support to the reverse mode
+    * improved support for broadcasting for UTPM instances
+
 Unit Test
 ---------
 
 AlgoPy uses the same testing facilitities as NumPy. I.e., one can run the complete
 unit test with::
-    
+
     $ python -c "import algopy; algopy.test()"
 
 
