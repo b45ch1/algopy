@@ -180,11 +180,11 @@ Official releases:
         - `$ easy_install algopy` for installation
         - `$ easy_install --upgrade algopy` to upgrade to the newest version
     * NetBSD package
-        `http://pkgsrc.se/wip/py-algopy`
-        `http://cvsweb.se.netbsd.org/cgi-bin/bsdweb.cgi/wip/py-algopy`
+        - http://pkgsrc.se/wip/py-algopy
+        - http://cvsweb.se.netbsd.org/cgi-bin/bsdweb.cgi/wip/py-algopy
 
 Bleeding edge:
-    * the most recent version is available at `https://github.com/b45ch1/algopy`
+    * the most recent version is available at https://github.com/b45ch1/algopy
     * includes additional documentation, e.g. talks and additional examples and
       the sphinx `*.rst` documents
 
