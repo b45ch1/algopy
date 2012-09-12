@@ -16,6 +16,11 @@ Documentation with examples is available at http://packages.python.org/algopy/.
 #
 #    python setup.py sdist --formats=gztar,zip upload
 
+# upload sphinx documentation
+#    python setup.py build_sphinx
+#    python setup.py upload_sphinx
+# need to uncomment some code for that (look for comments containging build_sphinx)
+
 DOCLINES = __doc__.split("\n")
 
 import os
@@ -138,7 +143,7 @@ def setup_package():
 
     from distutils.core import setup
     # from distutils.core import setup, Extension
-    # from setuptools import setup
+    # from setuptools import setup #uncomment for build_sphinx and upload_sphinx
 
     try:
         setup(name=NAME,
@@ -154,7 +159,7 @@ def setup_package():
           packages = packages,
           # ext_package='algopy.ctps',
           # ext_modules=[Extension('libctps', ['algopy/ctps/src/ctps.c'])],
-           # entry_points = {"distutils.commands": ["upload_sphinx = sphinx_pypi_upload:UploadDoc",]}
+          # entry_points = {"distutils.commands": ["upload_sphinx = sphinx_pypi_upload:UploadDoc",]} #uncomment for build_sphinx and upload_sphinx
          )
 
     finally:

@@ -53,6 +53,9 @@ Example:
 
         print 'Jacobian dy/dx =', J
 
+Installation:
+
+    see http://packages.python.org/algopy/
 
 
 Features:
@@ -76,22 +79,6 @@ Testing:
 
         $ python -c "import algopy; algopy.test()"
 
-
-Dependencies:
-
-    ALGOPY Core:
-        * numpy
-        * scipy
-
-    ALGOPY Examples:
-        * pyadolc
-
-    Run tests:
-        * Nose
-
-    Documentation:
-        * sphinx
-        * matplotlib, mayavi2, yapgvb
 
 Alternatives:
 

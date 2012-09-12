@@ -170,24 +170,43 @@ AlgoPy has been influenced by the following publications:
 Installation and Upgrade:
 -------------------------
 
-Current version is 0.3.0
+Current version is 0.3.2
 
 Official releases:
     * available at:  http://pypi.python.org/pypi/algopy
-    * if you have easy_install you can use the shell command
+    * with pip
+        - `$ pip install algopy`
+    * with easy_install
         - `$ easy_install algopy` for installation
         - `$ easy_install --upgrade algopy` to upgrade to the newest version
+    * NetBSD package
+        `http://pkgsrc.se/wip/py-algopy`
+        `http://cvsweb.se.netbsd.org/cgi-bin/bsdweb.cgi/wip/py-algopy`
 
 Bleeding edge:
-    * the most recent version is available at `https://github.com/b45ch1/algopy` .
+    * the most recent version is available at `https://github.com/b45ch1/algopy`
     * includes additional documentation, e.g. talks and additional examples and
       the sphinx `*.rst` documents
 
+
 Dependencies:
-    * numpy
-    * (optional/recommended) scipy (needed to support some linear algebra functions)
-    * (optional/recommended) nose
-    * (optional/recommended) yapgvb (to generate plots of the computational graph)
+
+    ALGOPY Core:
+        * numpy
+        * scipy
+
+    ALGOPY Examples:
+        * pyadolc
+
+    Run tests:
+        * Nose
+
+    Documentation:
+        * sphinx
+        * matplotlib, mayavi2, yapgvb
+
+
+
 
 How does it work?:
 ------------------
