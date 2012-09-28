@@ -17,7 +17,7 @@ numpy_linalg_function_names = ['inv', 'solve', 'eigh', 'qr', 'cholesky','transpo
 
 
 function_template = string.Template('''
-def $function_name(*args):
+def $function_name(*args, **kwargs):
     case,arg = 0,0
     for na,a in enumerate(args):
         if hasattr(a.__class__, '$function_name'):
@@ -26,13 +26,13 @@ def $function_name(*args):
             break
 
     if case==1:
-        return getattr(args[arg].__class__, '$function_name')(*args)
+        return getattr(args[arg].__class__, '$function_name')(*args, **kwargs)
 
     elif case==0:
-        return $namespace.__getattribute__('$function_name')(*args)
+        return $namespace.__getattribute__('$function_name')(*args, **kwargs)
 
     else:
-        return $namespace.__getattribute__('$function_name')(*args)
+        return $namespace.__getattribute__('$function_name')(*args, **kwargs)
 ''')
 
 for function_name in numpy_function_names:
@@ -227,11 +227,20 @@ def vecsym(v):
 vecsym.__doc__ = utils.vecsym.__doc__
 
 
-def svd(A):
+def svd(A, epsilon=10**-8):
     """
     computes the singular value decomposition A = U S V.T
 
-    (U, S, VT) = UTPM.svd(A, out=None)
+    (U, S, VT) = UTPM.svd(A, epsilon= 10**-8)
+
+    Parameters
+    ----------
+
+    A: array_like
+        input array (numpy.ndarray, algopy.UTPM or algopy.Function instance)
+
+    epsilon:   float
+        threshold to evaluate the rank of A
 
     Implementation
     --------------
@@ -260,13 +269,26 @@ def svd(A):
     B = zeros((M+N, M+N),dtype=A)
     B[:M,M:] = A
     B[M:,:M] = A.T
-    l,Q = eigh(B)
+    l,Q = eigh(B, epsilon=epsilon)
+
+
+    # compute the rank
+    r = 0
+    for i in range(N):
+        if abs(l[i]) > epsilon:
+            r = i+1
+
+    if r < N:
+        raise NotImplementedError('rank deficient matrices are not supported')
 
     # permutation matrix
 
-    tmp = [M+N-1 - i for i in range(N)] + [i for i in range(N)] + [N+i for i in range(M-N)]
+    tmp  = [M+N-1 - i for i in range(r)] + [i for i in range(r)]
+    tmp += [M+N-1-r-i for i in range(N-r)] + [N-1+i for i in range(N-r)]
+    tmp += [N+i for i in range(M-N)]
     P = numpy.eye(M+N)
     P = P[tmp]
+
 
     # bring Q into the required format
 
@@ -278,10 +300,10 @@ def svd(A):
     U = zeros((M,M), dtype=Q)
     V = zeros((N,N), dtype=Q)
 
-    U[:,:N] = 2.**0.5*Q[:M,:N]
-    U[:,N:] = Q[:M, 2*N: N+M]
-    V[:,:N] = 2.**0.5*Q[M:,:N]
-
+    U[:,:r] = 2.**0.5*Q[:M,:r]
+    U[:,r:] = Q[:M, 2*r: r+M]
+    V[:,:r] = 2.**0.5*Q[M:,:r]
+    V[:,r:] = Q[M:,r+M:]
     s = -l[:N]
 
     return U, s, V
