@@ -18,6 +18,17 @@ numpy_linalg_function_names = ['inv', 'solve', 'eigh', 'qr', 'cholesky','transpo
 
 function_template = string.Template('''
 def $function_name(*args, **kwargs):
+    """
+    generic implementation of $function_name
+
+    this function calls, depending on the input arguments,
+    either
+
+    * numpy.$function_name
+    * numpy.linalg.$function_name
+    * args[i].__class__
+
+    """
     case,arg = 0,0
     for na,a in enumerate(args):
         if hasattr(a.__class__, '$function_name'):
