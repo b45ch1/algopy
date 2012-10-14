@@ -121,6 +121,109 @@ class Test_global_functions(TestCase):
         assert_array_almost_equal( (dot(V, V.T) - numpy.eye(N)).data, 0.)
 
 
+    def test_expm(self):
+
+        g_data = numpy.array([
+                [2954, 141, 17, 16],
+                [165, 1110, 5, 2],
+                [18, 4, 3163, 374],
+                [15, 2, 310, 2411],
+                ],dtype=float)
+
+        def transform_params(Y):
+            X = exp(Y)
+            tsrate, tvrate = X[0], X[1]
+            v_unnormalized = zeros(4, dtype=X)
+            v_unnormalized[0] = X[2]
+            v_unnormalized[1] = X[3]
+            v_unnormalized[2] = X[4]
+            v_unnormalized[3] = 1.0
+            v = v_unnormalized / sum(v_unnormalized)
+            return tsrate, tvrate, v
+
+        def eval_f(Y):
+            """
+            using algopy.expm
+            """
+
+            a, b, v = transform_params(Y)
+
+            Q = zeros((4,4), dtype=Y)
+            Q[0,0] = 0;    Q[0,1] = a;    Q[0,2] = b;    Q[0,3] = b;
+            Q[1,0] = a;    Q[1,1] = 0;    Q[1,2] = b;    Q[1,3] = b;
+            Q[2,0] = b;    Q[2,1] = b;    Q[2,2] = 0;    Q[2,3] = a;
+            Q[3,0] = b;    Q[3,1] = b;    Q[3,2] = a;    Q[3,3] = 0;
+
+            Q = Q * v
+            Q -= diag(sum(Q, axis=1))
+            P = expm(Q)
+            S = log(dot(diag(v), P))
+            return -sum(S * g_data)
+
+        def eval_f_eigh(Y):
+            """
+            reformulation of eval_f(Y) to use eigh instead of expm
+            """
+            a, b, v = transform_params(Y)
+
+            Q = zeros((4,4), dtype=Y)
+            Q[0,0] = 0;    Q[0,1] = a;    Q[0,2] = b;    Q[0,3] = b;
+            Q[1,0] = a;    Q[1,1] = 0;    Q[1,2] = b;    Q[1,3] = b;
+            Q[2,0] = b;    Q[2,1] = b;    Q[2,2] = 0;    Q[2,3] = a;
+            Q[3,0] = b;    Q[3,1] = b;    Q[3,2] = a;    Q[3,3] = 0;
+
+            Q = dot(Q, diag(v))
+            Q -= diag(sum(Q, axis=1))
+            va = diag(sqrt(v))
+            vb = diag(1./sqrt(v))
+            W, U = eigh(dot(dot(va, Q), vb))
+            M = dot(U, dot(diag(exp(W)), U.T))
+            P = dot(vb, dot(M, va))
+            S = log(dot(diag(v), P))
+            return -sum(S * g_data)
+
+        def eval_grad_f_eigh(Y):
+            """
+            compute the gradient of f in the forward mode of AD
+            """
+            Y = UTPM.init_jacobian(Y)
+            retval = eval_f_eigh(Y)
+            return UTPM.extract_jacobian(retval)
+
+        def eval_hess_f_eigh(Y):
+            """
+            compute the hessian of f in the forward mode of AD
+            """
+            Y = UTPM.init_hessian(Y)
+            retval = eval_f_eigh(Y)
+            hessian = UTPM.extract_hessian(5, retval)
+            return hessian
+
+        def eval_grad_f(Y):
+            """
+            compute the gradient of f in the forward mode of AD
+            """
+            Y = UTPM.init_jacobian(Y)
+            retval = eval_f(Y)
+            return UTPM.extract_jacobian(retval)
+
+        def eval_hess_f(Y):
+            """
+            compute the hessian of f in the forward mode of AD
+            """
+            Y = UTPM.init_hessian(Y)
+            retval = eval_f(Y)
+            hessian = UTPM.extract_hessian(5, retval)
+            return hessian
+
+        Y = numpy.zeros(5)
+        assert_array_almost_equal(eval_f_eigh(Y), eval_f(Y))
+        assert_array_almost_equal(eval_grad_f_eigh(Y), eval_grad_f(Y))
+        assert_array_almost_equal(eval_hess_f_eigh(Y), eval_hess_f(Y))
+
+
+
+
 if __name__ == "__main__":
     run_module_suite()
 

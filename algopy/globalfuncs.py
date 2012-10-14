@@ -319,3 +319,56 @@ def svd(A, epsilon=10**-8):
 
     return U, s, V
 
+
+def expm(A):
+    """
+    B = expm(A)
+
+    Compute the matrix exponential using a Pade approximation of order 7.
+
+    Warning
+    -------
+
+    A Pade approximation order 7 may no be sufficient to
+    obtain derivatives that are accurate up to machine precision.
+
+    Parameters
+    ----------
+
+    A:      array_like (algopy.UTPM, algopy.Function, numpy.ndarray)
+            A.shape = (N,N)
+
+    Returns
+    -------
+
+    B:      same type as A
+            B.shape = (N,N)
+
+
+    Reference
+    ---------
+
+    N. J. Higham,
+    "The Scaling and Squaring Method for the Matrix Exponential Revisited",
+    SIAM. J. Matrix Anal. & Appl. 26, 1179 (2005).
+    """
+
+    N = A.shape[0]
+    ident = numpy.eye(N)
+    U, V = _algopy_pade7(A, ident)
+    return solve(-U + V, U + V)
+
+
+def _algopy_pade7(A, ident):
+    """
+    Pade approximation of order 7.
+
+    See docstring of expm for more information.
+    """
+    b = (17297280., 8648640., 1995840., 277200., 25200., 1512., 56., 1.)
+    A2 = dot(A, A)
+    A4 = dot(A2, A2)
+    A6 = dot(A2, A4)
+    U = dot(A, b[7]*A6 + b[5]*A4 + b[3]*A2 + b[1]*ident)
+    V = b[6]*A6 + b[4]*A4 + b[2]*A2 + b[0]*ident
+    return U, V
