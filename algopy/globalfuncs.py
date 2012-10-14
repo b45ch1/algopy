@@ -178,9 +178,30 @@ def outer(a,b):
 
 
 def qr_full(A):
-    """ Q,R = qr_full(A) returns QR decomposition with quadratic Q
-    calls internally UTPM.qr_full or Function.qr_full
     """
+    Q,R = qr_full(A)
+
+    This function is merely a wrapper of
+    UTPM.qr_full,  Function.qr_full, scipy.linalg.qr
+
+    Parameters
+    ----------
+
+    A:      algopy.UTPM or algopy.Function or numpy.ndarray
+            A.shape = (M,N),  M >= N
+
+    Returns
+    --------
+
+    Q:      same type as A
+            Q.shape = (M,M)
+
+    R:      same type as A
+            R.shape = (M,N)
+
+
+    """
+
     if isinstance(A, UTPM):
         return UTPM.qr_full(A)
 
@@ -209,6 +230,7 @@ def eigh1(A):
     else:
         raise NotImplementedError('don\'t know what to do with this instance')
 
+
 def symvec(A, UPLO='F'):
     if isinstance(A, UTPM):
         return UTPM.symvec(A, UPLO=UPLO)
@@ -222,6 +244,7 @@ def symvec(A, UPLO='F'):
     else:
         raise NotImplementedError('don\'t know what to do with this instance')
 symvec.__doc__ = utils.symvec.__doc__
+
 
 def vecsym(v):
     if isinstance(v, UTPM):
@@ -241,6 +264,7 @@ vecsym.__doc__ = utils.vecsym.__doc__
 def svd(A, epsilon=10**-8):
     """
     computes the singular value decomposition A = U S V.T
+    of matrices A with full rank (i.e. nonzero singular values)
 
     (U, S, VT) = UTPM.svd(A, epsilon= 10**-8)
 
@@ -258,7 +282,6 @@ def svd(A, epsilon=10**-8):
 
     The singular value decomposition is directly related to the symmetric
     eigenvalue decomposition.
-
 
     See A. Bjoerk, Numerical Methods for Least Squares Problems, SIAM, 1996
     for the relation between SVD and symm. eigenvalue decomposition
