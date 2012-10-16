@@ -693,7 +693,7 @@ class Function(Ring):
 
     def __repr__(self):
         retstr = 'Function:\n'
-        retstr += 'ID = %s\n'%str(self.get_ID())
+        retstr += 'ID = %s\n'%str(self.ID)
         retstr += 'function = %s\n'%str(self.func)
         return retstr
 
