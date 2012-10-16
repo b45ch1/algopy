@@ -292,7 +292,9 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             rhs_shape = rhs.shape
             if numpy.isscalar(rhs_shape):
                 rhs_shape = (rhs_shape,)
-            return UTPM( (self.data.T * rhs.reshape((1,1) + rhs_shape).T).T)
+            retval = self.zeros_like()
+            retval.data[...] =  (self.data.T * rhs.reshape((1,1) + rhs_shape).T).T
+            return retval
 
 
         x_data, y_data = UTPM._broadcast_arrays(self.data, rhs.data)
@@ -1448,21 +1450,58 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def pb_mul(cls, zbar, x, y , z, out = None):
-        if out == None:
-            D,P = y.data.shape[:2]
-            xbar = x.zeros_like()
-            ybar = y.zeros_like()
+
+        if isinstance(x, UTPM) and isinstance(y, UTPM):
+            if out == None:
+                D,P = z.data.shape[:2]
+                xbar = x.zeros_like()
+                ybar = y.zeros_like()
+
+            else:
+                xbar, ybar = out
+
+            xbar2, tmp = cls.broadcast(xbar, zbar)
+            ybar2, tmp = cls.broadcast(ybar, zbar)
+
+            xbar2 += zbar * y
+            ybar2 += zbar * x
+
+            return (xbar,ybar)
+
+        elif isinstance(x, UTPM):
+            if out == None:
+                D,P = z.data.shape[:2]
+                xbar = x.zeros_like()
+                ybar = None
+
+            else:
+                xbar, ybar = out
+
+            xbar2, tmp = cls.broadcast(xbar, zbar)
+
+            xbar2 += zbar * y
+
+            return (xbar,ybar)
+
+        elif isinstance(y, UTPM):
+            if out == None:
+                D,P = z.data.shape[:2]
+                xbar = None
+                ybar = y.zeros_like()
+
+            else:
+                xbar, ybar = out
+
+            ybar2, tmp = cls.broadcast(ybar, zbar)
+
+            ybar2 += zbar * x
+
+            return (xbar,ybar)
 
         else:
-            xbar, ybar = out
+            raise NotImplementedError('not implemented')
 
-        xbar2, tmp = cls.broadcast(xbar, zbar)
-        ybar2, tmp = cls.broadcast(ybar, zbar)
 
-        xbar2 += zbar * y
-        ybar2 += zbar * x
-
-        return (xbar,ybar)
 
     @classmethod
     def pb_div(cls, zbar, x, y , z, out = None):

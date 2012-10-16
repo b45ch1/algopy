@@ -1,6 +1,8 @@
 from numpy.testing import *
+from numpy.testing.decorators import *
 import numpy
 
+from algopy import CGraph, Function
 from algopy.utpm import UTPM
 from algopy.globalfuncs import *
 
@@ -121,7 +123,8 @@ class Test_global_functions(TestCase):
         assert_array_almost_equal( (dot(V, V.T) - numpy.eye(N)).data, 0.)
 
 
-    def test_expm(self):
+    @knownfailureif(numpy.__version__[:3] != 1.4, msg = " this test fails at Q = Q * v because of the numpy broadcasting bug")
+    def test_maximum_likelihood_with_expm(self):
 
         g_data = numpy.array([
                 [2954, 141, 17, 16],
@@ -216,11 +219,68 @@ class Test_global_functions(TestCase):
             hessian = UTPM.extract_hessian(5, retval)
             return hessian
 
-        Y = numpy.zeros(5)
+        Y = numpy.array([-1.,-2.,2.,1.,1.])
         assert_array_almost_equal(eval_f_eigh(Y), eval_f(Y))
         assert_array_almost_equal(eval_grad_f_eigh(Y), eval_grad_f(Y))
         assert_array_almost_equal(eval_hess_f_eigh(Y), eval_hess_f(Y))
 
+        # test reverse mode
+
+        cg = CGraph()
+        x = Function(Y)
+        y = eval_f_eigh(x)
+        cg.independentFunctionList = [x]
+        cg.dependentFunctionList = [y]
+
+        g1 = eval_grad_f(Y)
+        g2 = cg.gradient(Y)
+
+        assert_array_almost_equal(g1, g2)
+
+    def test_tracer_on_mixed_utpm_ndarray_mul(self):
+        D,P = 1,1
+        A = numpy.arange(2*2,dtype=float).reshape(2,2)
+
+        x = UTPM(numpy.zeros((D,P,2,2)))
+
+        def f(x):
+            return sum(A*x)
+
+        cg = CGraph()
+        ax = Function(x)
+        ay = f(ax)
+        cg.independentFunctionList = [ax]
+        cg.dependentFunctionList = [ay]
+
+        assert_array_almost_equal(A, cg.gradient(x))
+
+
+    def test_expm(self):
+
+        def f(x):
+            x = x.reshape((2,2))
+            return sum(expm(x))
+
+        x = numpy.random.random(2*2)
+
+
+        # forward mode
+
+        ax = UTPM.init_jacobian(x)
+        ay = f(ax)
+        g1  = UTPM.extract_jacobian(ay)
+
+        # reverse mode
+
+        cg = CGraph()
+        ax = Function(x)
+        ay = f(ax)
+        cg.independentFunctionList = [ax]
+        cg.dependentFunctionList = [ay]
+
+        g2 = cg.gradient(x)
+
+        assert_array_almost_equal(g1, g2)
 
 
 
