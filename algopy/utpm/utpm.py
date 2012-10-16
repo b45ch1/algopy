@@ -31,8 +31,11 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     M: number of cols of A_0
 
     shape([A]) = (D,P,N,M)
-    The reason for this choice is that the (N,M) matrix is the elementary type, so that memory should be contiguous. Then, at each operation, the code performed to compute
+    The reason for this choice is that the (N,M) matrix is the elementary type,
+    so that memory should be contiguous.
+    Then, at each operation, the code performed to compute
     v_d has to be repeated for every direction.
+
     E.g. a multiplication
     [w] = [u]*[v] =
     [[u_11, ..., u_1Ndir],
@@ -45,10 +48,18 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     ...
     [[ u_D1 + v_D1, ..., u_DNdir + v_DNdir]]
 
-    For ufuncs this arrangement is advantageous, because in this order, memory chunks of size Ndir are used and the operation on each element is the same. This is desireable to avoid cache misses.
-    See for example __mul__: there, operations of self.data[:d+1,:,:,:]* rhs.data[d::-1,:,:,:] has to be performed. One can see, that contiguous memory blocks are used for such operations.
+    For ufuncs this arrangement is advantageous, because in this order,
+    memory chunks of size Ndir are used and the operation on each element is the
+    same. This is desireable to avoid cache misses.
+    See for example __mul__: there, operations of
 
-    A disadvantage of this arrangement is: it seems unnatural. It is easier to regard each direction separately.
+    self.data[:d+1,:,:,:]* rhs.data[d::-1,:,:,:]
+
+    has to be performed.
+    One can see, that contiguous memory blocks are used for such operations.
+
+    A disadvantage of this arrangement is: it seems unnatural.
+    It is easier to regard each direction separately.
     """
 
     __array_priority__ = 2
@@ -544,7 +555,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return retval
 
     @classmethod
-    def pb_hyp1f1(cls, ybar, x, y, out=None):
+    def pb_hyp1f1(cls, ybar, x, y, a, b, out=None):
         """ computes bar y dy = bar x dx in UTP arithmetic"""
         if out == None:
             D,P = x.data.shape[:2]
@@ -553,8 +564,9 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         else:
             xbar, = out
 
-        cls._pb_exp(ybar.data, x.data, y.data, out = xbar.data)
-        return out
+        cls._pb_hyp1f1(ybar.data, x.data, a, b, y.data, out = xbar.data)
+
+        return xbar
 
 
     def sum(self, axis=None, dtype=None, out=None):

@@ -524,7 +524,7 @@ class RawAlgorithmsMixIn:
                     accum[i] = numpy.sum(accum[:i] * x_data[i:0:-1], axis=0)
                 accum[0] = 0.
             # Rising factorial ratio, and factorial in denominator.
-            prefix = (prefix * (a+d-1)) / ((b+d-1) * d)
+            prefix = (prefix * (a+d-1.)) / ((b+d-1.) * d)
             # Derivative of the hypergeometric function.
             hyp = scipy.special.hyp1f1(a + d, b + d, x_data[0])
             # Add the contribution of this summation term.
@@ -533,12 +533,18 @@ class RawAlgorithmsMixIn:
         return y_data
 
     @classmethod
-    def _pb_hyp1f1(cls, ybar_data, x_data, y_data, out = None):
+    def _pb_hyp1f1(cls, ybar_data, x_data, a, b, y_data, out = None):
+
         if out == None:
             raise NotImplementedError('should implement that')
 
         xbar_data = out
-        cls._amul(ybar_data, y_data, xbar_data)
+
+        tmp = numpy.zeros_like(x_data)
+        tmp = cls._hyp1f1(x_data, a+1., b+1., out = tmp)
+        tmp *= float(a)/float(b)
+        cls._amul(ybar_data, tmp, xbar_data)
+
 
     @classmethod
     def _dot(cls, x_data, y_data, out = None):

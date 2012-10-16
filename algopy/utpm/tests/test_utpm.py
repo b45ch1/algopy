@@ -1,5 +1,6 @@
 from numpy.testing import *
 import numpy
+import scipy.special
 
 from algopy.utpm import *
 
@@ -432,25 +433,58 @@ class Test_Push_Forward(TestCase):
         assert_array_almost_equal(t.data, (s/c).data)
 
     def test_hyp1f1(self):
-        D,P,N,M = 5,3,4,5
-        #
+        D,P,N,M = 5,1,3,3
+
         # Check special case of exp.
         x = UTPM(numpy.random.random((D,P,M,N)))
         h = UTPM.hyp1f1(x, 1., 1.)
         e = UTPM.exp(x)
         assert_array_almost_equal(h.data, e.data)
-        #
+
         # Check another special case.
         x = UTPM(numpy.random.random((D,P,M,N)))
         h = UTPM.hyp1f1(x, 1., 2.)
         s = (UTPM.exp(x) - 1.) / x
         assert_array_almost_equal(h.data, s.data)
-        #
+
         # Check another special case.
         x = UTPM(numpy.random.random((D,P,M,N)))
         h = UTPM.hyp1f1(x, 0.5, -0.5)
         s = UTPM.exp(x) * (1. - 2*x)
         assert_array_almost_equal(h.data, s.data)
+
+        # Check another special case.
+        x = UTPM(numpy.zeros((D,P,M,N)))
+        a,b = 1., 2.
+        x.data[0,...] = numpy.random.random((P,M,N))
+        x.data[1,...] = 1.
+        h = UTPM.hyp1f1(x, a, b)
+        prefix = 1.
+        s = UTPM(numpy.zeros((D,P,M,N)))
+        s.data[0] = scipy.special.hyp1f1(a, b, x.data[0])
+        for d in range(1,D):
+            prefix *= (a+d-1.)/(b+d-1.)
+            prefix /= d
+            s.data[d] = prefix * scipy.special.hyp1f1(a+d, b+d, x.data[0])
+
+        assert_array_almost_equal(h.data, s.data)
+
+
+    def test_hyp1f1_pullback(self):
+        D,P = 2,1
+
+        a,b = 1.,2.
+
+        # forward
+        x = UTPM(numpy.random.random((D,P)))
+        y = UTPM.hyp1f1(x, a, b)
+
+        # reverse
+        ybar = UTPM(numpy.random.random((D,P)))
+        xbar = UTPM.pb_hyp1f1(ybar, x, y, a, b)
+
+        assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
+
 
 
     def test_abs(self):
