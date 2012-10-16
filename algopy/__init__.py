@@ -1,41 +1,51 @@
 """
-ALGOPY, a library for Algorithmic Differentation (AD) in Python
+AlgoPy, a library for Automatic Differentation (AD) in Python
 -------------------------------------------------------------
 
+Description:
+    AlgoPy allows you to differentiate functions implemented as computer programs
+    by using Algorithmic Differentiation (AD) techniques in the forward and
+    reverse mode.
+
+    The forward mode propagates univariate Taylor polynomials of arbitrary order.
+    Hence it is also possible to use AlgoPy to evaluate higher-order derivative tensors.
+
+    Speciality of AlgoPy is the possibility to differentiate functions that contain
+    matrix functions as +,-,*,/, dot, solve, qr, eigh, cholesky.
+
+
 Rationale:
-    ALGOPY is a research prototype striving to provide state of the art algorithms.
+    Many programs for scientific computing make use of numerical linear algebra.
+    The defacto standard for array manipulations in Python is NumPy.
+    AlgoPy allows you to write code that can either be evaluated by NumPy, or with
+    AlgoPy with little or no modifications to your code.
 
-    The ultimative goal is to provide high performance algorithms
-    that can be used to differentiate dynamic systems  (ODEs, DAEs, PDEs)
-    and static systems (linear/nonlinear systems of equations).
+    Note that this does not mean that any code you wrote can be differentiated with AlgoPy,
+    but rather that you can write code that can be evaluated with or without AlgoPy.
 
-    ALGOPY focuses on the algorithmic differentiation of elementary functions,
-    e.g. C = dot(A,B), B = inv(A), Q,R = qr(A), lam,Q = eigh(A),where A,B,C are
-    dense matrices and element-wise operation such as y = sin(x), z = x*y, etc.
 
-    In particular, ALGOPY offers:
+How to cite AlgoPy::
 
-        Univariate Taylor Propagation:
-
-            * Univariate Taylor Propagation on Scalars  (UTPS)
-              Implementation in: `./algopy/utp/utps.py`
-            * Univariate Taylor Propagation on Matrices (UTPM)
-              Implemenation in: `./algopy/utp/utpm.py`
-            * Exact Interpolation of Higher Order Derivative Tensors:
-              (Hessians, etc.)
-
-        Reverse Mode:
-
-            ALGOPY also features functionality for convenient differentiation of a given
-            algorithm. For that, the sequence of operation is recorded by tracing the
-            evaluation of the algorithm. Implementation in: `./algopy/tracer.py`
-
-    ALGOPY aims to provide algorithms in a clean and accessible way allowing quick
-    understanding of the underlying algorithms. Therefore, it should be easy to
-    port to other programming languages, take code snippets.
-    If optimized algorithms are wanted, they should be provided in a subclass derived
-    from the reference implementation.
-
+    @article{Walter2011,
+    title = "Algorithmic differentiation in Python with AlgoPy",
+    journal = "Journal of Computational Science",
+    volume = "",
+    number = "0",
+    pages = " - ",
+    year = "2011",
+    note = "",
+    issn = "1877-7503",
+    doi = "10.1016/j.jocs.2011.10.007",
+    url = "http://www.sciencedirect.com/science/article/pii/S1877750311001013",
+    author = "Sebastian F. Walter and Lutz Lehmann",
+    keywords = "Automatic differentiation",
+    keywords = "Cholesky decomposition",
+    keywords = "Hierarchical approach",
+    keywords = "Higher-order derivatives",
+    keywords = "Numerical linear algebra",
+    keywords = "NumPy",
+    keywords = "Taylor arithmetic"
+    }
 
 """
 

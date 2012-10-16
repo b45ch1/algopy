@@ -153,6 +153,7 @@ Related Work
 ------------
 
 AlgoPy has been influenced by the following publications:
+
     * "ADOL-C: A Package for the Automatic Differentiation of Algorithms Written
       in C/C++", Andreas Griewank, David Juedes, H. Mitev, Jean Utke, Olaf Vogel,
       Andrea Walther
@@ -164,6 +165,44 @@ AlgoPy has been influenced by the following publications:
     * "Collected Matrix Derivative Results for Forward and Reverse Mode
       Algorithmic Differentiation", Mike Giles,
       http://www.springerlink.com/content/h1750t57160w2782/
+
+
+Publications related to AlgoPy
+------------------------------
+
+* Walter et al.,
+  "On evaluating higher-order derivatives of the QR decomposition of tall
+  matrices with full column rank in forward and reverse mode algorithmic
+  differentiation", `http://dx.doi.org/10.1080/10556788.2011.610454 <http://dx.doi.org/10.1080/10556788.2011.610454>`_
+
+* Walter et al.,
+  "Algorithmic differentiation in Python with AlgoPy", `http://dx.doi.org/10.1016/j.jocs.2011.10.007 <http://dx.doi.org/10.1016/j.jocs.2011.10.007>`_
+
+
+
+Please cite the following paper if you use AlgoPy::
+
+    @article{Walter2011,
+    title = "Algorithmic differentiation in Python with AlgoPy",
+    journal = "Journal of Computational Science",
+    volume = "",
+    number = "0",
+    pages = " - ",
+    year = "2011",
+    note = "",
+    issn = "1877-7503",
+    doi = "10.1016/j.jocs.2011.10.007",
+    url = "http://www.sciencedirect.com/science/article/pii/S1877750311001013",
+    author = "Sebastian F. Walter and Lutz Lehmann",
+    keywords = "Automatic differentiation",
+    keywords = "Cholesky decomposition",
+    keywords = "Hierarchical approach",
+    keywords = "Higher-order derivatives",
+    keywords = "Numerical linear algebra",
+    keywords = "NumPy",
+    keywords = "Taylor arithmetic"
+    }
+
 
 
 

@@ -94,8 +94,31 @@ Alternatives:
     .. _PYCPPAD: http://www.github.com/b45ch1/pycppad
 
 Email:
+
     sebastian.walter@gmail.com
 
+How to cite AlgoPy::
+
+    @article{Walter2011,
+    title = "Algorithmic differentiation in Python with AlgoPy",
+    journal = "Journal of Computational Science",
+    volume = "",
+    number = "0",
+    pages = " - ",
+    year = "2011",
+    note = "",
+    issn = "1877-7503",
+    doi = "10.1016/j.jocs.2011.10.007",
+    url = "http://www.sciencedirect.com/science/article/pii/S1877750311001013",
+    author = "Sebastian F. Walter and Lutz Lehmann",
+    keywords = "Automatic differentiation",
+    keywords = "Cholesky decomposition",
+    keywords = "Hierarchical approach",
+    keywords = "Higher-order derivatives",
+    keywords = "Numerical linear algebra",
+    keywords = "NumPy",
+    keywords = "Taylor arithmetic"
+    }
 
 
 -------------------------------------------------------------------------------
