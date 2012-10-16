@@ -166,11 +166,9 @@ class CGraph:
                         err_str += 'type(arg[%d].x) = \n%s\n'%(narg, type(arg.x) )
                     else:
                         err_str += 'type(arg[%d]) = \n%s\n'%(narg, type(arg) )
-                    try:
+                    if isinstance(arg.x, algopy.UTPM):
                         err_str += 'arg[%d].x.data.shape = \n%s\n'%(narg, arg.x.data.shape)
                         err_str += 'arg[%d].xbar.data.shape = \n%s\n'%(narg, arg.xbar.data.shape)
-                    except:
-                        pass
 
                 err_str += '\n%s'%traceback.format_exc()
                 raise Exception(err_str)
