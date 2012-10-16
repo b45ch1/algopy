@@ -547,24 +547,26 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         cls._pb_tansec(ybar.data, zbar.data, x.data, y.data, z.data, out = xbar.data)
         return out
 
-    def hyp1f1(self, a, b):
+    @classmethod
+    def hyp1f1(cls, a, b, x):
         """ computes y = hyp1f1(a, b, x) in UTP arithmetic"""
 
-        retval = self.clone()
-        self._hyp1f1(self.data, a, b, out = retval.data)
+        retval = x.clone()
+        cls._hyp1f1(a, b, x.data, out = retval.data)
         return retval
 
     @classmethod
-    def pb_hyp1f1(cls, ybar, x, y, a, b, out=None):
+    def pb_hyp1f1(cls, ybar, a, b, x, y, out=None):
         """ computes bar y dy = bar x dx in UTP arithmetic"""
         if out == None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
         else:
-            xbar, = out
+            # out = (abar, bbar, xbar)
+            xbar = out[2]
 
-        cls._pb_hyp1f1(ybar.data, x.data, a, b, y.data, out = xbar.data)
+        cls._pb_hyp1f1(ybar.data, a, b, x.data, y.data, out = xbar.data)
 
         return xbar
 

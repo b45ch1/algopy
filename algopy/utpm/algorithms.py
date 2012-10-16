@@ -502,7 +502,7 @@ class RawAlgorithmsMixIn:
         return y_data, z_data
 
     @classmethod
-    def _hyp1f1(cls, x_data, a, b, out = None):
+    def _hyp1f1(cls, a, b, x_data, out = None):
         if out == None:
             raise NotImplementedError('should implement that')
         y_data = out
@@ -533,7 +533,7 @@ class RawAlgorithmsMixIn:
         return y_data
 
     @classmethod
-    def _pb_hyp1f1(cls, ybar_data, x_data, a, b, y_data, out = None):
+    def _pb_hyp1f1(cls, ybar_data, a, b, x_data, y_data, out = None):
 
         if out == None:
             raise NotImplementedError('should implement that')
@@ -541,7 +541,7 @@ class RawAlgorithmsMixIn:
         xbar_data = out
 
         tmp = numpy.zeros_like(x_data)
-        tmp = cls._hyp1f1(x_data, a+1., b+1., out = tmp)
+        tmp = cls._hyp1f1(a+1., b+1., x_data,  out = tmp)
         tmp *= float(a)/float(b)
         cls._amul(ybar_data, tmp, xbar_data)
 

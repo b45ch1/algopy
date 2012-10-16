@@ -2,6 +2,7 @@ from numpy.testing import *
 from environment import Settings
 import os
 
+import algopy
 from algopy.tracer.tracer import *
 from algopy.utpm import UTPM
 
@@ -1163,61 +1164,72 @@ class Test_CGgraph_on_UTPM(TestCase):
         assert_array_almost_equal(const1.data[0,:], const2.data[0,:])
 
 
-
-    def test_simple_ODOE_objective_function(self):
+    def test_very_simple_ODOE_objective_function(self):
         """
         compute PHI = trace( (J^T,J)^-1 )
         """
-        D,P,N,M = 2,1,3,2
-        MJ = UTPM(numpy.random.rand(D,P,N,M))
-       #  MJ = UTPM(numpy.array([[[[ 0.79636398,  0.22627532],
-       #   [ 0.89051158,  0.25639902],
-       #   [ 0.11028533,  0.95436784]]],
-
-
-       # [[[ 0.87357288,  0.12196627],
-       #   [ 0.77661888,  0.81793605],
-       #   [ 0.96229905,  0.7880918 ]]]]))
-
-
-
+        D,P,N,M = 2,1,100,3
+        J = UTPM(numpy.random.rand(D,P,N,M))
         cg = CGraph()
-        FJ = Function(MJ)
-        # print 'FJ=\n',FJ
+        FJ = Function(J)
         FJT = Function.transpose(FJ)
-        # print 'FJT=\n',FJT
-        FM = Function(UTPM(numpy.zeros((D,P,M,M))))
-        # print 'FM=\n',FM
-        FM[...] += Function.dot(FJT, FJ)
-        # print 'FM=\n',FM
+        FM = Function.dot(FJT, FJ)
         FC = Function.inv(FM)
-        # print 'FC=\n',FC
         FPHI = Function.trace(FC)
         cg.independentFunctionList = [FJ]
         cg.dependentFunctionList = [FPHI]
 
         assert_array_equal(FPHI.shape, ())
-        PHIbar = UTPM(numpy.ones((D,P)))
+        cg.pushforward([J])
+        PHIbar = UTPM(numpy.random.rand(*(D,P)))
 
         # pullback using the tracer
         cg.pullback([PHIbar])
 
-        # # compute pullback by hand
-        # Cbar = UTPM.pb_trace(PHIbar, FC.x, FPHI.x)
-        # assert_array_almost_equal(Cbar.data, FC.xbar.data)
-
-        # Mbar = UTPM.pb_inv(Cbar, FM.x, FC.x)
-        # assert_array_almost_equal(Mbar.data, FM.xbar.data)
-
-        # tmpbar = UTPM.pb_dot(Mbar, FJT.x, FJ.x, FM.x)
-        # assert_array_almost_equal(tmpbar[1].data, FJ.xbar.data)
-
-
         # verifying pullback by  ybar.T ydot == xbar.T xdot
-        const1 =  UTPM.dot(FPHI.xbar, UTPM.shift(FPHI.x,-1))
+        const1 = UTPM.dot(FPHI.xbar, UTPM.shift(FPHI.x,-1))
         const2 = UTPM.trace(UTPM.dot(FJ.xbar.T, UTPM.shift(FJ.x,-1)))
+
+        # print cg
+
+        # print const1
+        # print const2
+
         assert_array_almost_equal(const1.data[0,:], const2.data[0,:])
 
+
+    def test_hyp1f1(self):
+        """
+        compute y = hyp1f1(1., 2., x**2 + 1)
+        """
+
+        def f(x):
+            v1 = x**2 + 3.
+            y = algopy.special.hyp1f1(1., 2., v1)
+            return y
+
+
+        # use CGraph
+
+        cg = CGraph()
+        x = Function(numpy.array([1.]))
+        y = f(x)
+
+        cg.independentFunctionList = [x]
+        cg.dependentFunctionList = [y]
+
+        result1 = cg.jac_vec(numpy.array([2.]), numpy.array([1.]))
+        result2 = cg.jacobian(numpy.array([2.]))[0]
+
+        # use UTPM
+
+        x = UTPM.init_jacobian(numpy.array([2.]))
+        y = f(x)
+        result3 = UTPM.extract_jacobian(y)[0]
+
+        assert_array_almost_equal(result1, result2)
+        assert_array_almost_equal(result2, result3)
+        assert_array_almost_equal(result3, result1)
 
 
     def test_more_complicated_ODOE_objective_function(self):

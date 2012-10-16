@@ -130,7 +130,8 @@ class CGraph:
         import time
 
         if len(self.dependentFunctionList) == 0:
-            raise Exception('You forgot to specify which variables are dependent!\n e.g. with cg.dependentFunctionList = [F1,F2]')
+            raise Exception('You forgot to specify which variables are dependent!\n'\
+                            ' e.g. with cg.dependentFunctionList = [F1,F2]')
 
         # initial all xbar to zero
         for f in self.functionList:
@@ -161,7 +162,10 @@ class CGraph:
                 err_str +='tried to evaluate the pullback of %s(*args) with\n'%(f.func.__name__)
 
                 for narg, arg in enumerate(f.args):
-                    err_str += 'type(arg[%d].x) = \n%s\n'%(narg, type(arg.x))
+                    if hasattr(arg, 'x'):
+                        err_str += 'type(arg[%d].x) = \n%s\n'%(narg, type(arg.x) )
+                    else:
+                        err_str += 'type(arg[%d]) = \n%s\n'%(narg, type(arg) )
                     try:
                         err_str += 'arg[%d].x.data.shape = \n%s\n'%(narg, arg.x.data.shape)
                         err_str += 'arg[%d].xbar.data.shape = \n%s\n'%(narg, arg.xbar.data.shape)
@@ -849,10 +853,10 @@ class Function(Ring):
         # STEP 2: call the pullback function
         kwargs = {'out': list(argsbar)}
 
-        #print 'func_name = ',func_name
-        #print 'calling pullback function f=',f
-        #print 'args = ',args
-        #print 'kwargs = ',kwargs
+#         print 'func_name = ',func_name
+#         print 'calling pullback function f=',f
+#         print 'args = ',args
+#         print 'kwargs = ',kwargs
 
         f(*args, **kwargs )
 
@@ -883,10 +887,12 @@ class Function(Ring):
     def xbar_from_x(self):
         """
 
-        Warning for the faint-hearted: this function is quite a hack and should be refactored
+        Warning for the faint-hearted: this function is quite a hack and
+        should be refactored
 
         each Function instance has the attribute x.
-        xbar_from_x creates a corresponding attribute xbar that is a copy of x but filled with zeros.
+        xbar_from_x creates a corresponding attribute xbar that is a copy of x
+        but filled with zeros.
 
         it also supports functions with multiple outputs of the form
 
@@ -954,6 +960,13 @@ class Function(Ring):
             # this is a hack to get L,Q,b = eigh1 to work, should be fixed soon!
             self.xbar = None # copy.deepcopy(self.x)
 
+
+
+    # #########################################################
+    # intrinsic Python operators
+    # #########################################################
+
+
     def __getitem__(self, sl):
         return Function.pushforward(operator.getitem ,[self,sl])
 
@@ -1002,21 +1015,11 @@ class Function(Ring):
         lhs = self.__class__.totype(lhs)
         return lhs/self
 
-    @classmethod
-    def dot(cls, lhs,rhs):
-        lhs = cls.totype(lhs)
-        rhs = cls.totype(rhs)
 
-        out = Function.pushforward(algopy.dot, [lhs,rhs])
-        return out
+    # #########################################################
+    # numpy functions
+    # #########################################################
 
-    @classmethod
-    def outer(cls, lhs,rhs):
-        lhs = cls.totype(lhs)
-        rhs = cls.totype(rhs)
-
-        out = Function.pushforward(algopy.outer, [lhs,rhs])
-        return out
 
     def log(self):
          return Function.pushforward(algopy.log, [self])
@@ -1044,6 +1047,28 @@ class Function(Ring):
 
     def prod(self, axis=None, dtype=None, out=None):
          return Function.pushforward(algopy.prod, [self, axis, dtype, out])
+
+    @classmethod
+    def dot(cls, lhs,rhs):
+        lhs = cls.totype(lhs)
+        rhs = cls.totype(rhs)
+
+        out = Function.pushforward(algopy.dot, [lhs,rhs])
+        return out
+
+    @classmethod
+    def outer(cls, lhs,rhs):
+        lhs = cls.totype(lhs)
+        rhs = cls.totype(rhs)
+
+        out = Function.pushforward(algopy.outer, [lhs,rhs])
+        return out
+
+
+    # #########################################################
+    # numpy.linalg functions
+    # #########################################################
+
 
     def inv(self):
          return Function.pushforward(algopy.inv, [self])
@@ -1110,6 +1135,23 @@ class Function(Ring):
     def get_flat(self):
         return self.x.flat
     flat = property(get_flat)
+
+
+    # #########################################################
+    # scipy.special functions
+    # #########################################################
+
+
+    @classmethod
+    def hyp1f1(cls, a, b, x):
+        return Function.pushforward(algopy.special.hyp1f1, [a, b, x])
+
+
+
+    # #########################################################
+    # misc functions (not well tested, if at all)
+    # #########################################################
+
 
     def coeff_op(self, sl, shp):
         return Function.pushforward(algopy.coeff_op, [self, sl, shp])

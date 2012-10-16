@@ -1,6 +1,8 @@
 import numpy
 try:
-    import scipy; import scipy.linalg
+    import scipy;
+    import scipy.linalg
+    import scipy.special
 
 except:
     pass
@@ -11,7 +13,6 @@ from algopy import UTPM
 from algopy import Function
 
 # override numpy definitions
-
 numpy_function_names = ['sin','cos','tan', 'exp', 'log', 'sqrt', 'pow', 'arcsin', 'arccos', 'arctan', 'sinh', 'cosh', 'tanh', 'trace',  'zeros_like', 'diag', 'triu', 'tril', 'reshape']
 numpy_linalg_function_names = ['inv', 'solve', 'eigh', 'qr', 'cholesky','transpose', 'det']
 
@@ -51,7 +52,6 @@ for function_name in numpy_function_names:
 
 for function_name in numpy_linalg_function_names:
     exec function_template.substitute(function_name=function_name, namespace='numpy.linalg')
-
 
 def sum(x, axis=None, dtype=None, out=None):
     """ generic sum function

@@ -437,19 +437,19 @@ class Test_Push_Forward(TestCase):
 
         # Check special case of exp.
         x = UTPM(numpy.random.random((D,P,M,N)))
-        h = UTPM.hyp1f1(x, 1., 1.)
+        h = UTPM.hyp1f1(1., 1., x)
         e = UTPM.exp(x)
         assert_array_almost_equal(h.data, e.data)
 
         # Check another special case.
         x = UTPM(numpy.random.random((D,P,M,N)))
-        h = UTPM.hyp1f1(x, 1., 2.)
+        h = UTPM.hyp1f1(1., 2.,  x)
         s = (UTPM.exp(x) - 1.) / x
         assert_array_almost_equal(h.data, s.data)
 
         # Check another special case.
         x = UTPM(numpy.random.random((D,P,M,N)))
-        h = UTPM.hyp1f1(x, 0.5, -0.5)
+        h = UTPM.hyp1f1(0.5, -0.5, x)
         s = UTPM.exp(x) * (1. - 2*x)
         assert_array_almost_equal(h.data, s.data)
 
@@ -458,7 +458,7 @@ class Test_Push_Forward(TestCase):
         a,b = 1., 2.
         x.data[0,...] = numpy.random.random((P,M,N))
         x.data[1,...] = 1.
-        h = UTPM.hyp1f1(x, a, b)
+        h = UTPM.hyp1f1(a, b, x)
         prefix = 1.
         s = UTPM(numpy.zeros((D,P,M,N)))
         s.data[0] = scipy.special.hyp1f1(a, b, x.data[0])
@@ -477,11 +477,11 @@ class Test_Push_Forward(TestCase):
 
         # forward
         x = UTPM(numpy.random.random((D,P)))
-        y = UTPM.hyp1f1(x, a, b)
+        y = UTPM.hyp1f1(a, b, x)
 
         # reverse
         ybar = UTPM(numpy.random.random((D,P)))
-        xbar = UTPM.pb_hyp1f1(ybar, x, y, a, b)
+        xbar = UTPM.pb_hyp1f1(ybar, a, b, x, y)
 
         assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
