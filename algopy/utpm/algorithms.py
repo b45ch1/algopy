@@ -3,6 +3,7 @@ from numpy.lib.stride_tricks import as_strided, broadcast_arrays
 
 try:
     import scipy.linalg
+    import scipy.special
 except:
     pass
 
@@ -500,6 +501,44 @@ class RawAlgorithmsMixIn:
 
         return y_data, z_data
 
+    @classmethod
+    def _hyp1f1(cls, x_data, a, b, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        y_data = out
+        y_data[...] = 0.
+        D,P = x_data.shape[:2]
+
+        # base point: d = 0
+        y_data[0] = scipy.special.hyp1f1(a, b, x_data[0])
+
+        # higher order coefficients: d > 0
+        prefix = 1.
+        for d in range(1, D):
+            # Accumulate coefficients of truncated expansions of powers
+            # of the polynomial.
+            if d == 1:
+                accum = x_data[1:].copy()
+            else:
+                for i in range(D-2, 0, -1):
+                    accum[i] = numpy.sum(accum[:i] * x_data[i:0:-1], axis=0)
+                accum[0] = 0.
+            # Rising factorial ratio, and factorial in denominator.
+            prefix = (prefix * (a+d-1)) / ((b+d-1) * d)
+            # Derivative of the hypergeometric function.
+            hyp = scipy.special.hyp1f1(a + d, b + d, x_data[0])
+            # Add the contribution of this summation term.
+            y_data[1:] = y_data[1:] + prefix * hyp * accum
+
+        return y_data
+
+    @classmethod
+    def _pb_hyp1f1(cls, ybar_data, x_data, y_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+
+        xbar_data = out
+        cls._amul(ybar_data, y_data, xbar_data)
 
     @classmethod
     def _dot(cls, x_data, y_data, out = None):

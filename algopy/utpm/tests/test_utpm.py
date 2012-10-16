@@ -431,6 +431,26 @@ class Test_Push_Forward(TestCase):
         t = UTPM.tanh(x)
         assert_array_almost_equal(t.data, (s/c).data)
 
+    def test_hyp1f1(self):
+        D,P,N,M = 5,3,4,5
+        #
+        # Check special case of exp.
+        x = UTPM(numpy.random.random((D,P,M,N)))
+        h = UTPM.hyp1f1(x, 1., 1.)
+        e = UTPM.exp(x)
+        assert_array_almost_equal(h.data, e.data)
+        #
+        # Check another special case.
+        x = UTPM(numpy.random.random((D,P,M,N)))
+        h = UTPM.hyp1f1(x, 1., 2.)
+        s = (UTPM.exp(x) - 1.) / x
+        assert_array_almost_equal(h.data, s.data)
+        #
+        # Check another special case.
+        x = UTPM(numpy.random.random((D,P,M,N)))
+        h = UTPM.hyp1f1(x, 0.5, -0.5)
+        s = UTPM.exp(x) * (1. - 2*x)
+        assert_array_almost_equal(h.data, s.data)
 
 
     def test_abs(self):
