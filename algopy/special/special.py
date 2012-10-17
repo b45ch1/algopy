@@ -25,5 +25,4 @@ def hyp1f1(a, b, x):
     else:
         return scipy.special.hyp1f1(a, b, x)
 
-# append the scipy.special docstring
 hyp1f1.__doc__ += scipy.special.hyp1f1.__doc__

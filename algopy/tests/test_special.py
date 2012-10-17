@@ -4,7 +4,7 @@ import numpy
 from algopy import UTPM, Function
 from algopy.special import *
 
-class Test_Global_Functions_on_Numpy_instances(TestCase):
+class Test_ScipySpecialFunctions(TestCase):
 
     def test_hyp1f1(self):
         """

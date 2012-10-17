@@ -1,3 +1,14 @@
+"""
+check that algopy.sin(x) correctly calls either
+
+* numpy.sin(x)
+* UTPM.sin(x)
+* or Function.sin(x)
+
+depending on the type of x.
+"""
+
+
 from numpy.testing import *
 from numpy.testing.decorators import *
 import numpy
@@ -6,8 +17,11 @@ from algopy import CGraph, Function
 from algopy.utpm import UTPM
 from algopy.globalfuncs import *
 
+from algopy.linalg import *
 
-class Test_Global_Functions_on_Numpy_instances(TestCase):
+
+class Test_array(TestCase):
+
     def test_global_unary_function(self):
         x = numpy.ones((6,6))
         assert_array_almost_equal(trace(x), numpy.trace(x))
@@ -107,48 +121,8 @@ class Test_global_functions(TestCase):
 
         # assert_array_equal(numpy.shape(AY.data),(2,2,4,4))
 
-    def test_svd(self):
-        D,P,M,N = 3,1,5,2
-        A = UTPM(numpy.random.random((D,P,M,N)))
-
-        U,s,V = svd(A)
-
-        S = zeros((M,N),dtype=A)
-        S[:N,:N] = diag(s)
-
-        assert_array_almost_equal( (dot(dot(U, S), V.T) - A).data, 0.)
-        assert_array_almost_equal( (dot(U.T, U) - numpy.eye(M)).data, 0.)
-        assert_array_almost_equal( (dot(U, U.T) - numpy.eye(M)).data, 0.)
-        assert_array_almost_equal( (dot(V.T, V) - numpy.eye(N)).data, 0.)
-        assert_array_almost_equal( (dot(V, V.T) - numpy.eye(N)).data, 0.)
 
 
-    def test_expm(self):
-
-        def f(x):
-            x = x.reshape((2,2))
-            return sum(expm(x))
-
-        x = numpy.random.random(2*2)
-
-
-        # forward mode
-
-        ax = UTPM.init_jacobian(x)
-        ay = f(ax)
-        g1  = UTPM.extract_jacobian(ay)
-
-        # reverse mode
-
-        cg = CGraph()
-        ax = Function(x)
-        ay = f(ax)
-        cg.independentFunctionList = [ax]
-        cg.dependentFunctionList = [ay]
-
-        g2 = cg.gradient(x)
-
-        assert_array_almost_equal(g1, g2)
 
     def test_tracer_on_mixed_utpm_ndarray_mul(self):
         D,P = 1,1
@@ -168,171 +142,6 @@ class Test_global_functions(TestCase):
         assert_array_almost_equal(A, cg.gradient(x))
 
 
-class Test_MaximimLikelihoodExample(TestCase):
-
-    def transform_params(self, Y):
-        X = exp(Y)
-        tsrate, tvrate = X[0], X[1]
-        v_unnormalized = zeros(4, dtype=X)
-        v_unnormalized[0] = X[2]
-        v_unnormalized[1] = X[3]
-        v_unnormalized[2] = X[4]
-        v_unnormalized[3] = 1.0
-        v = v_unnormalized / sum(v_unnormalized)
-        return tsrate, tvrate, v
-
-    def eval_f(self, Y):
-        """
-        using algopy.expm
-        """
-
-        a, b, v = self.transform_params(Y)
-
-        g_data = numpy.array([
-                [2954, 141, 17, 16],
-                [165, 1110, 5, 2],
-                [18, 4, 3163, 374],
-                [15, 2, 310, 2411],
-                ],dtype=float)
-
-
-        Q = zeros((4,4), dtype=Y)
-        Q[0,0] = 0;    Q[0,1] = a;    Q[0,2] = b;    Q[0,3] = b;
-        Q[1,0] = a;    Q[1,1] = 0;    Q[1,2] = b;    Q[1,3] = b;
-        Q[2,0] = b;    Q[2,1] = b;    Q[2,2] = 0;    Q[2,3] = a;
-        Q[3,0] = b;    Q[3,1] = b;    Q[3,2] = a;    Q[3,3] = 0;
-
-        Q = Q * v
-        Q -= diag(sum(Q, axis=1))
-        P = expm(Q)
-        S = log(dot(diag(v), P))
-        return -sum(S * g_data)
-
-    def eval_f_eigh(self, Y):
-        """
-        reformulation of eval_f(Y) to use eigh instead of expm
-        """
-
-        a, b, v = self.transform_params(Y)
-
-        g_data = numpy.array([
-                [2954, 141, 17, 16],
-                [165, 1110, 5, 2],
-                [18, 4, 3163, 374],
-                [15, 2, 310, 2411],
-                ],dtype=float)
-
-
-        Q = zeros((4,4), dtype=Y)
-        Q[0,0] = 0;    Q[0,1] = a;    Q[0,2] = b;    Q[0,3] = b;
-        Q[1,0] = a;    Q[1,1] = 0;    Q[1,2] = b;    Q[1,3] = b;
-        Q[2,0] = b;    Q[2,1] = b;    Q[2,2] = 0;    Q[2,3] = a;
-        Q[3,0] = b;    Q[3,1] = b;    Q[3,2] = a;    Q[3,3] = 0;
-
-        Q = dot(Q, diag(v))
-        Q -= diag(sum(Q, axis=1))
-        va = diag(sqrt(v))
-        vb = diag(1./sqrt(v))
-        W, U = eigh(dot(dot(va, Q), vb))
-        M = dot(U, dot(diag(exp(W)), U.T))
-        P = dot(vb, dot(M, va))
-        S = log(dot(diag(v), P))
-        return -sum(S * g_data)
-
-
-    def eval_grad_f_eigh(self, Y):
-        """
-        compute the gradient of f in the forward mode of AD
-        """
-        Y = UTPM.init_jacobian(Y)
-        retval = self.eval_f_eigh(Y)
-        return UTPM.extract_jacobian(retval)
-
-    def eval_hess_f_eigh(self, Y):
-        """
-        compute the hessian of f in the forward mode of AD
-        """
-        Y = UTPM.init_hessian(Y)
-        retval = self.eval_f_eigh(Y)
-        hessian = UTPM.extract_hessian(5, retval)
-        return hessian
-
-    def eval_grad_f(self, Y):
-        """
-        compute the gradient of f in the forward mode of AD
-        """
-        Y = UTPM.init_jacobian(Y)
-        retval = self.eval_f(Y)
-        return UTPM.extract_jacobian(retval)
-
-    def eval_hess_f(self, Y):
-        """
-        compute the hessian of f in the forward mode of AD
-        """
-        Y = UTPM.init_hessian(Y)
-        retval = self.eval_f(Y)
-        hessian = UTPM.extract_hessian(5, retval)
-        return hessian
-
-    def test_expm_implementations(self):
-        """
-        Check for syntax errors within the expm Pade approximations.
-        """
-
-        Y = numpy.zeros(5)
-
-        a, b, v = self.transform_params(Y)
-
-        Q = zeros((4,4), dtype=Y)
-        Q[0,0] = 0;    Q[0,1] = a;    Q[0,2] = b;    Q[0,3] = b;
-        Q[1,0] = a;    Q[1,1] = 0;    Q[1,2] = b;    Q[1,3] = b;
-        Q[2,0] = b;    Q[2,1] = b;    Q[2,2] = 0;    Q[2,3] = a;
-        Q[3,0] = b;    Q[3,1] = b;    Q[3,2] = a;    Q[3,3] = 0;
-
-        Q = Q * v
-        Q -= diag(sum(Q, axis=1))
-
-        # Pade approximations of explicit order.
-        for q in (3, 5, 7, 9, 13):
-            expm_pade(Q, q)
-
-        # Squaring and scaling on top of Pade approximations.
-        expm_higham_2005(Q)
-
-        # Default expm implementation.
-        expm(Q)
-
-
-
-    def test_ml_with_expm_gradient_forward(self):
-
-        Y = numpy.zeros(5)
-
-        assert_array_almost_equal(self.eval_f_eigh(Y), self.eval_f(Y))
-        assert_array_almost_equal(self.eval_grad_f_eigh(Y), self.eval_grad_f(Y))
-
-    def test_ml_with_expm_hessian_forward(self):
-
-        Y = numpy.zeros(5)
-        assert_array_almost_equal(self.eval_f_eigh(Y), self.eval_f(Y))
-        assert_array_almost_equal(self.eval_hess_f_eigh(Y), self.eval_hess_f(Y))
-
-
-
-    @knownfailureif(numpy.__version__[:3] != 1.4, msg = " this test fails at Q = Q * v because of the numpy broadcasting bug")
-    def test_ml_with_expm_gradient_reverse(self):
-        # test reverse mode
-
-        cg = CGraph()
-        x = Function(Y)
-        y = self.eval_f_eigh(x)
-        cg.independentFunctionList = [x]
-        cg.dependentFunctionList = [y]
-
-        g1 = self.eval_grad_f(Y)
-        g2 = cg.gradient(Y)
-
-        assert_array_almost_equal(g1, g2)
 
 
 if __name__ == "__main__":

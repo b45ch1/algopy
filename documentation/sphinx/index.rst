@@ -336,6 +336,14 @@ Additional Information:
    examples/polarization.rst
    symbolic_differentiation.rst
 
+
+How is AlgoPy organized:
+
+.. torctree::
+    :maxdepth: 1
+
+    folder_structure.rst
+
 Current Issues:
 ---------------
 

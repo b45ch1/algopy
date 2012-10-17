@@ -1,8 +1,10 @@
 """
+=============================================================
 AlgoPy, a library for Automatic Differentation (AD) in Python
--------------------------------------------------------------
+=============================================================
 
 Description:
+
     AlgoPy allows you to differentiate functions implemented as computer programs
     by using Algorithmic Differentiation (AD) techniques in the forward and
     reverse mode.
@@ -15,6 +17,7 @@ Description:
 
 
 Rationale:
+
     Many programs for scientific computing make use of numerical linear algebra.
     The defacto standard for array manipulations in Python is NumPy.
     AlgoPy allows you to write code that can either be evaluated by NumPy, or with
@@ -66,10 +69,13 @@ from utpm import UTPM, UTP
 import globalfuncs
 from globalfuncs import *
 
-try:
-    import special
-except:
-    pass
+from compound import *
+
+import special
+
+import linalg
+from linalg import *
+
 
 try:
     import version
