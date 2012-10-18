@@ -23,6 +23,24 @@ class Test_ScipySpecialFunctions(TestCase):
         y3 = hyp1f1(a, b, x)
         assert_almost_equal(y1, y3.x)
 
+    def test_erf(self):
+        """
+        check that algopy.special.erf can be called with
+        UTPM and Function instances as arguments
+        """
+
+        x = 3.
+        y1 = erf(x)
+
+        x = UTPM(3.* numpy.ones((1,1)))
+        y2 = erf(x)
+        assert_almost_equal(y1, y2.data[0,0])
+
+        x = Function(3.)
+        y3 = erf(x)
+        assert_almost_equal(y1, y3.x)
+
+
 
 
 if __name__ == "__main__":
