@@ -8,6 +8,8 @@ where M is the ring of matrices and t an external parameter
 
 """
 
+import math
+
 import numpy.linalg
 import numpy
 
@@ -571,6 +573,13 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         cls._pb_hyp1f1(ybar.data, a, b, x.data, y.data, out = xbar.data)
 
         return xbar
+
+    @classmethod
+    def erf(cls, x):
+        """ computes y = erf(x) in UTP arithmetic"""
+        a = 1. / 2.
+        b = 3. / 2.
+        return 2 * x * cls.hyp1f1(a, b, -x*x) / math.sqrt(math.pi)
 
 
     def sum(self, axis=None, dtype=None, out=None):

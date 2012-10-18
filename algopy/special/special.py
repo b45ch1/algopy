@@ -26,3 +26,30 @@ def hyp1f1(a, b, x):
         return scipy.special.hyp1f1(a, b, x)
 
 hyp1f1.__doc__ += scipy.special.hyp1f1.__doc__
+
+
+def erf(x):
+    """
+    generic implementation of
+
+    y = erf(x)
+
+    x:      either a
+
+            * float
+            * numpy.ndarray
+            * algopy.UTPM
+            * algopy.Function
+
+            instance.
+
+
+    """
+
+    if hasattr(x.__class__, 'erf'):
+        return x.__class__.erf(x)
+    else:
+        return scipy.special.erf(x)
+
+erf.__doc__ += scipy.special.erf.__doc__
+
