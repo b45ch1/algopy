@@ -1018,6 +1018,11 @@ class Function(Ring):
     # numpy functions
     # #########################################################
 
+    def zeros(self):
+         return Function.pushforward(algopy.zeros, [shape, dtype, order])
+
+    def ones(self):
+         return Function.pushforward(algopy.ones, [shape, dtype, order])
 
     def log(self):
          return Function.pushforward(algopy.log, [self])

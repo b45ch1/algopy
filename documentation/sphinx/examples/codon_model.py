@@ -577,12 +577,12 @@ def get_selection_S(F):
     """
 
     # FIXME: use algopy.ones_like when it becomes available
-    #e = algopy.ones_like(F)
+    e = algopy.ones_like(F)
 
-    # FIXME: instead of the following block
-    e = algopy.zeros_like(F)
-    for i in range(F.shape[0]):
-        e[i] = 1.
+#     # FIXME: instead of the following block
+#     e = algopy.zeros_like(F)
+#     for i in range(F.shape[0]):
+#         e[i] = 1.
 
     return algopy.outer(e, F) - algopy.outer(F, e)
 

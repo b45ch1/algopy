@@ -1532,10 +1532,6 @@ class Test_UserFriendlyDrivers(TestCase):
 
 
 
-
-
-
-
     def test_jacobian_vec_hess(self):
         class Model:
             def eval_g(self, x):

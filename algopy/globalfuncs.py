@@ -10,7 +10,7 @@ from algopy import Function
 numpy_function_names = ['sin','cos','tan', 'exp', 'log', 'sqrt', 'pow',
                         'arcsin', 'arccos', 'arctan',
                         'sinh', 'cosh', 'tanh',
-                        'trace',  'zeros_like', 'diag',
+                        'trace', 'diag',
                         'triu', 'tril', 'reshape']
 
 
@@ -98,10 +98,7 @@ def extract_UTPM_jacobian(x):
 
 def zeros( shape, dtype=float, order = 'C'):
     """
-    generic generalization of numpy.zeros
-
-    create a zero instance
-
+    generic implementation of numpy.zeros
     """
 
     if numpy.isscalar(shape):
@@ -125,6 +122,55 @@ def zeros( shape, dtype=float, order = 'C'):
     else:
         return numpy.zeros(shape,dtype=type(dtype), order=order)
 zeros.__doc__ += numpy.zeros.__doc__
+
+
+def ones( shape, dtype=float, order = 'C'):
+    """
+    generic implementation of numpy.ones
+    """
+
+    if numpy.isscalar(shape):
+        shape = (shape,)
+
+    if isinstance(dtype,type):
+        return numpy.ones(shape, dtype=dtype,order=order)
+
+
+    elif isinstance(dtype, numpy.ndarray):
+        return numpy.ones(shape,dtype=dtype.dtype, order=order)
+
+    elif isinstance(dtype, UTPM):
+        D,P = dtype.data.shape[:2]
+        tmp = numpy.zeros((D,P) + shape ,dtype = dtype.data.dtype)
+        tmp[0,...] = 1.
+        return UTPM(tmp)
+
+    elif isinstance(dtype, Function):
+        return dtype.pushforward(ones, [shape, dtype, order])
+
+    else:
+        return numpy.ones(shape,dtype=type(dtype), order=order)
+ones.__doc__ += numpy.ones.__doc__
+
+
+def zeros_like(a, dtype=None, order = 'C'):
+    """
+    generic implementation of numpy.zeros_like
+    """
+    if dtype==None:
+        dtype = a
+    return zeros( a.shape, dtype=dtype, order = order)
+zeros_like.__doc__ += numpy.zeros_like.__doc__
+
+
+def ones_like(a, dtype=None, order = 'C'):
+    """
+    generic implementation of numpy.ones_like
+    """
+    if dtype==None:
+        dtype = a
+    return ones( a.shape, dtype=dtype, order = order)
+ones_like.__doc__ += numpy.ones_like.__doc__
 
 
 def dot(a,b):

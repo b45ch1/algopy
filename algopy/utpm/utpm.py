@@ -939,6 +939,11 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def zeros_like(self):
         return self.__class__(numpy.zeros_like(self.data))
 
+    def ones_like(self):
+        data = numpy.zeros_like(self.data)
+        data[0,...] = 1.
+        return self.__class__(data)
+
     def shift(self, s, out = None):
         """
         shifting coefficients [x0,x1,x2,x3] s positions
