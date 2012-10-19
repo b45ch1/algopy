@@ -285,8 +285,9 @@ Further Reading
 
 Information on the web:
 
-There has been a winterschool for Algorithmic Differentiation. Some tutorials explain Taylor polynomial arithmetic.
-http://www.sintef.no/Projectweb/eVITA/English/eSCience-Meeting-2010/Winter-School/
+There has been a winterschool for Algorithmic Differentiation.
+Some tutorials explain Taylor polynomial arithmetic.
+http://www.sintef.no/Projectweb/eVITA/Winter-Schools/2010/
 
 Talks:
     * :download:`Informal talk at the IWR Heidelberg, April 29th, 2010<./talks/informal_talk_iwr_heidelberg_theory_and_tools_for_algorithmic_differentiation.pdf>`.
