@@ -7,6 +7,18 @@ that are not represented as a single node in the
 computational graph, but are treated as a **compound**
 function. I.e., tracing algopy.prod will result
 in a CGraph with many successive multiplication operations.
+
+
+Note
+----
+
+These functions should be replaced by a dedicated implementation in
+
+* algopy.Function
+* algopy.UTPM
+
+so they are represented by a single node in the CGraph.
+
 """
 
 import numpy

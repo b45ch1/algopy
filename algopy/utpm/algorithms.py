@@ -1,3 +1,20 @@
+"""
+This file contains the core algorithms for
+
+* the forward mode (univariate Taylor polynomial arithmetic)
+* the reverse mode
+
+The functions are operating solely on numpy datastructures.
+
+Rationale
+---------
+
+If speed is an issue, one can rather easily replace
+the function implementations by C or Fortran functions.
+
+"""
+
+
 import numpy
 from numpy.lib.stride_tricks import as_strided, broadcast_arrays
 
