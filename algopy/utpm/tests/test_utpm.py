@@ -505,13 +505,10 @@ class Test_Push_Forward(TestCase):
         y = UTPM.erf(x)
 
         # reverse
-        #FIXME: not implemented
-        #FIXME: derivative of erf(x) is 2*exp(-x*x)/sqrt(pi)
-        #ybar = UTPM(numpy.random.random((D,P)))
-        #xbar = UTPM.pb_erf(ybar, x, y)
+        ybar = UTPM(numpy.random.random((D,P)))
+        xbar = UTPM.pb_erf(ybar, x, y)
 
-        #FIXME: uncomment the next line when pb_erf is implemented
-        #assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
+        assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
 
     def test_abs(self):

@@ -582,6 +582,19 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return 2 * x * cls.hyp1f1(a, b, -x*x) / math.sqrt(math.pi)
 
 
+    @classmethod
+    def pb_erf(cls, ybar, x, y, out=None):
+        """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
+
+        if out == None:
+            xbar = x.zeros_like()
+
+        xbar += ybar * 2.*cls.exp(-x*x)/math.sqrt(math.pi)
+
+        return xbar
+
+
+
     def sum(self, axis=None, dtype=None, out=None):
         if dtype != None or out != None:
             raise NotImplementedError('not implemented yet')
