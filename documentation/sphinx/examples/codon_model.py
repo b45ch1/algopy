@@ -6,10 +6,7 @@ AlgoPy provides the gradients and hessians for informing the
 truncated Newton nonlinear optimization.
 """
 
-import string
 import math
-import argparse
-from itertools import product
 
 import numpy
 import algopy
@@ -642,7 +639,7 @@ def eval_f(
     log_nt_weights[0] = theta[3]
     log_nt_weights[1] = theta[4]
     log_nt_weights[2] = theta[5]
-    log_nt_weights[3] = 1.
+    log_nt_weights[3] = 0
 
     # construct the transition matrix
     Q = get_Q(
