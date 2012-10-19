@@ -516,12 +516,12 @@ def get_lb_expected_subs(ham, subs_counts):
 
 def dna_to_codon_ord(codons, dna_string):
     codon_dict = dict((c, i) for i, c in enumerate(codons))
-    dna = ''.join(g_human_mtdna.split()).lower()
+    dna = ''.join(dna_string.lower().split())
     n = len(dna)
     if n % 3:
         raise Exception('expected DNA length to be a multiple of 3')
-    codons = [dna[i:i+3] for i in range(0, n, 3)]
-    return [codon_dict[c] for c in codons]
+    observed_codons = [dna[i:i+3] for i in range(0, n, 3)]
+    return [codon_dict[c] for c in observed_codons]
 
 def get_empirical_summary(ncodons, human_codon_ord, chimp_codon_ord):
     """
@@ -550,7 +550,7 @@ def fixation_h(x):
     """
     This is a fixation h function in the notation of Yang and Nielsen.
     """
-    return 1. / algopy.hyp1f1(1., 2., -x)
+    return 1. / algopy.special.hyp1f1(1., 2., -x)
 
 def get_selection_F(log_counts, compo, log_nt_weights):
     """
@@ -575,7 +575,15 @@ def get_selection_S(F):
     @param F: a selection value for each codon, up to an additive constant
     @return: selection differences F_j - F_i, also known as S_ij
     """
-    e = algopy.ones_like(F)
+
+    # FIXME: use algopy.ones_like when it becomes available
+    #e = algopy.ones_like(F)
+
+    # FIXME: instead of the following block
+    e = algopy.zeros_like(F)
+    for i in range(F.shape[0]):
+        e[i] = 1.
+
     return algopy.outer(e, F) - algopy.outer(F, e)
 
 def get_Q(
@@ -609,8 +617,23 @@ def get_Q(
     omega = algopy.exp(log_omega)
     F = get_selection_F(log_counts, compo, log_nt_weights)
     S = get_selection_S(F)
-    pre_Q = mu * (kappa * ts + tv) * (omega * nonsyn + syn) * algopy.exp(
-            algopy.dot(asym_compo, log_nt_weights)) * h(S)
+
+    # breaking down the following split line for debugging
+    #pre_Q = mu * (kappa * ts + tv) * (omega * nonsyn + syn) * algopy.exp(
+            #algopy.dot(asym_compo, log_nt_weights)) * h(S)
+
+    print 'kappa.shape:', kappa.shape
+    print 'ts.shape:', ts.shape
+    print 'ts.data.shape:', ts.data.shape
+    print
+    kappa_ts = kappa * ts
+    omega_nonsyn = omega * nonsyn
+    pre_Q = mu.copy()
+    pre_Q = pre_Q * (kappa_ts + tv)
+    pre_Q = pre_Q * (omega_nonsyn + syn)
+    pre_Q = pre_Q * algopy.exp(algopy.dot(asym_compo, log_nt_weights))
+    pre_Q = pre_Q * h(S)
+
     Q = pre_Q - algopy.diag(algopy.sum(pre_Q, axis=1))
     return Q
 
@@ -693,7 +716,7 @@ def main():
     # Precompute some numpy ndarrays
     # according to properties of DNA and the mitochondrial genetic code.
     all_codons = [c for codons in code for c in codons]
-    codons = [c for codons in code for c in codons[:-1]]
+    codons = [c for codons in code[:-1] for c in codons]
     ts, tv = get_ts_tv(codons)
     syn, nonsyn = get_syn_nonsyn(code, codons)
     compo = get_compo(codons)
@@ -706,6 +729,8 @@ def main():
     all_chimp_codons = dna_to_codon_ord(all_codons, g_chimp_mtdna)
     all_codon_counts, all_subs_counts = get_empirical_summary(
             64, all_human_codons, all_chimp_codons)
+    if all_codon_counts[-len(stop):].tolist() != [0, 0, 0, 0]:
+        raise Exception('unexpectedly saw stop codons')
     codon_counts = all_codon_counts[:len(codons)]
     subs_counts = all_subs_counts[:len(codons), :len(codons)]
     v = codon_counts / float(numpy.sum(codon_counts))
@@ -726,11 +751,11 @@ def main():
 
     # get the minimum expected number of substitutions between codons
     mu_empirical = get_lb_expected_subs(ham, subs_counts)
-    mu_implied = -numpy.sum(np.diag(Q) * v)
+    mu_implied = -numpy.sum(numpy.diag(Q) * v)
     log_mu = math.log(mu_empirical) - math.log(mu_implied)
 
     # construct the initial guess vector
-    theta = np.array([
+    theta = numpy.array([
         log_mu,
         log_kappa,
         log_omega,
@@ -738,6 +763,13 @@ def main():
         0,
         0,
         ])
+
+    # construct the args to the neg log likelihood function
+    fmin_args = (
+            subs_counts, log_counts, v,
+            fixation_h,
+            ts, tv, syn, nonsyn, compo, asym_compo,
+            )
 
     # do the search, using information about the gradient and hessian
     results = scipy.optimize.fmin_ncg(
