@@ -235,6 +235,35 @@ class Test_Push_Forward(TestCase):
         z = UTPM.dot(x1,x2)
         assert_array_almost_equal(y.data, z.data)
 
+
+    def test_outer2(self):
+        D,P,N = 3,1,10
+        x = UTPM(numpy.random.random((D,P,N)))
+        y = UTPM(numpy.random.random((D,P,N)))
+
+        a = UTPM.trace(UTPM.outer(x,y))
+        b = UTPM.dot(x,y)
+        assert_array_almost_equal(a.data, b.data)
+
+
+    def test_outer3(self):
+        D,P,N = 3,1,10
+        x = UTPM(numpy.random.random((D,P,N)))
+        y = numpy.random.random(N)
+        a = UTPM.trace(UTPM.outer(x,y))
+        b = UTPM.dot(x,y)
+        assert_array_almost_equal(a.data, b.data)
+
+
+    def test_outer4(self):
+        D,P,N = 3,1,10
+        x = numpy.random.random(N)
+        y = UTPM(numpy.random.random((D,P,N)))
+        a = UTPM.trace(UTPM.outer(x,y))
+        b = UTPM.dot(x,y)
+        assert_array_almost_equal(a.data, b.data)
+
+
     def test_scalar_operations(self):
         D,P,N,M = 2,3,4,5
         X = 2 * numpy.random.rand(D,P,N,M)

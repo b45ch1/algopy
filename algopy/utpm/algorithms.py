@@ -665,6 +665,51 @@ class RawAlgorithmsMixIn:
         return out
 
     @classmethod
+    def _outer_non_utpm_y(cls, x_data, y, out = None):
+        """
+        z = outer(x,y)
+        where x is UTPM and y is ndarray
+        """
+
+        if out == None:
+            raise NotImplementedError('should implement that')
+
+        z_data = out
+        z_data[...] = 0.
+
+        D,P = x_data.shape[:2]
+
+        for d in range(D):
+            for p in range(P):
+                z_data[d,p,...] += numpy.outer(x_data[d,p,...], y)
+
+        return out
+
+
+    @classmethod
+    def _outer_non_utpm_x(cls, x, y_data, out = None):
+        """
+        z = outer(x,y)
+        where y is UTPM and x is ndarray
+        """
+
+        if out == None:
+            raise NotImplementedError('should implement that')
+
+        z_data = out
+        z_data[...] = 0.
+
+        D,P = y_data.shape[:2]
+
+        for d in range(D):
+            for p in range(P):
+                z_data[d,p,...] += numpy.outer(x, y_data[d,p,...])
+
+        return out
+
+
+
+    @classmethod
     def _outer_pullback(cls, zbar_data, x_data, y_data, z_data, out = None):
         if out == None:
             raise NotImplementedError('should implement that')

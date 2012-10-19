@@ -1259,6 +1259,18 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             out = cls(cls.__zeros__(out_shp, dtype = x.data.dtype))
             cls._outer( x.data, y.data, out = out.data)
 
+        elif isinstance(x, UTPM) and isinstance(y, numpy.ndarray):
+            x_shp = x.data.shape
+            out_shp = x_shp + x_shp[-1:]
+            out = cls(cls.__zeros__(out_shp, dtype = x.data.dtype))
+            cls._outer_non_utpm_y( x.data, y, out = out.data)
+
+        elif isinstance(x, numpy.ndarray) and isinstance(y, UTPM):
+            y_shp = y.data.shape
+            out_shp = y_shp + y_shp[-1:]
+            out = cls(cls.__zeros__(out_shp, dtype = y.data.dtype))
+            cls._outer_non_utpm_x( x, y.data, out = out.data)
+
         else:
             raise NotImplementedError('this operation is not supported')
 
