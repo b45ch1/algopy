@@ -294,9 +294,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             rhs_shape = rhs.shape
             if numpy.isscalar(rhs_shape):
                 rhs_shape = (rhs_shape,)
-            retval = self.zeros_like()
-            retval.data[...] =  (self.data.T * rhs.reshape((1,1) + rhs_shape).T).T
-            return retval
+            retval = (self.data.T * rhs.reshape((1,1) + rhs_shape).T).T
+            return UTPM(retval.copy())
 
 
         x_data, y_data = UTPM._broadcast_arrays(self.data, rhs.data)

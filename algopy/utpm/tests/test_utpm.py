@@ -43,6 +43,16 @@ class Test_Push_Forward(TestCase):
     #     y2 = x[0]*x[1]*x[2]
     #     assert_array_almost_equal(y.data, y2.data)
 
+
+    def test_mul(self):
+        x = numpy.array([1.,2.,3.])
+        y = UTPM([[5],[7]])
+        correct = UTPM([[[5,10,15]],[[7,14,21]]])
+        z1 = y * x
+        z2 = x * y
+        assert_array_almost_equal(correct.data, z1.data)
+        assert_array_almost_equal(correct.data, z2.data)
+
     def test_broadcasting_sub(self):
         #check 1
         x1 = numpy.array([1.,2.,3.])
