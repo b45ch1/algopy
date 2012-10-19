@@ -1,3 +1,5 @@
+import math
+
 import numpy
 import scipy
 import scipy.special
@@ -52,4 +54,34 @@ def erf(x):
         return scipy.special.erf(x)
 
 erf.__doc__ += scipy.special.erf.__doc__
+
+
+def erfi(x):
+    """
+    generic implementation of
+
+    y = erfi(x)
+
+    x:      either a
+
+            * float
+            * numpy.ndarray
+            * algopy.UTPM
+            * algopy.Function
+
+            instance.
+
+
+    """
+
+    if hasattr(x.__class__, 'erfi'):
+        return x.__class__.erfi(x)
+    else:
+        #FIXME: scipy.special.erfi does not yet exist
+        #return scipy.special.erfi(x)
+        return 2 * x * scipy.special.hyp1f1(0.5, 1.5, x*x) / (
+                math.sqrt(math.pi))
+
+#FIXME: scipy.special.erfi does not yet exist
+#erfi.__doc__ += scipy.special.erfi.__doc__
 

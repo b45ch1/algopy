@@ -1242,19 +1242,17 @@ class Test_CGgraph_on_UTPM(TestCase):
             y = algopy.special.erf(v1)
             return y
 
-        #FIXME: uncomment the rest when the pullback is implemented
-
         # use CGraph
 
-        #cg = CGraph()
-        #x = Function(numpy.array([1.]))
-        #y = f(x)
+        cg = CGraph()
+        x = Function(numpy.array([1.]))
+        y = f(x)
 
-        #cg.independentFunctionList = [x]
-        #cg.dependentFunctionList = [y]
+        cg.independentFunctionList = [x]
+        cg.dependentFunctionList = [y]
 
-        #result1 = cg.jac_vec(numpy.array([2.]), numpy.array([1.]))
-        #result2 = cg.jacobian(numpy.array([2.]))[0]
+        result1 = cg.jac_vec(numpy.array([2.]), numpy.array([1.]))
+        result2 = cg.jacobian(numpy.array([2.]))[0]
 
         # use UTPM
 
@@ -1262,9 +1260,42 @@ class Test_CGgraph_on_UTPM(TestCase):
         y = f(x)
         result3 = UTPM.extract_jacobian(y)[0]
 
-        #assert_array_almost_equal(result1, result2)
-        #assert_array_almost_equal(result2, result3)
-        #assert_array_almost_equal(result3, result1)
+        assert_array_almost_equal(result1, result2)
+        assert_array_almost_equal(result2, result3)
+        assert_array_almost_equal(result3, result1)
+
+    def test_erfi(self):
+        """
+        compute y = erfi(x**2 - 3.)
+        """
+
+        def f(x):
+            v1 = x**2 - 3.
+            y = algopy.special.erfi(v1)
+            return y
+
+        # use CGraph
+
+        cg = CGraph()
+        x = Function(numpy.array([1.]))
+        y = f(x)
+
+        cg.independentFunctionList = [x]
+        cg.dependentFunctionList = [y]
+
+        result1 = cg.jac_vec(numpy.array([2.]), numpy.array([1.]))
+        result2 = cg.jacobian(numpy.array([2.]))[0]
+
+        # use UTPM
+
+        x = UTPM.init_jacobian(numpy.array([2.]))
+        y = f(x)
+        result3 = UTPM.extract_jacobian(y)[0]
+
+        assert_array_almost_equal(result1, result2)
+        assert_array_almost_equal(result2, result3)
+        assert_array_almost_equal(result3, result1)
+
 
 
     def test_more_complicated_ODOE_objective_function(self):

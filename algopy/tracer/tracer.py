@@ -1153,6 +1153,10 @@ class Function(Ring):
     def erf(cls, x):
         return Function.pushforward(algopy.special.erf, [x])
 
+    @classmethod
+    def erfi(cls, x):
+        return Function.pushforward(algopy.special.erfi, [x])
+
 
     # #########################################################
     # misc functions (not well tested, if at all)

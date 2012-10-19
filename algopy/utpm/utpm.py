@@ -586,11 +586,38 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
 
         if out == None:
+            D,P = x.data.shape[:2]
             xbar = x.zeros_like()
+
+        else:
+            xbar, = out
 
         xbar += ybar * 2.*cls.exp(-x*x)/math.sqrt(math.pi)
 
         return xbar
+
+
+    @classmethod
+    def erfi(cls, x):
+        """ computes y = erfi(x) in UTP arithmetic"""
+        return 2 * x * cls.hyp1f1(0.5, 1.5, x*x) / math.sqrt(math.pi)
+
+
+    @classmethod
+    def pb_erfi(cls, ybar, x, y, out=None):
+        """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
+
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar, = out
+
+        xbar += ybar * 2.*cls.exp(x*x)/math.sqrt(math.pi)
+
+        return xbar
+
 
 
 

@@ -550,6 +550,33 @@ class Test_Push_Forward(TestCase):
         assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
 
+    def test_erfi(self):
+        D,P,N,M = 5,1,3,3
+        x = UTPM(numpy.random.random((D,P,M,N)))
+
+        # FIXME: only the 0th order is tested
+        observed = UTPM.erfi(x).data[0]
+        expected = scipy.special.hyp1f1(0.5, 1.5, x.data[0]*x.data[0]) * (
+                x.data[0] * 2.0 / math.sqrt(math.pi))
+
+        assert_array_almost_equal(observed, expected)
+
+
+    def test_erfi_pullback(self):
+        D,P = 2,1
+
+        # forward
+        x = UTPM(numpy.random.random((D,P)))
+        y = UTPM.erfi(x)
+
+        # reverse
+        ybar = UTPM(numpy.random.random((D,P)))
+        xbar = UTPM.pb_erfi(ybar, x, y)
+
+        assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
+
+
+
     def test_abs(self):
         D,P,N = 4,3,12
         tmp = numpy.random.rand(D,P,N,N) - 0.5
