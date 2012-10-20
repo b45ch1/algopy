@@ -525,6 +525,61 @@ class Test_Push_Forward(TestCase):
         assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
 
+    def test_hyp0f1(self):
+        D,P,N,M = 5,1,3,3
+
+        # cos
+        x = UTPM(numpy.random.random((D,P,M,N)))
+        h = UTPM.hyp0f1(0.5, -(0.5 * x)**2)
+        c = UTPM.cos(x)
+        assert_array_almost_equal(h.data, c.data)
+
+        # cosh
+        x = UTPM(numpy.random.random((D,P,M,N)))
+        h = UTPM.hyp0f1(0.5, (0.5 * x)**2)
+        c = UTPM.cosh(x)
+        assert_array_almost_equal(h.data, c.data)
+
+        #FIXME: possibly update this if algopy sinc is implemented
+        # numpy sinc (this is the engineer's sinc not the math sinc)
+        x = UTPM(numpy.random.random((D,P,M,N)))
+        h = UTPM.hyp0f1(1.5, -(0.5 * math.pi * x)**2)
+        c = UTPM.sin(math.pi * x) / (math.pi * x)
+        assert_array_almost_equal(h.data, c.data)
+
+        # Check another special case.
+        x = UTPM(numpy.zeros((D,P,M,N)))
+        b = 2.
+        x.data[0,...] = numpy.random.random((P,M,N))
+        x.data[1,...] = 1.
+        h = UTPM.hyp0f1(b, x)
+        prefix = 1.
+        s = UTPM(numpy.zeros((D,P,M,N)))
+        s.data[0] = scipy.special.hyp0f1(b, x.data[0])
+        for d in range(1,D):
+            prefix /= (b+d-1.)
+            prefix /= d
+            s.data[d] = prefix * scipy.special.hyp0f1(b+d, x.data[0])
+
+        assert_array_almost_equal(h.data, s.data)
+
+
+    def test_hyp0f1_pullback(self):
+        D,P = 2,1
+
+        b = 2.
+
+        # forward
+        x = UTPM(numpy.random.random((D,P)))
+        y = UTPM.hyp0f1(b, x)
+
+        # reverse
+        ybar = UTPM(numpy.random.random((D,P)))
+        xbar = UTPM.pb_hyp0f1(ybar, b, x, y)
+
+        assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
+
+
     def test_erf(self):
         D,P,N,M = 5,1,3,3
         x = UTPM(numpy.random.random((D,P,M,N)))

@@ -21,8 +21,10 @@ from numpy.lib.stride_tricks import as_strided, broadcast_arrays
 try:
     import scipy.linalg
     import scipy.special
+    import mpmath
 except:
     pass
+
 
 
 def vdot(x,y, z = None):
@@ -124,6 +126,7 @@ def broadcast_arrays_shape(x_shp,y_shp):
 
 
     return z_shp
+
 
 class RawAlgorithmsMixIn:
 
@@ -560,6 +563,55 @@ class RawAlgorithmsMixIn:
         tmp = numpy.zeros_like(x_data)
         tmp = cls._hyp1f1(a+1., b+1., x_data,  out = tmp)
         tmp *= float(a)/float(b)
+        cls._amul(ybar_data, tmp, xbar_data)
+
+
+    @classmethod
+    def _hyp0f1(cls, b, x_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        y_data = out
+        y_data[...] = 0.
+        D,P = x_data.shape[:2]
+
+        #FIXME: scipy.special.hyp0f1 implementation could use some attention
+        #FIXME: http://projects.scipy.org/scipy/ticket/1082
+        def _mpmath_hyp0f1_float(b, x):
+            return float(mpmath.hyp0f1(b, x))
+        _mpmath_hyp0f1 = numpy.vectorize(_mpmath_hyp0f1_float)
+
+        # base point: d = 0
+        y_data[0] = _mpmath_hyp0f1(b, x_data[0])
+
+        # higher order coefficients: d > 0
+        prefix = 1.
+        for d in range(1, D):
+            # Accumulate coefficients of truncated expansions of poly powers.
+            if d == 1:
+                accum = x_data[1:].copy()
+            else:
+                for i in range(D-2, 0, -1):
+                    accum[i] = numpy.sum(accum[:i] * x_data[i:0:-1], axis=0)
+                accum[0] = 0.
+            prefix /= b + d - 1.
+            prefix /= d
+            hyp = _mpmath_hyp0f1(b + d, x_data[0])
+            # Add the contribution of this summation term.
+            y_data[1:] = y_data[1:] + prefix * hyp * accum
+
+        return y_data
+
+    @classmethod
+    def _pb_hyp0f1(cls, ybar_data, b, x_data, y_data, out = None):
+
+        if out == None:
+            raise NotImplementedError('should implement that')
+
+        xbar_data = out
+
+        tmp = numpy.zeros_like(x_data)
+        tmp = cls._hyp0f1(b+1., x_data,  out = tmp)
+        tmp *= 1. / float(b)
         cls._amul(ybar_data, tmp, xbar_data)
 
 
