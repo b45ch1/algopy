@@ -7,6 +7,7 @@ import numpy
 
 from algopy import *
 from algopy.linalg import *
+from algopy.special import *
 
 class Test_MaximimLikelihoodExample(TestCase):
 
@@ -243,21 +244,58 @@ class Test_OdoeExample(TestCase):
         assert_array_almost_equal(const2.data[0,:], const3.data[0,:])
 
 
+class Test_RemovableSingularities(TestCase):
+    """
+    Check the examples from the last slide of a talk by Warwick Tucker 2010.
 
+    It is from Lecture 1 of the Automatic Differentiation Winter School
+    in eScience, Geilo.
+    """
 
+    def test_example_x(self):
+        xdata = numpy.array([0., 1., 0., 0.]).reshape(4, 1)
+        x = UTPM(xdata)
+        assert_array_almost_equal(x.data, xdata)
 
+    def test_example_y(self):
+        xdata = numpy.array([0., 1., 0., 0.]).reshape(4, 1)
+        ydata = numpy.array([0., 1., 0., -1./6.]).reshape(4, 1)
+        x = UTPM(xdata)
+        y = sin(x)
+        assert_array_almost_equal(y.data, ydata)
 
+    @knownfailureif(True, msg = "L'Hopital's rule is not implemented")
+    def test_example_z(self):
+        xdata = numpy.array([0., 1., 0., 0.]).reshape(4, 1)
+        zdata = numpy.array([1., 0., -1./6.]).reshape(3, 1)
+        x = UTPM(xdata)
+        z = sin(x) / x
+        assert_array_almost_equal(z.data, zdata)
 
+    def test_example_z_stable(self):
+        xdata = numpy.array([0., 1., 0., 0.]).reshape(4, 1)
+        zdata = numpy.array([1., 0., -1./6., 0]).reshape(4, 1)
+        x = UTPM(xdata)
+        z = hyp0f1(1.5, -(0.5 * x)**2)
+        assert_array_almost_equal(z.data, zdata)
 
+    @knownfailureif(True, msg = "L'Hopital's rule is not implemented")
+    def test_example_w(self):
+        xdata = numpy.array([0., 1., 0., 0.]).reshape(4, 1)
+        wdata = numpy.array([1., 0.5, 1./6.]).reshape(3, 1)
+        x = UTPM(xdata)
+        w = (exp(x) - 1.) / x
+        assert_array_almost_equal(w.data, wdata)
 
-
-
-
-
+    def test_example_w_stable(self):
+        xdata = numpy.array([0., 1., 0., 0.]).reshape(4, 1)
+        wdata = numpy.array([1., 0.5, 1./6., 1./24.]).reshape(4, 1)
+        x = UTPM(xdata)
+        w = hyp1f1(1., 2., x)
+        assert_array_almost_equal(w.data, wdata)
 
 
 if __name__ == "__main__":
     run_module_suite()
-
 
 

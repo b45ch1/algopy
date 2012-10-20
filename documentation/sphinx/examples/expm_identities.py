@@ -26,16 +26,10 @@ def expm_tS_v1(t, S):
     S: symmetric numpy matrix
     """
 
-    # Use a more complicated data type.
-    S_taylor = zeros(S.shape, dtype=t)
-    for i in range(S.shape[0]):
-        for j in range(S.shape[1]):
-            S_taylor[i, j] = S[i, j]
-
     # Compute the expm using the default Taylor-aware implementation.
     # As of the time of writing this comment, this default implementation
     # uses a fixed-order Pade approximation.
-    return expm(t * S_taylor)
+    return expm(t * S)
 
 
 def expm_tS_v2(t, S):
@@ -45,16 +39,10 @@ def expm_tS_v2(t, S):
     S: symmetric numpy matrix
     """
 
-    # Use a more complicated data type.
-    S_taylor = zeros(S.shape, dtype=t)
-    for i in range(S.shape[0]):
-        for j in range(S.shape[1]):
-            S_taylor[i, j] = S[i, j]
-
     # Compute the eigendecomposition using a Taylor-aware eigh.
-    L_taylor, Q_taylor = eigh(t * S_taylor)
+    L, Q = eigh(t * S)
 
-    return dot(Q_taylor * exp(L_taylor), Q_taylor.T)
+    return dot(Q * exp(L), Q.T)
 
 
 def expm_tS_v3(t, S):
@@ -67,16 +55,21 @@ def expm_tS_v3(t, S):
     # Compute the eigendecomposition using a Taylor-naive eigh.
     L, Q = numpy.linalg.eigh(S)
 
-    # Use a more complicated data type.
-    L_taylor = zeros(L.shape, dtype=t)
-    Q_taylor = zeros(Q.shape, dtype=t)
-    for i in range(L.shape[0]):
-        L_taylor[i] = L[i]
-    for i in range(Q.shape[0]):
-        for j in range(Q.shape[1]):
-            Q_taylor[i, j] = Q[i, j]
+    # Construct a one dimensional array that is Taylor-aware.
+    etl = exp(t * L)
+    print etl.ndim
+    print etl.shape
+    print type(etl)
+    print etl
 
-    return dot(Q_taylor * exp(t * L_taylor), Q_taylor.T)
+    # FIXME: this uses broadcasting and seems to give the wrong answer
+    M = Q * etl
+
+    # FIXME: this does not use so much broadcasting but seems to be right
+    #M = dot(Q, diag(etl))
+
+    return dot(M, Q.T)
+
 
 
 def create_random_symmetric_matrix():

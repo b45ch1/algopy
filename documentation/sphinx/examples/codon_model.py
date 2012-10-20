@@ -6,10 +6,7 @@ AlgoPy provides the gradients and hessians for informing the
 truncated Newton nonlinear optimization.
 """
 
-import string
 import math
-import argparse
-from itertools import product
 
 import numpy
 import algopy
@@ -575,15 +572,7 @@ def get_selection_S(F):
     @param F: a selection value for each codon, up to an additive constant
     @return: selection differences F_j - F_i, also known as S_ij
     """
-
-    # FIXME: use algopy.ones_like when it becomes available
     e = algopy.ones_like(F)
-
-#     # FIXME: instead of the following block
-#     e = algopy.zeros_like(F)
-#     for i in range(F.shape[0]):
-#         e[i] = 1.
-
     return algopy.outer(e, F) - algopy.outer(F, e)
 
 def get_Q(
@@ -617,23 +606,8 @@ def get_Q(
     omega = algopy.exp(log_omega)
     F = get_selection_F(log_counts, compo, log_nt_weights)
     S = get_selection_S(F)
-
-    # breaking down the following split line for debugging
-    #pre_Q = mu * (kappa * ts + tv) * (omega * nonsyn + syn) * algopy.exp(
-            #algopy.dot(asym_compo, log_nt_weights)) * h(S)
-
-    print 'kappa.shape:', kappa.shape
-    print 'ts.shape:', ts.shape
-    print 'ts.data.shape:', ts.data.shape
-    print
-    kappa_ts = kappa * ts
-    omega_nonsyn = omega * nonsyn
-    pre_Q = mu.copy()
-    pre_Q = pre_Q * (kappa_ts + tv)
-    pre_Q = pre_Q * (omega_nonsyn + syn)
-    pre_Q = pre_Q * algopy.exp(algopy.dot(asym_compo, log_nt_weights))
-    pre_Q = pre_Q * h(S)
-
+    pre_Q = mu * (kappa * ts + tv) * (omega * nonsyn + syn) * algopy.exp(
+            algopy.dot(asym_compo, log_nt_weights)) * h(S)
     Q = pre_Q - algopy.diag(algopy.sum(pre_Q, axis=1))
     return Q
 
@@ -646,17 +620,6 @@ def get_log_likelihood(P, v, subs_counts):
     @param subs_counts: observed substitution counts
     """
     return algopy.sum(subs_counts * algopy.log(P.T * v))
-
-def transform_params(Y):
-    X = algopy.exp(Y)
-    tsrate, tvrate = X[0], X[1]
-    v_unnormalized = algopy.zeros(4, dtype=X)
-    v_unnormalized[0] = X[2]
-    v_unnormalized[1] = X[3]
-    v_unnormalized[2] = X[4]
-    v_unnormalized[3] = 1.0
-    v = v_unnormalized / algopy.sum(v_unnormalized)
-    return tsrate, tvrate, v
 
 def eval_f(
         theta,
@@ -676,7 +639,7 @@ def eval_f(
     log_nt_weights[0] = theta[3]
     log_nt_weights[1] = theta[4]
     log_nt_weights[2] = theta[5]
-    log_nt_weights[3] = 1.
+    log_nt_weights[3] = 0
 
     # construct the transition matrix
     Q = get_Q(

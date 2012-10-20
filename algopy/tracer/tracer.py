@@ -1150,8 +1150,16 @@ class Function(Ring):
         return Function.pushforward(algopy.special.hyp1f1, [a, b, x])
 
     @classmethod
+    def hyp0f1(cls, b, x):
+        return Function.pushforward(algopy.special.hyp0f1, [b, x])
+
+    @classmethod
     def erf(cls, x):
         return Function.pushforward(algopy.special.erf, [x])
+
+    @classmethod
+    def erfi(cls, x):
+        return Function.pushforward(algopy.special.erfi, [x])
 
 
     # #########################################################

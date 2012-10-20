@@ -574,6 +574,29 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return xbar
 
     @classmethod
+    def hyp0f1(cls, b, x):
+        """ computes y = hyp0f1(b, x) in UTP arithmetic"""
+
+        retval = x.clone()
+        cls._hyp0f1(b, x.data, out = retval.data)
+        return retval
+
+    @classmethod
+    def pb_hyp0f1(cls, ybar, b, x, y, out=None):
+        """ computes bar y dy = bar x dx in UTP arithmetic"""
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            # out = (bbar, xbar)
+            xbar = out[1]
+
+        cls._pb_hyp0f1(ybar.data, b, x.data, y.data, out = xbar.data)
+
+        return xbar
+
+    @classmethod
     def erf(cls, x):
         """ computes y = erf(x) in UTP arithmetic"""
         a = 1. / 2.
@@ -586,11 +609,38 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
 
         if out == None:
+            D,P = x.data.shape[:2]
             xbar = x.zeros_like()
+
+        else:
+            xbar, = out
 
         xbar += ybar * 2.*cls.exp(-x*x)/math.sqrt(math.pi)
 
         return xbar
+
+
+    @classmethod
+    def erfi(cls, x):
+        """ computes y = erfi(x) in UTP arithmetic"""
+        return 2 * x * cls.hyp1f1(0.5, 1.5, x*x) / math.sqrt(math.pi)
+
+
+    @classmethod
+    def pb_erfi(cls, ybar, x, y, out=None):
+        """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
+
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar, = out
+
+        xbar += ybar * 2.*cls.exp(x*x)/math.sqrt(math.pi)
+
+        return xbar
+
 
 
 
