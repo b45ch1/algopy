@@ -272,10 +272,11 @@ class Test_RemovableSingularities(TestCase):
         assert_array_almost_equal(z.data, zdata)
 
     def test_example_z_stable(self):
-        try:
-            import mpmath
-        except:
-            return
+        #FIXME: this is no longer necessary if the scipy workaround is ok
+        #try:
+            #import mpmath
+        #except:
+            #return
 
         xdata = numpy.array([0., 1., 0., 0.]).reshape(4, 1)
         zdata = numpy.array([1., 0., -1./6., 0]).reshape(4, 1)

@@ -646,6 +646,30 @@ class Test_Push_Forward(TestCase):
 
         assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
+    def test_dawsn(self):
+        D,P,N,M = 5,1,3,3
+        x = UTPM(numpy.random.random((D,P,M,N)))
+
+        # FIXME: only the 0th order is tested
+        observed = UTPM.dawsn(x).data[0]
+        expected = scipy.special.dawsn(x.data[0])
+
+        assert_array_almost_equal(observed, expected)
+
+
+    def test_dawsn_pullback(self):
+        D,P = 2,1
+
+        # forward
+        x = UTPM(numpy.random.random((D,P)))
+        y = UTPM.dawsn(x)
+
+        # reverse
+        ybar = UTPM(numpy.random.random((D,P)))
+        xbar = UTPM.pb_dawsn(ybar, x, y)
+
+        assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
+
 
 
     def test_abs(self):

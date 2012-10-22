@@ -658,6 +658,26 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         return xbar
 
+    @classmethod
+    def dawsn(cls, x):
+        """ computes y = dawsn(x) in UTP arithmetic"""
+        return x * cls.hyp1f1(1., 1.5, -x*x)
+
+
+    @classmethod
+    def pb_dawsn(cls, ybar, x, y, out=None):
+        """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
+
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar, = out
+
+        xbar += ybar * (1. - 2.*x*cls.dawsn(x))
+
+        return xbar
 
 
 

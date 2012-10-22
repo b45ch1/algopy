@@ -1161,6 +1161,10 @@ class Function(Ring):
     def erfi(cls, x):
         return Function.pushforward(algopy.special.erfi, [x])
 
+    @classmethod
+    def dawsn(cls, x):
+        return Function.pushforward(algopy.special.dawsn, [x])
+
 
     # #########################################################
     # misc functions (not well tested, if at all)

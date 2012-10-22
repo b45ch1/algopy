@@ -612,7 +612,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _hyp0f1(cls, b, x_data, out = None):
-        import mpmath
+        #import mpmath
 
         if out == None:
             raise NotImplementedError('should implement that')
@@ -622,12 +622,16 @@ class RawAlgorithmsMixIn:
 
         #FIXME: scipy.special.hyp0f1 implementation could use some attention
         #FIXME: http://projects.scipy.org/scipy/ticket/1082
-        def _mpmath_hyp0f1_float(b, x):
-            return float(mpmath.hyp0f1(b, x))
-        _mpmath_hyp0f1 = numpy.vectorize(_mpmath_hyp0f1_float)
+        #def _mpmath_hyp0f1_float(b, x):
+            #return float(mpmath.hyp0f1(b, x))
+        #_mpmath_hyp0f1 = numpy.vectorize(_mpmath_hyp0f1_float)
+        #
+        #FIXME: this works around a scipy.special.hyp0f1 failure
+        def _hacked_hyp0f1(b, x):
+            return scipy.special.hyp0f1(b, x + 0j)
 
         # base point: d = 0
-        y_data[0] = _mpmath_hyp0f1(b, x_data[0])
+        y_data[0] = _hacked_hyp0f1(b, x_data[0])
 
         # higher order coefficients: d > 0
         prefix = 1.
@@ -641,7 +645,7 @@ class RawAlgorithmsMixIn:
                 accum[0] = 0.
             prefix /= b + d - 1.
             prefix /= d
-            hyp = _mpmath_hyp0f1(b + d, x_data[0])
+            hyp = _hacked_hyp0f1(b + d, x_data[0])
             # Add the contribution of this summation term.
             y_data[1:] = y_data[1:] + prefix * hyp * accum
 
