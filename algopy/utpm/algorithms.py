@@ -21,7 +21,6 @@ from numpy.lib.stride_tricks import as_strided, broadcast_arrays
 try:
     import scipy.linalg
     import scipy.special
-    import mpmath
 except:
     pass
 
@@ -568,6 +567,8 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _hyp0f1(cls, b, x_data, out = None):
+        import mpmath
+
         if out == None:
             raise NotImplementedError('should implement that')
         y_data = out

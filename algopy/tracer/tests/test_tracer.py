@@ -1230,12 +1230,18 @@ class Test_CGgraph_on_UTPM(TestCase):
         assert_array_almost_equal(result1, result2)
         assert_array_almost_equal(result2, result3)
         assert_array_almost_equal(result3, result1)
-        
+
 
     def test_hyp0f1(self):
         """
         compute y = hyp0f1(2., x**2 + 3.)
         """
+
+        try:
+            import mpmath
+        except:
+            return
+
 
         def f(x):
             v1 = x**2 + 3.
