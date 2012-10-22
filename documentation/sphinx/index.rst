@@ -340,7 +340,7 @@ Additional Information:
 
 How is AlgoPy organized:
 
-.. torctree::
+.. toctree::
     :maxdepth: 1
 
     folder_structure.rst
