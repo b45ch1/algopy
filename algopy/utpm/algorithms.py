@@ -200,6 +200,56 @@ class RawAlgorithmsMixIn:
             z_data[d,:,...] = 1./ y_data[0,:,...] * ( x_data[d,:,...] - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
 
     @classmethod
+    def _floordiv(cls, x_data, y_data, out = None):
+        """
+        z = x // y
+
+        use L'Hospital's rule when leading coefficients of y_data are zero
+
+        """
+        z_data = out
+        if out == None:
+            return NotImplementedError('')
+
+        (D,P) = z_data.shape[:2]
+
+        x_data = x_data.copy()
+        y_data = y_data.copy()
+
+        print x_data
+        print y_data
+
+
+        # left shifting x_data and y_data if necessary
+
+        mask = Ellipsis
+        while True:
+            mask = numpy.where( abs(y_data[0, mask]) <= 10**-8)
+            print 'mask=\n', mask
+            print 'y_data[:D-1, mask]=\n', y_data[:D-1, mask]
+            print 'y_data[1:, mask]=\n',y_data[1:, mask]
+
+            if len(mask[0]) == 0:
+                break
+            elif len(mask) == 1:
+                mask = mask[0]
+
+            x_data[:D-1, mask] = x_data[1:, mask]
+            x_data[D-1,  mask] = 0.
+
+            y_data[:D-1, mask] = y_data[1:, mask]
+            y_data[D-1,  mask] = 0.
+            print 'x_data =\n', y_data
+            print 'y_data =\n', y_data
+
+        for d in range(D):
+            z_data[d,:,...] = 1./ y_data[0,:,...] * \
+                         ( x_data[d,:,...]
+                           - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...],
+                           axis=0)
+                         )
+
+    @classmethod
     def _pow_real(cls, x_data, r, out = None):
         """ y = x**r, where r is scalar """
         y_data = out

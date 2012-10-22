@@ -321,6 +321,23 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         self._div(x_data, y_data, z_data)
         return self.__class__(z_data)
 
+
+    def __floordiv__(self, rhs):
+        """
+        self // rhs
+
+        use L'Hopital's rule
+        """
+
+        x_data, y_data = UTPM._broadcast_arrays(self.data, rhs.data)
+        z_data = numpy.zeros_like(x_data)
+        self._floordiv(x_data, y_data, z_data)
+        return self.__class__(z_data)
+
+
+
+
+
     def __pow__(self,r):
         if isinstance(r, UTPM):
             return numpy.exp(numpy.log(self)*r)

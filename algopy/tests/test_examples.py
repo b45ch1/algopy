@@ -264,12 +264,11 @@ class Test_RemovableSingularities(TestCase):
         y = sin(x)
         assert_array_almost_equal(y.data, ydata)
 
-    @knownfailureif(True, msg = "L'Hopital's rule is not implemented")
     def test_example_z(self):
         xdata = numpy.array([0., 1., 0., 0.]).reshape(4, 1)
-        zdata = numpy.array([1., 0., -1./6.]).reshape(3, 1)
+        zdata = numpy.array([1., 0., -1./6., 0.]).reshape(4, 1)
         x = UTPM(xdata)
-        z = sin(x) / x
+        z = sin(x) // x
         assert_array_almost_equal(z.data, zdata)
 
     def test_example_z_stable(self):
@@ -284,12 +283,11 @@ class Test_RemovableSingularities(TestCase):
         z = hyp0f1(1.5, -(0.5 * x)**2)
         assert_array_almost_equal(z.data, zdata)
 
-    @knownfailureif(True, msg = "L'Hopital's rule is not implemented")
     def test_example_w(self):
         xdata = numpy.array([0., 1., 0., 0.]).reshape(4, 1)
-        wdata = numpy.array([1., 0.5, 1./6.]).reshape(3, 1)
+        wdata = numpy.array([1., 0.5, 1./6., 0.]).reshape(4, 1)
         x = UTPM(xdata)
-        w = (exp(x) - 1.) / x
+        w = (exp(x) - 1.) // x
         assert_array_almost_equal(w.data, wdata)
 
     def test_example_w_stable(self):
