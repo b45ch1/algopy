@@ -52,3 +52,29 @@ def erfi(x):
 #FIXME: scipy.special.erfi does not yet exist
 #erfi.__doc__ += scipy.special.erfi.__doc__
 
+
+def dawsn(x):
+    """
+    generic implementation of
+
+    y = dawsn(x)
+
+    x:      either a
+
+            * float
+            * numpy.ndarray
+            * algopy.UTPM
+            * algopy.Function
+
+            instance.
+
+
+    """
+
+    if hasattr(x.__class__, 'dawsn'):
+        return x.__class__.dawsn(x)
+    else:
+        return scipy.special.dawsn(x)
+
+dawsn.__doc__ += scipy.special.dawsn.__doc__
+
