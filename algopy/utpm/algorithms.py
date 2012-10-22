@@ -225,9 +225,6 @@ class RawAlgorithmsMixIn:
         mask = Ellipsis
         while True:
             mask = numpy.where( abs(y_data[0, mask]) <= 10**-8)
-            print 'mask=\n', mask
-            print 'y_data[:D-1, mask]=\n', y_data[:D-1, mask]
-            print 'y_data[1:, mask]=\n',y_data[1:, mask]
 
             if len(mask[0]) == 0:
                 break
@@ -239,8 +236,6 @@ class RawAlgorithmsMixIn:
 
             y_data[:D-1, mask] = y_data[1:, mask]
             y_data[D-1,  mask] = 0.
-            print 'x_data =\n', y_data
-            print 'y_data =\n', y_data
 
         for d in range(D):
             z_data[d,:,...] = 1./ y_data[0,:,...] * \
