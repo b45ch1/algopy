@@ -660,11 +660,8 @@ class RawAlgorithmsMixIn:
         cls._amul(ybar_data, tmp, xbar_data)
 
 
-
-
     @classmethod
     def _hyp0f1(cls, b, x_data, out = None):
-        #import mpmath
 
         if out == None:
             raise NotImplementedError('should implement that')
@@ -672,12 +669,6 @@ class RawAlgorithmsMixIn:
         y_data[...] = 0.
         D,P = x_data.shape[:2]
 
-        #FIXME: scipy.special.hyp0f1 implementation could use some attention
-        #FIXME: http://projects.scipy.org/scipy/ticket/1082
-        #def _mpmath_hyp0f1_float(b, x):
-            #return float(mpmath.hyp0f1(b, x))
-        #_mpmath_hyp0f1 = numpy.vectorize(_mpmath_hyp0f1_float)
-        #
         #FIXME: this works around a scipy.special.hyp0f1 failure
         def _hacked_hyp0f1(b, x):
             return scipy.special.hyp0f1(b, x + 0j)

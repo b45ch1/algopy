@@ -1208,7 +1208,6 @@ class Test_CGgraph_on_UTPM(TestCase):
             y = algopy.special.hyp1f1(1., 2., v1)
             return y
 
-
         # use CGraph
 
         cg = CGraph()
@@ -1240,10 +1239,8 @@ class Test_CGgraph_on_UTPM(TestCase):
         def f(x):
             # use smaller offset to ameliorate convergence issues
             v1 = 0.1 * x**2 + 0.03
-            print v1
             y = algopy.special.hyp2f0(0.5, 1.0, v1)
             return y
-
 
         # use CGraph
 
@@ -1272,12 +1269,6 @@ class Test_CGgraph_on_UTPM(TestCase):
         """
         compute y = hyp0f1(2., x**2 + 3.)
         """
-
-        try:
-            import mpmath
-        except:
-            return
-
 
         def f(x):
             v1 = x**2 + 3.

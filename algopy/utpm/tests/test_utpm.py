@@ -599,14 +599,6 @@ class Test_Push_Forward(TestCase):
 
 
     def test_hyp0f1(self):
-
-
-        try:
-            import mpmath
-        except:
-            return
-
-
         D,P,N,M = 5,1,3,3
 
         # cos
@@ -646,14 +638,6 @@ class Test_Push_Forward(TestCase):
 
 
     def test_hyp0f1_pullback(self):
-
-
-        try:
-            import mpmath
-        except:
-            return
-
-
         D,P = 2,1
 
         b = 2.

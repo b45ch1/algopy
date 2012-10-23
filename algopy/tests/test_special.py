@@ -47,11 +47,6 @@ class Test_ScipySpecialFunctions(TestCase):
         UTPM and Function instances as arguments
         """
 
-        try:
-            import mpmath
-        except:
-            return
-
         b, x = 2., 3.
         y1 = hyp0f1(b, x)
 
