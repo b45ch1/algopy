@@ -525,6 +525,79 @@ class Test_Push_Forward(TestCase):
         assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
 
+    def test_hyp2f0(self):
+        D,P,N,M = 5,1,3,3
+
+        # Check a special case.
+        # This is a little tricky because hyp2f0 likes small x
+        # and hyp1f1 likes small 1/x.
+        n = 2
+        b = 0.1
+        x = UTPM(0.1 + 0.3 * numpy.random.rand(D,P,M,N))
+        a1 = -n
+        a2 = b
+        h = UTPM.hyp2f0(a1, a2, x)
+        s = scipy.special.poch(b, n) * ((-x)**n) * (
+                UTPM.hyp1f1(-n, 1. - b - n, -(1./x)))
+        assert_array_almost_equal(h.data, s.data)
+
+        # Check the special case with negative values.
+        n = 2
+        b = 0.1
+        x = UTPM(-0.1 - 0.3 * numpy.random.rand(D,P,M,N))
+        a1 = -n
+        a2 = b
+        h = UTPM.hyp2f0(a1, a2, x)
+        s = scipy.special.poch(b, n) * ((-x)**n) * (
+                UTPM.hyp1f1(-n, 1. - b - n, -(1./x)))
+        assert_array_almost_equal(h.data, s.data)
+
+        # FIXME: move this utility function somewhere better?
+        def _uncheesed_hyp2f0(a1_in, a2_in, x_in):
+            # FIXME: use convergence_type 1 vs. 2 ?  Scipy docs are not helpful.
+            convergence_type = 2
+            value, error_info = scipy.special.hyp2f0(
+                    a1_in, a2_in, x_in, convergence_type)
+            return value
+
+        # Check another special case.
+        x = UTPM(numpy.zeros((D,P,M,N)))
+        a1, a2 = 1., 2.
+        x.data[0,...] = 0.1 + 0.3 * numpy.random.rand(P,M,N)
+        x.data[1,...] = 1.
+        h = UTPM.hyp2f0(a1, a2, x)
+        prefix = 1.
+        s = UTPM(numpy.zeros((D,P,M,N)))
+        s.data[0] = _uncheesed_hyp2f0(a1, a2, x.data[0])
+        for d in range(1,D):
+            prefix *= (a1+d-1.)*(a2+d-1.)
+            prefix /= d
+            s.data[d] = prefix * _uncheesed_hyp2f0(a1+d, a2+d, x.data[0])
+
+        assert_array_almost_equal(h.data, s.data)
+
+
+    def test_hyp2f0_pullback(self):
+        D,P = 2,1
+
+        a1, a2 = 0.5, 1.0
+
+        # Use smaller numbers to ameliorate convergence issues.
+        # Also notice that I am using numpy.random.randn(D,P)
+        # instead of numpy.random.random((D,P)).
+        sigma = 0.01
+
+        # forward
+        x = UTPM(sigma * numpy.random.randn(D,P))
+        y = UTPM.hyp2f0(a1, a2, x)
+
+        # reverse
+        ybar = UTPM(sigma * numpy.random.randn(D,P))
+        xbar = UTPM.pb_hyp2f0(ybar, a1, a2, x, y)
+
+        assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
+
+
     def test_hyp0f1(self):
 
 

@@ -609,6 +609,58 @@ class RawAlgorithmsMixIn:
         tmp *= float(a)/float(b)
         cls._amul(ybar_data, tmp, xbar_data)
 
+    @classmethod
+    def _hyp2f0(cls, a1, a2, x_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        y_data = out
+        y_data[...] = 0.
+        D,P = x_data.shape[:2]
+
+        # FIXME: move this utility function somewhere better?
+        def _uncheesed_hyp2f0(a1_in, a2_in, x_in):
+            # FIXME: use convergence_type 1 vs. 2 ?  Scipy docs are not helpful.
+            convergence_type = 2
+            value, error_info = scipy.special.hyp2f0(
+                    a1_in, a2_in, x_in, convergence_type)
+            return value
+
+        # base point: d = 0
+        y_data[0] = _uncheesed_hyp2f0(a1, a2, x_data[0])
+
+        # higher order coefficients: d > 0
+        prefix = 1.
+        for d in range(1, D):
+            # Accumulate coefficients of truncated expansions of powers
+            # of the polynomial.
+            if d == 1:
+                accum = x_data[1:].copy()
+            else:
+                for i in range(D-2, 0, -1):
+                    accum[i] = numpy.sum(accum[:i] * x_data[i:0:-1], axis=0)
+                accum[0] = 0.
+            prefix *= ((a1+d-1.) * (a2+d-1.)) / d
+            hyp = _uncheesed_hyp2f0(a1+d, a2+d, x_data[0])
+            # Add the contribution of this summation term.
+            y_data[1:] = y_data[1:] + prefix * hyp * accum
+
+        return y_data
+
+    @classmethod
+    def _pb_hyp2f0(cls, ybar_data, a1, a2, x_data, y_data, out = None):
+
+        if out == None:
+            raise NotImplementedError('should implement that')
+
+        xbar_data = out
+
+        tmp = numpy.zeros_like(x_data)
+        tmp = cls._hyp2f0(a1+1., a2+1., x_data,  out = tmp)
+        tmp *= float(a1) * float(a2)
+        cls._amul(ybar_data, tmp, xbar_data)
+
+
+
 
     @classmethod
     def _hyp0f1(cls, b, x_data, out = None):

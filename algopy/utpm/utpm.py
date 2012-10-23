@@ -591,6 +591,29 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return xbar
 
     @classmethod
+    def hyp2f0(cls, a1, a2, x):
+        """ computes y = hyp2f0(a1, a2, x) in UTP arithmetic"""
+
+        retval = x.clone()
+        cls._hyp2f0(a1, a2, x.data, out = retval.data)
+        return retval
+
+    @classmethod
+    def pb_hyp2f0(cls, ybar, a1, a2, x, y, out=None):
+        """ computes bar y dy = bar x dx in UTP arithmetic"""
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            # out = (a1bar, a2bar, xbar)
+            xbar = out[2]
+
+        cls._pb_hyp2f0(ybar.data, a1, a2, x.data, y.data, out = xbar.data)
+
+        return xbar
+
+    @classmethod
     def hyp0f1(cls, b, x):
         """ computes y = hyp0f1(b, x) in UTP arithmetic"""
 
