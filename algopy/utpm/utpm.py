@@ -591,6 +591,29 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return xbar
 
     @classmethod
+    def hyp2f0(cls, a1, a2, x):
+        """ computes y = hyp2f0(a1, a2, x) in UTP arithmetic"""
+
+        retval = x.clone()
+        cls._hyp2f0(a1, a2, x.data, out = retval.data)
+        return retval
+
+    @classmethod
+    def pb_hyp2f0(cls, ybar, a1, a2, x, y, out=None):
+        """ computes bar y dy = bar x dx in UTP arithmetic"""
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            # out = (a1bar, a2bar, xbar)
+            xbar = out[2]
+
+        cls._pb_hyp2f0(ybar.data, a1, a2, x.data, y.data, out = xbar.data)
+
+        return xbar
+
+    @classmethod
     def hyp0f1(cls, b, x):
         """ computes y = hyp0f1(b, x) in UTP arithmetic"""
 
@@ -620,7 +643,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         b = 3. / 2.
         return 2 * x * cls.hyp1f1(a, b, -x*x) / math.sqrt(math.pi)
 
-
     @classmethod
     def pb_erf(cls, ybar, x, y, out=None):
         """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
@@ -642,7 +664,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         """ computes y = erfi(x) in UTP arithmetic"""
         return 2 * x * cls.hyp1f1(0.5, 1.5, x*x) / math.sqrt(math.pi)
 
-
     @classmethod
     def pb_erfi(cls, ybar, x, y, out=None):
         """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
@@ -658,11 +679,11 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         return xbar
 
+
     @classmethod
     def dawsn(cls, x):
         """ computes y = dawsn(x) in UTP arithmetic"""
         return x * cls.hyp1f1(1., 1.5, -x*x)
-
 
     @classmethod
     def pb_dawsn(cls, ybar, x, y, out=None):
@@ -679,6 +700,47 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         return xbar
 
+
+    @classmethod
+    def logit(cls, x):
+        """ computes y = logit(x) in UTP arithmetic"""
+        return cls.log(x) - cls.log(1-x)
+
+    @classmethod
+    def pb_logit(cls, ybar, x, y, out=None):
+        """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
+
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar, = out
+
+        xbar += ybar / (x * (1. - x))
+
+        return xbar
+
+
+    @classmethod
+    def expit(cls, x):
+        """ computes y = expit(x) in UTP arithmetic"""
+        return 1. / (1. + cls.exp(-x))
+
+    @classmethod
+    def pb_expit(cls, ybar, x, y, out=None):
+        """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
+
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar, = out
+
+        xbar += ybar * cls.expit(x) * cls.expit(-x)
+
+        return xbar
 
 
     def sum(self, axis=None, dtype=None, out=None):

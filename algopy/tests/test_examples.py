@@ -272,12 +272,6 @@ class Test_RemovableSingularities(TestCase):
         assert_array_almost_equal(z.data, zdata)
 
     def test_example_z_stable(self):
-        #FIXME: this is no longer necessary if the scipy workaround is ok
-        #try:
-            #import mpmath
-        #except:
-            #return
-
         xdata = numpy.array([0., 1., 0., 0.]).reshape(4, 1)
         zdata = numpy.array([1., 0., -1./6., 0]).reshape(4, 1)
         x = UTPM(xdata)
@@ -299,7 +293,30 @@ class Test_RemovableSingularities(TestCase):
         assert_array_almost_equal(w.data, wdata)
 
 
+class Test_BroadcastingStrangeness(TestCase):
+
+    def test_broadcasting_strangeness(self):
+
+        Q = numpy.random.rand(4, 4)
+        w = numpy.random.rand(4)
+        t = numpy.random.rand(1)
+
+        # Broadcast multiplication gives the same answer as dotting.
+        x = t
+        v = x * w
+        M_broadcast = Q * v
+        M_dot_diag = dot(Q, diag(v))
+        assert_array_almost_equal(M_broadcast, M_dot_diag)
+
+        # But not when I start using AlgoPy with nonzero Taylor degree.
+        # Maybe I am doing it wrong.
+        x = UTPM.init_jacobian(t)
+        v = x * w
+        M_broadcast = Q * v
+        M_dot_diag = dot(Q, diag(v))
+        assert_array_almost_equal(M_broadcast.data, M_dot_diag.data)
+
+
 if __name__ == "__main__":
     run_module_suite()
-
 

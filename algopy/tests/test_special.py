@@ -23,16 +23,29 @@ class Test_ScipySpecialFunctions(TestCase):
         y3 = hyp1f1(a, b, x)
         assert_almost_equal(y1, y3.x)
 
+    def test_hyp2f0(self):
+        """
+        check that algopy.special.hyp2f0 can be called with
+        UTPM and Function instances as arguments
+        """
+
+        # use small x to ameliorate convergence issues
+        a1, a2, x = 1., 2., 0.03
+        y1 = hyp2f0(a1, a2, x)
+
+        a1, a2, x = 1., 2., UTPM(0.03* numpy.ones((1,1)))
+        y2 = hyp2f0(a1, a2, x)
+        assert_almost_equal(y1, y2.data[0,0])
+
+        a1, a2, x = 1., 2., Function(0.03)
+        y3 = hyp2f0(a1, a2, x)
+        assert_almost_equal(y1, y3.x)
+
     def test_hyp0f1(self):
         """
         check that algopy.special.hyp0f1 can be called with
         UTPM and Function instances as arguments
         """
-
-        try:
-            import mpmath
-        except:
-            return
 
         b, x = 2., 3.
         y1 = hyp0f1(b, x)
@@ -96,8 +109,39 @@ class Test_ScipySpecialFunctions(TestCase):
         y3 = dawsn(x)
         assert_almost_equal(y1, y3.x)
 
+    def test_logit(self):
+        """
+        check that algopy.special.logit can be called with
+        UTPM and Function instances as arguments
+        """
 
+        x = 3.
+        y1 = logit(x)
 
+        x = UTPM(3.* numpy.ones((1,1)))
+        y2 = logit(x)
+        assert_almost_equal(y1, y2.data[0,0])
+
+        x = Function(3.)
+        y3 = logit(x)
+        assert_almost_equal(y1, y3.x)
+
+    def test_expit(self):
+        """
+        check that algopy.special.expit can be called with
+        UTPM and Function instances as arguments
+        """
+
+        x = 3.
+        y1 = expit(x)
+
+        x = UTPM(3.* numpy.ones((1,1)))
+        y2 = expit(x)
+        assert_almost_equal(y1, y2.data[0,0])
+
+        x = Function(3.)
+        y3 = expit(x)
+        assert_almost_equal(y1, y3.x)
 
 
 if __name__ == "__main__":
