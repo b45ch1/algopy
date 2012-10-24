@@ -78,3 +78,55 @@ def dawsn(x):
 
 dawsn.__doc__ += scipy.special.dawsn.__doc__
 
+
+def logit(x):
+    """
+    generic implementation of
+
+    y = logit(x)
+
+    x:      either a
+
+            * float
+            * numpy.ndarray
+            * algopy.UTPM
+            * algopy.Function
+
+            instance.
+
+
+    """
+
+    if hasattr(x.__class__, 'logit'):
+        return x.__class__.logit(x)
+    else:
+        return scipy.special.logit(x)
+
+logit.__doc__ += scipy.special.logit.__doc__
+
+
+def expit(x):
+    """
+    generic implementation of
+
+    y = expit(x)
+
+    x:      either a
+
+            * float
+            * numpy.ndarray
+            * algopy.UTPM
+            * algopy.Function
+
+            instance.
+
+
+    """
+
+    if hasattr(x.__class__, 'expit'):
+        return x.__class__.expit(x)
+    else:
+        return scipy.special.expit(x)
+
+expit.__doc__ += scipy.special.expit.__doc__
+

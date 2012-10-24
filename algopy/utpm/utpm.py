@@ -643,7 +643,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         b = 3. / 2.
         return 2 * x * cls.hyp1f1(a, b, -x*x) / math.sqrt(math.pi)
 
-
     @classmethod
     def pb_erf(cls, ybar, x, y, out=None):
         """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
@@ -665,7 +664,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         """ computes y = erfi(x) in UTP arithmetic"""
         return 2 * x * cls.hyp1f1(0.5, 1.5, x*x) / math.sqrt(math.pi)
 
-
     @classmethod
     def pb_erfi(cls, ybar, x, y, out=None):
         """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
@@ -681,11 +679,11 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         return xbar
 
+
     @classmethod
     def dawsn(cls, x):
         """ computes y = dawsn(x) in UTP arithmetic"""
         return x * cls.hyp1f1(1., 1.5, -x*x)
-
 
     @classmethod
     def pb_dawsn(cls, ybar, x, y, out=None):
@@ -702,6 +700,47 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         return xbar
 
+
+    @classmethod
+    def logit(cls, x):
+        """ computes y = logit(x) in UTP arithmetic"""
+        return cls.log(x) - cls.log(1-x)
+
+    @classmethod
+    def pb_logit(cls, ybar, x, y, out=None):
+        """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
+
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar, = out
+
+        xbar += ybar / (x * (1. - x))
+
+        return xbar
+
+
+    @classmethod
+    def expit(cls, x):
+        """ computes y = expit(x) in UTP arithmetic"""
+        return 1. / (1. + cls.exp(-x))
+
+    @classmethod
+    def pb_expit(cls, ybar, x, y, out=None):
+        """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
+
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar, = out
+
+        xbar += ybar * cls.expit(x) * cls.expit(-x)
+
+        return xbar
 
 
     def sum(self, axis=None, dtype=None, out=None):

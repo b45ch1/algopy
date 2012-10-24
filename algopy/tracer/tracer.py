@@ -1169,6 +1169,14 @@ class Function(Ring):
     def dawsn(cls, x):
         return Function.pushforward(algopy.special.dawsn, [x])
 
+    @classmethod
+    def logit(cls, x):
+        return Function.pushforward(algopy.special.logit, [x])
+
+    @classmethod
+    def expit(cls, x):
+        return Function.pushforward(algopy.special.expit, [x])
+
 
     # #########################################################
     # misc functions (not well tested, if at all)
