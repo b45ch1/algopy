@@ -316,6 +316,39 @@ class Test_BroadcastingStrangeness(TestCase):
         M_dot_diag = dot(Q, diag(v))
         assert_array_almost_equal(M_broadcast.data, M_dot_diag.data)
 
+    def test_broadcasting_add(self):
+        Q_data = numpy.random.rand(2,1,4, 4)
+        Q = UTPM(Q_data)
+        v = numpy.random.rand(4)
+        actual   = (Q+v).data[0,0]
+        expected = Q_data[0,0,...] + v
+        assert_allclose(expected, actual)
+
+    def test_broadcasting_sub(self):
+        Q_data = numpy.random.rand(2,1,4, 4)
+        Q = UTPM(Q_data)
+        v = numpy.random.rand(4)
+        actual   = (Q-v).data[0,0]
+        expected = Q_data[0,0,...] - v
+        assert_allclose(expected, actual)
+
+    def test_broadcasting_mul(self):
+        Q_data = numpy.random.rand(2,1,4, 4)
+        Q = UTPM(Q_data)
+        v = numpy.random.rand(4)
+        actual   = (Q*v).data[0,0]
+        expected = Q_data[0,0,...] * v
+        assert_allclose(expected, actual)
+
+    def test_broadcasting_div(self):
+        Q_data = numpy.random.rand(2,1,4, 4)
+        Q = UTPM(Q_data)
+        v = numpy.random.rand(4)
+        actual   = (Q/v).data[0,0]
+        expected = Q_data[0,0,...] / v
+        assert_allclose(expected, actual)
+
+
 
 if __name__ == "__main__":
     run_module_suite()

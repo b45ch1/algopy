@@ -294,9 +294,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             rhs_shape = rhs.shape
             if numpy.isscalar(rhs_shape):
                 rhs_shape = (rhs_shape,)
-            retval = (self.data.T * rhs.reshape((1,1) + rhs_shape).T).T
-            return UTPM(retval.copy())
-
+            x_data, y_data = UTPM._broadcast_arrays(self.data, rhs.reshape((1,1)+rhs_shape))
+            return UTPM(x_data * y_data)
 
         x_data, y_data = UTPM._broadcast_arrays(self.data, rhs.data)
         z_data = numpy.zeros_like(x_data)
@@ -310,11 +309,12 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         elif isinstance(rhs,numpy.ndarray) and rhs.dtype == object:
             raise NotImplementedError('should implement that')
 
-        elif isinstance(rhs, numpy.ndarray):
+        elif isinstance(rhs,numpy.ndarray):
             rhs_shape = rhs.shape
             if numpy.isscalar(rhs_shape):
                 rhs_shape = (rhs_shape,)
-            return UTPM((self.data.T / rhs.reshape((1,1) + rhs_shape ).T).T )
+            x_data, y_data = UTPM._broadcast_arrays(self.data, rhs.reshape((1,1)+rhs_shape))
+            return UTPM(x_data / y_data)
 
         x_data, y_data = UTPM._broadcast_arrays(self.data, rhs.data)
         z_data = numpy.zeros_like(x_data)
