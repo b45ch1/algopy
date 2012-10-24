@@ -4,6 +4,7 @@ import algopy
 import operator
 from algopy.base_type import Ring
 
+class PlotError(Exception): pass
 
 class NotSet:
     def __init__(self, descr=None):
@@ -568,7 +569,8 @@ class CGraph:
 
         return self.independentFunctionList[0].xbar.data[1,0,:]
 
-    def plot(self, filename = None, method = None, orientation = 'TD'):
+    def plot(self, filename='computational_graph.png', method='dot',
+            orientation='TB'):
         """
         accepted filenames, e.g.:
         filename =
@@ -584,40 +586,41 @@ class CGraph:
         method = 'neato'
 
         accepted orientations:
+        orientation = 'TB'
         orientation = 'LR'
-        orientation = 'TD'
+        orientation = 'BT'
+        orientation = 'RL'
         """
 
         try:
             import yapgvb
-
         except:
-            print 'you will need yapgvb to plot graphs'
-            return
+            raise PlotError('you will need yapgvb to plot graphs')
 
         import os
 
-        method_list = ['dot','circo','fdp','twopi','neato']
+        supported_extensions = list(yapgvb.formats)
+        extension = os.path.splitext(filename)[1][1:]
+        if extension not in supported_extensions:
+            raise PlotError(
+                'Unsupported output graphics file extension.\n'
+                'Supported extensions: ' + str(supported_extensions))
 
-        # checking filename and converting appropriately
-        if filename == None:
-            filename = 'computational_graph.png'
+        supported_methods = list(yapgvb.engines)
+        if method not in supported_methods:
+            raise PlotError(
+                'Unsupported graph layout method.\n'
+                'Supported layout methods: ' + str(supported_methods))
 
-        if orientation != 'LR' and orientation != 'TD' :
-            orientation = 'TD'
-
-        if not any([method == m for m in method_list]):
-            method = 'dot'
-        name, extension = filename.split('.')
-        if extension != 'png' and extension != 'svg':
-            print 'Only *.png or *.svg are supported formats!'
-            print 'Using *.png now'
-            extension = 'png'
-
-        # print 'name=',name, 'extension=', extension
+        supported_orientations = ['TB', 'LR', 'BT', 'RL']
+        if orientation not in supported_orientations:
+            raise PlotError(
+                'Unsupported graph layout orientation.\n'
+                'Supported layout orientations: ' + str(supported_orientations))
 
         # setting the style for the nodes
         g = yapgvb.Digraph('someplot')
+        g.rankdir = orientation
 
         # add nodes
         for f in self.functionList:
@@ -644,7 +647,8 @@ class CGraph:
             nodes[f.ID].shape = yapgvb.shapes.octagon
 
         g.layout(method)
-        g.render(filename)
+        g.render(filename, format=extension)
+
 
 class Function(Ring):
 
