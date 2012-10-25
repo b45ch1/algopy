@@ -159,8 +159,7 @@ class Test_MaximimLikelihoodExample(TestCase):
         assert_array_almost_equal(self.eval_hess_f_eigh(Y), self.eval_hess_f(Y))
 
 
-
-    @knownfailureif(numpy.__version__[:3] != 1.4, msg = " this test fails at Q = Q * v because of the numpy broadcasting bug")
+    @dec.skipif(float(numpy.__version__[:3]) > 1.5, msg =  "numpy.versions > 1.5 have a bug in iadd of zero-strided arrays, skipping test")
     def test_ml_with_expm_gradient_reverse(self):
         # test reverse mode
 

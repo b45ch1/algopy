@@ -997,6 +997,7 @@ class Test_CGgraph_on_UTPM(TestCase):
         assert_array_almost_equal(xbar_correct.data, fx.xbar.data)
 
 
+    @dec.skipif(float(numpy.__version__[:3]) > 1.5, msg =  "numpy.versions > 1.5 have a bug in iadd of zero-strided arrays, skipping test")
     def test_broadcasting1(self):
         D,P,N = 2,1,2
         x = UTPM(numpy.random.rand(D,P,N,1))
@@ -1018,6 +1019,7 @@ class Test_CGgraph_on_UTPM(TestCase):
         assert_array_almost_equal(numpy.sum(z.x.data[1,0] * zbar.data[0,0]), numpy.sum(x.x.data[1,0] * x.xbar.data[0,0]) + numpy.sum(A.x.data[1,0] * A.xbar.data[0,0]))
 
 
+    @dec.skipif(float(numpy.__version__[:3]) > 1.5, msg =  "numpy.versions > 1.5 have a bug in iadd of zero-strided arrays, skipping test")
     def test_broadcasting2(self):
         D,P,N = 2,1,2
         x = UTPM(numpy.random.rand(D,P,N,1))
@@ -1035,6 +1037,7 @@ class Test_CGgraph_on_UTPM(TestCase):
         cg.pullback([zbar])
         assert_array_almost_equal(numpy.sum(z.x.data[1,0] * zbar.data[0,0]), numpy.sum(x.x.data[1,0] * x.xbar.data[0,0]) + numpy.sum(A.x.data[1,0] * A.xbar.data[0,0]))
 
+    @dec.skipif(float(numpy.__version__[:3]) > 1.5, msg =  "numpy.versions > 1.5 have a bug in iadd of zero-strided arrays, skipping test")
     def test_broadcasting3(self):
         D,P = 2,1
         x = UTPM(numpy.random.rand(D,P,2,3))
@@ -1054,6 +1057,7 @@ class Test_CGgraph_on_UTPM(TestCase):
         print y.xbar.data[0,0]
         print x.xbar.data[0,0]
         assert_array_almost_equal(numpy.sum(z.x.data[1,0] * zbar.data[0,0]), numpy.sum(x.x.data[1,0] * x.xbar.data[0,0]) + numpy.sum(y.x.data[1,0] * y.xbar.data[0,0]))
+
 
     def test_eigh1_pullback(self):
         (D,P,N) = 2,1,2
