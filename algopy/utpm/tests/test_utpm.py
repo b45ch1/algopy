@@ -775,6 +775,17 @@ class Test_Push_Forward(TestCase):
 
         assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
+    def test_expit_logit(self):
+        D,P,N,M = 5,3,4,5
+        x = UTPM(numpy.random.randn(D,P,M,N))
+
+        y = UTPM.expit(x)
+        x2 = UTPM.logit(y)
+        y2 = UTPM.expit(x2)
+
+        assert_allclose(x.data, x2.data)
+        assert_allclose(y.data, y2.data)
+
     def test_abs(self):
         D,P,N = 4,3,12
         tmp = numpy.random.rand(D,P,N,N) - 0.5
