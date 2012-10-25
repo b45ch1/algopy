@@ -294,6 +294,9 @@ class Test_RemovableSingularities(TestCase):
 
 
 class Test_BroadcastingStrangeness(TestCase):
+    """
+    This test case was used to track down a bug which has now been fixed.
+    """
 
     def test_broadcasting_strangeness(self):
 
@@ -301,15 +304,12 @@ class Test_BroadcastingStrangeness(TestCase):
         w = numpy.random.rand(4)
         t = numpy.random.rand(1)
 
-        # Broadcast multiplication gives the same answer as dotting.
         x = t
         v = x * w
         M_broadcast = Q * v
         M_dot_diag = dot(Q, diag(v))
         assert_array_almost_equal(M_broadcast, M_dot_diag)
 
-        # But not when I start using AlgoPy with nonzero Taylor degree.
-        # Maybe I am doing it wrong.
         x = UTPM.init_jacobian(t)
         v = x * w
         M_broadcast = Q * v
