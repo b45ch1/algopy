@@ -293,9 +293,13 @@ class Test_RemovableSingularities(TestCase):
         assert_array_almost_equal(w.data, wdata)
 
 
-class Test_BroadcastingStrangeness(TestCase):
 
-    def test_broadcasting_strangeness(self):
+
+
+
+class Test_Broadcasting(TestCase):
+
+    def test_broadcasting1(self):
 
         Q = numpy.random.rand(4, 4)
         w = numpy.random.rand(4)
@@ -317,37 +321,52 @@ class Test_BroadcastingStrangeness(TestCase):
         assert_array_almost_equal(M_broadcast.data, M_dot_diag.data)
 
     def test_broadcasting_add(self):
+        """ test broadcasting between UTPM and ndarray instance"""
         Q_data = numpy.random.rand(2,1,4, 4)
         Q = UTPM(Q_data)
         v = numpy.random.rand(4)
         actual   = (Q+v).data[0,0]
         expected = Q_data[0,0,...] + v
         assert_allclose(expected, actual)
+        actual   = (Q+v).data[1,0]
+        expected = Q_data[1,0,...]
+        assert_allclose(expected, actual)
 
     def test_broadcasting_sub(self):
+        """ test broadcasting between UTPM and ndarray instance"""
         Q_data = numpy.random.rand(2,1,4, 4)
         Q = UTPM(Q_data)
         v = numpy.random.rand(4)
         actual   = (Q-v).data[0,0]
         expected = Q_data[0,0,...] - v
         assert_allclose(expected, actual)
+        actual   = (Q-v).data[1,0]
+        expected = Q_data[1,0,...]
+        assert_allclose(expected, actual)
 
     def test_broadcasting_mul(self):
+        """ test broadcasting between UTPM and ndarray instance"""
         Q_data = numpy.random.rand(2,1,4, 4)
         Q = UTPM(Q_data)
         v = numpy.random.rand(4)
         actual   = (Q*v).data[0,0]
         expected = Q_data[0,0,...] * v
         assert_allclose(expected, actual)
+        actual   = (Q*v).data[1,0]
+        expected = Q_data[1,0,...] * v
+        assert_allclose(expected, actual)
 
     def test_broadcasting_div(self):
+        """ test broadcasting between UTPM and ndarray instance"""
         Q_data = numpy.random.rand(2,1,4, 4)
         Q = UTPM(Q_data)
         v = numpy.random.rand(4)
         actual   = (Q/v).data[0,0]
         expected = Q_data[0,0,...] / v
         assert_allclose(expected, actual)
-
+        actual   = (Q/v).data[1,0]
+        expected = Q_data[1,0,...] / v
+        assert_allclose(expected, actual)
 
 
 if __name__ == "__main__":
