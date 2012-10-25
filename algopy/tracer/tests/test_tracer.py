@@ -525,6 +525,30 @@ class Test_CGgraph_on_UTPM(TestCase):
             assert_almost_equal(numpy.trace(numpy.dot(Ab.T,Ad)), numpy.trace(numpy.dot(Qb.T,Qd) + numpy.dot(Rb.T,Rd)))
 
 
+    def test_pullback5(self):
+        cg = CGraph()
+        x = UTP([3.])
+        y = UTP([7.])
+        fx = Function(x)
+        fy = Function(y)
+        fv1 = fx * fy
+        fv2 = (fv1 * fx + fy)*fv1
+        cg.independentFunctionList = [fx,fy]
+        cg.dependentFunctionList = [fv2]
+
+        v2bar = UTP([1.])
+        cg.pullback([v2bar])
+
+        xbar_reverse = cg.independentFunctionList[0].xbar
+        ybar_reverse = cg.independentFunctionList[1].xbar
+
+        xbar_symbolic = 3 * x**2 * y**2 + y**2
+        ybar_symbolic = 2*x**3 * y + 2 * x * y
+
+        assert_almost_equal(xbar_reverse.data, xbar_symbolic.data)
+        assert_almost_equal(ybar_reverse.data, ybar_symbolic.data)
+
+
     def test_pullback_inv(self):
         """
         test pullback on

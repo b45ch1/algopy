@@ -2,53 +2,6 @@ import numpy
 import numpy.testing
 import algopy
 
-
-def utps2base_and_dirs(x):
-    """
-    Conversion function from algopy.utps to adolc.hov_forward input argument format.
-
-    This function converts a 1D array of UTPS instances to the format (y,W)
-    where x is an (Nx,)-array and W an (Nx,P,D-1) array.
-
-    (y,W) is the input format for adolc.hov_forward
-    D is the largest degree of the polynomial, i.e. t^D
-    """
-    Nx = numpy.shape(x)[0]
-    D,P = numpy.shape(x[0].data)
-
-
-    y = numpy.zeros(Nx,dtype=float)
-    W = numpy.zeros((Nx,P,D-1))
-
-    for nx in range(Nx):
-        y[nx] = x[nx].data[0,0]
-        W[nx,:,:] = x[nx].data[1:,:].T
-
-    return (y,W)
-
-
-def base_and_dirs2utps(x,V):
-    """
-    this function converts (x,V) to an Nx array of UTPS instances.
-    where x is an (Nx,)-array and V an (Nx,P,D-1) array.
-    (x,V) is the input format for adolc.hov_forward
-
-    D is the largest degree of the polynomial, i.e. t^D
-    """
-
-    Nx = numpy.shape(x)[0]
-    (Nx2,P,D) = numpy.shape(V)
-    D += 1
-    assert Nx == Nx2
-
-    y = []
-    for nx in range(Nx):
-        tmp = numpy.zeros((D,P),dtype=float)
-        tmp[0,:]  = x[nx]
-        tmp[1:,:] = V[nx,:,:].T
-        y.append(UTPS(tmp))
-    return numpy.array(y)
-
 def utpm2dirs(u):
     """
     Vbar = utpm2dirs(u)
