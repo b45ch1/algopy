@@ -1429,25 +1429,25 @@ class Test_CGgraph_on_UTPM(TestCase):
         """
 
         def f(x):
-            v1 = x**2 + 3.
+            v1 = x**2 + 0.1
             y = algopy.special.logit(v1)
             return y
 
         # use CGraph
 
         cg = CGraph()
-        x = Function(numpy.array([1.]))
+        x = Function(numpy.array([0.2]))
         y = f(x)
 
         cg.independentFunctionList = [x]
         cg.dependentFunctionList = [y]
 
-        result1 = cg.jac_vec(numpy.array([2.]), numpy.array([1.]))
-        result2 = cg.jacobian(numpy.array([2.]))[0]
+        result1 = cg.jac_vec(numpy.array([0.2]), numpy.array([1.]))
+        result2 = cg.jacobian(numpy.array([0.2]))[0]
 
         # use UTPM
 
-        x = UTPM.init_jacobian(numpy.array([2.]))
+        x = UTPM.init_jacobian(numpy.array([0.2]))
         y = f(x)
         result3 = UTPM.extract_jacobian(y)[0]
 

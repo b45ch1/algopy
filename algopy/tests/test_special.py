@@ -114,15 +114,15 @@ class Test_ScipySpecialFunctions(TestCase):
         check that algopy.special.logit can be called with
         UTPM and Function instances as arguments
         """
-
-        x = 3.
+        p= 0.5
+        x = p
         y1 = logit(x)
 
-        x = UTPM(3.* numpy.ones((1,1)))
+        x = UTPM(p* numpy.ones((1,1)))
         y2 = logit(x)
         assert_almost_equal(y1, y2.data[0,0])
 
-        x = Function(3.)
+        x = Function(p)
         y3 = logit(x)
         assert_almost_equal(y1, y3.x)
 

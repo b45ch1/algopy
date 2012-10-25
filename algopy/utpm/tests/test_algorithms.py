@@ -24,7 +24,7 @@ class Test_Helper_Functions(TestCase):
 
         assert_array_almost_equal(R,R2)
         assert_array_almost_equal(S,S2)
-       
+
     def test_triple_truncated_dot(self):
         D,P,N,M = 3,1,1,1
         A = numpy.random.rand(D,P,N,M)
@@ -46,19 +46,19 @@ class Test_Helper_Functions(TestCase):
             A[2]*B[1]*C[0] + A[2]*B[0]*C[1]
         R = truncated_triple_dot(A,B,C, 3)
 
-        assert_array_almost_equal(R,S)       
-        
-        
+        assert_array_almost_equal(R,S)
+
+
     def test_broadcast_arrays_shape(self):
         D,P = 3,4
-        
+
         y_shp = (D,P)
         x_shp = (D,P)
         z_shp1 = broadcast_arrays_shape(x_shp, y_shp)
         z_shp2 = broadcast_arrays_shape(y_shp, x_shp)
         assert_array_equal((D,P), z_shp1)
         assert_array_equal((D,P), z_shp2)
-        
+
         y_shp = (D,P,1)
         x_shp = (D,P)
         z_shp1 = broadcast_arrays_shape(x_shp, y_shp)
@@ -72,28 +72,28 @@ class Test_Helper_Functions(TestCase):
         z_shp2 = broadcast_arrays_shape(y_shp, x_shp)
         assert_array_equal((D,P,1,2,3), z_shp1)
         assert_array_equal((D,P,1,2,3), z_shp2)
-        
+
         y_shp = (D,P,1,2,3)
         x_shp = (D,P,3,1,1)
         z_shp1 = broadcast_arrays_shape(x_shp, y_shp)
         z_shp2 = broadcast_arrays_shape(y_shp, x_shp)
         assert_array_equal((D,P,3,2,3), z_shp1)
-        assert_array_equal((D,P,3,2,3), z_shp2)          
-        
+        assert_array_equal((D,P,3,2,3), z_shp2)
+
         y_shp = (D,P,7, 1,2,3)
         x_shp = (D,P,3,1,1)
         z_shp1 = broadcast_arrays_shape(x_shp, y_shp)
         z_shp2 = broadcast_arrays_shape(y_shp, x_shp)
         assert_array_equal((D,P,7,3,2,3), z_shp1)
         assert_array_equal((D,P,7,3,2,3), z_shp2)
-        
+
         y_shp = (D,P,7, 1,2,3)
         x_shp = (D,P,3,1,1)
         z_shp1 = broadcast_arrays_shape(x_shp, y_shp)
         z_shp2 = broadcast_arrays_shape(y_shp, x_shp)
         assert_array_equal((D,P,7,3,2,3), z_shp1)
-        assert_array_equal((D,P,7,3,2,3), z_shp2)          
-        
+        assert_array_equal((D,P,7,3,2,3), z_shp2)
+
 
 
 class Test_pushforward_class_functions(TestCase):
@@ -134,7 +134,7 @@ class Test_pushforward_class_functions(TestCase):
         X_data = numpy.random.rand(D,P,N,M)
         Y_data = UTPM._transpose(X_data)
 
-        assert_array_almost_equal(X_data.transpose((0,1,3,2)), Y_data) 
+        assert_array_almost_equal(X_data.transpose((0,1,3,2)), Y_data)
 
 
 
