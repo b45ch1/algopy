@@ -1757,7 +1757,10 @@ class RawAlgorithmsMixIn:
             lam0 = numpy.diag(Lam_data[0,p])
 
             E[p] += lam0;  E[p] = (E[p].T - lam0).T
+
+        numpy.seterr(divide='ignore')
         H = 1./E
+        numpy.seterr(divide='warn')
         for p in range(P):
             b = b_list[p]
             for nb in range(b.size-1):
