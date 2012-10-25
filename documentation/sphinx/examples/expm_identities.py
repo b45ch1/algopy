@@ -55,21 +55,7 @@ def expm_tS_v3(t, S):
     # Compute the eigendecomposition using a Taylor-naive eigh.
     L, Q = numpy.linalg.eigh(S)
 
-    # Construct a one dimensional array that is Taylor-aware.
-    etl = exp(t * L)
-    print etl.ndim
-    print etl.shape
-    print type(etl)
-    print etl
-
-    # FIXME: this uses broadcasting and seems to give the wrong answer
-    M = Q * etl
-
-    # FIXME: this does not use so much broadcasting but seems to be right
-    #M = dot(Q, diag(etl))
-
-    return dot(M, Q.T)
-
+    return dot(Q * exp(t * L), Q.T)
 
 
 def create_random_symmetric_matrix():
@@ -86,8 +72,8 @@ class Test_ExpmScaledSymmetric(TestCase):
         raw_v1 = expm_tS_v1(t, S)
         raw_v2 = expm_tS_v2(t, S)
         raw_v3 = expm_tS_v3(t, S)
-        assert_array_almost_equal(raw_v1, raw_v2)
-        assert_array_almost_equal(raw_v1, raw_v3)
+        assert_allclose(raw_v1, raw_v2)
+        assert_allclose(raw_v1, raw_v3)
 
     def test_d1(self):
         S = create_random_symmetric_matrix()
@@ -96,13 +82,13 @@ class Test_ExpmScaledSymmetric(TestCase):
         raw_v1 = expm_tS_v1(t_grad, S)
         raw_v2 = expm_tS_v2(t_grad, S)
         raw_v3 = expm_tS_v3(t_grad, S)
-        assert_array_almost_equal(raw_v1.data, raw_v2.data)
-        assert_array_almost_equal(raw_v1.data, raw_v3.data)
+        assert_allclose(raw_v1.data, raw_v2.data)
+        assert_allclose(raw_v1.data, raw_v3.data)
         grad_v1 = UTPM.extract_jacobian(sum(raw_v1))
         grad_v2 = UTPM.extract_jacobian(sum(raw_v2))
         grad_v3 = UTPM.extract_jacobian(sum(raw_v3))
-        assert_array_almost_equal(grad_v1, grad_v2)
-        assert_array_almost_equal(grad_v1, grad_v3)
+        assert_allclose(grad_v1, grad_v2)
+        assert_allclose(grad_v1, grad_v3)
 
     def test_d2(self):
         S = create_random_symmetric_matrix()
@@ -111,13 +97,13 @@ class Test_ExpmScaledSymmetric(TestCase):
         raw_v1 = expm_tS_v1(t_hess, S)
         raw_v2 = expm_tS_v2(t_hess, S)
         raw_v3 = expm_tS_v3(t_hess, S)
-        assert_array_almost_equal(raw_v1.data, raw_v2.data)
-        assert_array_almost_equal(raw_v1.data, raw_v3.data)
+        assert_allclose(raw_v1.data, raw_v2.data)
+        assert_allclose(raw_v1.data, raw_v3.data)
         hess_v1 = UTPM.extract_hessian(1, sum(raw_v1))
         hess_v2 = UTPM.extract_hessian(1, sum(raw_v2))
         hess_v3 = UTPM.extract_hessian(1, sum(raw_v3))
-        assert_array_almost_equal(hess_v1, hess_v2)
-        assert_array_almost_equal(hess_v1, hess_v3)
+        assert_allclose(hess_v1, hess_v2)
+        assert_allclose(hess_v1, hess_v3)
 
 
 if __name__ == "__main__":
