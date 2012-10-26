@@ -1034,6 +1034,9 @@ class Function(Ring):
     def exp(self):
          return Function.pushforward(algopy.exp, [self])
 
+    def expm1(self):
+         return Function.pushforward(algopy.expm1, [self])
+
     def sin(self):
          return Function.pushforward(algopy.sin, [self])
 

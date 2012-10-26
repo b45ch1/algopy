@@ -377,6 +377,28 @@ class Test_Push_Forward(TestCase):
         Z = UTPM.log(Y)
         assert_array_almost_equal(X.data, Z.data)
 
+    def test_expm1(self):
+        D,P,N = 4,2,2
+        X = UTPM(numpy.random.randn(D,P,N,N))
+        X.data[1] = 1.
+        Y = UTPM.expm1(X)
+        Z = UTPM.exp(X) - 1.
+        assert_allclose(Y.data, Z.data)
+
+    def test_expm1_near_zero(self):
+        D,P,N = 2,1,1
+        eps = 1e-8
+        X = UTPM(numpy.array([eps, 1.]).reshape((D,P,N,N)))
+        Y = UTPM.expm1(X)
+        assert_array_less(eps, Y.data[0,0,0,0])
+
+    def test_exp_minus_one_near_zero(self):
+        D,P,N = 2,1,1
+        eps = 1e-8
+        X = UTPM(numpy.array([eps, 1.]).reshape((D,P,N,N)))
+        Y = UTPM.exp(X) - 1.
+        assert_array_less(Y.data[0,0,0,0], eps)
+
     def test_pow(self):
         D,P,N = 4,2,2
         X = UTPM(numpy.random.rand(D,P,N,N))
@@ -774,6 +796,17 @@ class Test_Push_Forward(TestCase):
         xbar = UTPM.pb_expit(ybar, x, y)
 
         assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
+
+    def test_expit_logit(self):
+        D,P,N,M = 5,3,4,5
+        x = UTPM(numpy.random.randn(D,P,M,N))
+
+        y = UTPM.expit(x)
+        x2 = UTPM.logit(y)
+        y2 = UTPM.expit(x2)
+
+        assert_allclose(x.data, x2.data)
+        assert_allclose(y.data, y2.data)
 
     def test_abs(self):
         D,P,N = 4,3,12

@@ -370,6 +370,29 @@ class RawAlgorithmsMixIn:
         cls._amul(ybar_data, y_data, xbar_data)
 
     @classmethod
+    def _expm1(cls, x_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        y_data = out
+        D,P = x_data.shape[:2]
+        y_data[0] = numpy.exp(x_data[0])
+        xtctilde = x_data[1:].copy()
+        for d in range(1,D):
+            xtctilde[d-1] *= d
+        for d in range(1, D):
+            y_data[d] = numpy.sum(y_data[:d][::-1]*xtctilde[:d], axis=0)/d
+        y_data[0] = numpy.expm1(x_data[0])
+        return y_data
+
+    @classmethod
+    def _pb_expm1(cls, ybar_data, x_data, y_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+
+        xbar_data = out
+        cls._amul(ybar_data, y_data, xbar_data)
+
+    @classmethod
     def _pb_sqrt(cls, ybar_data, x_data, y_data, out = None):
         if out == None:
             raise NotImplementedError('should implement that')
