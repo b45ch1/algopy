@@ -7,11 +7,12 @@ from algopy import UTPM
 from algopy import Function
 
 # override numpy definitions
-numpy_function_names = ['sin','cos','tan', 'exp', 'log', 'sqrt', 'pow',
-                        'arcsin', 'arccos', 'arctan',
-                        'sinh', 'cosh', 'tanh',
-                        'trace', 'diag',
-                        'triu', 'tril', 'reshape']
+numpy_function_names = [
+        'sin','cos','tan', 'exp', 'expm1', 'log', 'sqrt', 'pow',
+        'arcsin', 'arccos', 'arctan',
+        'sinh', 'cosh', 'tanh',
+        'trace', 'diag',
+        'triu', 'tril', 'reshape']
 
 
 function_template = string.Template('''

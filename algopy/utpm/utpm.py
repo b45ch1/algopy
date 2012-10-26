@@ -473,6 +473,26 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         cls._pb_exp(ybar.data, x.data, y.data, out = xbar.data)
         return out
 
+    def expm1(self):
+        """ computes y = expm1(x) in UTP arithmetic"""
+
+        retval = self.clone()
+        self._expm1(self.data, out = retval.data)
+        return retval
+
+    @classmethod
+    def pb_expm1(cls, ybar, x, y, out=None):
+        """ computes bar y dy = bar x dx in UTP arithmetic"""
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar, = out
+
+        cls._pb_expm1(ybar.data, x.data, y.data, out = xbar.data)
+        return out
+
     def log(self):
         """ computes y = log(x) in UTP arithmetic"""
         retval = self.clone()
