@@ -1937,7 +1937,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return xbar
 
     @classmethod
-    def qr(cls, A, out = None, work = None, epsilon = 10**-14):
+    def qr(cls, A, out = None, work = None, epsilon = 1e-14):
         D,P,M,N = numpy.shape(A.data)
         K = min(M,N)
 
@@ -1994,7 +1994,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
 
     @classmethod
-    def eigh(cls, A, out = None, epsilon = 10**-8):
+    def eigh(cls, A, out = None, epsilon = 1e-8):
         """
         computes the eigenvalue decomposition A = Q^T L Q
         of a symmetrical matrix A with distinct eigenvalues
@@ -2017,7 +2017,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return l,Q
 
     @classmethod
-    def eigh1(cls, A, out = None, epsilon = 10**-8):
+    def eigh1(cls, A, out = None, epsilon = 1e-8):
         """
         computes the relaxed eigenvalue decompositin of level 1
         of a symmetrical matrix A with distinct eigenvalues
@@ -2147,7 +2147,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         Nv = v.data[0,0].size
 
         tmp = numpy.sqrt(1 + 8*Nv)
-        if abs(int(tmp) - tmp) > 10**-16:
+        if abs(int(tmp) - tmp) > 1e-16:
             # hackish way to check that the input length of v makes sense
             raise ValueError('size of v does not match any possible symmetric matrix')
         N = (int(tmp) - 1)//2

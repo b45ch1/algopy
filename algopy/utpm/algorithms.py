@@ -224,7 +224,7 @@ class RawAlgorithmsMixIn:
 
         mask = Ellipsis
         while True:
-            mask = numpy.where( abs(y_data[0, mask]) <= 10**-8)
+            mask = numpy.where( abs(y_data[0, mask]) <= 1e-8)
 
             if len(mask[0]) == 0:
                 break
@@ -1390,7 +1390,7 @@ class RawAlgorithmsMixIn:
         return numpy.zeros(shp, dtype = dtype)
 
     @classmethod
-    def _qr(cls,  A_data, out = None,  work = None, epsilon = 10**-14):
+    def _qr(cls,  A_data, out = None,  work = None, epsilon = 1e-14):
         """
         computes the qr decomposition (Q,R) = qr(A)    <===>    QR = A
 
@@ -1431,7 +1431,7 @@ class RawAlgorithmsMixIn:
             cls._qr_rectangular(A_data, out = (Q_data, R_data))
 
     @classmethod
-    def _qr_rectangular(cls,  A_data, out = None,  work = None, epsilon = 10**-14):
+    def _qr_rectangular(cls,  A_data, out = None,  work = None, epsilon = 1e-14):
         """
         computation of qr(A) where A.shape(M,N) with M >= N
 
@@ -1643,7 +1643,7 @@ class RawAlgorithmsMixIn:
 
 
     @classmethod
-    def _eigh(cls, L_data, Q_data, A_data, epsilon = 10**-8, full_output = False):
+    def _eigh(cls, L_data, Q_data, A_data, epsilon = 1e-8, full_output = False):
         """
         computes the eigenvalue decompositon
 
@@ -1731,7 +1731,7 @@ class RawAlgorithmsMixIn:
 
 
     @classmethod
-    def _eigh1(cls, L_data, Q_data, A_data, epsilon = 10**-8, full_output = False):
+    def _eigh1(cls, L_data, Q_data, A_data, epsilon = 1e-8, full_output = False):
         """
         computes the solution of the relaxed problem of order 1
 
@@ -1882,7 +1882,7 @@ class RawAlgorithmsMixIn:
             for n in range(N):
                 for p in range(P):
                     tmp = lam_data[0,p,n] - lam_data[0,p,m]
-                    if numpy.abs(tmp) > 10**-8:
+                    if numpy.abs(tmp) > 1e-8:
                         for d in range(D):
                             H[d,p,m,n] = 1./tmp
                 # tmp = lam_data[:,:,n] -   lam_data[:,:,m]
@@ -2037,7 +2037,7 @@ class RawAlgorithmsMixIn:
             # print 'p=',p
             for n in range(N):
                 # print 'R_data[0,p,n,n]=',R_data[0,p,n,n]
-                if abs(R_data[0,p,n,n]) > 10**-16:
+                if abs(R_data[0,p,n,n]) > 1e-16:
                     rank += 1
             rank_list.append(rank)
 

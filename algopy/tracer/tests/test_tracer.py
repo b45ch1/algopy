@@ -181,7 +181,7 @@ class Test_Function_on_UTPM(TestCase):
 
 
     def test_prod(self):
-        tmp = numpy.array([4.*10**-1,10**-20,3*10**10])
+        tmp = numpy.array([4e-1, 1e-20, 3e10])
 
         cg = CGraph()
         x = Function(tmp)
