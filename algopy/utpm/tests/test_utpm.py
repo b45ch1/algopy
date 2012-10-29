@@ -1003,6 +1003,14 @@ class Test_Push_Forward(TestCase):
         z = abs(x)
         assert_allclose(y.data, z.data)
 
+    #FIXME: this fails; what should abs(x) mean?
+    def test_abs_sign(self):
+        D,P,N,M = 5,3,4,5
+        x = UTPM(numpy.random.randn(D,P,M,N))
+        y = x * UTPM.sign(x)
+        z = abs(x)
+        assert_allclose(y.data, z.data)
+
     def test_abs(self):
         D,P,N = 4,3,12
         tmp = numpy.random.rand(D,P,N,N) - 0.5
