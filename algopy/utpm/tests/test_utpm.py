@@ -978,7 +978,7 @@ class Test_Push_Forward(TestCase):
         assert_allclose(x.data, x2.data)
         assert_allclose(y.data, y2.data)
 
-    def test_sign(self):
+    def test_sign_tanh(self):
         D,P,N,M = 5,3,4,5
 
         # sample random numbers but not too close to zero
@@ -988,6 +988,19 @@ class Test_Push_Forward(TestCase):
         k = 200.
         y = UTPM.tanh(k*x)
         z = UTPM.sign(x)
+        assert_allclose(y.data, z.data)
+
+    #FIXME: this fails; what should abs(x) mean?
+    def test_abs_tanh(self):
+        D,P,N,M = 5,3,4,5
+
+        # sample random numbers but not too close to zero
+        tmp = numpy.random.randn(D,P,M,N)
+        x = UTPM(tmp + 0.1*numpy.sign(tmp))
+
+        k = 200.
+        y = x*UTPM.tanh(k*x)
+        z = abs(x)
         assert_allclose(y.data, z.data)
 
     def test_abs(self):
