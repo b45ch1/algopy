@@ -14,6 +14,9 @@ from algopy.special import *
 # and they put algopy functions like sum and exp in the top level namespace.
 
 
+def heaviside(x):
+    return 0.5*sign(x) + 0.5
+
 
 def nice_fn_a(x):
     """
@@ -53,6 +56,17 @@ def expit_blend(x, f, g, k=60):
     """
     return f(x)*expit(-4*k*x) + g(x)*expit(4*k*x)
 
+def soft_piecewise(x, f, g):
+    """
+    This is soft in the sense that nans or infs may leak through.
+    It is softer than hard_piecewise but not as soft as expit_blend.
+    This should be the limit of expit_blend as k approaches infinity.
+    @param x: independent variable
+    @param f: dominant function when x < 0
+    @param g: dominant function when 0 < x
+    """
+    return f(x)*heaviside(-x) + g(x)*heaviside(x)
+
 def hard_piecewise(x, f, g):
     """
     This function harshly glues together f and g at the origin.
@@ -80,8 +94,10 @@ class Test_Piecewise(TestCase):
         Y = f(X)
         Z = expit_blend(X, f, g)
         W = hard_piecewise(X, f, g)
+        V = soft_piecewise(X, f, g)
         assert_allclose(Y.data, Z.data)
         assert_allclose(Y.data, W.data)
+        assert_allclose(Y.data, V.data)
 
     def test_single_positive_value_nice_fn(self):
         D,P = 4,1
@@ -92,8 +108,10 @@ class Test_Piecewise(TestCase):
         Y = g(X)
         Z = expit_blend(X, f, g)
         W = hard_piecewise(X, f, g)
+        V = soft_piecewise(X, f, g)
         assert_allclose(Y.data, Z.data)
         assert_allclose(Y.data, W.data)
+        assert_allclose(Y.data, V.data)
 
     def test_single_negative_value_weird_fn(self):
         """
@@ -107,8 +125,10 @@ class Test_Piecewise(TestCase):
         Y = f(X)
         #Z = expit_blend(X, f, g)
         W = hard_piecewise(X, f, g)
+        #V = soft_piecewise(X, f, g)
         #assert_allclose(Y.data, Z.data)
         assert_allclose(Y.data, W.data)
+        #assert_allclose(Y.data, V.data)
 
     def test_single_positive_value_weird_fn(self):
         """
@@ -122,8 +142,10 @@ class Test_Piecewise(TestCase):
         Y = g(X)
         #Z = expit_blend(X, f, g)
         W = hard_piecewise(X, f, g)
+        #V = soft_piecewise(X, f, g)
         #assert_allclose(Y.data, Z.data)
         assert_allclose(Y.data, W.data)
+        #assert_allclose(Y.data, V.data)
 
     def test_piecewise_positive(self):
         """
@@ -135,7 +157,9 @@ class Test_Piecewise(TestCase):
         f, g = nice_fn_a, nice_fn_b
         Y = expit_blend(X, f, g)
         Z = hard_piecewise(X, f, g)
+        V = soft_piecewise(X, f, g)
         assert_allclose(Y.data, Z.data)
+        assert_allclose(Y.data, V.data)
 
     def test_piecewise_negative(self):
         """
@@ -147,7 +171,9 @@ class Test_Piecewise(TestCase):
         f, g = nice_fn_a, nice_fn_b
         Y = expit_blend(X, f, g)
         Z = hard_piecewise(X, f, g)
+        V = soft_piecewise(X, f, g)
         assert_allclose(Y.data, Z.data)
+        assert_allclose(Y.data, V.data)
 
     def test_piecewise_mixed_sign(self):
         """
@@ -159,7 +185,9 @@ class Test_Piecewise(TestCase):
         f, g = nice_fn_a, nice_fn_b
         Y = expit_blend(X, f, g)
         Z = hard_piecewise(X, f, g)
+        V = soft_piecewise(X, f, g)
         assert_allclose(Y.data, Z.data)
+        assert_allclose(Y.data, V.data)
 
     def test_positive_and_negative_weird_functions(self):
         """
@@ -179,8 +207,10 @@ class Test_Piecewise(TestCase):
         Y[1] = g(X[1])
         #Z = expit_blend(X, f, g)
         W = hard_piecewise(X, f, g)
+        #V = soft_piecewise(X, f, g)
         #assert_allclose(Y.data, Z.data)
         assert_allclose(Y.data, W.data)
+        #assert_allclose(Y.data, V.data)
 
 
 if __name__ == "__main__":
