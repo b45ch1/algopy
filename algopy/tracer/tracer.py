@@ -1151,10 +1151,17 @@ class Function(Ring):
     # scipy.special functions
     # #########################################################
 
+    @classmethod
+    def dpm_hyp1f1(cls, a, b, x):
+        return Function.pushforward(algopy.special.dpm_hyp1f1, [a, b, x])
 
     @classmethod
     def hyp1f1(cls, a, b, x):
         return Function.pushforward(algopy.special.hyp1f1, [a, b, x])
+
+    @classmethod
+    def dpm_hyp2f0(cls, a1, a2, x):
+        return Function.pushforward(algopy.special.dpm_hyp2f0, [a1, a2, x])
 
     @classmethod
     def hyp2f0(cls, a1, a2, x):

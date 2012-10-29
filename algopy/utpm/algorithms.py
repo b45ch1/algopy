@@ -589,6 +589,68 @@ class RawAlgorithmsMixIn:
         return y_data, z_data
 
     @classmethod
+    def _dpm_hyp1f1(cls, a, b, x_data, out = None):
+        try:
+            import mpmath
+        except ImportError:
+            raise Exception('you need to install mpmath to use dpm_ functions')
+        if out == None:
+            raise NotImplementedError('should implement that')
+        y_data = out
+        y_data[...] = 0.
+        D,P = x_data.shape[:2]
+
+        #FIXME: move this function?
+        def _float_dpm_hyp1f1(a_in, b_in, x_in):
+            value = mpmath.hyp1f1(a_in, b_in, x_in)
+            try:
+                return float(value)
+            except:
+                return numpy.nan
+        _dpm_hyp1f1 = numpy.vectorize(_float_dpm_hyp1f1)
+
+        # base point: d = 0
+        y_data[0] = _dpm_hyp1f1(a, b, x_data[0])
+
+        # higher order coefficients: d > 0
+        prefix = 1.
+        for d in range(1, D):
+            # Accumulate coefficients of truncated expansions of powers
+            # of the polynomial.
+            if d == 1:
+                accum = x_data[1:].copy()
+            else:
+                for i in range(D-2, 0, -1):
+                    accum[i] = numpy.sum(accum[:i] * x_data[i:0:-1], axis=0)
+                accum[0] = 0.
+            # Rising factorial ratio, and factorial in denominator.
+            prefix = (prefix * (a+d-1.)) / ((b+d-1.) * d)
+            # Derivative of the hypergeometric function.
+            hyp = _dpm_hyp1f1(a + d, b + d, x_data[0])
+            # Add the contribution of this summation term.
+            y_data[1:] = y_data[1:] + prefix * hyp * accum
+
+        return y_data
+
+    @classmethod
+    def _pb_dpm_hyp1f1(cls, ybar_data, a, b, x_data, y_data, out = None):
+        try:
+            import mpmath
+        except ImportError:
+            raise Exception('you need to install mpmath to use dpm_ functions')
+
+        if out == None:
+            raise NotImplementedError('should implement that')
+
+        xbar_data = out
+
+        tmp = numpy.zeros_like(x_data)
+        tmp = cls._dpm_hyp1f1(a+1., b+1., x_data,  out = tmp)
+        tmp *= float(a)/float(b)
+        cls._amul(ybar_data, tmp, xbar_data)
+
+
+    @classmethod
     def _hyp1f1(cls, a, b, x_data, out = None):
         if out == None:
             raise NotImplementedError('should implement that')
@@ -630,6 +692,65 @@ class RawAlgorithmsMixIn:
         tmp = numpy.zeros_like(x_data)
         tmp = cls._hyp1f1(a+1., b+1., x_data,  out = tmp)
         tmp *= float(a)/float(b)
+        cls._amul(ybar_data, tmp, xbar_data)
+
+    @classmethod
+    def _dpm_hyp2f0(cls, a1, a2, x_data, out = None):
+        try:
+            import mpmath
+        except ImportError:
+            raise Exception('you need to install mpmath to use dpm_ functions')
+        if out == None:
+            raise NotImplementedError('should implement that')
+        y_data = out
+        y_data[...] = 0.
+        D,P = x_data.shape[:2]
+
+        #FIXME: move this function?
+        def _float_dpm_hyp2f0(a1_in, a2_in, x_in):
+            value = mpmath.hyp2f0(a1_in, a2_in, x_in)
+            try:
+                return float(value)
+            except:
+                return numpy.nan
+        _dpm_hyp2f0 = numpy.vectorize(_float_dpm_hyp2f0)
+
+        # base point: d = 0
+        y_data[0] = _dpm_hyp2f0(a1, a2, x_data[0])
+
+        # higher order coefficients: d > 0
+        prefix = 1.
+        for d in range(1, D):
+            # Accumulate coefficients of truncated expansions of powers
+            # of the polynomial.
+            if d == 1:
+                accum = x_data[1:].copy()
+            else:
+                for i in range(D-2, 0, -1):
+                    accum[i] = numpy.sum(accum[:i] * x_data[i:0:-1], axis=0)
+                accum[0] = 0.
+            prefix *= ((a1+d-1.) * (a2+d-1.)) / d
+            hyp = _dpm_hyp2f0(a1+d, a2+d, x_data[0])
+            # Add the contribution of this summation term.
+            y_data[1:] = y_data[1:] + prefix * hyp * accum
+
+        return y_data
+
+    @classmethod
+    def _pb_dpm_hyp2f0(cls, ybar_data, a1, a2, x_data, y_data, out = None):
+        try:
+            import mpmath
+        except ImportError:
+            raise Exception('you need to install mpmath to use dpm_ functions')
+
+        if out == None:
+            raise NotImplementedError('should implement that')
+
+        xbar_data = out
+
+        tmp = numpy.zeros_like(x_data)
+        tmp = cls._dpm_hyp2f0(a1+1., a2+1., x_data,  out = tmp)
+        tmp *= float(a1) * float(a2)
         cls._amul(ybar_data, tmp, xbar_data)
 
     @classmethod
@@ -692,9 +813,12 @@ class RawAlgorithmsMixIn:
         y_data[...] = 0.
         D,P = x_data.shape[:2]
 
-        #FIXME: this works around a scipy.special.hyp0f1 failure
+        #FIXME: this works around two scipy.special.hyp0f1 failures
         def _hacked_hyp0f1(b, x):
-            return scipy.special.hyp0f1(b, x + 0j)
+            old_settings = numpy.seterr(all='ignore')
+            value = scipy.special.hyp0f1(b, x + 0j)
+            numpy.seterr(**old_settings)
+            return value
 
         # base point: d = 0
         y_data[0] = _hacked_hyp0f1(b, x_data[0])

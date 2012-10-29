@@ -4,6 +4,45 @@ import numpy
 import scipy
 import scipy.special
 
+def dpm_hyp1f1(a, b, x):
+    """
+    generic implementation of
+
+    y = dpm_hyp1f1(a, b, x)
+
+    x:      either a
+
+            * float
+            * numpy.ndarray
+            * algopy.UTPM
+            * algopy.Function
+
+            instance.
+
+
+    """
+    try:
+        import mpmath
+    except ImportError:
+        raise Exception('you need to install mpmath to use dpm_ functions')
+
+    #FIXME: move this function?
+    def _float_dpm_hyp1f1(a_in, b_in, x_in):
+        value = mpmath.hyp1f1(a_in, b_in, x_in)
+        try:
+            return float(value)
+        except:
+            return numpy.nan
+    _dpm_hyp1f1 = numpy.vectorize(_float_dpm_hyp1f1)
+
+    if hasattr(x.__class__, 'dpm_hyp1f1'):
+        return x.__class__.dpm_hyp1f1(a, b, x)
+    else:
+        return _dpm_hyp1f1(a, b, x)
+
+#dpm_hyp1f1.__doc__ += scipy.special.hyp1f1.__doc__
+
+
 def hyp1f1(a, b, x):
     """
     generic implementation of
@@ -28,6 +67,45 @@ def hyp1f1(a, b, x):
         return scipy.special.hyp1f1(a, b, x)
 
 hyp1f1.__doc__ += scipy.special.hyp1f1.__doc__
+
+
+def dpm_hyp2f0(a1, a2, x):
+    """
+    generic implementation of
+
+    y = dpm_hyp2f0(a1, a2, x)
+
+    x:      either a
+
+            * float
+            * numpy.ndarray
+            * algopy.UTPM
+            * algopy.Function
+
+            instance.
+
+
+    """
+    try:
+        import mpmath
+    except ImportError:
+        raise Exception('you need to install mpmath to use dpm_ functions')
+
+    #FIXME: move this function?
+    def _float_dpm_hyp2f0(a1_in, a2_in, x_in):
+        value = mpmath.hyp2f0(a1_in, a2_in, x_in)
+        try:
+            return float(value)
+        except:
+            return numpy.nan
+    _dpm_hyp2f0 = numpy.vectorize(_float_dpm_hyp2f0)
+
+    if hasattr(x.__class__, 'dpm_hyp2f0'):
+        return x.__class__.dpm_hyp2f0(a1, a2, x)
+    else:
+        return _dpm_hyp2f0(a1, a2, x)
+
+#dpm_hyp2f0.__doc__ += scipy.special.hyp2f0.__doc__
 
 
 def hyp2f0(a1, a2, x):
@@ -56,7 +134,8 @@ def hyp2f0(a1, a2, x):
         value, error_info = scipy.special.hyp2f0(a1, a2, x, convergence_type)
         return value
 
-hyp2f0.__doc__ += scipy.special.hyp2f0.__doc__
+#FIXME: the functions have different calling conventions, so different docs
+#hyp2f0.__doc__ += scipy.special.hyp2f0.__doc__
 
 
 def hyp0f1(b, x):
@@ -77,10 +156,17 @@ def hyp0f1(b, x):
 
     """
 
+    #FIXME: this works around two scipy.special.hyp0f1 failures
+    def _hacked_hyp0f1(b, x):
+        old_settings = numpy.seterr(all='ignore')
+        value = scipy.special.hyp0f1(b, x + 0j)
+        numpy.seterr(**old_settings)
+        return value
+
     if hasattr(x.__class__, 'hyp0f1'):
         return x.__class__.hyp0f1(b, x)
     else:
-        return scipy.special.hyp0f1(b, x)
+        return _hacked_hyp0f1(b, x)
 
 hyp0f1.__doc__ += scipy.special.hyp0f1.__doc__
 
