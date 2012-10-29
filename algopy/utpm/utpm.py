@@ -963,15 +963,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         """
         # check if zero order coeff is smaller than 0
         tmp = self.data[0] < 0
-
-        # check that taking absolute value for vectorized polynomials (i.e. P > 1) is well-defined
-        D,P = self.data.shape[:2]
-        for p in range(P-1):
-            if (tmp[p] - tmp[p+1]).any():
-                raise ValueError('vectorized version of abs works only if all directions P have the same sign!')
-
         retval = self.clone()
-        retval.data *= (-1)**tmp[0]
+        retval.data *= (-1)**tmp
 
         return retval
 
