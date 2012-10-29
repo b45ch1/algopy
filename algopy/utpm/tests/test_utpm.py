@@ -493,6 +493,82 @@ class Test_Push_Forward(TestCase):
         t = UTPM.tanh(x)
         assert_array_almost_equal(t.data, (s/c).data)
 
+    def test_dpm_hyp1f1(self):
+        try:
+            import mpmath
+        except ImportError:
+            #FIXME: use a decorator to conditionally skip the test?
+            return
+        #FIXME: this whole function is copypasted with minimal modification
+
+        #FIXME: move this function?
+        def _float_dpm_hyp1f1(a_in, b_in, x_in):
+            value = mpmath.hyp1f1(a_in, b_in, x_in)
+            try:
+                return float(value)
+            except:
+                return numpy.nan
+        _dpm_hyp1f1 = numpy.vectorize(_float_dpm_hyp1f1)
+
+        D,P,N,M = 5,1,3,3
+
+        # Check special case of exp.
+        x = UTPM(numpy.random.random((D,P,M,N)))
+        h = UTPM.dpm_hyp1f1(1., 1., x)
+        e = UTPM.exp(x)
+        assert_array_almost_equal(h.data, e.data)
+
+        # Check another special case.
+        # sample random numbers but not too close to zero
+        tmp = numpy.random.randn(D,P,M,N)
+        x = UTPM(tmp + 0.1*numpy.sign(tmp))
+        h = UTPM.dpm_hyp1f1(1., 2.,  x)
+        s = (UTPM.exp(x) - 1.) / x
+        assert_array_almost_equal(h.data, s.data)
+
+        # Check another special case.
+        x = UTPM(numpy.random.random((D,P,M,N)))
+        h = UTPM.dpm_hyp1f1(0.5, -0.5, x)
+        s = UTPM.exp(x) * (1. - 2*x)
+        assert_array_almost_equal(h.data, s.data)
+
+        # Check another special case.
+        x = UTPM(numpy.zeros((D,P,M,N)))
+        a,b = 1., 2.
+        x.data[0,...] = numpy.random.random((P,M,N))
+        x.data[1,...] = 1.
+        h = UTPM.dpm_hyp1f1(a, b, x)
+        prefix = 1.
+        s = UTPM(numpy.zeros((D,P,M,N)))
+        s.data[0] = _dpm_hyp1f1(a, b, x.data[0])
+        for d in range(1,D):
+            prefix *= (a+d-1.)/(b+d-1.)
+            prefix /= d
+            s.data[d] = prefix * _dpm_hyp1f1(a+d, b+d, x.data[0])
+
+        assert_array_almost_equal(h.data, s.data)
+
+    def test_dpm_hyp1f1_pullback(self):
+        try:
+            import mpmath
+        except ImportError:
+            #FIXME: use a decorator to conditionally skip the test?
+            return
+
+        D,P = 2,1
+
+        a,b = 1.,2.
+
+        # forward
+        x = UTPM(numpy.random.random((D,P)))
+        y = UTPM.dpm_hyp1f1(a, b, x)
+
+        # reverse
+        ybar = UTPM(numpy.random.random((D,P)))
+        xbar = UTPM.pb_dpm_hyp1f1(ybar, a, b, x, y)
+
+        assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
+
     def test_hyp1f1(self):
         D,P,N,M = 5,1,3,3
 
@@ -503,7 +579,9 @@ class Test_Push_Forward(TestCase):
         assert_array_almost_equal(h.data, e.data)
 
         # Check another special case.
-        x = UTPM(numpy.random.random((D,P,M,N)))
+        # sample random numbers but not too close to zero
+        tmp = numpy.random.randn(D,P,M,N)
+        x = UTPM(tmp + 0.1*numpy.sign(tmp))
         h = UTPM.hyp1f1(1., 2.,  x)
         s = (UTPM.exp(x) - 1.) / x
         assert_array_almost_equal(h.data, s.data)
@@ -546,6 +624,96 @@ class Test_Push_Forward(TestCase):
 
         assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
+    def test_dpm_hyp2f0(self):
+        try:
+            import mpmath
+        except ImportError:
+            #FIXME: use a decorator to conditionally skip the test?
+            return
+        #FIXME: this whole function is copypasted with minimal modification
+
+        #FIXME: move this function?
+        def _float_dpm_hyp2f0(a1_in, a2_in, x_in):
+            value = mpmath.hyp2f0(a1_in, a2_in, x_in)
+            try:
+                return float(value)
+            except:
+                return numpy.nan
+        _dpm_hyp2f0 = numpy.vectorize(_float_dpm_hyp2f0)
+
+        D,P,N,M = 5,1,3,3
+
+        #FIXME: This one was giving imaginary values so I discontinued it.
+        # Check a special case.
+        # This is a little tricky because hyp2f0 likes small x
+        # and hyp1f1 likes small 1/x.
+        """
+        n = 2
+        b = 0.1
+        x = UTPM(0.1 + 0.3 * numpy.random.rand(D,P,M,N))
+        a1 = -n
+        a2 = b
+        h = UTPM.dpm_hyp2f0(a1, a2, x)
+        s = scipy.special.poch(b, n) * ((-x)**n) * (
+                UTPM.dpm_hyp1f1(-n, 1. - b - n, -(1./x)))
+        print x
+        print h
+        print s
+        assert_array_almost_equal(h.data, s.data)
+        """
+
+        # Check the special case with negative values.
+        n = 2
+        b = 0.1
+        x = UTPM(-0.1 - 0.3 * numpy.random.rand(D,P,M,N))
+        a1 = -n
+        a2 = b
+        h = UTPM.dpm_hyp2f0(a1, a2, x)
+        s = scipy.special.poch(b, n) * ((-x)**n) * (
+                UTPM.dpm_hyp1f1(-n, 1. - b - n, -(1./x)))
+        assert_array_almost_equal(h.data, s.data)
+
+        # Check another special case.
+        x = UTPM(numpy.zeros((D,P,M,N)))
+        a1, a2 = 1., 2.
+        x.data[0,...] = 0.1 + 0.3 * numpy.random.rand(P,M,N)
+        x.data[1,...] = 1.
+        h = UTPM.dpm_hyp2f0(a1, a2, x)
+        prefix = 1.
+        s = UTPM(numpy.zeros((D,P,M,N)))
+        s.data[0] = _dpm_hyp2f0(a1, a2, x.data[0])
+        for d in range(1,D):
+            prefix *= (a1+d-1.)*(a2+d-1.)
+            prefix /= d
+            s.data[d] = prefix * _dpm_hyp2f0(a1+d, a2+d, x.data[0])
+
+        assert_array_almost_equal(h.data, s.data)
+
+    def test_dpm_hyp2f0_pullback(self):
+        try:
+            import mpmath
+        except ImportError:
+            #FIXME: use a decorator to conditionally skip the test?
+            return
+
+        D,P = 2,1
+
+        a1, a2 = 0.5, 1.0
+
+        # Use smaller numbers to ameliorate convergence issues.
+        # Also notice that I am using numpy.random.randn(D,P)
+        # instead of numpy.random.random((D,P)).
+        sigma = 0.01
+
+        # forward
+        x = UTPM(sigma * numpy.random.randn(D,P))
+        y = UTPM.dpm_hyp2f0(a1, a2, x)
+
+        # reverse
+        ybar = UTPM(sigma * numpy.random.randn(D,P))
+        xbar = UTPM.pb_dpm_hyp2f0(ybar, a1, a2, x, y)
+
+        assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
     def test_hyp2f0(self):
         D,P,N,M = 5,1,3,3
@@ -637,7 +805,9 @@ class Test_Push_Forward(TestCase):
 
         #FIXME: possibly update this if algopy sinc is implemented
         # numpy sinc (this is the engineer's sinc not the math sinc)
-        x = UTPM(numpy.random.random((D,P,M,N)))
+        # sample random numbers but not too close to zero
+        tmp = numpy.random.randn(D,P,M,N)
+        x = UTPM(tmp + 0.1*numpy.sign(tmp))
         h = UTPM.hyp0f1(1.5, -(0.5 * math.pi * x)**2)
         c = UTPM.sin(math.pi * x) / (math.pi * x)
         assert_array_almost_equal(h.data, c.data)
@@ -807,6 +977,39 @@ class Test_Push_Forward(TestCase):
 
         assert_allclose(x.data, x2.data)
         assert_allclose(y.data, y2.data)
+
+    def test_sign_tanh(self):
+        D,P,N,M = 5,3,4,5
+
+        # sample random numbers but not too close to zero
+        tmp = numpy.random.randn(D,P,M,N)
+        x = UTPM(tmp + 0.1*numpy.sign(tmp))
+
+        k = 200.
+        y = UTPM.tanh(k*x)
+        z = UTPM.sign(x)
+        assert_allclose(y.data, z.data)
+
+    #FIXME: this fails; what should abs(x) mean?
+    def test_abs_tanh(self):
+        D,P,N,M = 5,3,4,5
+
+        # sample random numbers but not too close to zero
+        tmp = numpy.random.randn(D,P,M,N)
+        x = UTPM(tmp + 0.1*numpy.sign(tmp))
+
+        k = 200.
+        y = x*UTPM.tanh(k*x)
+        z = abs(x)
+        assert_allclose(y.data, z.data)
+
+    #FIXME: this fails; what should abs(x) mean?
+    def test_abs_sign(self):
+        D,P,N,M = 5,3,4,5
+        x = UTPM(numpy.random.randn(D,P,M,N))
+        y = x * UTPM.sign(x)
+        z = abs(x)
+        assert_allclose(y.data, z.data)
 
     def test_abs(self):
         D,P,N = 4,3,12
@@ -1116,7 +1319,13 @@ class Test_Pullbacks(TestCase):
             yb = ybar.data[0,p]
             yd = y.data[1,p]
 
-            assert_almost_equal( numpy.trace(numpy.dot(Ab.T,Ad)) + numpy.trace(numpy.dot(xb.T,xd)), numpy.trace(numpy.dot(yb.T,yd)))
+            # This was failing sporadically, so changing
+            # from absolute error assert_almost_equal
+            # to relative error assert_allclose.
+            #assert_almost_equal( numpy.trace(numpy.dot(Ab.T,Ad)) + numpy.trace(numpy.dot(xb.T,xd)), numpy.trace(numpy.dot(yb.T,yd)))
+            assert_allclose(
+                    numpy.trace(numpy.dot(Ab.T,Ad)) + numpy.trace(numpy.dot(xb.T,xd)),
+                    numpy.trace(numpy.dot(yb.T,yd)))
 
 
     # def test_dot_pullback(self):

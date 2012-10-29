@@ -31,13 +31,13 @@ from algopy.globalfuncs import zeros, dot
 from algopy.linalg.linalg import eigh, solve
 
 
-def svd(A, epsilon=10**-8):
+def svd(A, epsilon=1e-8):
     """
     computes the singular value decomposition A = U S V.T
     of matrices A with full rank (i.e. nonzero singular values)
     by reformulation to eigh.
 
-    (U, S, VT) = UTPM.svd(A, epsilon= 10**-8)
+    (U, S, VT) = UTPM.svd(A, epsilon= 1e-8)
 
     Parameters
     ----------

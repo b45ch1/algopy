@@ -6,6 +6,28 @@ from algopy.special import *
 
 class Test_ScipySpecialFunctions(TestCase):
 
+    def test_dpm_hyp1f1(self):
+        """
+        check that algopy.special.dpm_hyp1f1 can be called with
+        UTPM and Function instances as arguments
+        """
+        try:
+            import mpmath
+        except ImportError:
+            #FIXME: use a decorator to conditionally skip the test?
+            return
+
+        a, b, x = 1., 2., 3.
+        y1 = dpm_hyp1f1(a, b, x)
+
+        a, b, x = 1., 2., UTPM(3.* numpy.ones((1,1)))
+        y2 = dpm_hyp1f1(a, b, x)
+        assert_almost_equal(y1, y2.data[0,0])
+
+        a, b, x = 1., 2., Function(3.)
+        y3 = dpm_hyp1f1(a, b, x)
+        assert_almost_equal(y1, y3.x)
+
     def test_hyp1f1(self):
         """
         check that algopy.special.hyp1f1 can be called with
@@ -21,6 +43,29 @@ class Test_ScipySpecialFunctions(TestCase):
 
         a, b, x = 1., 2., Function(3.)
         y3 = hyp1f1(a, b, x)
+        assert_almost_equal(y1, y3.x)
+
+    def test_dpm_hyp2f0(self):
+        """
+        check that algopy.special.dpm_hyp2f0 can be called with
+        UTPM and Function instances as arguments
+        """
+        try:
+            import mpmath
+        except ImportError:
+            #FIXME: use a decorator to conditionally skip the test?
+            return
+
+        # use small x to ameliorate convergence issues
+        a1, a2, x = 1., 2., 0.03
+        y1 = dpm_hyp2f0(a1, a2, x)
+
+        a1, a2, x = 1., 2., UTPM(0.03* numpy.ones((1,1)))
+        y2 = dpm_hyp2f0(a1, a2, x)
+        assert_almost_equal(y1, y2.data[0,0])
+
+        a1, a2, x = 1., 2., Function(0.03)
+        y3 = dpm_hyp2f0(a1, a2, x)
         assert_almost_equal(y1, y3.x)
 
     def test_hyp2f0(self):

@@ -588,6 +588,29 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return out
 
     @classmethod
+    def dpm_hyp1f1(cls, a, b, x):
+        """ computes y = hyp1f1(a, b, x) in UTP arithmetic"""
+
+        retval = x.clone()
+        cls._dpm_hyp1f1(a, b, x.data, out = retval.data)
+        return retval
+
+    @classmethod
+    def pb_dpm_hyp1f1(cls, ybar, a, b, x, y, out=None):
+        """ computes bar y dy = bar x dx in UTP arithmetic"""
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            # out = (abar, bbar, xbar)
+            xbar = out[2]
+
+        cls._pb_dpm_hyp1f1(ybar.data, a, b, x.data, y.data, out = xbar.data)
+
+        return xbar
+
+    @classmethod
     def hyp1f1(cls, a, b, x):
         """ computes y = hyp1f1(a, b, x) in UTP arithmetic"""
 
@@ -607,6 +630,29 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             xbar = out[2]
 
         cls._pb_hyp1f1(ybar.data, a, b, x.data, y.data, out = xbar.data)
+
+        return xbar
+
+    @classmethod
+    def dpm_hyp2f0(cls, a1, a2, x):
+        """ computes y = hyp2f0(a1, a2, x) in UTP arithmetic"""
+
+        retval = x.clone()
+        cls._dpm_hyp2f0(a1, a2, x.data, out = retval.data)
+        return retval
+
+    @classmethod
+    def pb_dpm_hyp2f0(cls, ybar, a1, a2, x, y, out=None):
+        """ computes bar y dy = bar x dx in UTP arithmetic"""
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            # out = (a1bar, a2bar, xbar)
+            xbar = out[2]
+
+        cls._pb_dpm_hyp2f0(ybar.data, a1, a2, x.data, y.data, out = xbar.data)
 
         return xbar
 
@@ -888,6 +934,26 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         tmp = self.clone()
         self._tanhsech2(self.data, out = (retval.data, tmp.data))
         return retval
+
+    def sign(self):
+        """ computes y = sign(x) in UTP arithmetic"""
+
+        retval = self.clone()
+        self._sign(self.data, out = retval.data)
+        return retval
+
+    @classmethod
+    def pb_sign(cls, ybar, x, y, out=None):
+        """ computes bar y dy = bar x dx in UTP arithmetic"""
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar, = out
+
+        cls._pb_sign(ybar.data, x.data, y.data, out = xbar.data)
+        return out
 
 
     def __abs__(self):
@@ -1871,7 +1937,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return xbar
 
     @classmethod
-    def qr(cls, A, out = None, work = None, epsilon = 10**-14):
+    def qr(cls, A, out = None, work = None, epsilon = 1e-14):
         D,P,M,N = numpy.shape(A.data)
         K = min(M,N)
 
@@ -1928,7 +1994,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
 
     @classmethod
-    def eigh(cls, A, out = None, epsilon = 10**-8):
+    def eigh(cls, A, out = None, epsilon = 1e-8):
         """
         computes the eigenvalue decomposition A = Q^T L Q
         of a symmetrical matrix A with distinct eigenvalues
@@ -1951,7 +2017,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return l,Q
 
     @classmethod
-    def eigh1(cls, A, out = None, epsilon = 10**-8):
+    def eigh1(cls, A, out = None, epsilon = 1e-8):
         """
         computes the relaxed eigenvalue decompositin of level 1
         of a symmetrical matrix A with distinct eigenvalues
@@ -2081,7 +2147,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         Nv = v.data[0,0].size
 
         tmp = numpy.sqrt(1 + 8*Nv)
-        if abs(int(tmp) - tmp) > 10**-16:
+        if abs(int(tmp) - tmp) > 1e-16:
             # hackish way to check that the input length of v makes sense
             raise ValueError('size of v does not match any possible symmetric matrix')
         N = (int(tmp) - 1)//2
