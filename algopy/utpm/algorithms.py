@@ -393,6 +393,25 @@ class RawAlgorithmsMixIn:
         cls._amul(ybar_data, y_data, xbar_data)
 
     @classmethod
+    def _sign(cls, x_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        y_data = out
+        D,P = x_data.shape[:2]
+        y_data[0] = numpy.sign(x_data[0])
+        for d in range(1,D):
+            y_data[d] = 0.
+        return y_data
+
+    @classmethod
+    def _pb_sign(cls, ybar_data, x_data, y_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+
+        tmp = numpy.zeros_like(x_data)
+        cls._amul(ybar_data, tmp, xbar_data)
+
+    @classmethod
     def _pb_sqrt(cls, ybar_data, x_data, y_data, out = None):
         if out == None:
             raise NotImplementedError('should implement that')

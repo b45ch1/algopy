@@ -1052,6 +1052,9 @@ class Function(Ring):
     def __pow__(self, r):
          return Function.pushforward(operator.pow, [self, r])
 
+    def sign(self):
+         return Function.pushforward(algopy.sign, [self])
+
     def sum(self, axis=None, dtype=None, out=None):
          return Function.pushforward(algopy.sum, [self, axis, dtype, out])
 

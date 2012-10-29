@@ -11,6 +11,7 @@ numpy_function_names = [
         'sin','cos','tan', 'exp', 'expm1', 'log', 'sqrt', 'pow',
         'arcsin', 'arccos', 'arctan',
         'sinh', 'cosh', 'tanh',
+        'sign',
         'trace', 'diag',
         'triu', 'tril', 'reshape']
 

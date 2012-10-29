@@ -935,6 +935,26 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         self._tanhsech2(self.data, out = (retval.data, tmp.data))
         return retval
 
+    def sign(self):
+        """ computes y = sign(x) in UTP arithmetic"""
+
+        retval = self.clone()
+        self._sign(self.data, out = retval.data)
+        return retval
+
+    @classmethod
+    def pb_sign(cls, ybar, x, y, out=None):
+        """ computes bar y dy = bar x dx in UTP arithmetic"""
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar, = out
+
+        cls._pb_sign(ybar.data, x.data, y.data, out = xbar.data)
+        return out
+
 
     def __abs__(self):
         """ absolute value of polynomials
