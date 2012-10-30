@@ -834,10 +834,8 @@ class RawAlgorithmsMixIn:
 
         #FIXME: this works around two scipy.special.hyp0f1 failures
         def _hacked_hyp0f1(b, x):
-            old_settings = numpy.seterr(all='ignore')
-            value = scipy.special.hyp0f1(b, x + 0j)
-            numpy.seterr(**old_settings)
-            return value
+            with numpy.errstate(invalid='ignore'):
+                return scipy.special.hyp0f1(b, x + 0j)
 
         # base point: d = 0
         y_data[0] = _hacked_hyp0f1(b, x_data[0])
@@ -1924,9 +1922,8 @@ class RawAlgorithmsMixIn:
 
             E[p] += lam0;  E[p] = (E[p].T - lam0).T
 
-        numpy.seterr(divide='ignore')
-        H = 1./E
-        numpy.seterr(divide='warn')
+        with numpy.errstate(divide='ignore'):
+            H = 1./E
         for p in range(P):
             b = b_list[p]
             for nb in range(b.size-1):
