@@ -377,6 +377,13 @@ class Test_Push_Forward(TestCase):
         Z = UTPM.log(Y)
         assert_array_almost_equal(X.data, Z.data)
 
+    def test_log1p(self):
+        D,P,N = 4,2,2
+        X = UTPM(1. + 2.*numpy.random.rand(D,P,N,N))
+        Y = UTPM.log1p(X)
+        Z = UTPM.log(1. + X)
+        assert_allclose(Y.data, Z.data)
+
     def test_expm1(self):
         D,P,N = 4,2,2
         X = UTPM(numpy.random.randn(D,P,N,N))
@@ -398,6 +405,17 @@ class Test_Push_Forward(TestCase):
         X = UTPM(numpy.array([eps, 1.]).reshape((D,P,N,N)))
         Y = UTPM.exp(X) - 1.
         assert_array_less(Y.data[0,0,0,0], eps)
+
+    def test_expm1_log1p(self):
+        D,P,N,M = 5,3,4,5
+        x = UTPM(numpy.random.randn(D,P,M,N))
+
+        y = UTPM.expm1(x)
+        x2 = UTPM.log1p(y)
+        y2 = UTPM.expm1(x2)
+
+        assert_allclose(x.data, x2.data)
+        assert_allclose(y.data, y2.data)
 
     def test_pow(self):
         D,P,N = 4,2,2

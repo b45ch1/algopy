@@ -390,7 +390,11 @@ class RawAlgorithmsMixIn:
             raise NotImplementedError('should implement that')
 
         xbar_data = out
-        cls._amul(ybar_data, y_data, xbar_data)
+
+        y_data_1p = y_data.copy()
+        y_data_1p += 1.
+
+        cls._amul(ybar_data, y_data_1p, xbar_data)
 
     @classmethod
     def _sign(cls, x_data, out = None):
@@ -408,8 +412,11 @@ class RawAlgorithmsMixIn:
         if out == None:
             raise NotImplementedError('should implement that')
 
+        xbar_data = out
+
         tmp = numpy.zeros_like(x_data)
         cls._amul(ybar_data, tmp, xbar_data)
+
 
     @classmethod
     def _pb_sqrt(cls, ybar_data, x_data, y_data, out = None):
@@ -454,6 +461,42 @@ class RawAlgorithmsMixIn:
 
         tmp = xbar_data.copy()
         cls._div(ybar_data, x_data, tmp)
+        xbar_data += tmp
+        return xbar_data
+
+    @classmethod
+    def _log1p(cls, x_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        y_data = out
+        D,P = x_data.shape[:2]
+
+        # base point: d = 0
+        y_data[0] = numpy.log1p(x_data[0])
+
+        # higher order coefficients: d > 0
+
+        for d in range(1,D):
+            y_data[d] =  (x_data[d]*d - numpy.sum(x_data[1:d][::-1] * y_data[1:d], axis=0))
+            y_data[d] /= (1. + x_data[0])
+
+        for d in range(1,D):
+            y_data[d] /= d
+
+        return y_data
+
+    @classmethod
+    def _pb_log1p(cls, ybar_data, x_data, y_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+
+        xbar_data = out
+
+        x_data_1p = x_data.copy()
+        x_data_1p += 1.
+
+        tmp = xbar_data.copy()
+        cls._div(ybar_data, x_data_1p, tmp)
         xbar_data += tmp
         return xbar_data
 
@@ -834,10 +877,8 @@ class RawAlgorithmsMixIn:
 
         #FIXME: this works around two scipy.special.hyp0f1 failures
         def _hacked_hyp0f1(b, x):
-            old_settings = numpy.seterr(all='ignore')
-            value = scipy.special.hyp0f1(b, x + 0j)
-            numpy.seterr(**old_settings)
-            return value
+            with numpy.errstate(invalid='ignore'):
+                return scipy.special.hyp0f1(b, x + 0j)
 
         # base point: d = 0
         y_data[0] = _hacked_hyp0f1(b, x_data[0])
@@ -1924,9 +1965,8 @@ class RawAlgorithmsMixIn:
 
             E[p] += lam0;  E[p] = (E[p].T - lam0).T
 
-        numpy.seterr(divide='ignore')
-        H = 1./E
-        numpy.seterr(divide='warn')
+        with numpy.errstate(divide='ignore'):
+            H = 1./E
         for p in range(P):
             b = b_list[p]
             for nb in range(b.size-1):

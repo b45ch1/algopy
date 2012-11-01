@@ -1031,6 +1031,9 @@ class Function(Ring):
     def log(self):
          return Function.pushforward(algopy.log, [self])
 
+    def log1p(self):
+         return Function.pushforward(algopy.log1p, [self])
+
     def exp(self):
          return Function.pushforward(algopy.exp, [self])
 

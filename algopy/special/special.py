@@ -158,10 +158,8 @@ def hyp0f1(b, x):
 
     #FIXME: this works around two scipy.special.hyp0f1 failures
     def _hacked_hyp0f1(b, x):
-        old_settings = numpy.seterr(all='ignore')
-        value = scipy.special.hyp0f1(b, x + 0j)
-        numpy.seterr(**old_settings)
-        return value
+        with numpy.errstate(invalid='ignore'):
+            return scipy.special.hyp0f1(b, x + 0j)
 
     if hasattr(x.__class__, 'hyp0f1'):
         return x.__class__.hyp0f1(b, x)
