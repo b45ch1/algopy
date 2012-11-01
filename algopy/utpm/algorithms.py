@@ -390,7 +390,11 @@ class RawAlgorithmsMixIn:
             raise NotImplementedError('should implement that')
 
         xbar_data = out
-        cls._amul(ybar_data, y_data, xbar_data)
+
+        y_data_1p = y_data.copy()
+        y_data_1p += 1.
+
+        cls._amul(ybar_data, y_data_1p, xbar_data)
 
     @classmethod
     def _sign(cls, x_data, out = None):
@@ -408,8 +412,10 @@ class RawAlgorithmsMixIn:
         if out == None:
             raise NotImplementedError('should implement that')
 
+        #FIXME: this is buggy and not covered by unit tests
         tmp = numpy.zeros_like(x_data)
         cls._amul(ybar_data, tmp, xbar_data)
+
 
     @classmethod
     def _pb_sqrt(cls, ybar_data, x_data, y_data, out = None):
@@ -486,7 +492,7 @@ class RawAlgorithmsMixIn:
         xbar_data = out
 
         x_data_1p = x_data.copy()
-        x_data_1p[0] += 1.
+        x_data_1p += 1.
 
         tmp = xbar_data.copy()
         cls._div(ybar_data, x_data_1p, tmp)
