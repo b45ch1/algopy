@@ -8,7 +8,8 @@ from algopy import Function
 
 # override numpy definitions
 numpy_function_names = [
-        'sin','cos','tan', 'exp', 'expm1', 'log', 'sqrt', 'pow',
+        'exp', 'expm1', 'log', 'log1p', 'sqrt', 'pow',
+        'sin', 'cos', 'tan',
         'arcsin', 'arccos', 'arctan',
         'sinh', 'cosh', 'tanh',
         'sign',

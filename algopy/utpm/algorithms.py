@@ -458,6 +458,42 @@ class RawAlgorithmsMixIn:
         return xbar_data
 
     @classmethod
+    def _log1p(cls, x_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        y_data = out
+        D,P = x_data.shape[:2]
+
+        # base point: d = 0
+        y_data[0] = numpy.log1p(x_data[0])
+
+        # higher order coefficients: d > 0
+
+        for d in range(1,D):
+            y_data[d] =  (x_data[d]*d - numpy.sum(x_data[1:d][::-1] * y_data[1:d], axis=0))
+            y_data[d] /= (1. + x_data[0])
+
+        for d in range(1,D):
+            y_data[d] /= d
+
+        return y_data
+
+    @classmethod
+    def _pb_log1p(cls, ybar_data, x_data, y_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+
+        xbar_data = out
+
+        x_data_1p = x_data.copy()
+        x_data_1p[0] += 1.
+
+        tmp = xbar_data.copy()
+        cls._div(ybar_data, x_data_1p, tmp)
+        xbar_data += tmp
+        return xbar_data
+
+    @classmethod
     def _tansec2(cls, x_data, out = None):
         """ computes tan and sec in Taylor arithmetic"""
         if out == None:

@@ -512,6 +512,25 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         cls._pb_log(ybar.data, x.data, y.data, out = xbar.data)
         return out
 
+    def log1p(self):
+        """ computes y = log1p(x) in UTP arithmetic"""
+        retval = self.clone()
+        self._log1p(self.data, out = retval.data)
+        return retval
+
+    @classmethod
+    def pb_log1p(cls, ybar, x, y, out=None):
+        """ computes bar y dy = bar x dx in UTP arithmetic"""
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar, = out
+
+        cls._pb_log1p(ybar.data, x.data, y.data, out = xbar.data)
+        return out
+
     def sincos(self):
         """ simultanteously computes s = sin(x) and c = cos(x) in UTP arithmetic"""
         retsin = self.clone()
