@@ -412,7 +412,8 @@ class RawAlgorithmsMixIn:
         if out == None:
             raise NotImplementedError('should implement that')
 
-        #FIXME: this is buggy and not covered by unit tests
+        xbar_data = out
+
         tmp = numpy.zeros_like(x_data)
         cls._amul(ybar_data, tmp, xbar_data)
 
