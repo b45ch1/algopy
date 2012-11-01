@@ -1192,40 +1192,6 @@ class Test_CGgraph_on_UTPM(TestCase):
         assert_array_almost_equal(const1.data[0,:], const2.data[0,:])
 
 
-    def test_very_simple_ODOE_objective_function(self):
-        """
-        compute PHI = trace( (J^T,J)^-1 )
-        """
-        D,P,N,M = 2,1,100,3
-        J = UTPM(numpy.random.rand(D,P,N,M))
-        cg = CGraph()
-        FJ = Function(J)
-        FJT = Function.transpose(FJ)
-        FM = Function.dot(FJT, FJ)
-        FC = Function.inv(FM)
-        FPHI = Function.trace(FC)
-        cg.independentFunctionList = [FJ]
-        cg.dependentFunctionList = [FPHI]
-
-        assert_array_equal(FPHI.shape, ())
-        cg.pushforward([J])
-        PHIbar = UTPM(numpy.random.rand(*(D,P)))
-
-        # pullback using the tracer
-        cg.pullback([PHIbar])
-
-        # verifying pullback by  ybar.T ydot == xbar.T xdot
-        const1 = UTPM.dot(FPHI.xbar, UTPM.shift(FPHI.x,-1))
-        const2 = UTPM.trace(UTPM.dot(FJ.xbar.T, UTPM.shift(FJ.x,-1)))
-
-        # print cg
-
-        # print const1
-        # print const2
-
-        assert_array_almost_equal(const1.data[0,:], const2.data[0,:])
-
-
     def test_dpm_hyp1f1(self):
         """
         compute y = dpm_hyp1f1(1., 2., x**2 + 3.)
