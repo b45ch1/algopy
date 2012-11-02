@@ -56,12 +56,12 @@ class Test_Push_Forward(TestCase):
     def test_broadcasting_sub(self):
         #check 1
         x1 = numpy.array([1.,2.,3.])
-        y1 = UTPM([[5],[7]])
+        y1 = UTPM([[5.],[7.]])
 
         z11 = x1 - y1
         z12 = -(y1 - x1)
 
-        z_data = numpy.array([[[-4,-3,-2]],[[-7,-7,-7]]])
+        z_data = numpy.array([[[-4.,-3.,-2.]],[[-7.,-7.,-7.]]])
         assert_array_almost_equal(z_data, z11.data)
         assert_array_almost_equal(z_data, z12.data)
 
