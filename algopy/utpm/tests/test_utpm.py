@@ -642,6 +642,50 @@ class Test_Push_Forward(TestCase):
 
         assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
+
+    def test_hyperu(self):
+        D,P,N,M = 5,1,3,3
+
+        # Check special case of a rational function.
+        R = numpy.random.randn(D, P, M, N)
+        R += 0.01 * numpy.sign(R)
+        x = UTPM(R)
+        h = UTPM.hyperu(1., 6., x)
+        s = (x*(x*(x*(x+4) + 12) + 24) + 24) / (x**5)
+        assert_allclose(h.data, s.data)
+
+        # Check another special case.
+        x = UTPM(numpy.zeros((D,P,M,N)))
+        a,b = 1., 2.
+        x.data[0,...] = numpy.random.random((P,M,N))
+        x.data[1,...] = 1.
+        h = UTPM.hyperu(a, b, x)
+        prefix = 1.
+        s = UTPM(numpy.zeros((D,P,M,N)))
+        s.data[0] = scipy.special.hyperu(a, b, x.data[0])
+        for d in range(1,D):
+            prefix *= -(a+d-1.) / d
+            s.data[d] = prefix * scipy.special.hyperu(a+d, b+d, x.data[0])
+
+        assert_allclose(h.data, s.data)
+
+
+    def test_hyperu_pullback(self):
+        D,P = 2,1
+
+        a, b = 1., 1.5
+
+        # forward
+        x = UTPM(numpy.random.random((D,P)))
+        y = UTPM.hyperu(a, b, x)
+
+        # reverse
+        ybar = UTPM(numpy.random.random((D,P)))
+        xbar = UTPM.pb_hyperu(ybar, a, b, x, y)
+
+        assert_allclose(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
+
+
     def test_dpm_hyp2f0(self):
         try:
             import mpmath

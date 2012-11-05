@@ -653,6 +653,29 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return xbar
 
     @classmethod
+    def hyperu(cls, a, b, x):
+        """ computes y = hyperu(a, b, x) in UTP arithmetic"""
+
+        retval = x.clone()
+        cls._hyperu(a, b, x.data, out = retval.data)
+        return retval
+
+    @classmethod
+    def pb_hyperu(cls, ybar, a, b, x, y, out=None):
+        """ computes bar y dy = bar x dx in UTP arithmetic"""
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            # out = (abar, bbar, xbar)
+            xbar = out[2]
+
+        cls._pb_hyperu(ybar.data, a, b, x.data, y.data, out = xbar.data)
+
+        return xbar
+
+    @classmethod
     def dpm_hyp2f0(cls, a1, a2, x):
         """ computes y = hyp2f0(a1, a2, x) in UTP arithmetic"""
 
