@@ -1166,6 +1166,10 @@ class Function(Ring):
         return Function.pushforward(algopy.special.hyp1f1, [a, b, x])
 
     @classmethod
+    def hyperu(cls, a, b, x):
+        return Function.pushforward(algopy.special.hyperu, [a, b, x])
+
+    @classmethod
     def dpm_hyp2f0(cls, a1, a2, x):
         return Function.pushforward(algopy.special.dpm_hyp2f0, [a1, a2, x])
 

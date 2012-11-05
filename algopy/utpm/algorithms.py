@@ -757,6 +757,48 @@ class RawAlgorithmsMixIn:
         cls._amul(ybar_data, tmp, xbar_data)
 
     @classmethod
+    def _hyperu(cls, a, b, x_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        y_data = out
+        y_data[...] = 0.
+        D,P = x_data.shape[:2]
+
+        # base point: d = 0
+        y_data[0] = scipy.special.hyperu(a, b, x_data[0])
+
+        # higher order coefficients: d > 0
+        prefix = 1.
+        for d in range(1, D):
+            # Accumulate coefficients of truncated expansions of powers
+            # of the polynomial.
+            # This is analogous to the hyp1f1 implementation.
+            if d == 1:
+                accum = x_data[1:].copy()
+            else:
+                for i in range(D-2, 0, -1):
+                    accum[i] = numpy.sum(accum[:i] * x_data[i:0:-1], axis=0)
+                accum[0] = 0.
+            prefix *= -(a+d-1.) / d
+            hyp = scipy.special.hyperu(a + d, b + d, x_data[0])
+            y_data[1:] = y_data[1:] + prefix * hyp * accum
+
+        return y_data
+
+    @classmethod
+    def _pb_hyperu(cls, ybar_data, a, b, x_data, y_data, out = None):
+
+        if out == None:
+            raise NotImplementedError('should implement that')
+
+        xbar_data = out
+
+        tmp = numpy.zeros_like(x_data)
+        tmp = cls._hyperu(a+1., b+1., x_data,  out = tmp)
+        tmp *= -a
+        cls._amul(ybar_data, tmp, xbar_data)
+
+    @classmethod
     def _dpm_hyp2f0(cls, a1, a2, x_data, out = None):
         try:
             import mpmath
