@@ -1023,46 +1023,46 @@ class Function(Ring):
     # #########################################################
 
     def zeros(self):
-         return Function.pushforward(algopy.zeros, [shape, dtype, order])
+        return Function.pushforward(algopy.zeros, [shape, dtype, order])
 
     def ones(self):
-         return Function.pushforward(algopy.ones, [shape, dtype, order])
+        return Function.pushforward(algopy.ones, [shape, dtype, order])
 
     def log(self):
-         return Function.pushforward(algopy.log, [self])
+        return Function.pushforward(algopy.log, [self])
 
     def log1p(self):
-         return Function.pushforward(algopy.log1p, [self])
+        return Function.pushforward(algopy.log1p, [self])
 
     def exp(self):
-         return Function.pushforward(algopy.exp, [self])
+        return Function.pushforward(algopy.exp, [self])
 
     def expm1(self):
-         return Function.pushforward(algopy.expm1, [self])
+        return Function.pushforward(algopy.expm1, [self])
 
     def sin(self):
-         return Function.pushforward(algopy.sin, [self])
+        return Function.pushforward(algopy.sin, [self])
 
     def tan(self):
-         return Function.pushforward(algopy.tan, [self])
+        return Function.pushforward(algopy.tan, [self])
 
     def cos(self):
-         return Function.pushforward(algopy.cos, [self])
+        return Function.pushforward(algopy.cos, [self])
 
     def sqrt(self):
-         return Function.pushforward(algopy.sqrt, [self])
+        return Function.pushforward(algopy.sqrt, [self])
 
     def __pow__(self, r):
-         return Function.pushforward(operator.pow, [self, r])
+        return Function.pushforward(operator.pow, [self, r])
 
     def sign(self):
-         return Function.pushforward(algopy.sign, [self])
+        return Function.pushforward(algopy.sign, [self])
 
     def sum(self, axis=None, dtype=None, out=None):
-         return Function.pushforward(algopy.sum, [self, axis, dtype, out])
+        return Function.pushforward(algopy.sum, [self, axis, dtype, out])
 
     def prod(self, axis=None, dtype=None, out=None):
-         return Function.pushforward(algopy.prod, [self, axis, dtype, out])
+        return Function.pushforward(algopy.prod, [self, axis, dtype, out])
 
     @classmethod
     def dot(cls, lhs,rhs):
@@ -1087,25 +1087,25 @@ class Function(Ring):
 
 
     def inv(self):
-         return Function.pushforward(algopy.inv, [self])
+        return Function.pushforward(algopy.inv, [self])
 
     def qr(self):
-         return Function.pushforward(algopy.qr, [self])
+        return Function.pushforward(algopy.qr, [self])
 
     def cholesky(self):
-         return Function.pushforward(algopy.cholesky, [self])
+        return Function.pushforward(algopy.cholesky, [self])
 
     def qr_full(self):
-         return Function.pushforward(algopy.qr_full, [self])
+        return Function.pushforward(algopy.qr_full, [self])
 
     def diag(self):
-         return Function.pushforward(algopy.diag, [self])
+        return Function.pushforward(algopy.diag, [self])
 
     def eigh(self):
-         return Function.pushforward(algopy.eigh, [self])
+        return Function.pushforward(algopy.eigh, [self])
 
     def eigh1(self):
-         return Function.pushforward(algopy.eigh1, [self])
+        return Function.pushforward(algopy.eigh1, [self])
 
     def solve(self,rhs):
         return Function.pushforward(algopy.solve, [self,rhs])
