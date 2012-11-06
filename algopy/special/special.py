@@ -69,6 +69,32 @@ def hyp1f1(a, b, x):
 hyp1f1.__doc__ += scipy.special.hyp1f1.__doc__
 
 
+def hyperu(a, b, x):
+    """
+    generic implementation of
+
+    y = hyperu(a, b, x)
+
+    x:      either a
+
+            * float
+            * numpy.ndarray
+            * algopy.UTPM
+            * algopy.Function
+
+            instance.
+
+
+    """
+
+    if hasattr(x.__class__, 'hyperu'):
+        return x.__class__.hyperu(a, b, x)
+    else:
+        return scipy.special.hyperu(a, b, x)
+
+hyperu.__doc__ += scipy.special.hyperu.__doc__
+
+
 def dpm_hyp2f0(a1, a2, x):
     """
     generic implementation of
