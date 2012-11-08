@@ -622,7 +622,9 @@ def get_log_likelihood(P, v, subs_counts):
     @param v: stationary distribution proportional to observed codon counts
     @param subs_counts: observed substitution counts
     """
-    log_likelihoods = slow_part(subs_counts, algopy.log(P.T * v))
+    A = subs_counts
+    B = algopy.log(P.T * v)
+    log_likelihoods = slow_part(A, B)
     return algopy.sum(log_likelihoods)
 
 def eval_f(
