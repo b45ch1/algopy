@@ -1386,9 +1386,6 @@ class RawAlgorithmsMixIn:
 
         # compute (P_L + 0.5*P_D) * dot(L.T, Lbar)
         Proj = cls.build_PL(N) + 0.5 * numpy.eye(N)
-
-        # compute (P_L + 0.5*P_D) * dot(L.T, Lbar)
-        Proj = cls.build_PL(N) + 0.5 * numpy.eye(N)
         tmp = cls._dot(cls._transpose(L_data), Lbar_data, cls.__zeros_like__(A_data))
         tmp *= Proj
 
