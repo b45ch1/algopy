@@ -611,6 +611,9 @@ def get_Q(
     Q = pre_Q - algopy.diag(algopy.sum(pre_Q, axis=1))
     return Q
 
+def slow_part(A, B):
+    return A*B
+
 def get_log_likelihood(P, v, subs_counts):
     """
     The stationary distribution of P is empirically derived.
@@ -619,7 +622,10 @@ def get_log_likelihood(P, v, subs_counts):
     @param v: stationary distribution proportional to observed codon counts
     @param subs_counts: observed substitution counts
     """
-    return algopy.sum(subs_counts * algopy.log(P.T * v))
+    A = subs_counts
+    B = algopy.log(P.T * v)
+    log_likelihoods = slow_part(A, B)
+    return algopy.sum(log_likelihoods)
 
 def eval_f(
         theta,

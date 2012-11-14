@@ -1357,13 +1357,7 @@ class RawAlgorithmsMixIn:
               [1,0,0],
               [1,1,0]]
         """
-        retval = numpy.zeros((N,N))
-
-        for r in range(N):
-            for c in range(r):
-                retval[r,c] = 1.
-
-        return retval
+        return numpy.tril(numpy.ones((N,N)), -1)
 
     @classmethod
     def build_PU(cls, N):
@@ -1374,13 +1368,7 @@ class RawAlgorithmsMixIn:
               [0,0,1],
               [0,0,0]]
         """
-        retval = numpy.zeros((N,N))
-
-        for r in range(N):
-            for c in range(r+1,N):
-                retval[r,c] = 1.
-
-        return retval
+        return numpy.triu(numpy.ones((N,N)), 1)
 
 
     @classmethod
@@ -1395,9 +1383,6 @@ class RawAlgorithmsMixIn:
         Abar_data = out
 
         D,P,N = A_data.shape[:3]
-
-        # compute (P_L + 0.5*P_D) * dot(L.T, Lbar)
-        Proj = cls.build_PL(N) + 0.5 * numpy.eye(N)
 
         # compute (P_L + 0.5*P_D) * dot(L.T, Lbar)
         Proj = cls.build_PL(N) + 0.5 * numpy.eye(N)
