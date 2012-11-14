@@ -996,30 +996,32 @@ class Test_CGgraph_on_UTPM(TestCase):
 
         assert_array_almost_equal(xbar_correct.data, fx.xbar.data)
 
-
-    @dec.skipif(float(numpy.__version__[:3]) > 1.5, msg =  "numpy.versions > 1.5 have a bug in iadd of zero-strided arrays, skipping test")
     def test_broadcasting1(self):
-        D,P,N = 2,1,2
-        x = UTPM(numpy.random.rand(D,P,N,1))
-        A = UTPM(numpy.random.rand(D,P,N, N))
+        D, P, N = 2, 1, 2
+        x = UTPM(numpy.arange(D * P * N * 1, dtype=float).reshape((D, P, N, 1)))
+        A = UTPM(numpy.arange(D * P * N * N, dtype=float).reshape((D, P, N, N)))
         cg = CGraph()
         x = Function(x)
         A = Function(A)
         z = x + A
         cg.trace_off()
-        cg.independentFunctionList = [x,A]
+        cg.independentFunctionList = [x, A]
         cg.dependentFunctionList = [z]
 
-        zbar = UTPM(numpy.random.rand(*z.x.data.shape))
+        zbar = UTPM(3 + numpy.arange(D * P * N * N,
+                                 dtype=float).reshape((D, P, N, N)))
         cg.pullback([zbar])
 
-        print zbar.data[0,0]
-        print A.xbar.data[0,0]
-        print x.xbar.data[0,0]
-        assert_array_almost_equal(numpy.sum(z.x.data[1,0] * zbar.data[0,0]), numpy.sum(x.x.data[1,0] * x.xbar.data[0,0]) + numpy.sum(A.x.data[1,0] * A.xbar.data[0,0]))
+        # print 'zbar.data[0, 0]\n', zbar.data[0, 0]
+        # print 'A.xbar.data[0, 0]\n', A.xbar.data[0, 0]
+        # print 'x.xbar.data[0, 0]\n', x.xbar.data[0, 0]
 
+        # print cg
+        a = numpy.sum(z.x.data[1, 0] * zbar.data[0, 0])
+        b = numpy.sum(x.x.data[1, 0] * x.xbar.data[0, 0]) \
+          + numpy.sum(A.x.data[1, 0] * A.xbar.data[0, 0])
+        assert_array_almost_equal(a, b)
 
-    @dec.skipif(float(numpy.__version__[:3]) > 1.5, msg =  "numpy.versions > 1.5 have a bug in iadd of zero-strided arrays, skipping test")
     def test_broadcasting2(self):
         D,P,N = 2,1,2
         x = UTPM(numpy.random.rand(D,P,N,1))
@@ -1037,8 +1039,29 @@ class Test_CGgraph_on_UTPM(TestCase):
         cg.pullback([zbar])
         assert_array_almost_equal(numpy.sum(z.x.data[1,0] * zbar.data[0,0]), numpy.sum(x.x.data[1,0] * x.xbar.data[0,0]) + numpy.sum(A.x.data[1,0] * A.xbar.data[0,0]))
 
-    @dec.skipif(float(numpy.__version__[:3]) > 1.5, msg =  "numpy.versions > 1.5 have a bug in iadd of zero-strided arrays, skipping test")
     def test_broadcasting3(self):
+        D, P, N = 2, 1, 2
+        x = UTPM(numpy.random.rand(D, P, N, 1))
+        A = UTPM(numpy.random.rand(D, P, N, N))
+        cg = CGraph()
+        x = Function(x)
+        A = Function(A)
+        #z = A - dot(x,x.T)/A + A*x /dot(A[:,:1], A[1:,:])
+        z = A * x
+        cg.trace_off()
+        cg.independentFunctionList = [x, A]
+        cg.dependentFunctionList = [z]
+
+        zbar = UTPM(numpy.random.rand(*z.x.data.shape))
+        cg.pullback([zbar])
+
+        a = numpy.sum(z.x.data[1, 0] * zbar.data[0, 0])
+        b = numpy.sum(x.x.data[1, 0] * x.xbar.data[0, 0]) \
+          + numpy.sum(A.x.data[1, 0] * A.xbar.data[0, 0])
+
+        assert_array_almost_equal(a, b)
+
+    def test_broadcasting4(self):
         D,P = 2,1
         x = UTPM(numpy.random.rand(D,P,2,3))
         y = UTPM(numpy.random.rand(D,P,3))
@@ -1058,6 +1081,26 @@ class Test_CGgraph_on_UTPM(TestCase):
         print x.xbar.data[0,0]
         assert_array_almost_equal(numpy.sum(z.x.data[1,0] * zbar.data[0,0]), numpy.sum(x.x.data[1,0] * x.xbar.data[0,0]) + numpy.sum(y.x.data[1,0] * y.xbar.data[0,0]))
 
+    def test_broadcasting5(self):
+        D, P, N = 2, 1, 2
+        x = UTPM(numpy.random.rand(D, P, N, 1))
+        A = UTPM(numpy.random.rand(D, P, N, N))
+        cg = CGraph()
+        x = Function(x)
+        A = Function(A)
+        z = A - dot(x, x.T) / A + A * x / dot(A[:, :1], A[1:, :])
+        cg.trace_off()
+        cg.independentFunctionList = [x, A]
+        cg.dependentFunctionList = [z]
+
+        zbar = UTPM(numpy.random.rand(*z.x.data.shape))
+        cg.pullback([zbar])
+
+        a = numpy.sum(z.x.data[1, 0] * zbar.data[0, 0])
+        b = numpy.sum(x.x.data[1, 0] * x.xbar.data[0, 0]) \
+          + numpy.sum(A.x.data[1, 0] * A.xbar.data[0, 0])
+
+        assert_array_almost_equal(a, b)
 
     def test_eigh1_pullback(self):
         (D,P,N) = 2,1,2

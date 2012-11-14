@@ -17,6 +17,51 @@ from ..base_type import Ring
 
 from algorithms import RawAlgorithmsMixIn, broadcast_arrays_shape
 
+import operator
+
+if float(numpy.__version__[:3]) > 1.5:
+
+    def workaround_strides_function(x, y, fun):
+        """
+
+        peform the operation fun(x,y)
+
+        where fun = operator.iadd, operator.imul, operator.setitem, etc.
+
+        workaround for the bug
+        https://github.com/numpy/numpy/issues/2705
+
+        Replace this function once the bug has been fixed.
+
+        This function assumes that x and y have the same shape.
+
+
+        Parameters
+        ------------
+
+        x:      UTPM instance
+
+        y:      UTPM instance
+
+        fun:    function from the module operator
+
+        """
+
+        if x.shape != y.shape:
+            raise ValueError('x.shape != y.shape')
+
+        if x.ndim == 0:
+            fun(x, y)
+        else:
+            for i in range(x.shape[0]):
+                workaround_strides_function(x[i, ...], y[i, ...], fun)
+
+else:
+
+    def workaround_strides_function(x, y, fun):
+        fun(x, y)
+
+
 class UTPM(Ring, RawAlgorithmsMixIn):
     """
 
@@ -1265,30 +1310,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         return out
 
-
-    def init_UTPM_jacobian(self):
-        """ initializes this UTPM instance to compute the Jacobian,
-
-        it is possible to force the dtype to a certain dtype,
-        if no dtype is provided, the dtype is inferred from x
-        """
-
-
-        shp = list(self.data.shape)
-
-        if shp[0] != 1 or shp[1] != 1 or len(shp) != 3 :
-            raise NotImplementedError()
-
-        D,P = 2, numpy.prod(shp)
-        new_shp = (D,P) + shp
-
-        data = numpy.zeros(new_shp)
-        data[0] = x
-        data[1,:].flat = numpy.eye(numpy.size(x))
-
-        return self.__class__(data)
-
-
     @classmethod
     def init_jacobian(cls, x, dtype=None):
         """ initializes this UTPM instance to compute the Jacobian,
@@ -1680,9 +1701,9 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return cls.pb_div(zbar, x, y , z, out = out)
 
     @classmethod
-    def pb_add(cls, zbar, x, y , z, out = None):
+    def pb_add(cls, zbar, x, y, z, out=None):
         if out == None:
-            D,P = y.data.shape[:2]
+            D, P = y.data.shape[:2]
             xbar = x.zeros_like()
             ybar = y.zeros_like()
 
@@ -1690,7 +1711,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             xbar, ybar = out
 
         if isinstance(xbar, UTPM):
-            xbar2,zbar2 = cls.broadcast(xbar, zbar)
+            xbar2, zbar2 = cls.broadcast(xbar, zbar)
 
             # print 'xbar = ', xbar
             # print 'zbar = ', zbar
@@ -1700,20 +1721,22 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             # print 'xbar2.data.strides = ', xbar2.data.strides
             # print 'zbar2.data.strides = ', zbar2.data.strides
             # print 'xbar2 + zbar2 = ', xbar2 + zbar2
-            xbar2[...] = xbar2 + zbar2
+
+            workaround_strides_function(xbar2, zbar2, operator.iadd)
+            # xbar2[...] = xbar2 + zbar2
 
             # print 'after update'
             # print 'xbar2 =\n', xbar2
             # print 'xbar =\n', xbar
 
-
         if isinstance(ybar, UTPM):
-            ybar2,zbar2 = cls.broadcast(ybar, zbar)
-            ybar2 += zbar2
+            ybar2, zbar2 = cls.broadcast(ybar, zbar)
+            workaround_strides_function(ybar2, zbar2, operator.iadd)
+            # ybar2 += zbar2
         # print 'ybar2.data.shape=',ybar2.data.shape
 
 
-        return (xbar,ybar)
+        return (xbar, ybar)
 
 
     @classmethod
@@ -1747,11 +1770,13 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         if isinstance(x, UTPM):
             xbar2,zbar2 = cls.broadcast(xbar, zbar)
-            xbar2 += zbar2
+            workaround_strides_function(xbar2, zbar2, operator.iadd)
+            # xbar2 += zbar2
 
         if isinstance(y, UTPM):
             ybar2,zbar2 = cls.broadcast(ybar, zbar)
-            ybar2 -= zbar2
+            workaround_strides_function(ybar2, zbar2, operator.isub)
+            # ybar2 -= zbar2
 
         return (xbar,ybar)
 
@@ -1771,14 +1796,16 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             xbar2, tmp = cls.broadcast(xbar, zbar)
             ybar2, tmp = cls.broadcast(ybar, zbar)
 
-            xbar2 += zbar * y
-            ybar2 += zbar * x
+            # xbar2 += zbar * y
+            workaround_strides_function(xbar2, zbar * y, operator.iadd)
+            # ybar2 += zbar * x
+            workaround_strides_function(ybar2, zbar * x, operator.iadd)
 
-            return (xbar,ybar)
+            return (xbar, ybar)
 
         elif isinstance(x, UTPM):
             if out == None:
-                D,P = z.data.shape[:2]
+                D, P = z.data.shape[:2]
                 xbar = x.zeros_like()
                 ybar = None
 
@@ -1787,13 +1814,14 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
             xbar2, tmp = cls.broadcast(xbar, zbar)
 
-            xbar2 += zbar * y
+            workaround_strides_function(xbar2, zbar * y, operator.iadd)
+            # xbar2 += zbar * y
 
-            return (xbar,ybar)
+            return (xbar, ybar)
 
         elif isinstance(y, UTPM):
             if out == None:
-                D,P = z.data.shape[:2]
+                D, P = z.data.shape[:2]
                 xbar = None
                 ybar = y.zeros_like()
 
@@ -1802,39 +1830,76 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
             ybar2, tmp = cls.broadcast(ybar, zbar)
 
-            ybar2 += zbar * x
+            workaround_strides_function(xbar2, zbar * x, operator.iadd)
+            # ybar2 += zbar * x
 
-            return (xbar,ybar)
+            return (xbar, ybar)
 
         else:
             raise NotImplementedError('not implemented')
 
-
-
     @classmethod
-    def pb_div(cls, zbar, x, y , z, out = None):
-        if out == None:
-            D,P = y.data.shape[:2]
-            xbar = x.zeros_like()
-            ybar = y.zeros_like()
+    def pb_div(cls, zbar, x, y, z, out=None):
 
-        else:
-            xbar, ybar = out
+        if isinstance(x, UTPM) and isinstance(y, UTPM):
 
-        x2, y2 = cls.broadcast(x, y)
+            if out == None:
+                D,P = y.data.shape[:2]
+                xbar = x.zeros_like()
+                ybar = y.zeros_like()
 
-        xbar2, tmp = cls.broadcast(xbar, zbar)
-        ybar2, tmp = cls.broadcast(ybar, zbar)
+            else:
+                xbar, ybar = out
 
-        tmp  = zbar.clone()
-        tmp /= y2
-        xbar2 += tmp
-        tmp *= z
-        ybar2 -= tmp
+            x2, y2 = cls.broadcast(x, y)
 
-        return (xbar,ybar)
+            xbar2, tmp = cls.broadcast(xbar, zbar)
+            ybar2, tmp = cls.broadcast(ybar, zbar)
 
+            tmp = zbar.clone()
+            # tmp /= y2
+            workaround_strides_function(tmp, y2, operator.idiv)
+            # xbar2 += tmp
+            workaround_strides_function(xbar2, tmp, operator.iadd)
+            # tmp *= z
+            workaround_strides_function(tmp, z, operator.imul)
+            # ybar2 -= tmp
+            workaround_strides_function(ybar2, tmp, operator.isub)
 
+            return (xbar, ybar)
+
+        elif isinstance(x, UTPM):
+
+            if out == None:
+                D, P = z.data.shape[:2]
+                xbar = x.zeros_like()
+                ybar = None
+
+            else:
+                xbar, ybar = out
+
+            xbar2, tmp = cls.broadcast(xbar, zbar)
+
+            # tmp /= y2
+            # xbar2 += tmp
+            workaround_strides_function(xbar2, zbar / y, operator.iadd)
+
+            return (xbar, ybar)
+
+        elif isinstance(y, UTPM):
+
+            if out == None:
+                D, P = z.data.shape[:2]
+                xbar = None
+                ybar = y.zeros_like()
+
+            else:
+                xbar, ybar = out
+
+            ybar2, tmp = cls.broadcast(ybar, zbar)
+            workaround_strides_function(ybar2, zbar / y * z, operator.isub)
+
+            return (xbar, ybar)
 
     @classmethod
     def broadcast(cls, x,y):

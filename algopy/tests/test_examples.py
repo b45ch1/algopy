@@ -143,8 +143,6 @@ class Test_MaximimLikelihoodExample(TestCase):
         # Default expm implementation.
         expm(Q)
 
-
-
     def test_ml_with_expm_gradient_forward(self):
 
         Y = numpy.zeros(5)
@@ -158,14 +156,12 @@ class Test_MaximimLikelihoodExample(TestCase):
         assert_array_almost_equal(self.eval_f_eigh(Y), self.eval_f(Y))
         assert_array_almost_equal(self.eval_hess_f_eigh(Y), self.eval_hess_f(Y))
 
-
-    @dec.skipif(float(numpy.__version__[:3]) > 1.5, msg =  "numpy.versions > 1.5 have a bug in iadd of zero-strided arrays, skipping test")
     def test_ml_with_expm_gradient_reverse(self):
         # test reverse mode
-
+        Y = numpy.zeros(5)
         cg = CGraph()
         x = Function(Y)
-        y = self.eval_f_eigh(x)
+        y = self.eval_f(x)
         cg.independentFunctionList = [x]
         cg.dependentFunctionList = [y]
 
