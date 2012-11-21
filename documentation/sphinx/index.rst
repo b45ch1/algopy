@@ -315,6 +315,7 @@ Advanced Examples:
    examples/ode_solvers.rst
    examples/comparison_forward_reverse_mode.rst
    examples/ampl_minimization_problem.rst
+   examples/rosenbrock_banana.rst
 
 Application Examples:
 
