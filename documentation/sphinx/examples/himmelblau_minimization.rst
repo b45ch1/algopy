@@ -137,6 +137,16 @@ Here is its output::
              Function evaluations: 126
     [ 3.  2.]
 
+    strategy: tnc
+    options: default
+    gradient: autodiff
+    (array([ 2.999999,  2.000002]), 11, 1)
+
+    strategy: tnc
+    options: default
+    gradient: finite differences
+    (array([ 2.99999646,  2.00000762]), 14, 1)
+
 
     ---------------------------------------------------------
     searches beginning from the more difficult init point [-0.27 -0.9 ]
@@ -237,5 +247,16 @@ Here is its output::
              Iterations: 6
              Function evaluations: 155
     [ 3.58442834 -1.84812653]
+
+    strategy: tnc
+    options: default
+    gradient: autodiff
+    (array([ 3.,  2.]), 42, 1)
+
+    strategy: tnc
+    options: default
+    gradient: finite differences
+    (array([ 2.99999981,  1.99999997]), 39, 1)
+
 
 

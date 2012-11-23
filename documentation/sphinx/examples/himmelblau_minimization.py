@@ -148,6 +148,30 @@ def do_searches(f, g, h, x0):
     print results
     print
 
+    print 'strategy:', 'tnc'
+    print 'options:', 'default'
+    print 'gradient:', 'autodiff'
+    results = scipy.optimize.fmin_tnc(
+            f,
+            x0,
+            fprime=g,
+            disp=0,
+            )
+    print results
+    print
+
+    print 'strategy:', 'tnc'
+    print 'options:', 'default'
+    print 'gradient:', 'finite differences'
+    results = scipy.optimize.fmin_tnc(
+            f,
+            x0,
+            approx_grad=True,
+            disp=0,
+            )
+    print results
+    print
+
 
 def show_local_curvature(f, g, h, x0):
     print 'point:'
