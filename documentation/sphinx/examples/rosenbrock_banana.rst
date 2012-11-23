@@ -25,8 +25,35 @@ Here is its output::
     This is at f(1, 1) = 0 but the function is a bit tricky.
     To make the search difficult we will start far from the min.
 
+    target:
+    [ 1.  1.]
+    autodiff gradient:
+    [-0.  0.]
+    finite differences gradient:
+    [ 0.  0.]
+    autodiff hessian:
+    [[ 802. -400.]
+     [-400.  200.]]
+    finite differences hessian:
+    [[ 802. -400.]
+     [-400.  200.]]
+
+    ---------------------------------------------------------
+    searching from starting point (-1.2, 1.0)
+    ---------------------------------------------------------
+
     initial guess:
     [-1.2  1. ]
+    autodiff gradient:
+    [-215.6  -88. ]
+    finite differences gradient:
+    [-215.6  -88. ]
+    autodiff hessian:
+    [[ 1330.   480.]
+     [  480.   200.]]
+    finite differences hessian:
+    [[ 1330.   480.]
+     [  480.   200.]]
 
     strategy: default (Nelder-Mead)
     options: default
@@ -106,6 +133,103 @@ Here is its output::
              Current function value: 0.000000
              Iterations: 23
              Function evaluations: 665
+    [ 1.  1.]
+
+    ---------------------------------------------------------
+    searching from starting point (2.0, 2.0)
+    ---------------------------------------------------------
+
+    initial guess:
+    [ 2.  2.]
+    autodiff gradient:
+    [ 1602.  -400.]
+    finite differences gradient:
+    [ 1602.  -400.]
+    autodiff hessian:
+    [[ 4002.  -800.]
+     [ -800.   200.]]
+    finite differences hessian:
+    [[ 4002.  -800.]
+     [ -800.   200.]]
+
+    strategy: default (Nelder-Mead)
+    options: default
+    Optimization terminated successfully.
+             Current function value: 0.000000
+             Iterations: 62
+             Function evaluations: 119
+    [ 0.99998292  0.99996512]
+
+    strategy: ncg
+    options: default
+    gradient: autodiff
+    hessian: autodiff
+    Optimization terminated successfully.
+             Current function value: 0.000000
+             Iterations: 33
+             Function evaluations: 52
+             Gradient evaluations: 33
+             Hessian evaluations: 33
+    [ 0.99996674  0.99993334]
+
+    strategy: ncg
+    options: default
+    gradient: autodiff
+    hessian: finite differences
+    Optimization terminated successfully.
+             Current function value: 0.000000
+             Iterations: 33
+             Function evaluations: 52
+             Gradient evaluations: 139
+             Hessian evaluations: 0
+    [ 0.99996668  0.99993322]
+
+    strategy: bfgs
+    options: default
+    gradient: autodiff
+    Optimization terminated successfully.
+             Current function value: 0.000000
+             Iterations: 19
+             Function evaluations: 27
+             Gradient evaluations: 27
+    [ 0.99999999  0.99999999]
+
+    strategy: bfgs
+    options: default
+    gradient: finite differences
+    Optimization terminated successfully.
+             Current function value: 0.000000
+             Iterations: 19
+             Function evaluations: 108
+             Gradient evaluations: 27
+    [ 0.99999551  0.99999102]
+
+    strategy: slsqp
+    options: default
+    gradient: autodiff
+    Optimization terminated successfully.    (Exit mode 0)
+                Current function value: 1.0334670512e-07
+                Iterations: 20
+                Function evaluations: 29
+                Gradient evaluations: 20
+    [ 0.9996964   0.99938232]
+
+    strategy: slsqp
+    options: default
+    gradient: finite differences
+    Optimization terminated successfully.    (Exit mode 0)
+                Current function value: 1.06959048795e-07
+                Iterations: 20
+                Function evaluations: 89
+                Gradient evaluations: 20
+    [ 0.99969095  0.9993713 ]
+
+    strategy: powell
+    options: default
+    Optimization terminated successfully.
+             Current function value: 0.000000
+             Iterations: 12
+             Function evaluations: 339
     [ 1.  1.]
 
 

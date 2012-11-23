@@ -9,6 +9,7 @@ import functools
 import numpy
 import scipy.optimize
 import algopy
+import numdifftools
 
 
 #########################################################################
@@ -48,22 +49,18 @@ def rosenbrock(X):
 #########################################################################
 # Compare optimization strategies.
 
+def do_searches(f, g, h, x0):
 
-def main():
-
-    # define the function and the autodiff gradient and hessian
-    f = rosenbrock
-    g = functools.partial(eval_grad, rosenbrock)
-    h = functools.partial(eval_hess, rosenbrock)
-
-    print 'Try to find the minimum of the Rosenbrock banana function.'
-    print 'This is at f(1, 1) = 0 but the function is a bit tricky.'
-    print 'To make the search difficult we will start far from the min.'
-    print
-
-    x0 = numpy.array([-1.2, 1.0], dtype=float)
     print 'initial guess:'
     print x0
+    print 'autodiff gradient:'
+    print g(x0)
+    print 'finite differences gradient:'
+    print numdifftools.Gradient(f)(x0)
+    print 'autodiff hessian:'
+    print h(x0)
+    print 'finite differences hessian:'
+    print numdifftools.Hessian(f)(x0)
     print
 
     print 'strategy:', 'default (Nelder-Mead)'
@@ -150,6 +147,39 @@ def main():
             )
     print results
     print
+
+
+def main():
+
+    # define the function and the autodiff gradient and hessian
+    f = rosenbrock
+    g = functools.partial(eval_grad, rosenbrock)
+    h = functools.partial(eval_hess, rosenbrock)
+
+    print 'Try to find the minimum of the Rosenbrock banana function.'
+    print 'This is at f(1, 1) = 0 but the function is a bit tricky.'
+    print 'To make the search difficult we will start far from the min.'
+    print
+
+    target = numpy.array([1.0, 1.0], dtype=float)
+    print 'target:'
+    print target
+    print 'autodiff gradient:'
+    print g(target)
+    print 'finite differences gradient:'
+    print numdifftools.Gradient(f)(target)
+    print 'autodiff hessian:'
+    print h(target)
+    print 'finite differences hessian:'
+    print numdifftools.Hessian(f)(target)
+    print
+
+    for x0 in ((-1.2, 1.0), (2.0, 2.0)):
+        print '---------------------------------------------------------'
+        print 'searching from starting point', x0
+        print '---------------------------------------------------------'
+        print
+        do_searches(f, g, h, numpy.array(x0, dtype=float))
 
 
 if __name__ == '__main__':
