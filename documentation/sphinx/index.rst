@@ -316,6 +316,7 @@ Advanced Examples:
    examples/comparison_forward_reverse_mode.rst
    examples/ampl_minimization_problem.rst
    examples/rosenbrock_banana.rst
+   examples/himmelblau_minimization.rst
 
 Application Examples:
 
