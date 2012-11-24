@@ -317,6 +317,7 @@ Advanced Examples:
    examples/ampl_minimization_problem.rst
    examples/rosenbrock_banana.rst
    examples/himmelblau_minimization.rst
+   examples/wood_function_minimization.rst
 
 Application Examples:
 
