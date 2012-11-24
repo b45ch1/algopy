@@ -22,7 +22,15 @@ the nonlinear optimization procedures in
 `scipy.optimize <http://docs.scipy.org/doc/scipy/reference/optimize.html>`_
 will more easily find the values of :math:`x_1, x_2, x_3, x_4`
 that minimize :math:`f(x_1, x_2, x_3, x_4)`.
-Here is the python code:
+
+For what it's worth, here is the symbolic Hessian according to Sympy::
+
+    [1200*x1**2 - 400*x2 + 2, -400*x1,                       0,       0]
+    [                -400*x1,   220.2,                       0,    19.8]
+    [                      0,       0, 1080*x3**2 - 360*x4 + 2, -360*x3]
+    [                      0,    19.8,                 -360*x3,   200.2]
+
+And here is the python code for the minimization:
 
 .. literalinclude:: wood_function_minimization.py
 

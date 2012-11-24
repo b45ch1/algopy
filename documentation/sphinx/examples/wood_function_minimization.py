@@ -2,7 +2,7 @@
 Minimize the Wood function.
 
 Problem 3.1 of
-"A truncated Newton method with nonmonoton line search
+"A truncated Newton method with nonmonotone line search
 for unconstrained optimization"
 Except that I think there is a typo in that paper,
 and the minimum is actually at (1,1,1,1) rather than at (0,0,0,0).
