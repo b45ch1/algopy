@@ -10,17 +10,18 @@ with nonmonotone line search for unconstrained optimization
 by Grippo et al. 1989.
 
 .. math::
-    f(x, y) =& 100(x_1^2 - x_2)^2 + (x_1-1)^2 + (x_3-1)^2 \\
-             & + 90(x_3^2-x_4)^2 \\
-             & + 10.1 \left[ (x2-1)^2 + (x_4-1)^2 \right] \\
-             & + 19.8(x_2-1)(x_4-1)
+    f(x_1, x_2, x_3, x_4)
+        = & 100(x_1^2 - x_2)^2 + (x_1-1)^2 + (x_3-1)^2 \\
+          & + 90(x_3^2-x_4)^2 \\
+          & + 10.1 \left( (x_2-1)^2 + (x_4-1)^2 \right) \\
+          & + 19.8(x_2-1)(x_4-1)
 
 The idea is that by using AlgoPy to provide the gradient and hessian
 of the objective function,
 the nonlinear optimization procedures in
 `scipy.optimize <http://docs.scipy.org/doc/scipy/reference/optimize.html>`_
-will more easily find the :math:`x` and :math:`y` values
-that minimize :math:`f(x, y)`.
+will more easily find the values of :math:`x_1, x_2, x_3, x_4`
+that minimize :math:`f(x_1, x_2, x_3, x_4)`.
 Here is the python code:
 
 .. literalinclude:: wood_function_minimization.py
