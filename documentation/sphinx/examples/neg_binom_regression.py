@@ -1,7 +1,9 @@
 """
-Negative Binomial Regression.
+Negative Binomial Regression
 
+This is an algopy implementation of the statsmodels example
 http://statsmodels.sourceforge.net/devel/examples/generated/example_gmle.html
+.
 """
 
 import functools
@@ -15,10 +17,10 @@ import patsy
 
 g_url = 'http://vincentarelbundock.github.com/Rdatasets/csv/COUNT/medpar.csv'
 
-def get_aic(theta, y, X):
-    return 2*len(theta) + 2*get_neg_ll(theta, y, X)
+def get_aic(y, X, theta):
+    return 2*len(theta) + 2*get_neg_ll(y, X, theta)
 
-def get_neg_ll(theta, y, X):
+def get_neg_ll(y, X, theta):
     alpha = theta[-1]
     beta = theta[:-1]
     a = alpha * algopy.exp(algopy.dot(X, beta))
@@ -29,69 +31,28 @@ def get_neg_ll(theta, y, X):
         -algopy.special.gammaln(y + 1) +
         -algopy.special.gammaln(1/alpha))
     neg_ll = -ll
-    #print theta
-    #print neg_ll
-    #print
     return neg_ll
 
-def eval_grad(f, theta, *args):
+def eval_grad(f, theta):
     theta = algopy.UTPM.init_jacobian(theta)
-    retval = f(theta, *args)
-    return algopy.UTPM.extract_jacobian(retval)
+    return algopy.UTPM.extract_jacobian(f(theta))
 
-def eval_hess(f, theta, *args):
+def eval_hess(f, theta):
     theta = algopy.UTPM.init_hessian(theta)
-    retval = f(theta, *args)
-    return algopy.UTPM.extract_hessian(len(theta), retval)
-
-
-def show_local_curvature(f, g, h, x0):
-    print 'point:'
-    print x0
-    print 'function value:'
-    print f(x0)
-    print 'autodiff gradient:'
-    print g(x0)
-    print 'finite differences gradient:'
-    print numdifftools.Gradient(f)(x0)
-    print 'autodiff hessian:'
-    print h(x0)
-    print 'finite differences hessian:'
-    print numdifftools.Hessian(f)(x0)
-
+    return algopy.UTPM.extract_hessian(len(theta), f(theta))
 
 def main():
 
-    # read the data into numpy arrays
+    # read the data from the internet into numpy arrays
     medpar = pandas.read_csv(g_url)
-    y, X = patsy.dmatrices('los~type2+type3+hmo+white', medpar)
-    y = numpy.array(y).flatten()
-    X = numpy.array(X)
-    print type(y)
-    print type(X)
-    print y[:5]
-    print X[:5]
+    y_patsy, X_patsy = patsy.dmatrices('los~type2+type3+hmo+white', medpar)
+    y = numpy.array(y_patsy).flatten()
+    X = numpy.array(X_patsy)
 
-    fmin_args = (y, X)
-
-    # define the function and the autodiff gradient and hessian
-    f = get_neg_ll
-    g = functools.partial(eval_grad, get_neg_ll)
-    h = functools.partial(eval_hess, get_neg_ll)
-
-    # define the max likelihood values from the statsmodels webpage
-    expected_theta = numpy.array([
-        2.3103, 0.2213, 0.7061, -0.068, -0.129, 0.4458])
-    expected_aic = 9606.9532058301575
-    print 'expected aic:'
-    print expected_aic
-    print
-    print 'observed aic:'
-    print get_aic(expected_theta, y, X)
-    print
-    print 'standard deviations at expected mle:'
-    print numpy.sqrt(numpy.diag(scipy.linalg.inv(h(expected_theta, y, X))))
-    print
+    # define the objective function and the autodiff gradient and hessian
+    f = functools.partial(get_neg_ll, y, X)
+    g = functools.partial(eval_grad, f)
+    h = functools.partial(eval_hess, f)
 
     # init the search for max likelihood parameters
     theta0 = numpy.array([
@@ -106,15 +67,27 @@ def main():
             theta0,
             fprime=g,
             fhess=h,
-            args=fmin_args,
             avextol=1e-6,
             )
 
+    # compute the hessian a couple of different ways
+    algopy_hessian = h(results)
+    num_hessian = numdifftools.Hessian(f)(results)
+
+    # report the results of the search including aic and standard error
     print 'search results:'
     print results
     print
-    print 'standard deviations at observed mle:'
-    print numpy.sqrt(numpy.diag(scipy.linalg.inv(h(results, y, X))))
+    print 'aic:'
+    print get_aic(y, X, results)
+    print
+    print 'standard error using observed fisher information,'
+    print 'with hessian computed using algopy:'
+    print numpy.sqrt(numpy.diag(scipy.linalg.inv(algopy_hessian)))
+    print
+    print 'standard error using observed fisher information,'
+    print 'with hessian computed using numdifftools:'
+    print numpy.sqrt(numpy.diag(scipy.linalg.inv(num_hessian)))
     print
 
 
