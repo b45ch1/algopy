@@ -328,6 +328,7 @@ Application Examples:
    examples/leastsquaresfitting.rst
    examples/hessian_of_potential_function.rst
    examples/minimal_surface.rst
+   examples/neg_binom_regression.rst
 
 
 Additional Information:
