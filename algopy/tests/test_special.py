@@ -103,6 +103,40 @@ class Test_ScipySpecialFunctions(TestCase):
         y3 = hyp0f1(b, x)
         assert_almost_equal(y1, y3.x)
 
+    def test_polygamma(self):
+        """
+        check that algopy.special.polygamma can be called with
+        UTPM and Function instances as arguments
+        """
+
+        n, x = 2, 3.
+        y1 = polygamma(n, x)
+
+        n, x = 2, UTPM(3.* numpy.ones((1,1)))
+        y2 = polygamma(n, x)
+        assert_almost_equal(y1, y2.data[0,0])
+
+        n, x = 2, Function(3.)
+        y3 = polygamma(n, x)
+        assert_almost_equal(y1, y3.x)
+
+    def test_gammaln(self):
+        """
+        check that algopy.special.gammaln can be called with
+        UTPM and Function instances as arguments
+        """
+
+        x = 3.
+        y1 = gammaln(x)
+
+        x = UTPM(3.* numpy.ones((1,1)))
+        y2 = gammaln(x)
+        assert_almost_equal(y1, y2.data[0,0])
+
+        x = Function(3.)
+        y3 = gammaln(x)
+        assert_almost_equal(y1, y3.x)
+
     def test_erf(self):
         """
         check that algopy.special.erf can be called with

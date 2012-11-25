@@ -790,6 +790,50 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return xbar
 
     @classmethod
+    def polygamma(cls, n, x):
+        """ computes y = polygamma(n, x) in UTP arithmetic"""
+
+        retval = x.clone()
+        cls._polygamma(n, x.data, out = retval.data)
+        return retval
+
+    @classmethod
+    def pb_polygamma(cls, ybar, n, x, y, out=None):
+        """ computes bar y dy = bar x dx in UTP arithmetic"""
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            # out = (nbar, xbar)
+            xbar = out[1]
+
+        cls._pb_polygamma(ybar.data, n, x.data, y.data, out = xbar.data)
+
+        return xbar
+
+    @classmethod
+    def gammaln(cls, x):
+        """ computes y = gammaln(x) in UTP arithmetic"""
+
+        retval = x.clone()
+        cls._gammaln(x.data, out = retval.data)
+        return retval
+
+    @classmethod
+    def pb_gammaln(cls, ybar, x, y, out=None):
+        """ computes bar y dy = bar x dx in UTP arithmetic"""
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar, = out
+
+        cls._pb_gammaln(ybar.data, x.data, y.data, out = xbar.data)
+        return out
+
+    @classmethod
     def erf(cls, x):
         """ computes y = erf(x) in UTP arithmetic"""
         a = 1. / 2.

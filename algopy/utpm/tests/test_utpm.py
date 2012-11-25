@@ -1,3 +1,5 @@
+import math
+
 from numpy.testing import *
 import numpy
 import scipy.special
@@ -642,6 +644,14 @@ class Test_Push_Forward(TestCase):
 
         assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
+    def test_gammaln(self):
+        D,P,N,M = 5,1,3,3
+        # sample some nonnegative floats
+        R = numpy.exp(numpy.random.randn(D, P, M, N))
+        x = UTPM(R)
+        a = UTPM.gammaln(x)
+        b = UTPM.gammaln(x + 1) - UTPM.log(x)
+        assert_allclose(a.data, b.data)
 
     def test_hyperu(self):
         D,P,N,M = 5,1,3,3
@@ -849,7 +859,6 @@ class Test_Push_Forward(TestCase):
 
         assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
-
     def test_hyp0f1(self):
         D,P,N,M = 5,1,3,3
 
@@ -903,6 +912,47 @@ class Test_Push_Forward(TestCase):
         # reverse
         ybar = UTPM(numpy.random.random((D,P)))
         xbar = UTPM.pb_hyp0f1(ybar, b, x, y)
+
+        assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
+
+
+    def test_polygamma(self):
+        D,P,N,M = 5,1,3,3
+
+        x = UTPM(numpy.exp(numpy.random.randn(D,P,M,N)))
+        n = 2
+        a = UTPM.polygamma(n, x)
+        b = UTPM.polygamma(n, x+1) - ((-1)**n)*math.factorial(n)*(x**(-n-1))
+        assert_array_almost_equal(a.data, b.data)
+
+        # Check another special case.
+        x = UTPM(numpy.zeros((D,P,M,N)))
+        n = 2
+        x.data[0,...] = numpy.random.random((P,M,N))
+        x.data[1,...] = 1.
+        h = UTPM.polygamma(n, x)
+        prefix = 1.
+        s = UTPM(numpy.zeros((D,P,M,N)))
+        s.data[0] = scipy.special.polygamma(n, x.data[0])
+        for d in range(1,D):
+            prefix /= d
+            s.data[d] = prefix * scipy.special.polygamma(n+d, x.data[0])
+
+        assert_array_almost_equal(h.data, s.data)
+
+
+    def test_polygamma_pullback(self):
+        D,P = 2,1
+
+        n = 2
+
+        # forward
+        x = UTPM(numpy.random.random((D,P)))
+        y = UTPM.polygamma(n, x)
+
+        # reverse
+        ybar = UTPM(numpy.random.random((D,P)))
+        xbar = UTPM.pb_polygamma(ybar, n, x, y)
 
         assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
