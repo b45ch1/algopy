@@ -21,6 +21,7 @@ Here is the python code:
 
 Here is its output::
 
+
     properties of the function at a local min:
     point:
     [ 1.  1.]
@@ -88,6 +89,26 @@ Here is its output::
              Gradient evaluations: 139
              Hessian evaluations: 0
     [ 0.99996668  0.99993322]
+
+    strategy: cg
+    options: default
+    gradient: autodiff
+    Optimization terminated successfully.
+             Current function value: 0.000000
+             Iterations: 20
+             Function evaluations: 73
+             Gradient evaluations: 51
+    [ 0.99999877  0.99999753]
+
+    strategy: cg
+    options: default
+    gradient: finite differences
+    Optimization terminated successfully.
+             Current function value: 0.000000
+             Iterations: 24
+             Function evaluations: 249
+             Gradient evaluations: 54
+    [ 0.99999552  0.99999104]
 
     strategy: bfgs
     options: default
@@ -200,6 +221,26 @@ Here is its output::
              Hessian evaluations: 0
     [-0.95155309  0.91038895]
 
+    strategy: cg
+    options: default
+    gradient: autodiff
+    Optimization terminated successfully.
+             Current function value: 0.000000
+             Iterations: 10
+             Function evaluations: 41
+             Gradient evaluations: 36
+    [ 1.          0.99999999]
+
+    strategy: cg
+    options: default
+    gradient: finite differences
+    Optimization terminated successfully.
+             Current function value: 0.000000
+             Iterations: 13
+             Function evaluations: 221
+             Gradient evaluations: 51
+    [ 1.00000015  1.00000031]
+
     strategy: bfgs
     options: default
     gradient: autodiff
@@ -257,6 +298,7 @@ Here is its output::
     options: default
     gradient: finite differences
     (array([ 0.99995432,  0.99990844]), 97, 1)
+
 
 
 

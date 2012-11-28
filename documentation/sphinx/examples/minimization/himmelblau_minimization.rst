@@ -1,5 +1,5 @@
 Minimization of the Himmelblau Function
------------------------------------------------
+---------------------------------------
 
 In this example we want to use AlgoPy to help compute the
 minimum of the non-convex multi-modal bivariate
@@ -20,6 +20,7 @@ Here is the python code:
 
 
 Here is its output::
+
 
     properties of the function at a local min:
     point:
@@ -88,6 +89,26 @@ Here is its output::
              Gradient evaluations: 18
              Hessian evaluations: 0
     [ 3.  2.]
+
+    strategy: cg
+    options: default
+    gradient: autodiff
+    Optimization terminated successfully.
+             Current function value: 0.000000
+             Iterations: 7
+             Function evaluations: 18
+             Gradient evaluations: 18
+    [ 3.00000005  1.99999991]
+
+    strategy: cg
+    options: default
+    gradient: finite differences
+    Optimization terminated successfully.
+             Current function value: 0.000000
+             Iterations: 7
+             Function evaluations: 72
+             Gradient evaluations: 18
+    [ 3.00000004  1.99999991]
 
     strategy: bfgs
     options: default
@@ -200,6 +221,26 @@ Here is its output::
              Hessian evaluations: 0
     [-0.26999996 -0.89999989]
 
+    strategy: cg
+    options: default
+    gradient: autodiff
+    Optimization terminated successfully.
+             Current function value: 0.000000
+             Iterations: 10
+             Function evaluations: 35
+             Gradient evaluations: 35
+    [ 3.00000011  1.99999978]
+
+    strategy: cg
+    options: default
+    gradient: finite differences
+    Optimization terminated successfully.
+             Current function value: 0.000000
+             Iterations: 10
+             Function evaluations: 140
+             Gradient evaluations: 35
+    [ 3.0000001   1.99999978]
+
     strategy: bfgs
     options: default
     gradient: autodiff
@@ -257,6 +298,5 @@ Here is its output::
     options: default
     gradient: finite differences
     (array([ 2.99999981,  1.99999997]), 39, 1)
-
 
 

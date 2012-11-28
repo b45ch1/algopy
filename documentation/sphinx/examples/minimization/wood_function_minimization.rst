@@ -1,5 +1,5 @@
 Minimization of Wood's Function
------------------------------------------------
+-------------------------------
 
 In this example we want to use AlgoPy to help compute the
 minimum of Wood's function.
@@ -37,6 +37,7 @@ And here is the python code for the minimization:
 
 Here is its output::
 
+
     properties of the function at a local min:
     point:
     [ 1.  1.  1.  1.]
@@ -58,36 +59,36 @@ Here is its output::
      [  0.00000000e+00   1.98000000e+01  -3.60000000e+02   2.00200000e+02]]
 
     ---------------------------------------------------------
-    searches beginning from the easier init point [ 0.1  0.2  0.3  0.4]
+    searches beginning from the easier init point [ 1.1  1.2  1.3  1.4]
     ---------------------------------------------------------
 
     properties of the function at the initial guess:
     point:
-    [ 0.1  0.2  0.3  0.4]
+    [ 1.1  1.2  1.3  1.4]
     function value:
-    33.163
+    11.283
     autodiff gradient:
-    [ -9.4    9.96 -34.88  27.84]
+    [   4.6     9.96  136.32  -40.16]
     finite differences gradient:
-    [ -9.4    9.96 -34.88  27.84]
+    [   4.6     9.96  136.32  -40.16]
     autodiff hessian:
-    [[ -66.   -40.     0.     0. ]
-     [ -40.   220.2    0.    19.8]
-     [   0.     0.   -44.8 -108. ]
-     [   0.    19.8 -108.   200.2]]
+    [[  9.74000000e+02  -4.40000000e+02   0.00000000e+00   0.00000000e+00]
+     [ -4.40000000e+02   2.20200000e+02   2.84217094e-14   1.98000000e+01]
+     [  0.00000000e+00   2.84217094e-14   1.32320000e+03  -4.68000000e+02]
+     [  0.00000000e+00   1.98000000e+01  -4.68000000e+02   2.00200000e+02]]
     finite differences hessian:
-    [[ -6.60000000e+01  -4.00000000e+01   2.57962551e-16   2.41707021e-14]
-     [ -4.00000000e+01   2.20200000e+02  -5.21231467e-18   1.98000000e+01]
-     [  2.57962551e-16  -5.21231467e-18  -4.48000000e+01  -1.08000000e+02]
-     [  2.41707021e-14   1.98000000e+01  -1.08000000e+02   2.00200000e+02]]
+    [[  9.74000000e+02  -4.40000000e+02   1.00438116e-13   0.00000000e+00]
+     [ -4.40000000e+02   2.20200000e+02   6.53681225e-14   1.98000000e+01]
+     [  1.00438116e-13   6.53681225e-14   1.32320000e+03  -4.68000000e+02]
+     [  0.00000000e+00   1.98000000e+01  -4.68000000e+02   2.00200000e+02]]
 
     strategy: default (Nelder-Mead)
     options: default
     Optimization terminated successfully.
              Current function value: 0.000000
-             Iterations: 262
-             Function evaluations: 438
-    [ 0.99999926  0.9999881   1.00000257  1.00000442]
+             Iterations: 146
+             Function evaluations: 249
+    [ 0.99999164  0.99998319  1.00001086  1.00002861]
 
     strategy: ncg
     options: default
@@ -95,11 +96,11 @@ Here is its output::
     hessian: autodiff
     Optimization terminated successfully.
              Current function value: 0.000000
-             Iterations: 24
-             Function evaluations: 36
-             Gradient evaluations: 24
-             Hessian evaluations: 24
-    [ 1.  1.  1.  1.]
+             Iterations: 10
+             Function evaluations: 11
+             Gradient evaluations: 10
+             Hessian evaluations: 10
+    [ 1.00000012  1.00000024  1.          1.00000001]
 
     strategy: ncg
     options: default
@@ -107,69 +108,89 @@ Here is its output::
     hessian: finite differences
     Optimization terminated successfully.
              Current function value: 0.000000
-             Iterations: 24
-             Function evaluations: 36
-             Gradient evaluations: 804
+             Iterations: 10
+             Function evaluations: 11
+             Gradient evaluations: 54
              Hessian evaluations: 0
-    [ 1.          1.00000001  1.          1.        ]
+    [ 1.00000012  1.00000024  1.          1.00000001]
+
+    strategy: cg
+    options: default
+    gradient: autodiff
+    Optimization terminated successfully.
+             Current function value: 0.000000
+             Iterations: 33
+             Function evaluations: 71
+             Gradient evaluations: 71
+    [ 1.00000139  1.00000278  0.99999861  0.99999721]
+
+    strategy: cg
+    options: default
+    gradient: finite differences
+    Optimization terminated successfully.
+             Current function value: 0.000000
+             Iterations: 58
+             Function evaluations: 749
+             Gradient evaluations: 123
+    [ 0.99999733  0.99999467  1.0000027   1.00000542]
 
     strategy: bfgs
     options: default
     gradient: autodiff
     Optimization terminated successfully.
              Current function value: 0.000000
-             Iterations: 26
-             Function evaluations: 32
-             Gradient evaluations: 32
-    [ 1.  1.  1.  1.]
+             Iterations: 15
+             Function evaluations: 22
+             Gradient evaluations: 22
+    [ 0.99999999  0.99999997  1.00000001  1.00000002]
 
     strategy: bfgs
     options: default
     gradient: finite differences
     Optimization terminated successfully.
              Current function value: 0.000000
-             Iterations: 26
-             Function evaluations: 192
-             Gradient evaluations: 32
-    [ 0.99999981  0.99999964  1.00000006  1.00000014]
+             Iterations: 15
+             Function evaluations: 132
+             Gradient evaluations: 22
+    [ 0.9999998   0.99999962  1.00000007  1.00000016]
 
     strategy: slsqp
     options: default
     gradient: autodiff
     Optimization terminated successfully.    (Exit mode 0)
-                Current function value: 1.35388134687e-08
-                Iterations: 20
-                Function evaluations: 33
-                Gradient evaluations: 20
-    [ 0.99999577  0.99999202  1.00001936  1.00004226]
+                Current function value: 3.35065040984e-07
+                Iterations: 12
+                Function evaluations: 23
+                Gradient evaluations: 12
+    [ 1.0002004   1.0004415   0.99979783  0.99959924]
 
     strategy: slsqp
     options: default
     gradient: finite differences
     Optimization terminated successfully.    (Exit mode 0)
-                Current function value: 1.34090220511e-08
-                Iterations: 20
-                Function evaluations: 133
-                Gradient evaluations: 20
-    [ 0.99999558  0.99999166  1.00001942  1.00004239]
+                Current function value: 3.34830087144e-07
+                Iterations: 12
+                Function evaluations: 83
+                Gradient evaluations: 12
+    [ 1.00020021  1.00044114  0.9997979   0.99959938]
 
     strategy: powell
     options: default
     Optimization terminated successfully.
              Current function value: 0.000000
              Iterations: 16
-             Function evaluations: 798
+             Function evaluations: 724
     [ 1.  1.  1.  1.]
 
     strategy: tnc
     options: default
     gradient: autodiff
-    (array([ 0.99999992,  0.99999983,  1.00000003,  1.00000008]), 65, 1)
+    (array([ 0.99999805,  0.99999608,  1.00000183,  1.00000366]), 36, 1)
 
     strategy: tnc
     options: default
     gradient: finite differences
-    (array([ 1.00004027,  1.00008853,  0.99997404,  0.9999528 ]), 100, 3)
+    (array([ 0.99999969,  0.99999926,  1.00000022,  1.0000005 ]), 72, 1)
 
 
     ---------------------------------------------------------
@@ -227,6 +248,26 @@ Here is its output::
              Gradient evaluations: 6878
              Hessian evaluations: 0
     [ 0.10238992  0.01459057 -1.35571408  1.84742307]
+
+    strategy: cg
+    options: default
+    gradient: autodiff
+    Optimization terminated successfully.
+             Current function value: 0.000000
+             Iterations: 55
+             Function evaluations: 110
+             Gradient evaluations: 110
+    [ 0.99999999  0.99999998  0.99999999  0.99999999]
+
+    strategy: cg
+    options: default
+    gradient: finite differences
+    Optimization terminated successfully.
+             Current function value: 0.000000
+             Iterations: 102
+             Function evaluations: 1182
+             Gradient evaluations: 197
+    [ 1.00000232  1.00000467  0.99999761  0.99999522]
 
     strategy: bfgs
     options: default
