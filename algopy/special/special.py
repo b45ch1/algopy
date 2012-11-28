@@ -195,6 +195,58 @@ def hyp0f1(b, x):
 hyp0f1.__doc__ += scipy.special.hyp0f1.__doc__
 
 
+def polygamma(n, x):
+    """
+    generic implementation of
+
+    y = polygamma(n, x)
+
+    x:      either a
+
+            * float
+            * numpy.ndarray
+            * algopy.UTPM
+            * algopy.Function
+
+            instance.
+
+
+    """
+
+    if hasattr(x.__class__, 'polygamma'):
+        return x.__class__.polygamma(n, x)
+    else:
+        return scipy.special.polygamma(n, x)
+
+polygamma.__doc__ += scipy.special.polygamma.__doc__
+
+
+def gammaln(x):
+    """
+    generic implementation of
+
+    y = gammaln(x)
+
+    x:      either a
+
+            * float
+            * numpy.ndarray
+            * algopy.UTPM
+            * algopy.Function
+
+            instance.
+
+
+    """
+
+    if hasattr(x.__class__, 'gammaln'):
+        return x.__class__.gammaln(x)
+    else:
+        return scipy.special.gammaln(x)
+
+gammaln.__doc__ += scipy.special.gammaln.__doc__
+
+
 def erf(x):
     """
     generic implementation of

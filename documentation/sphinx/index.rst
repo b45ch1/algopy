@@ -315,6 +315,9 @@ Advanced Examples:
    examples/ode_solvers.rst
    examples/comparison_forward_reverse_mode.rst
    examples/ampl_minimization_problem.rst
+   examples/minimization/rosenbrock_banana.rst
+   examples/minimization/himmelblau_minimization.rst
+   examples/minimization/wood_function_minimization.rst
 
 Application Examples:
 
@@ -325,6 +328,7 @@ Application Examples:
    examples/leastsquaresfitting.rst
    examples/hessian_of_potential_function.rst
    examples/minimal_surface.rst
+   examples/neg_binom_regression.rst
 
 
 Additional Information:
