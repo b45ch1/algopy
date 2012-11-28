@@ -104,16 +104,26 @@ Issues and common pitfalls
         z[1] = y
 
 
-.. warning::
+.. note::
 
-    Broadcasting does not work in the reverse mode with NumPy 1.6!
-    (it used to work for NumPy 1.4 ...)
+    If you use NumPy version > 1.5 the reverse mode could be rather very if
+    you use broadcasting.
 
-    This is due to unexpected behavior of numpy, see discussion on
+    Reason:
+
+    Numpy version 1.5 and above have a bug in binary inplace operations (imul, iadd, ...) when
+    array elements point to overlapping memory regions, e.g., when strides = (0,8).
+
+    There is a workaround in AlgoPy for this case, but it is probably rather
+    slow for large matrices since a Python loops needs to access all elements
+    in the matrix.
+
+    See discussion on
     http://thread.gmane.org/gmane.comp.python.numeric.general/51379
 
+    and the issue on https://github.com/numpy/numpy/issues/2705
 
-    Example::
+    This bug is only relevant in the reverse mode and you use broadcasting, e.g., when you run the following example::
 
         import numpy, algopy
 
@@ -135,8 +145,6 @@ Issues and common pitfalls
 
         print cg.gradient(numpy.array([1.,2.,3.]))
 
-    Such code may give wrong results on your machine if you happen to have the
-    wrong NumPy version.
 
 
 
