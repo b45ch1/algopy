@@ -2,17 +2,24 @@
 This is a helper module for the minimization examples.
 """
 
+#FIXME: the pyipopt stuff has been commented out for now;
+#FIXME: update this code to use a better python ipopt interface when available
+# https://github.com/xuy/pyipopt
+# http://gitview.danfis.cz/pipopt
+# https://bitbucket.org/amitibo
+# https://github.com/casadi/casadi
+
 import functools
 
 import numpy
 import scipy.optimize
 import algopy
 import numdifftools
-import pyipopt
+#import pyipopt
 
 # Suppress log spam from pyipopt.
 # But ipopt itself will stil spam...
-pyipopt.set_loglevel(0)
+#pyipopt.set_loglevel(0)
 
 
 def eval_grad(f, theta):
@@ -176,30 +183,30 @@ def do_searches(f, g, h, x0):
     print results
     print
 
-    print 'strategy:', 'ipopt'
-    print 'options:', 'default'
-    print 'gradient:', 'autodiff'
-    print 'hessian:', 'autodiff'
-    results = pyipopt.fmin_unconstrained(
-            f,
-            x0,
-            fprime=g,
-            fhess=h,
-            )
-    print results
-    print
+    #print 'strategy:', 'ipopt'
+    #print 'options:', 'default'
+    #print 'gradient:', 'autodiff'
+    #print 'hessian:', 'autodiff'
+    #results = pyipopt.fmin_unconstrained(
+            #f,
+            #x0,
+            #fprime=g,
+            #fhess=h,
+            #)
+    #print results
+    #print
 
-    print 'strategy:', 'ipopt'
-    print 'options:', 'default'
-    print 'gradient:', 'autodiff'
-    print 'hessian:', 'finite differences'
-    results = pyipopt.fmin_unconstrained(
-            f,
-            x0,
-            fprime=g,
-            )
-    print results
-    print
+    #print 'strategy:', 'ipopt'
+    #print 'options:', 'default'
+    #print 'gradient:', 'autodiff'
+    #print 'hessian:', 'finite differences'
+    #results = pyipopt.fmin_unconstrained(
+            #f,
+            #x0,
+            #fprime=g,
+            #)
+    #print results
+    #print
 
 
 def show_minimization_results(f, target_in, easy_init_in, hard_init_in):
