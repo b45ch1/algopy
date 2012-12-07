@@ -1017,6 +1017,9 @@ class Function(Ring):
         lhs = self.__class__.totype(lhs)
         return lhs/self
 
+    __truediv__ = __div__
+    __rtruediv__ = __rdiv__
+
 
     # #########################################################
     # numpy functions
