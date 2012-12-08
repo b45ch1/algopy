@@ -831,7 +831,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             xbar, = out
 
         cls._pb_gammaln(ybar.data, x.data, y.data, out = xbar.data)
-        return out
+        return xbar
 
     @classmethod
     def erf(cls, x):
