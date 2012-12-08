@@ -246,7 +246,10 @@ class CGraph:
         else:
             x_list = [x]
 
-        utpm_x_list = [algopy.UTPM(numpy.asarray(xi).reshape((1,1) + numpy.shape(xi))) for xi in x_list]
+        utpm_x_list = []
+        for xi in x_list:
+            element = numpy.asarray(xi).reshape((1,1) + numpy.shape(xi))
+            utpm_x_list.append(algopy.UTPM(element))
 
         self.pushforward(utpm_x_list)
 
