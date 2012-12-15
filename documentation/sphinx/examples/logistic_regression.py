@@ -229,9 +229,9 @@ def get_neg_ll(vY, mX, vBeta):
     """
     #FIXME: algopy could benefit from the addition of a logsumexp function...
     alpha = algopy.dot(mX, vBeta)
-    return -algopy.sum(
-            vY*algopy.log(algopy.special.expit(alpha)) +
-            (1-vY)*(algopy.log(algopy.special.expit(-alpha))))
+    return algopy.sum(
+            vY*algopy.log1p(algopy.exp(-alpha)) +
+            (1-vY)*algopy.log1p(algopy.exp(alpha)))
 
 def preprocess_data():
     """
