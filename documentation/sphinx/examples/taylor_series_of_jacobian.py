@@ -23,8 +23,10 @@ cg.dependentFunctionList = [fz]
 
 # compute Taylor series
 #
-#  Jx( 1. + 2.*t + 3.*t**2 + 4.*t**3 + 5.*t**5)
-#  Jy( 1. + 2.*t + 3.*t**2 + 4.*t**3 + 5.*t**5)
+#  Jx( 1. + 2.*t + 3.*t**2 + 4.*t**3 + 5.*t**5,
+#      6. + 7.*t + 8.*t**2 + 9.*t**3 + 10.*t**5 )
+#  Jy( 1. + 2.*t + 3.*t**2 + 4.*t**3 + 5.*t**5,
+#      6. + 7.*t + 8.*t**2 + 9.*t**3 + 10.*t**5 )
 #
 # where
 #
@@ -36,8 +38,8 @@ cg.dependentFunctionList = [fz]
 D,P = 5, 3  # order D=5, number of directions P
 ax = UTPM(numpy.zeros((D, P)))
 ay = UTPM(numpy.zeros((D, P)))
-ax.data[:, :] = numpy.array([1., 2. ,3. ,4. ,5.]).reshape((5,1))  # input Taylor polynomial
-ay.data[:, :] = numpy.array([1., 2. ,3. ,4. ,5.]).reshape((5,1))  # input Taylor polynomial
+ax.data[:, :] = numpy.array([1., 2. ,3., 4. ,5.]).reshape((5,1))  # input Taylor polynomial
+ay.data[:, :] = numpy.array([6., 7. ,8., 9. ,10.]).reshape((5,1))  # input Taylor polynomial
 
 # forward sweep
 cg.pushforward([ax, ay])
