@@ -653,6 +653,19 @@ class Test_Push_Forward(TestCase):
         b = UTPM.gammaln(x + 1) - UTPM.log(x)
         assert_allclose(a.data, b.data)
 
+    def test_gammaln_pullback(self):
+        D,P = 2,1
+
+        # forward
+        x = UTPM(numpy.random.random((D,P)))
+        y = UTPM.gammaln(x)
+
+        # reverse
+        ybar = UTPM(numpy.random.random((D,P)))
+        xbar = UTPM.pb_gammaln(ybar, x, y)
+
+        assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
+
     def test_hyperu(self):
         D,P,N,M = 5,1,3,3
 

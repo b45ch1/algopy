@@ -337,6 +337,7 @@ Application Examples:
    examples/hessian_of_potential_function.rst
    examples/minimal_surface.rst
    examples/neg_binom_regression.rst
+   examples/logistic_regression.rst
 
 
 Additional Information:
