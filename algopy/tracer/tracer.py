@@ -267,14 +267,18 @@ class CGraph:
 
         J = self.jacobian(x)
 
+        If x is a UTPM instance, the Taylor series of the entries of the Jacobian
+        are computed.
+
         Parameters
         ----------
-        x: array_like
+
+        x: array_like or UTPM instance
             x.ndim = 1
 
         Returns
         -------
-        J: array_like
+        J: array_like or UTPM instance
             the Jacobian evaluated at x
             J.ndim = 2 when M>=1 and J.ndim = 1 when M == 0
 
@@ -297,24 +301,67 @@ class CGraph:
 
         """
 
-        x = numpy.asarray(x)
+        if len(self.independentFunctionList) != 1:
+            err_str = 'len(self.independentFunctionList) must be 1 but provided %d' % \
+                       len(self.independentFunctionList) 
+            raise ValueError(err_str)
 
-        if x.ndim != 1:
-            raise ValueError("x.ndim must be 1 but provided %d"%x.ndim)
+        if len(self.dependentFunctionList) != 1:
+            err_str = 'len(self.dependentFunctionList) must be 1 but provided %d' % \
+                       len(self.dependentFunctionList)
+            raise ValueError(err_str)
 
-        M = self.dependentFunctionList[0].size
+        if isinstance(x, algopy.UTPM):
 
-        tmp = numpy.zeros((1,M) + numpy.shape(x))
-        tmp[0,...] = x
-        utpm_x_list = [algopy.UTPM(tmp)]
+            if x.ndim != 1:
+                raise ValueError("x.ndim must be 1 but provided %d"%x.ndim)
+                
+            M = self.dependentFunctionList[0].size
 
-        self.pushforward(utpm_x_list)
+            D,P = x.data.shape[:2]
+            shp = x.shape
 
-        ybar =  algopy.UTPM(numpy.zeros((1,M,M)))
-        ybar.data[0,:,:] = numpy.eye(M)
-        self.pullback([ybar])
+            # if P != 1:
+            #     raise ValueError("x.data.shape[1] must be 1, but provided %d" % x.data.shape[1])
 
-        return self.independentFunctionList[0].xbar.data[0,:]
+            tmp = numpy.zeros((D,M*P) + x.shape)
+
+            for p in range(P):
+                tmp[:, p*M:(p+1)*M, ...] = x.data[:, p:p+1, ...]
+
+            utpm_x_list = [algopy.UTPM(tmp)]
+
+            self.pushforward(utpm_x_list)
+
+            ybar = algopy.UTPM(numpy.zeros((D, P*M, M)))
+
+            for p in range(P):
+                ybar.data[0, p*M:(p+1)*M, :] = numpy.eye(M)
+
+            self.pullback([ybar])
+
+            return algopy.UTPM(self.independentFunctionList[0].xbar.data.reshape((D, P, M) + shp))
+
+
+        else:
+            x = numpy.asarray(x)
+
+            if x.ndim != 1:
+                raise ValueError("x.ndim must be 1 but provided %d"%x.ndim)
+
+            M = self.dependentFunctionList[0].size
+
+            tmp = numpy.zeros((1,M) + numpy.shape(x))
+            tmp[0,...] = x
+            utpm_x_list = [algopy.UTPM(tmp)]
+
+            self.pushforward(utpm_x_list)
+
+            ybar =  algopy.UTPM(numpy.zeros((1,M,M)))
+            ybar.data[0,:,:] = numpy.eye(M)
+            self.pullback([ybar])
+
+            return self.independentFunctionList[0].xbar.data[0,:]
 
     def jac_vec(self, x, v):
         """ computes the Jacobian-vector product J*v of a function

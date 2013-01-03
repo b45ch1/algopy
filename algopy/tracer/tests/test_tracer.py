@@ -2111,6 +2111,42 @@ class Test_UserFriendlyDrivers(TestCase):
         assert_array_almost_equal(m.eval_vec_hess_g_forward(w,x), m.eval_vec_hess_g_reverse(w,x))
 
 
+    def test_taylor_series_of_jacobian(self):
+
+        def eval_g(x):
+            out = algopy.zeros(2, dtype=x)
+            out[0] = algopy.sin(x[0]*x[1])
+            out[1] = algopy.exp(x[0]*algopy.cos(x[0]))
+            return out[...]
+
+        def eval_J(x):
+            out = algopy.zeros((2,2), dtype=x)
+            out[0, 0] = x[1] * algopy.cos(x[0] * x[1])
+            out[0, 1] = x[0] * algopy.cos(x[0] * x[1])
+            out[1, 0] = (algopy.cos(x[0]) - x[0] * algopy.sin(x[0])) * \
+                        algopy.exp( x[0] * algopy.cos(x[0]))
+            return out
+
+        D, P, N = 5, 3, 2
+
+        x = numpy.random.random((N))
+
+        cg = algopy.CGraph()
+        fx = algopy.Function(x)
+        fy = eval_g(fx)
+        cg.independentFunctionList = [fx]
+        cg.dependentFunctionList = [fy]
+
+        ax = numpy.zeros((D, P, N))
+        ax[...] = x.reshape((1, 1, N))
+        ax = algopy.UTPM(ax)
+
+        aJ = cg.jacobian(ax)
+
+        aJ2 = eval_J(ax)
+
+        assert_almost_equal(aJ.data, aJ2.data)
+
 
 class Test_CGraph_Plotting(TestCase):
     def test_simple(self):
