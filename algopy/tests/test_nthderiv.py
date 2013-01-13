@@ -1,6 +1,7 @@
 """
-Note that some of the numdifftools documentation is out of date.
+Test the nthderiv module.
 
+Note that some of the numdifftools documentation is out of date.
 To figure out the right way to use numdifftools I had to directly inspect
 http://code.google.com/p/numdifftools/source/browse/trunk/numdifftools/core.py
 Also note that comparisons that use relative tolerances,
@@ -8,6 +9,7 @@ such as are used by assert_allclose by default,
 do not work well when you are comparing to zero.
 """
 
+import functools
 import warnings
 
 import numpy as np
@@ -19,7 +21,7 @@ from algopy import nthderiv
 try:
     import sympy
 except ImportError as e:
-    raise ImportWarning(e)
+    warnings.warn('some tests require the sympy package')
     sympy = None
 
 try:
@@ -28,49 +30,79 @@ except ImportError as e:
     warnings.warn('some tests require the numdifftools package')
     numdifftools = None
 
+# an example list of simple x values to be used for testing
+g_simple_xs = [
+        0.135,
+        -0.567,
+        1.1234,
+        -1.23,
+        ]
+
+# an example list of more complicated x values to be used for testing
+g_complicated_xs = g_simple_xs + [
+        np.array([[0.123, 0.2], [0.93, 0.44]]),
+        ]
 
 def assert_allclose_or_small(a, b, rtol=1e-7, zerotol=1e-7):
     if np.amax(np.abs(a)) > zerotol or np.amax(np.abs(b)) > zerotol:
         numpy.testing.assert_allclose(a, b, rtol=rtol)
 
+def gen_named_functions():
+    for name, f in nthderiv.__dict__.items():
+        domain = getattr(f, 'domain', None)
+        extras = getattr(f, 'extras', None)
+        if domain is not None and extras is not None:
+            yield name, f
+
 
 class TestAuto(numpy.testing.TestCase):
 
     def test_syntax(self):
-        for name, f in nthderiv.__dict__.items():
-            domain = getattr(f, 'domain', None)
-            extras = getattr(f, 'extras', None)
-            if extras != 0:
-                continue
-            if domain not in (nthderiv.DOM_ALL, nthderiv.DOM_POS):
-                continue
-            for x in (0.123, np.array([0.123, 0.2, 1.1], dtype=float)):
+        for name, f in gen_named_functions():
+            print
+            print name
+            # some of the x values are outside of the domain of some functions
+            valid_xs = [x for x in g_complicated_xs if np.all(f.domain(x))]
+            for x in valid_xs:
+                print 'x:', x
+                # some of the functions need extra parameters
+                args = [1] * f.extras + [x]
                 for n in range(4):
-                    ya = f(x, n=n)
+                    print 'n:', n
+                    ya = f(*args, n=n)
+                    print ya
+                    assert_equal(np.shape(x), np.shape(ya))
                     yb = np.empty_like(x)
-                    f(x, out=yb, n=n)
+                    f(*args, out=yb, n=n)
                     assert_equal(ya, yb)
 
     @numpy.testing.decorators.skipif(numdifftools is None)
     def test_numdifftools(self):
-        for name, f in nthderiv.__dict__.items():
-            domain = getattr(f, 'domain', None)
-            extras = getattr(f, 'extras', None)
-            if extras != 0:
+        imprecise_functions = [
+                nthderiv.hyp2f0,
+                nthderiv.hyp3f0,
+                ]
+        for name, f in gen_named_functions():
+            if f in imprecise_functions:
                 continue
-            if domain not in (nthderiv.DOM_ALL, nthderiv.DOM_POS):
-                continue
-            for x in (0.123, np.array([0.123, 0.2, 1.1], dtype=float)):
+            print
+            print name
+            # some of the x values are outside of the domain of some functions
+            valid_xs = [x for x in g_simple_xs if f.domain(x)]
+            for x in valid_xs:
+                print 'x:', x
+                # some of the functions need extra parameters
+                extra_args = [1] * f.extras
+                args = extra_args + [x]
                 for n in range(1, 5):
-                    ya = f(x, n=n)
-                    yb = numdifftools.Derivative(f, n=n)(x)
-                    print
-                    print name
                     print 'n:', n
-                    print 'x:', x
+                    ya = f(*args, n=n)
                     print 'ya:', ya
+                    f_part = functools.partial(f, *extra_args)
+                    yb = numdifftools.Derivative(f_part, n=n)(x)
                     print 'yb:', yb
-                    assert_allclose_or_small(ya, yb, rtol=1e-3, zerotol=1e-3)
+                    # we are only detecting gross errors
+                    assert_allclose_or_small(ya, yb, rtol=1e-2, zerotol=1e-2)
 
 
 class TestLog(numpy.testing.TestCase):

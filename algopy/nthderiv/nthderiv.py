@@ -12,6 +12,7 @@ Tests are in a separate module.
 """
 
 
+import warnings
 import functools
 import math
 
@@ -34,22 +35,6 @@ except:
     mpmath = None
 
 
-# Define some function domain constants for usage in testing.
-DOM_ALL = 'all real numbers'
-DOM_POS = 'positive real numbers'
-DOM_GT_1 = 'real numbers greater than 1'
-DOM_GT_NEG_1 = 'real numbers greater than -1'
-DOM_ABS_LT_1 = 'real numbers with absolute value less than 1'
-
-# Enumerate the domain constants for error checking.
-_domain_constants = (
-        DOM_ALL,
-        DOM_POS,
-        DOM_GT_1,
-        DOM_GT_NEG_1,
-        DOM_ABS_LT_1,
-        )
-
 # Define the names of functions and constants to export.
 __all__ = [
 
@@ -68,9 +53,41 @@ __all__ = [
 
         # this is a custom name
         'hyp_pfq',
+        ]
 
-        # these are custom constants
-        'DOM_ALL', 'DOM_POS', 'DOM_GT_1', 'DOM_GT_NEG_1', 'DOM_ABS_LT_1',
+
+##############################################################################
+# Define some subsets of floating point numbers.
+# Use these to decorate functions with their domains.
+# This decoration is intended to be used only for testing.
+
+def DOM_ALL(x):
+    'all real numbers'
+    return True
+
+def DOM_POS(x):
+    'positive real numbers'
+    return np.greater(x, 0)
+
+def DOM_GT_1(x):
+    'real numbers greater than 1'
+    return np.greater(x, 1)
+
+def DOM_GT_NEG_1(x):
+    'real numbers greater than -1'
+    return np.greater(x, -1)
+
+def DOM_ABS_LT_1(x):
+    'real numbers with absolute value less than 1'
+    return np.less(np.abs(x), 1)
+
+# Enumerate the domain constants for error checking.
+_domain_constants = [
+        DOM_ALL,
+        DOM_POS,
+        DOM_GT_1,
+        DOM_GT_NEG_1,
+        DOM_ABS_LT_1,
         ]
 
 
@@ -88,7 +105,7 @@ def basecase(fn_zeroth_deriv, domain=DOM_ALL, extras=0):
     @param domain: a constant that gives a rough domain indication
     @param extras: the number of extra parameters for example hyperu has two
     """
-    if domain not in _domain_constants:
+    if domain not in _domain_constants + [None]:
         raise ValueError
     def wrap(f):
         def wrapped_f(*args, **kwargs):
@@ -174,27 +191,31 @@ def np_recip_sqrt(x, out=None):
     return np.reciprocal(scipy.sqrt(x), out)
 
 def np_hyp0f1(b, x, out=None):
-    # work around a couple of scipy.special.hyp0f1 failures in old versions
+    # work around multiple scipy.special.hyp0f1 failures in old versions
     with np.errstate(invalid='ignore'):
-        return np_real(scipy.special.hyp0f1(b, x + 0j), out)
+        y = scipy.special.hyp0f1(b, x + 0j)
+        return np_real(np.reshape(y, np.shape(x)), out)
 
-def np_hyp1f2(a1, b1, b2, x, out_val=None, out_err=None):
+def np_hyp1f2(a1, b1, b2, x, out=None):
     # ignore the error return value to give a more uniform interface
-    out_val, out_err = scipy.special.hyp1f2(a1, b1, b2, x, out_val, out_err)
-    return out_val
+    out_err = np.empty_like(x)
+    out, out_err = scipy.special.hyp1f2(a1, b1, b2, x, out, out_err)
+    return out
 
-def np_hyp2f0(a1, a2, x, out_value=None, out_error=None):
+def np_hyp2f0(a1, a2, x, out=None, out_err=None):
+    # ignore the error return value to give a more uniform interface
+    out_err = np.empty_like(x)
     # pick a convergence type arbitrarily
     convergence_type = 2
-    out_value, out_error = scipy.special.hyp2f0(
+    out, out_error = scipy.special.hyp2f0(
             a1, a2, x, convergence_type,
-            out_value, out_error)
-    return out_value
+            out, out_err)
+    return out
 
-def np_hyp3f0(a1, a2, a3, x, out_val=None, out_err=None):
+def np_hyp3f0(a1, a2, a3, x, out=None, out_err=None):
     # ignore the error return value to give a more uniform interface
-    out_val, out_err = scipy.special.hyp3f0(a1, a2, a3, x, out_val, out_err)
-    return out_val
+    out, out_err = scipy.special.hyp3f0(a1, a2, a3, x, out, out_err)
+    return out
 
 def np_hyp_pfq(A, B, x, out=None):
     d = {
@@ -259,8 +280,11 @@ def absolute(x, out=None, n=0):
 ##############################################################################
 # Miscellaneous special functions.
 
-@basecase(scipy.special.hyperu, extras=2)
+@basecase(scipy.special.hyperu, domain=DOM_POS, extras=2)
 def hyperu(a, b, x, out=None, n=0):
+    """
+    This is defined on all real numbers but I think it is always real on R+.
+    """
     out = scipy.special.hyperu(a+n, b+n, x, out)
     out *= pow(-1, n) * scipy.special.poch(a, n)
     return out
@@ -383,6 +407,9 @@ def cos(x, out=None, n=0):
 
 @basecase(np.tan)
 def tan(x, out=None, n=0):
+    # FIXME: use scipy.special.polylog when available
+    #with warnings.catch_warnings():
+        #warnings.filterwarnings('ignore', category=np.ComplexWarning)
     a = mpmath_polylog_complex(-n, -scipy.exp(-2j*x))
     return np_real(a * pow(-2j, n+1), out)
 
@@ -395,7 +422,7 @@ def arcsin(x, out=None, n=0):
 
 @basecase(np.arccos, domain=DOM_ABS_LT_1)
 def arccos(x, out=None, n=0):
-    return np.negative(arcsin(x), out)
+    return np.negative(arcsin(x, out=out, n=n), out)
 
 @basecase(np.arctan)
 def arctan(x, out=None, n=0):
@@ -417,6 +444,7 @@ def cosh(x, out=None, n=0):
 
 @basecase(np.tanh)
 def tanh(x, out=None, n=0):
+    # FIXME: use scipy.special.polylog when available
     a = mpmath_polylog_real(-n, -np.exp(2*x))
     return np.multiply(-np.exp2(n+1), a, out)
 
@@ -444,8 +472,11 @@ def arctanh(x, out=None, n=0):
 ##############################################################################
 # Generalized hypergeometric functions of the pFq type.
 
-@basecase(np_hyp_pfq, extras=2)
+@basecase(np_hyp_pfq, domain=None, extras=None)
 def hyp_pfq(A, B, x, out=None, n=0):
+    """
+    This function is decorated weirdly because its extra params are lists.
+    """
     out = np_hyp_pfq([a+n for a in A], [b+n for b in B], x, out)
     out *= np.prod([scipy.special.poch(a, n) for a in A])
     out /= np.prod([scipy.special.poch(b, n) for b in B])
@@ -453,24 +484,24 @@ def hyp_pfq(A, B, x, out=None, n=0):
 
 @basecase(np_hyp0f1, extras=1)
 def hyp0f1(b, x, out=None, n=0):
-    return hyp_pfq([], [b], x, out, n)
+    return hyp_pfq([], [b], x, out=out, n=n)
 
 @basecase(scipy.special.hyp1f1, extras=2)
 def hyp1f1(a, b, x, out=None, n=0):
-    return hyp_pfq([a], [b], x, out, n)
+    return hyp_pfq([a], [b], x, out=out, n=n)
 
 @basecase(np_hyp1f2, extras=3)
 def hyp1f2(a, b1, b2, x, out=None, n=0):
-    return hyp_pfq([a], [b1, b2], x, out, n)
+    return hyp_pfq([a], [b1, b2], x, out=out, n=n)
 
 @basecase(np_hyp2f0, extras=2)
 def hyp2f0(a1, a2, x, out=None, n=0):
-    return hyp_pfq([a1, a2], [], x, out, n)
+    return hyp_pfq([a1, a2], [], x, out=out, n=n)
 
 @basecase(scipy.special.hyp2f1, extras=3)
 def hyp2f1(a1, a2, b1, x, out=None, n=0):
-    return hyp_pfq([a1, a2], [b1], x, out, n)
+    return hyp_pfq([a1, a2], [b1], x, out=out, n=n)
 
 @basecase(np_hyp3f0, extras=3)
 def hyp3f0(a1, a2, a3, x, out=None, n=0):
-    return hyp_pfq([a1, a2, a3], [], x, out, n)
+    return hyp_pfq([a1, a2, a3], [], x, out=out, n=n)
