@@ -42,5 +42,7 @@ def prod(x, axis=None, dtype=None, out=None):
             y[0] = y[0] * xi
         return y[0]
 
-prod.__doc__ += numpy.prod.__doc__
+    else:
+        raise ValueError('don\'t know what to do with this input!')
 
+prod.__doc__ += numpy.prod.__doc__
