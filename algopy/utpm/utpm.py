@@ -813,6 +813,27 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return xbar
 
     @classmethod
+    def psi(cls, x):
+        """ computes y = psi(x) in UTP arithmetic"""
+
+        retval = x.clone()
+        cls._psi(x.data, out = retval.data)
+        return retval
+
+    @classmethod
+    def pb_psi(cls, ybar, x, y, out=None):
+        """ computes bar y dy = bar x dx in UTP arithmetic"""
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar, = out
+
+        cls._pb_psi(ybar.data, x.data, y.data, out = xbar.data)
+        return xbar
+
+    @classmethod
     def gammaln(cls, x):
         """ computes y = gammaln(x) in UTP arithmetic"""
 

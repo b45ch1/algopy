@@ -73,6 +73,7 @@ class TestAuto(numpy.testing.TestCase):
     def test_syntax(self):
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', np.ComplexWarning)
+            #with np.errstate(divide='ignore'):
             with np.errstate(divide='ignore', invalid='ignore'):
                 for name, f in gen_named_functions():
                     print
@@ -99,8 +100,10 @@ class TestAuto(numpy.testing.TestCase):
     def test_numdifftools(self):
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', np.ComplexWarning)
+            #with np.errstate(divide='ignore'):
             with np.errstate(divide='ignore', invalid='ignore'):
                 imprecise_functions = [
+                        nthderiv.mpmath_hyp2f0,
                         nthderiv.hyp2f0,
                         nthderiv.hyp3f0,
                         ]
@@ -227,6 +230,20 @@ class TestMisc(numpy.testing.TestCase):
         a = nthderiv.arccosh(x, n=1)
         b = 1 / np.sqrt(x*x - 1)
         assert_allclose(a, b)
+
+    """
+    def test_hyp2f0_syntax(self):
+        a = 1.5
+        b = 1.0
+        x = 0.03
+        y1 = nthderiv.mpmath_hyp2f0(a, b, x, n=1)
+        print a, b, x
+        print y1
+        y2 = nthderiv.mpmath_hyp2f0(a, b, [x + 0j, x], n=1)
+        print y2
+        raise Exception
+    """
+
 
 
 if __name__ == '__main__':

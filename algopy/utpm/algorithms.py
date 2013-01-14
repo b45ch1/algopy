@@ -36,6 +36,13 @@ def _eval_slow_generic(f, extra_args, x_data, out=None):
     @param out: something about algorithmic differentiation
     @param return: something about algorithmic differentiation
     """
+    #FIXME: Improve or replace this function.
+    # It is intended to help with naive implementations
+    # of truncated taylor expansions
+    # of functions of a low degree polynomial,
+    # when the nth derivatives of the function of interest
+    # can be computed more or less directly.
+
     y_data = nthderiv.np_filled_like(x_data, 0, out=out)
     D,P = x_data.shape[:2]
 
@@ -686,64 +693,15 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _dpm_hyp1f1(cls, a, b, x_data, out = None):
-        try:
-            import mpmath
-        except ImportError:
-            raise Exception('you need to install mpmath to use dpm_ functions')
-        if out == None:
-            raise NotImplementedError('should implement that')
-        y_data = out
-        y_data[...] = 0.
-        D,P = x_data.shape[:2]
-
-        #FIXME: move this function?
-        def _float_dpm_hyp1f1(a_in, b_in, x_in):
-            value = mpmath.hyp1f1(a_in, b_in, x_in)
-            try:
-                return float(value)
-            except:
-                return numpy.nan
-        _dpm_hyp1f1 = numpy.vectorize(_float_dpm_hyp1f1)
-
-        # base point: d = 0
-        y_data[0] = _dpm_hyp1f1(a, b, x_data[0])
-
-        # higher order coefficients: d > 0
-        prefix = 1.
-        for d in range(1, D):
-            # Accumulate coefficients of truncated expansions of powers
-            # of the polynomial.
-            if d == 1:
-                accum = x_data[1:].copy()
-            else:
-                for i in range(D-2, 0, -1):
-                    accum[i] = numpy.sum(accum[:i] * x_data[i:0:-1], axis=0)
-                accum[0] = 0.
-            # Rising factorial ratio, and factorial in denominator.
-            prefix = (prefix * (a+d-1.)) / ((b+d-1.) * d)
-            # Derivative of the hypergeometric function.
-            hyp = _dpm_hyp1f1(a + d, b + d, x_data[0])
-            # Add the contribution of this summation term.
-            y_data[1:] = y_data[1:] + prefix * hyp * accum
-
-        return y_data
+        return _eval_slow_generic(
+                nthderiv.mpmath_hyp1f1, [a, b], x_data, out=out)
 
     @classmethod
     def _pb_dpm_hyp1f1(cls, ybar_data, a, b, x_data, y_data, out = None):
-        try:
-            import mpmath
-        except ImportError:
-            raise Exception('you need to install mpmath to use dpm_ functions')
-
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
-
-        xbar_data = out
-
-        tmp = numpy.zeros_like(x_data)
-        tmp = cls._dpm_hyp1f1(a+1., b+1., x_data,  out = tmp)
-        tmp *= float(a)/float(b)
-        cls._amul(ybar_data, tmp, xbar_data)
+        tmp = cls._dpm_hyp1f1(a+1., b+1., x_data) * (float(a) / float(b))
+        cls._amul(ybar_data, tmp, out=out)
 
     @classmethod
     def _hyp1f1(cls, a, b, x_data, out = None):
@@ -769,62 +727,15 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _dpm_hyp2f0(cls, a1, a2, x_data, out = None):
-        try:
-            import mpmath
-        except ImportError:
-            raise Exception('you need to install mpmath to use dpm_ functions')
-        if out == None:
-            raise NotImplementedError('should implement that')
-        y_data = out
-        y_data[...] = 0.
-        D,P = x_data.shape[:2]
-
-        #FIXME: move this function?
-        def _float_dpm_hyp2f0(a1_in, a2_in, x_in):
-            value = mpmath.hyp2f0(a1_in, a2_in, x_in)
-            try:
-                return float(value)
-            except:
-                return numpy.nan
-        _dpm_hyp2f0 = numpy.vectorize(_float_dpm_hyp2f0)
-
-        # base point: d = 0
-        y_data[0] = _dpm_hyp2f0(a1, a2, x_data[0])
-
-        # higher order coefficients: d > 0
-        prefix = 1.
-        for d in range(1, D):
-            # Accumulate coefficients of truncated expansions of powers
-            # of the polynomial.
-            if d == 1:
-                accum = x_data[1:].copy()
-            else:
-                for i in range(D-2, 0, -1):
-                    accum[i] = numpy.sum(accum[:i] * x_data[i:0:-1], axis=0)
-                accum[0] = 0.
-            prefix *= ((a1+d-1.) * (a2+d-1.)) / d
-            hyp = _dpm_hyp2f0(a1+d, a2+d, x_data[0])
-            # Add the contribution of this summation term.
-            y_data[1:] = y_data[1:] + prefix * hyp * accum
-
-        return y_data
+        return _eval_slow_generic(
+                nthderiv.mpmath_hyp2f0, [a1, a2], x_data, out=out)
 
     @classmethod
     def _pb_dpm_hyp2f0(cls, ybar_data, a1, a2, x_data, y_data, out = None):
-        try:
-            import mpmath
-        except ImportError:
-            raise Exception('you need to install mpmath to use dpm_ functions')
-
         if out == None:
             raise NotImplementedError('should implement that')
-
-        xbar_data = out
-
-        tmp = numpy.zeros_like(x_data)
-        tmp = cls._dpm_hyp2f0(a1+1., a2+1., x_data,  out = tmp)
-        tmp *= float(a1) * float(a2)
-        cls._amul(ybar_data, tmp, xbar_data)
+        tmp = cls._dpm_hyp2f0(a1+1., a2+1., x_data) * float(a1) * float(a2)
+        cls._amul(ybar_data, tmp, out=out)
 
     @classmethod
     def _hyp2f0(cls, a1, a2, x_data, out=None):
@@ -857,6 +768,19 @@ class RawAlgorithmsMixIn:
         if out == None:
             raise NotImplementedError('should implement that')
         tmp = cls._polygamma(m+1, x_data)
+        cls._amul(ybar_data, tmp, out=out)
+    @classmethod
+
+    def _psi(cls, x_data, out=None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        return _eval_slow_generic(nthderiv.psi, [], x_data, out=out)
+
+    @classmethod
+    def _pb_psi(cls, ybar_data, x_data, y_data, out=None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        tmp = cls._polygamma(1, x_data)
         cls._amul(ybar_data, tmp, out=out)
 
     @classmethod

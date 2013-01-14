@@ -2,14 +2,18 @@ from numpy.testing import *
 from environment import Settings
 import os
 
+import numpy
+
 import algopy
 from algopy.tracer.tracer import *
 from algopy.utpm import UTPM
-
 from algopy import dot, eigh, qr, trace, solve, inv
 
+try:
+    import mpmath
+except ImportError:
+    mpmath = None
 
-import numpy
 
 class Test_Function_on_numpy_types(TestCase):
 
@@ -1235,15 +1239,11 @@ class Test_CGgraph_on_UTPM(TestCase):
         assert_array_almost_equal(const1.data[0,:], const2.data[0,:])
 
 
+    @decorators.skipif(mpmath is None)
     def test_dpm_hyp1f1(self):
         """
         compute y = dpm_hyp1f1(1., 2., x**2 + 3.)
         """
-        try:
-            import mpmath
-        except ImportError:
-            #FIXME: use a decorator to conditionally skip the test?
-            return
 
         def f(x):
             v1 = x**2 + 3.
@@ -1339,15 +1339,11 @@ class Test_CGgraph_on_UTPM(TestCase):
         assert_array_almost_equal(result3, result1)
 
 
+    @decorators.skipif(mpmath is None)
     def test_dpm_hyp2f0(self):
         """
         compute y = dpm_hyp2f0(0.5, 1.0, 0.1 * x**2 + 0.03)
         """
-        try:
-            import mpmath
-        except ImportError:
-            #FIXME: use a decorator to conditionally skip the test?
-            return
 
         def f(x):
             # use smaller offset to ameliorate convergence issues
@@ -1455,6 +1451,39 @@ class Test_CGgraph_on_UTPM(TestCase):
             y = algopy.special.polygamma(2, v1)
             return y
 
+
+        # use CGraph
+
+        cg = CGraph()
+        x = Function(numpy.array([1.]))
+        y = f(x)
+
+        cg.independentFunctionList = [x]
+        cg.dependentFunctionList = [y]
+
+        result1 = cg.jac_vec(numpy.array([2.]), numpy.array([1.]))
+        result2 = cg.jacobian(numpy.array([2.]))[0]
+
+        # use UTPM
+
+        x = UTPM.init_jacobian(numpy.array([2.]))
+        y = f(x)
+        result3 = UTPM.extract_jacobian(y)[0]
+
+        assert_array_almost_equal(result1, result2)
+        assert_array_almost_equal(result2, result3)
+        assert_array_almost_equal(result3, result1)
+
+
+    def test_psi(self):
+        """
+        compute y = psi(x**2 + 3.)
+        """
+
+        def f(x):
+            v1 = x**2 + 3.
+            y = algopy.special.psi(v1)
+            return y
 
         # use CGraph
 

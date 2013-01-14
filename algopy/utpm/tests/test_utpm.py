@@ -4,7 +4,14 @@ from numpy.testing import *
 import numpy
 import scipy.special
 
+import algopy.nthderiv
 from algopy.utpm import *
+
+try:
+    import mpmath
+except ImportError:
+    mpmath = None
+
 
 class Test_Push_Forward(TestCase):
 
@@ -513,22 +520,9 @@ class Test_Push_Forward(TestCase):
         t = UTPM.tanh(x)
         assert_array_almost_equal(t.data, (s/c).data)
 
+    @decorators.skipif(mpmath is None)
     def test_dpm_hyp1f1(self):
-        try:
-            import mpmath
-        except ImportError:
-            #FIXME: use a decorator to conditionally skip the test?
-            return
         #FIXME: this whole function is copypasted with minimal modification
-
-        #FIXME: move this function?
-        def _float_dpm_hyp1f1(a_in, b_in, x_in):
-            value = mpmath.hyp1f1(a_in, b_in, x_in)
-            try:
-                return float(value)
-            except:
-                return numpy.nan
-        _dpm_hyp1f1 = numpy.vectorize(_float_dpm_hyp1f1)
 
         D,P,N,M = 5,1,3,3
 
@@ -560,20 +554,17 @@ class Test_Push_Forward(TestCase):
         h = UTPM.dpm_hyp1f1(a, b, x)
         prefix = 1.
         s = UTPM(numpy.zeros((D,P,M,N)))
-        s.data[0] = _dpm_hyp1f1(a, b, x.data[0])
+        s.data[0] = algopy.nthderiv.mpmath_hyp1f1(a, b, x.data[0])
         for d in range(1,D):
             prefix *= (a+d-1.)/(b+d-1.)
             prefix /= d
-            s.data[d] = prefix * _dpm_hyp1f1(a+d, b+d, x.data[0])
+            s.data[d] = prefix * algopy.nthderiv.mpmath_hyp1f1(
+                    a+d, b+d, x.data[0])
 
         assert_array_almost_equal(h.data, s.data)
 
+    @decorators.skipif(mpmath is None)
     def test_dpm_hyp1f1_pullback(self):
-        try:
-            import mpmath
-        except ImportError:
-            #FIXME: use a decorator to conditionally skip the test?
-            return
 
         D,P = 2,1
 
@@ -644,6 +635,36 @@ class Test_Push_Forward(TestCase):
 
         assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
+    def test_psi(self):
+        D,P,N,M = 5,1,3,3
+
+        # sample some positive random numbers
+        R = numpy.exp(numpy.random.randn(D, P, M, N))
+        x = UTPM(R)
+
+        # check an identity
+        a = UTPM.psi(x + 1)
+        b = UTPM.psi(x) + 1 / x
+        assert_allclose(a.data, b.data)
+
+        # check another identity
+        a = UTPM.psi(2*x)
+        b = 0.5 * UTPM.psi(x) + 0.5 * UTPM.psi(x + 0.5) + numpy.log(2)
+        assert_allclose(a.data, b.data)
+
+    def test_psi_pullback(self):
+        D,P = 2,1
+
+        # forward
+        x = UTPM(numpy.random.random((D,P)))
+        y = UTPM.psi(x)
+
+        # reverse
+        ybar = UTPM(numpy.random.random((D,P)))
+        xbar = UTPM.pb_psi(ybar, x, y)
+
+        assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
+
     def test_gammaln(self):
         D,P,N,M = 5,1,3,3
         # sample some nonnegative floats
@@ -709,43 +730,11 @@ class Test_Push_Forward(TestCase):
         assert_allclose(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
 
+    @decorators.skipif(mpmath is None)
     def test_dpm_hyp2f0(self):
-        try:
-            import mpmath
-        except ImportError:
-            #FIXME: use a decorator to conditionally skip the test?
-            return
         #FIXME: this whole function is copypasted with minimal modification
 
-        #FIXME: move this function?
-        def _float_dpm_hyp2f0(a1_in, a2_in, x_in):
-            value = mpmath.hyp2f0(a1_in, a2_in, x_in)
-            try:
-                return float(value)
-            except:
-                return numpy.nan
-        _dpm_hyp2f0 = numpy.vectorize(_float_dpm_hyp2f0)
-
         D,P,N,M = 5,1,3,3
-
-        #FIXME: This one was giving imaginary values so I discontinued it.
-        # Check a special case.
-        # This is a little tricky because hyp2f0 likes small x
-        # and hyp1f1 likes small 1/x.
-        """
-        n = 2
-        b = 0.1
-        x = UTPM(0.1 + 0.3 * numpy.random.rand(D,P,M,N))
-        a1 = -n
-        a2 = b
-        h = UTPM.dpm_hyp2f0(a1, a2, x)
-        s = scipy.special.poch(b, n) * ((-x)**n) * (
-                UTPM.dpm_hyp1f1(-n, 1. - b - n, -(1./x)))
-        print x
-        print h
-        print s
-        assert_array_almost_equal(h.data, s.data)
-        """
 
         # Check the special case with negative values.
         n = 2
@@ -766,20 +755,17 @@ class Test_Push_Forward(TestCase):
         h = UTPM.dpm_hyp2f0(a1, a2, x)
         prefix = 1.
         s = UTPM(numpy.zeros((D,P,M,N)))
-        s.data[0] = _dpm_hyp2f0(a1, a2, x.data[0])
+        s.data[0] = algopy.nthderiv.mpmath_hyp2f0(a1, a2, x.data[0])
         for d in range(1,D):
             prefix *= (a1+d-1.)*(a2+d-1.)
             prefix /= d
-            s.data[d] = prefix * _dpm_hyp2f0(a1+d, a2+d, x.data[0])
+            s.data[d] = prefix * algopy.nthderiv.mpmath_hyp2f0(
+                    a1+d, a2+d, x.data[0])
 
         assert_array_almost_equal(h.data, s.data)
 
+    @decorators.skipif(mpmath is None)
     def test_dpm_hyp2f0_pullback(self):
-        try:
-            import mpmath
-        except ImportError:
-            #FIXME: use a decorator to conditionally skip the test?
-            return
 
         D,P = 2,1
 
@@ -831,14 +817,6 @@ class Test_Push_Forward(TestCase):
         assert_array_almost_equal(h.data, s.data)
         """
 
-        # FIXME: move this utility function somewhere better?
-        def _uncheesed_hyp2f0(a1_in, a2_in, x_in):
-            # FIXME: use convergence_type 1 vs. 2 ?  Scipy docs are not helpful.
-            convergence_type = 2
-            value, error_info = scipy.special.hyp2f0(
-                    a1_in, a2_in, x_in, convergence_type)
-            return value
-
         # Check another special case.
         x = UTPM(numpy.zeros((D,P,M,N)))
         a1, a2 = 1., 2.
@@ -847,11 +825,11 @@ class Test_Push_Forward(TestCase):
         h = UTPM.hyp2f0(a1, a2, x)
         prefix = 1.
         s = UTPM(numpy.zeros((D,P,M,N)))
-        s.data[0] = _uncheesed_hyp2f0(a1, a2, x.data[0])
+        s.data[0] = algopy.nthderiv.hyp2f0(a1, a2, x.data[0])
         for d in range(1,D):
             prefix *= (a1+d-1.)*(a2+d-1.)
             prefix /= d
-            s.data[d] = prefix * _uncheesed_hyp2f0(a1+d, a2+d, x.data[0])
+            s.data[d] = prefix * algopy.nthderiv.hyp2f0(a1+d, a2+d, x.data[0])
 
         assert_array_almost_equal(h.data, s.data)
 
@@ -940,7 +918,7 @@ class Test_Push_Forward(TestCase):
         n = 2
         a = UTPM.polygamma(n, x)
         b = UTPM.polygamma(n, x+1) - ((-1)**n)*math.factorial(n)*(x**(-n-1))
-        assert_array_almost_equal(a.data, b.data)
+        assert_allclose(a.data, b.data)
 
         # Check another special case.
         x = UTPM(numpy.zeros((D,P,M,N)))
@@ -955,7 +933,7 @@ class Test_Push_Forward(TestCase):
             prefix /= d
             s.data[d] = prefix * scipy.special.polygamma(n+d, x.data[0])
 
-        assert_array_almost_equal(h.data, s.data)
+        assert_allclose(h.data, s.data)
 
 
     def test_polygamma_pullback(self):

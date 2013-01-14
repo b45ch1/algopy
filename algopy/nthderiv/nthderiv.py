@@ -51,6 +51,9 @@ __all__ = [
         'arcsinh', 'arccosh', 'arctanh',
         'hyp0f1', 'hyp1f1', 'hyp1f2', 'hyp2f0', 'hyp2f1', 'hyp3f0',
 
+        # these are more intelligently implemented versions from mpmath
+        'mpmath_hyp1f1', 'mpmath_hyp2f0',
+
         # this is a custom name
         'hyp_pfq',
 
@@ -239,10 +242,21 @@ def np_hyp_pfq(A, B, x, out=None):
 
 # FIXME: replace these with scipy.special.polylog when it is available
 if mpmath:
-    mpmath_polylog_real = np.vectorize(
+    _mpmath_polylog_real = np.vectorize(
             mpmath.fp.polylog, otypes=[np.float64])
-    mpmath_polylog_complex = np.vectorize(
+    _mpmath_polylog_complex = np.vectorize(
             mpmath.fp.polylog, otypes=[np.complex128])
+
+# FIXME: these are also hacks that should go away eventually
+if mpmath:
+    _mpmath_hyp1f1 = np.vectorize(mpmath.fp.hyp1f1, otypes=[np.complex128])
+    _mpmath_hyp2f0 = np.vectorize(mpmath.fp.hyp2f0, otypes=[np.complex128])
+
+def base_mpmath_hyp1f1(a, b, x, out=None):
+    return np_real(_mpmath_hyp1f1(a, b, x), out=out)
+
+def base_mpmath_hyp2f0(a1, a2, x, out=None):
+    return np_real(_mpmath_hyp2f0(a1, a2, x), out=out)
 
 
 ##############################################################################
@@ -413,7 +427,7 @@ def tan(x, out=None, n=0):
     # FIXME: use scipy.special.polylog when available
     #with warnings.catch_warnings():
         #warnings.filterwarnings('ignore', category=np.ComplexWarning)
-    a = mpmath_polylog_complex(-n, -scipy.exp(-2j*x))
+    a = _mpmath_polylog_complex(-n, -scipy.exp(-2j*x))
     return np_real(a * pow(-2j, n+1), out)
 
 @basecase(np.arcsin, domain=DOM_ABS_LT_1)
@@ -448,7 +462,7 @@ def cosh(x, out=None, n=0):
 @basecase(np.tanh)
 def tanh(x, out=None, n=0):
     # FIXME: use scipy.special.polylog when available
-    a = mpmath_polylog_real(-n, -np.exp(2*x))
+    a = _mpmath_polylog_real(-n, -np.exp(2*x))
     return np.multiply(-np.exp2(n+1), a, out)
 
 @basecase(np.arcsinh)
@@ -481,8 +495,9 @@ def hyp_pfq(A, B, x, out=None, n=0):
     This function is decorated weirdly because its extra params are lists.
     """
     out = np_hyp_pfq([a+n for a in A], [b+n for b in B], x, out)
-    out *= np.prod([scipy.special.poch(a, n) for a in A])
-    out /= np.prod([scipy.special.poch(b, n) for b in B])
+    with np.errstate(invalid='ignore'):
+        out *= np.prod([scipy.special.poch(a, n) for a in A])
+        out /= np.prod([scipy.special.poch(b, n) for b in B])
     return out
 
 @basecase(np_hyp0f1, extras=1)
@@ -508,3 +523,24 @@ def hyp2f1(a1, a2, b1, x, out=None, n=0):
 @basecase(np_hyp3f0, extras=3)
 def hyp3f0(a1, a2, a3, x, out=None, n=0):
     return hyp_pfq([a1, a2, a3], [], x, out=out, n=n)
+
+
+##############################################################################
+# A couple of mpmath hypergeometric functions.
+
+@basecase(base_mpmath_hyp1f1, extras=2)
+def mpmath_hyp1f1(a, b, x, out=None, n=0):
+    out = base_mpmath_hyp1f1(a+n, b+n, x, out=out)
+    with np.errstate(invalid='ignore'):
+        out *= scipy.special.poch(a, n)
+        out /= scipy.special.poch(b, n)
+    return out
+
+@basecase(base_mpmath_hyp2f0, extras=2)
+def mpmath_hyp2f0(a1, a2, x, out=None, n=0):
+    out = base_mpmath_hyp2f0(a1+n, a2+n, x, out=out)
+    with np.errstate(invalid='ignore'):
+        out *= scipy.special.poch(a1, n)
+        out *= scipy.special.poch(a2, n)
+    return out
+

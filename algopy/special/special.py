@@ -4,6 +4,9 @@ import numpy
 import scipy
 import scipy.special
 
+import algopy.nthderiv
+
+
 def dpm_hyp1f1(a, b, x):
     """
     generic implementation of
@@ -21,24 +24,11 @@ def dpm_hyp1f1(a, b, x):
 
 
     """
-    try:
-        import mpmath
-    except ImportError:
-        raise Exception('you need to install mpmath to use dpm_ functions')
-
-    #FIXME: move this function?
-    def _float_dpm_hyp1f1(a_in, b_in, x_in):
-        value = mpmath.hyp1f1(a_in, b_in, x_in)
-        try:
-            return float(value)
-        except:
-            return numpy.nan
-    _dpm_hyp1f1 = numpy.vectorize(_float_dpm_hyp1f1)
 
     if hasattr(x.__class__, 'dpm_hyp1f1'):
         return x.__class__.dpm_hyp1f1(a, b, x)
     else:
-        return _dpm_hyp1f1(a, b, x)
+        return algopy.nthderiv.mpmath_hyp1f1(a, b, x)
 
 #dpm_hyp1f1.__doc__ += scipy.special.hyp1f1.__doc__
 
@@ -64,7 +54,7 @@ def hyp1f1(a, b, x):
     if hasattr(x.__class__, 'hyp1f1'):
         return x.__class__.hyp1f1(a, b, x)
     else:
-        return scipy.special.hyp1f1(a, b, x)
+        return algopy.nthderiv.hyp1f1(a, b, x)
 
 hyp1f1.__doc__ += scipy.special.hyp1f1.__doc__
 
@@ -90,7 +80,7 @@ def hyperu(a, b, x):
     if hasattr(x.__class__, 'hyperu'):
         return x.__class__.hyperu(a, b, x)
     else:
-        return scipy.special.hyperu(a, b, x)
+        return algopy.nthderiv.hyperu(a, b, x)
 
 hyperu.__doc__ += scipy.special.hyperu.__doc__
 
@@ -112,24 +102,11 @@ def dpm_hyp2f0(a1, a2, x):
 
 
     """
-    try:
-        import mpmath
-    except ImportError:
-        raise Exception('you need to install mpmath to use dpm_ functions')
-
-    #FIXME: move this function?
-    def _float_dpm_hyp2f0(a1_in, a2_in, x_in):
-        value = mpmath.hyp2f0(a1_in, a2_in, x_in)
-        try:
-            return float(value)
-        except:
-            return numpy.nan
-    _dpm_hyp2f0 = numpy.vectorize(_float_dpm_hyp2f0)
 
     if hasattr(x.__class__, 'dpm_hyp2f0'):
         return x.__class__.dpm_hyp2f0(a1, a2, x)
     else:
-        return _dpm_hyp2f0(a1, a2, x)
+        return algopy.nthderiv.mpmath_hyp2f0(a1, a2, x)
 
 #dpm_hyp2f0.__doc__ += scipy.special.hyp2f0.__doc__
 
@@ -155,10 +132,7 @@ def hyp2f0(a1, a2, x):
     if hasattr(x.__class__, 'hyp2f0'):
         return x.__class__.hyp2f0(a1, a2, x)
     else:
-        # FIXME: use convergence_type 1 vs. 2 ?  Scipy docs are not helpful.
-        convergence_type = 2
-        value, error_info = scipy.special.hyp2f0(a1, a2, x, convergence_type)
-        return value
+        return algopy.nthderiv.hyp2f0(a1, a2, x)
 
 #FIXME: the functions have different calling conventions, so different docs
 #hyp2f0.__doc__ += scipy.special.hyp2f0.__doc__
@@ -182,15 +156,10 @@ def hyp0f1(b, x):
 
     """
 
-    #FIXME: this works around two scipy.special.hyp0f1 failures
-    def _hacked_hyp0f1(b, x):
-        with numpy.errstate(invalid='ignore'):
-            return scipy.special.hyp0f1(b, x + 0j)
-
     if hasattr(x.__class__, 'hyp0f1'):
         return x.__class__.hyp0f1(b, x)
     else:
-        return _hacked_hyp0f1(b, x)
+        return algopy.nthderiv.hyp0f1(b, x)
 
 hyp0f1.__doc__ += scipy.special.hyp0f1.__doc__
 
@@ -216,9 +185,35 @@ def polygamma(n, x):
     if hasattr(x.__class__, 'polygamma'):
         return x.__class__.polygamma(n, x)
     else:
-        return scipy.special.polygamma(n, x)
+        return algopy.nthderiv.polygamma(n, x)
 
 polygamma.__doc__ += scipy.special.polygamma.__doc__
+
+
+def psi(x):
+    """
+    generic implementation of
+
+    y = psi(x)
+
+    x:      either a
+
+            * float
+            * numpy.ndarray
+            * algopy.UTPM
+            * algopy.Function
+
+            instance.
+
+
+    """
+
+    if hasattr(x.__class__, 'psi'):
+        return x.__class__.psi(x)
+    else:
+        return algopy.nthderiv.psi(x)
+
+psi.__doc__ += scipy.special.psi.__doc__
 
 
 def gammaln(x):
@@ -242,7 +237,7 @@ def gammaln(x):
     if hasattr(x.__class__, 'gammaln'):
         return x.__class__.gammaln(x)
     else:
-        return scipy.special.gammaln(x)
+        return algopy.nthderiv.gammaln(x)
 
 gammaln.__doc__ += scipy.special.gammaln.__doc__
 
@@ -268,7 +263,7 @@ def erf(x):
     if hasattr(x.__class__, 'erf'):
         return x.__class__.erf(x)
     else:
-        return scipy.special.erf(x)
+        return algopy.nthderiv.erf(x)
 
 erf.__doc__ += scipy.special.erf.__doc__
 
@@ -294,13 +289,9 @@ def erfi(x):
     if hasattr(x.__class__, 'erfi'):
         return x.__class__.erfi(x)
     else:
-        #FIXME: scipy.special.erfi does not yet exist
-        #return scipy.special.erfi(x)
-        return 2 * x * scipy.special.hyp1f1(0.5, 1.5, x*x) / (
-                math.sqrt(math.pi))
+        return algopy.nthderiv.erfi(x)
 
-#FIXME: scipy.special.erfi does not yet exist
-#erfi.__doc__ += scipy.special.erfi.__doc__
+erfi.__doc__ += scipy.special.erfi.__doc__
 
 
 def dawsn(x):
