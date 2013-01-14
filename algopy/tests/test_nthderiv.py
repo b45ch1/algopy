@@ -57,52 +57,61 @@ def gen_named_functions():
 
 class TestAuto(numpy.testing.TestCase):
 
+    def _test_syntax_helper(self, f, x):
+        args = [1] * f.extras + [x]
+        for n in range(4):
+            print 'n:', n
+            ya = f(*args, n=n)
+            print ya
+            # the output shape should match the input shape
+            assert_equal(np.shape(x), np.shape(ya))
+            yb = np.empty_like(x)
+            f(*args, out=yb, n=n)
+            # the inplace and out-of-place modes should give the same output
+            assert_equal(ya, yb)
+
     def test_syntax(self):
-        for name, f in gen_named_functions():
-            print
-            print name
-            # some of the x values are outside of the domain of some functions
-            valid_xs = [x for x in g_complicated_xs if np.all(f.domain(x))]
-            for x in valid_xs:
-                print 'x:', x
-                # some of the functions need extra parameters
-                args = [1] * f.extras + [x]
-                for n in range(4):
-                    print 'n:', n
-                    ya = f(*args, n=n)
-                    print ya
-                    assert_equal(np.shape(x), np.shape(ya))
-                    yb = np.empty_like(x)
-                    f(*args, out=yb, n=n)
-                    assert_equal(ya, yb)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', np.ComplexWarning)
+            with np.errstate(divide='ignore', invalid='ignore'):
+                for name, f in gen_named_functions():
+                    print
+                    print name
+                    for x in g_complicated_xs:
+                        if np.all(f.domain(x)):
+                            print 'x:', x
+                            self._test_syntax_helper(f, x)
+
+    def _test_numdifftools_helper(self, f, x):
+        extra_args = [1] * f.extras
+        args = extra_args + [x]
+        for n in range(1, 5):
+            print 'n:', n
+            ya = f(*args, n=n)
+            print 'ya:', ya
+            f_part = functools.partial(f, *extra_args)
+            yb = numdifftools.Derivative(f_part, n=n)(x)
+            print 'yb:', yb
+            # detect only gross errors
+            assert_allclose_or_small(ya, yb, rtol=1e-2, zerotol=1e-2)
 
     @numpy.testing.decorators.skipif(numdifftools is None)
     def test_numdifftools(self):
-        imprecise_functions = [
-                nthderiv.hyp2f0,
-                nthderiv.hyp3f0,
-                ]
-        for name, f in gen_named_functions():
-            if f in imprecise_functions:
-                continue
-            print
-            print name
-            # some of the x values are outside of the domain of some functions
-            valid_xs = [x for x in g_simple_xs if f.domain(x)]
-            for x in valid_xs:
-                print 'x:', x
-                # some of the functions need extra parameters
-                extra_args = [1] * f.extras
-                args = extra_args + [x]
-                for n in range(1, 5):
-                    print 'n:', n
-                    ya = f(*args, n=n)
-                    print 'ya:', ya
-                    f_part = functools.partial(f, *extra_args)
-                    yb = numdifftools.Derivative(f_part, n=n)(x)
-                    print 'yb:', yb
-                    # we are only detecting gross errors
-                    assert_allclose_or_small(ya, yb, rtol=1e-2, zerotol=1e-2)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', np.ComplexWarning)
+            with np.errstate(divide='ignore', invalid='ignore'):
+                imprecise_functions = [
+                        nthderiv.hyp2f0,
+                        nthderiv.hyp3f0,
+                        ]
+                for name, f in gen_named_functions():
+                    if f not in imprecise_functions:
+                        print
+                        print name
+                        for x in g_simple_xs:
+                            if f.domain(x):
+                                print 'x:', x
+                                self._test_numdifftools_helper(f, x)
 
 
 class TestLog(numpy.testing.TestCase):

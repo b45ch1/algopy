@@ -53,6 +53,9 @@ __all__ = [
 
         # this is a custom name
         'hyp_pfq',
+
+        # this is a handy utility function which might become standard in numpy
+        'np_filled_like',
         ]
 
 
@@ -168,7 +171,7 @@ def np_real(z, out=None):
 
 def np_filled_like(x, fill_value, out=None):
     if out is None:
-        out = np.copy(x)
+        out = np.empty_like(x)
     out.fill(fill_value)
     return out
 
