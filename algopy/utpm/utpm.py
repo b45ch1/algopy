@@ -19,6 +19,9 @@ from algorithms import RawAlgorithmsMixIn, broadcast_arrays_shape
 
 import operator
 
+from algopy import nthderiv
+
+
 if float(numpy.__version__[:3]) > 1.5:
 
     def workaround_strides_function(x, y, fun):
@@ -857,9 +860,11 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def erf(cls, x):
         """ computes y = erf(x) in UTP arithmetic"""
-        a = 1. / 2.
-        b = 3. / 2.
-        return 2 * x * cls.hyp1f1(a, b, -x*x) / math.sqrt(math.pi)
+
+        retval = x.clone()
+        cls._erf(x.data, out = retval.data)
+        return retval
+
 
     @classmethod
     def pb_erf(cls, ybar, x, y, out=None):
@@ -872,8 +877,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         else:
             xbar, = out
 
-        xbar += ybar * 2.*cls.exp(-x*x)/math.sqrt(math.pi)
-
+        cls._pb_erf(ybar.data, x.data, y.data, out = xbar.data)
         return xbar
 
 

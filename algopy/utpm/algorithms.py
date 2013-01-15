@@ -44,7 +44,7 @@ def _eval_slow_generic(f, extra_args, x_data, out=None):
     # can be computed more or less directly.
 
     y_data = nthderiv.np_filled_like(x_data, 0, out=out)
-    D,P = x_data.shape[:2]
+    D, P = x_data.shape[:2]
 
     # base point: d = 0
     args = extra_args + [x_data[0]]
@@ -65,6 +65,32 @@ def _eval_slow_generic(f, extra_args, x_data, out=None):
 
     return y_data
 
+def _black_f_white_fprime(f, extra_args, fprime_data, x_data, out=None):
+    """
+    The function evaluation is a black box, but the derivative is compound.
+    @param f: a function from the nthderiv module
+    @param extra_args: a list of extra parameters like in hyp1f1 or polygamma
+    @param fprime_data: the array associated with the evaluated derivative
+    @param x_data: something about algorithmic differentiation
+    @param out: something about algorithmic differentiation
+    @param return: something about algorithmic differentiation
+    """
+
+    y_data = nthderiv.np_filled_like(x_data, 0, out=out)
+    D, P = x_data.shape[:2]
+
+    # Do the direct computation efficiently.
+    args = extra_args + [x_data[0]]
+    y_data[0] = f(*args)
+
+    # Compute the truncated series coefficients using discrete convolution.
+    #FIXME: one of these two loops can be vectorized
+    for d in range(1, D):
+        for c in range(d):
+            y_data[d] += fprime_data[d-1-c] * x_data[c+1] * (c+1)
+        y_data[d] /= d
+
+    return y_data
 
 
 def vdot(x,y, z = None):
@@ -193,7 +219,7 @@ class RawAlgorithmsMixIn:
         return x_data, y_data
 
     @classmethod
-    def _mul(cls, x_data, y_data, out = None):
+    def _mul(cls, x_data, y_data, out=None):
         """
         z = x*y
         """
@@ -201,7 +227,7 @@ class RawAlgorithmsMixIn:
         if out == None:
             raise NotImplementedError
 
-        (D,P) = z_data.shape[:2]
+        D, P = z_data.shape[:2]
         for d in range(D)[::-1]:
             numpy.sum(x_data[:d+1,:,...] * y_data[d::-1,:,...], axis=0, out = z_data[d,:,...] )
 
@@ -372,7 +398,31 @@ class RawAlgorithmsMixIn:
         D,P = a_shp[:2]
         return numpy.argmax(a_data[0].reshape((P,numpy.prod(a_shp[2:]))), axis = 1)
 
+    @classmethod
+    def _negative(cls, x_data, out=None):
+        """
+        z = -x
+        """
+        #FIXME: this can probably be improved
+        if out is None:
+            z_data = numpy.empty_like(x_data)
+        else:
+            z_data = out
+        cls._mul(x_data, -1, out=z_data)
+        return z_data
 
+    @classmethod
+    def _square(cls, x_data, out=None):
+        """
+        z = x*x
+        """
+        #FIXME: you should be able to do this twice as fast as mul
+        if out is None:
+            z_data = numpy.empty_like(x_data)
+        else:
+            z_data = out
+        cls._mul(x_data, x_data, out=z_data)
+        return z_data
 
     @classmethod
     def _sqrt(cls, x_data, out = None):
@@ -388,10 +438,11 @@ class RawAlgorithmsMixIn:
         return y_data
 
     @classmethod
-    def _exp(cls, x_data, out = None):
-        if out == None:
-            raise NotImplementedError('should implement that')
-        y_data = out
+    def _exp(cls, x_data, out=None):
+        if out is None:
+            y_data = numpy.empty_like(x_data)
+        else:
+            y_data = out
         D,P = x_data.shape[:2]
         y_data[0] = numpy.exp(x_data[0])
         xtctilde = x_data[1:].copy()
@@ -691,46 +742,59 @@ class RawAlgorithmsMixIn:
         return y_data, z_data
 
     @classmethod
-    def _dpm_hyp1f1(cls, a, b, x_data, out = None):
+    def _erf(cls, x_data, out=None):
+        fprime_data = (2. / math.sqrt(math.pi)) * cls._exp(-cls._square(x_data))
+        return _black_f_white_fprime(
+                nthderiv.erf, [], fprime_data, x_data, out=out)
+
+    @classmethod
+    def _pb_erf(cls, ybar_data, x_data, y_data, out = None):
+        if out is None:
+            raise NotImplementedError('should implement that')
+        fprime_data = (2. / math.sqrt(math.pi)) * cls._exp(-cls._square(x_data))
+        cls._amul(ybar_data, fprime_data, out=out)
+
+    @classmethod
+    def _dpm_hyp1f1(cls, a, b, x_data, out=None):
         return _eval_slow_generic(
                 nthderiv.mpmath_hyp1f1, [a, b], x_data, out=out)
 
     @classmethod
-    def _pb_dpm_hyp1f1(cls, ybar_data, a, b, x_data, y_data, out = None):
+    def _pb_dpm_hyp1f1(cls, ybar_data, a, b, x_data, y_data, out=None):
         if out is None:
             raise NotImplementedError('should implement that')
         tmp = cls._dpm_hyp1f1(a+1., b+1., x_data) * (float(a) / float(b))
         cls._amul(ybar_data, tmp, out=out)
 
     @classmethod
-    def _hyp1f1(cls, a, b, x_data, out = None):
+    def _hyp1f1(cls, a, b, x_data, out=None):
         return _eval_slow_generic(nthderiv.hyp1f1, [a, b], x_data, out=out)
 
     @classmethod
-    def _pb_hyp1f1(cls, ybar_data, a, b, x_data, y_data, out = None):
+    def _pb_hyp1f1(cls, ybar_data, a, b, x_data, y_data, out=None):
         if out is None:
             raise NotImplementedError('should implement that')
         tmp = cls._hyp1f1(a+1., b+1., x_data) * (float(a) / float(b))
         cls._amul(ybar_data, tmp, out=out)
 
     @classmethod
-    def _hyperu(cls, a, b, x_data, out = None):
+    def _hyperu(cls, a, b, x_data, out=None):
         return _eval_slow_generic(nthderiv.hyperu, [a, b], x_data, out=out)
 
     @classmethod
-    def _pb_hyperu(cls, ybar_data, a, b, x_data, y_data, out = None):
+    def _pb_hyperu(cls, ybar_data, a, b, x_data, y_data, out=None):
         if out == None:
             raise NotImplementedError('should implement that')
         tmp = cls._hyperu(a+1., b+1., x_data) * (-a)
         cls._amul(ybar_data, tmp, out=out)
 
     @classmethod
-    def _dpm_hyp2f0(cls, a1, a2, x_data, out = None):
+    def _dpm_hyp2f0(cls, a1, a2, x_data, out=None):
         return _eval_slow_generic(
                 nthderiv.mpmath_hyp2f0, [a1, a2], x_data, out=out)
 
     @classmethod
-    def _pb_dpm_hyp2f0(cls, ybar_data, a1, a2, x_data, y_data, out = None):
+    def _pb_dpm_hyp2f0(cls, ybar_data, a1, a2, x_data, y_data, out=None):
         if out == None:
             raise NotImplementedError('should implement that')
         tmp = cls._dpm_hyp2f0(a1+1., a2+1., x_data) * float(a1) * float(a2)
@@ -768,8 +832,8 @@ class RawAlgorithmsMixIn:
             raise NotImplementedError('should implement that')
         tmp = cls._polygamma(m+1, x_data)
         cls._amul(ybar_data, tmp, out=out)
-    @classmethod
 
+    @classmethod
     def _psi(cls, x_data, out=None):
         if out == None:
             raise NotImplementedError('should implement that')

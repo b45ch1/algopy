@@ -955,12 +955,9 @@ class Test_Push_Forward(TestCase):
     def test_erf(self):
         D,P,N,M = 5,1,3,3
         x = UTPM(numpy.random.random((D,P,M,N)))
-
-        # FIXME: only the 0th order is tested
-        observed = UTPM.erf(x).data[0]
-        expected = scipy.special.erf(x.data[0])
-
-        assert_array_almost_equal(observed, expected)
+        y1 = 2 * x * UTPM.hyp1f1(0.5, 1.5, -x*x) / math.sqrt(math.pi)
+        y2 = UTPM.erf(x)
+        assert_array_almost_equal(y1.data, y2.data)
 
 
     def test_erf_pullback(self):
