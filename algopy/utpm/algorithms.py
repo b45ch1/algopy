@@ -192,7 +192,6 @@ class RawAlgorithmsMixIn:
 
         return x_data, y_data
 
-
     @classmethod
     def _mul(cls, x_data, y_data, out = None):
         """
@@ -815,11 +814,13 @@ class RawAlgorithmsMixIn:
         # print 'x_data.shape=', x_data.shape
         # print 'y_data.shape=', y_data.shape
         # print 'z_data.shape=', z_data.shape
-
+        
         for d in range(D):
             for p in range(P):
                 for c in range(d+1):
-                    z_data[d,p,...] += numpy.dot(x_data[c,p,...], y_data[d-c,p,...])
+                    z_data[d,p,...] += numpy.dot(
+                            x_data[c,p,...],
+                            y_data[d-c,p,...])
 
         return out
 

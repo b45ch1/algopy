@@ -45,14 +45,11 @@ __all__ = [
         'exp', 'exp2', 'expm1',
         'log', 'log2', 'log10', 'log1p',
         'sqrt', 'square', 'negative', 'reciprocal',
-        'sin', 'cos', 'tan',
+        'sin', 'cos',
         'arcsin', 'arccos', 'arctan',
-        'sinh', 'cosh', 'tanh',
+        'sinh', 'cosh',
         'arcsinh', 'arccosh', 'arctanh',
         'hyp0f1', 'hyp1f1', 'hyp1f2', 'hyp2f0', 'hyp2f1', 'hyp3f0',
-
-        # these are more intelligently implemented versions from mpmath
-        'mpmath_hyp1f1', 'mpmath_hyp2f0',
 
         # this is a custom name
         'hyp_pfq',
@@ -60,6 +57,13 @@ __all__ = [
         # this is a handy utility function which might become standard in numpy
         'np_filled_like',
         ]
+
+# conditionally add functions that currently depend on mpmath
+if mpmath:
+    __all__.extend([
+            'tan', 'tanh',
+            'mpmath_hyp1f1', 'mpmath_hyp2f0',
+            ])
 
 
 ##############################################################################
@@ -70,6 +74,10 @@ __all__ = [
 def DOM_ALL(x):
     'all real numbers'
     return True
+
+def DOM_NONE(x):
+    'do not autotest any function annotated with this domain'
+    return False
 
 def DOM_POS(x):
     'positive real numbers'
@@ -90,6 +98,7 @@ def DOM_ABS_LT_1(x):
 # Enumerate the domain constants for error checking.
 _domain_constants = [
         DOM_ALL,
+        DOM_NONE,
         DOM_POS,
         DOM_GT_1,
         DOM_GT_NEG_1,
@@ -137,12 +146,20 @@ def basecase(fn_zeroth_deriv, domain=DOM_ALL, extras=0):
 
 ##############################################################################
 # These constants and functions are either not defined in numpy or in scipy,
-# or they are defined in weird ways.
+# or they are defined in weird ways or have been defined only recently.
 # Some of the changes I am making here may have already been made in
 # development versions of scipy, so by the time you read this,
 # chances are that you can just use the library functions.
 
-np_sqrt_pi = np.sqrt(np.pi)
+np_recip_sqrt_pi = np.reciprocal(np.sqrt(np.pi))
+
+try:
+    np_erfi = scipy.special.erfi
+except AttributeError:
+    def np_erfi(x, out=None):
+        a = 2 * x * np_recip_sqrt_pi
+        b = scipy.special.hyp1f1(0.5, 1.5, np.square(x))
+        return np.multiply(a, b, out)
 
 def np_sec(x, out=None):
     return np.reciprocal(np.cos(x), out)
@@ -308,7 +325,7 @@ def hyperu(a, b, x, out=None, n=0):
 
 @basecase(scipy.special.erf)
 def erf(x, out=None, n=0):
-    a = 2 * np.reciprocal(np_sqrt_pi) * np.exp(-np.square(x))
+    a = 2 * np_recip_sqrt_pi * np.exp(-np.square(x))
     b = np.zeros_like(x)
     for k in range(n):
         sa = pow(-1, k) * np.exp2(2*k + 1 - n) * pow(x, 2*k + 1 - n)
@@ -317,9 +334,9 @@ def erf(x, out=None, n=0):
         b += (sa * sb) / sc
     return np.multiply(a, b, out)
 
-@basecase(scipy.special.erfi)
+@basecase(np_erfi)
 def erfi(x, out=None, n=0):
-    a = 2 * np.reciprocal(np_sqrt_pi) * np.exp(np.square(x))
+    a = 2 * np_recip_sqrt_pi * np.exp(np.square(x))
     b = np.zeros_like(x)
     for k in range(n):
         sa = np.exp2(2*k + 1 - n) * pow(x, 2*k + 1 - n)
@@ -512,7 +529,7 @@ def hyp1f1(a, b, x, out=None, n=0):
 def hyp1f2(a, b1, b2, x, out=None, n=0):
     return hyp_pfq([a], [b1, b2], x, out=out, n=n)
 
-@basecase(np_hyp2f0, extras=2)
+@basecase(np_hyp2f0, domain=DOM_NONE, extras=2)
 def hyp2f0(a1, a2, x, out=None, n=0):
     return hyp_pfq([a1, a2], [], x, out=out, n=n)
 
@@ -520,7 +537,7 @@ def hyp2f0(a1, a2, x, out=None, n=0):
 def hyp2f1(a1, a2, b1, x, out=None, n=0):
     return hyp_pfq([a1, a2], [b1], x, out=out, n=n)
 
-@basecase(np_hyp3f0, extras=3)
+@basecase(np_hyp3f0, domain=DOM_NONE, extras=3)
 def hyp3f0(a1, a2, a3, x, out=None, n=0):
     return hyp_pfq([a1, a2, a3], [], x, out=out, n=n)
 
@@ -536,7 +553,7 @@ def mpmath_hyp1f1(a, b, x, out=None, n=0):
         out /= scipy.special.poch(b, n)
     return out
 
-@basecase(base_mpmath_hyp2f0, extras=2)
+@basecase(base_mpmath_hyp2f0, domain=DOM_NONE, extras=2)
 def mpmath_hyp2f0(a1, a2, x, out=None, n=0):
     out = base_mpmath_hyp2f0(a1+n, a2+n, x, out=out)
     with np.errstate(invalid='ignore'):

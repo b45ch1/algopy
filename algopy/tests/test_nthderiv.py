@@ -19,6 +19,12 @@ from numpy.testing import assert_allclose, assert_equal
 from algopy import nthderiv
 
 try:
+    import mpmath
+except ImportError as e:
+    warnings.warn('some tests require the mpmath package')
+    mpmath = None
+
+try:
     import sympy
 except ImportError as e:
     warnings.warn('some tests require the sympy package')
@@ -102,19 +108,13 @@ class TestAuto(numpy.testing.TestCase):
             warnings.simplefilter('ignore', np.ComplexWarning)
             #with np.errstate(divide='ignore'):
             with np.errstate(divide='ignore', invalid='ignore'):
-                imprecise_functions = [
-                        nthderiv.mpmath_hyp2f0,
-                        nthderiv.hyp2f0,
-                        nthderiv.hyp3f0,
-                        ]
                 for name, f in gen_named_functions():
-                    if f not in imprecise_functions:
-                        print
-                        print name
-                        for x in g_simple_xs:
-                            if f.domain(x):
-                                print 'x:', x
-                                self._test_numdifftools_helper(f, x)
+                    print
+                    print name
+                    for x in g_simple_xs:
+                        if f.domain(x):
+                            print 'x:', x
+                            self._test_numdifftools_helper(f, x)
 
 
 class TestLog(numpy.testing.TestCase):
@@ -183,6 +183,7 @@ class TestMisc(numpy.testing.TestCase):
         b = np.cos(x)
         assert_allclose(a, b)
 
+    @numpy.testing.decorators.skipif(mpmath is None)
     def test_tan(self):
         x = 0.123
         a = nthderiv.tan(x, n=0)
