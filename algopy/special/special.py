@@ -291,7 +291,11 @@ def erfi(x):
     else:
         return algopy.nthderiv.erfi(x)
 
-erfi.__doc__ += scipy.special.erfi.__doc__
+#FIXME: this function is currently only available in development scipy
+try:
+    erfi.__doc__ += scipy.special.erfi.__doc__
+except AttributeError:
+    pass
 
 
 def dawsn(x):
