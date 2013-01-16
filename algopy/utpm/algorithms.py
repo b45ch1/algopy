@@ -40,6 +40,7 @@ def _plus_const(x_data, c, out=None):
 
 def _eval_slow_generic(f, extra_args, x_data, out=None):
     """
+    This is related to summations associated with the name 'Faa di Bruno.'
     @param f: a function from the nthderiv module
     @param extra_args: a list of extra parameters like in hyp1f1 or polygamma
     @param x_data: something about algorithmic differentiation
@@ -101,6 +102,54 @@ def _black_f_white_fprime(f, extra_args, fprime_data, x_data, out=None):
         y_data[d] /= d
 
     return y_data
+
+def _taylor_polynomials_of_ode_solutions(
+        a_data, b_data, c_data,
+        u_data, v_data,
+        ):
+    """
+    This is a general O(D^2) algorithm for functions that are ODE solutions.
+    It is an attempt to implement Proposition 13.1
+    of "Evaluating Derivatives" by Griewank and Walther (2008).
+    The function must satisfy the identity
+    b(u) f'(u) - a(u) f(u) = c(u)
+    where a, b and c are already represented by their Taylor expansions.
+    Also u is represented as a Taylor expansion, and so is v.
+    But we are only given the first term of v, which is the recursion base.
+    In this function we use the notation from the book mentioned above.
+    """
+
+    # define the number of terms allowed in the truncated series
+    D = u_data.shape[0]
+    d = D-1
+
+    # these arrays have elements that are scaled slightly differently
+    u_tilde_data = u_data.copy()
+    v_tilde_data = v_data.copy()
+    for j in range(1, D):
+        u_tilde_data[j] *= j
+        v_tilde_data[j] *= j
+
+    # this is just convenient temporary storage which is not so important
+    s = numpy.zeros_like(u_data)
+
+    # on the other hand the e_data is very important for recursion
+    e_data = numpy.zeros_like(u_data)
+
+    # do the dynamic programming to fill the v_data array
+    for k in range(D):
+        if k > 0:
+            for j in range(1, k+1):
+                s[k] += (c_data[k-j] + e_data[k-j]) * u_tilde_data[j]
+            for j in range(1, k):
+                s[k] -= b_data[k-j] * v_tilde_data[j]
+            v_tilde_data[k] = s[k] / b_data[0]
+            v_data[k] = v_tilde_data[k] / k
+        if k < d:
+            for j in range(k+1):
+                e_data[k] += a_data[j] * v_data[k-j]
+
+    return v_data
 
 
 def vdot(x,y, z = None):
