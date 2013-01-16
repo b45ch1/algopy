@@ -130,6 +130,34 @@ class Test_taylor_polynomials_of_ode_solutions(TestCase):
             # compare the v_data array to the UTPM log data
             assert_allclose(v_data, UTPM.log(x).data)
 
+    def test_log1p(self):
+
+        for shape in (
+                (2, 3),
+                (4, 3, 2, 5),
+                ):
+
+            # sample some positive numbers for taking logs
+            x = UTPM(numpy.exp(numpy.random.randn(*shape)))
+
+            # construct the u and v arrays
+            u_data = x.data.copy()
+            v_data = numpy.empty_like(u_data)
+            v_data[0, ...] = numpy.log1p(u_data[0])
+
+            # construct values like in Table (13.2) of "Evaluating Derivatives"
+            a_data = numpy.zeros_like(u_data)
+            b_data = _plus_const(u_data.copy(), 1)
+            c_data = _plus_const(numpy.zeros_like(u_data), 1)
+
+            # fill the rest of the v_data
+            _taylor_polynomials_of_ode_solutions(
+                a_data, b_data, c_data,
+                u_data, v_data)
+
+            # compare the v_data array to the UTPM log1p data
+            assert_allclose(v_data, UTPM.log1p(x).data)
+
     def test_exp(self):
 
         for shape in (
@@ -157,6 +185,34 @@ class Test_taylor_polynomials_of_ode_solutions(TestCase):
 
             # compare the v_data array to the UTPM exp data
             assert_allclose(v_data, UTPM.exp(x).data)
+
+    def test_expm1(self):
+
+        for shape in (
+                (2, 3),
+                (4, 3, 2, 5),
+                ):
+
+            # sample some random numbers
+            x = UTPM(numpy.random.randn(*shape))
+
+            # construct the u and v arrays
+            u_data = x.data.copy()
+            v_data = numpy.empty_like(u_data)
+            v_data[0, ...] = numpy.expm1(u_data[0])
+
+            # construct values like in Table (13.2) of "Evaluating Derivatives"
+            a_data = _plus_const(numpy.zeros_like(u_data), 1)
+            b_data = _plus_const(numpy.zeros_like(u_data), 1)
+            c_data = _plus_const(numpy.zeros_like(u_data), 1)
+
+            # fill the rest of the v_data
+            _taylor_polynomials_of_ode_solutions(
+                a_data, b_data, c_data,
+                u_data, v_data)
+
+            # compare the v_data array to the UTPM expm1 data
+            assert_allclose(v_data, UTPM.expm1(x).data)
 
     def test_power(self):
 
