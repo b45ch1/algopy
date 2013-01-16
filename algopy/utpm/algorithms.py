@@ -282,13 +282,20 @@ class RawAlgorithmsMixIn:
         """
         z = x*y
         """
-        z_data = out
-        if out == None:
-            raise NotImplementedError
+        if out is None:
+            if numpy.shape(x_data) != numpy.shape(y_data):
+                raise NotImplementedError
+            else:
+                z_data = numpy.empty_like(x_data)
+        else:
+            z_data = out
 
         D, P = z_data.shape[:2]
         for d in range(D)[::-1]:
             numpy.sum(x_data[:d+1,:,...] * y_data[d::-1,:,...], axis=0, out = z_data[d,:,...] )
+
+        return z_data
+
 
     @classmethod
     def _amul(cls, x_data, y_data, out = None):
@@ -669,6 +676,36 @@ class RawAlgorithmsMixIn:
         xbar_data += cls._div(
                 ybar_data, _plus_const(x_data, 1), numpy.empty_like(xbar_data))
         return xbar_data
+
+    @classmethod
+    def _dawsn(cls, x_data, out=None):
+        if out is None:
+            v_data = numpy.empty_like(x_data)
+        else:
+            v_data = out
+
+        # construct the u and v arrays
+        u_data = x_data
+        v_data[0, ...] = scipy.special.dawsn(u_data[0])
+
+        # construct values like in Table (13.2) of "Evaluating Derivatives"
+        a_data = -2 * u_data.copy()
+        b_data = _plus_const(numpy.zeros_like(u_data), 1)
+        c_data = _plus_const(numpy.zeros_like(u_data), 1)
+
+        # fill the rest of the v_data
+        _taylor_polynomials_of_ode_solutions(
+            a_data, b_data, c_data,
+            u_data, v_data)
+
+        return v_data
+
+    @classmethod
+    def _pb_dawsn(cls, ybar_data, x_data, y_data, out=None):
+        if out is None:
+            raise NotImplementedError('should implement that')
+        fprime_data = _plus_const(-2*cls._mul(x_data, cls._dawsn(x_data)), 1)
+        cls._amul(ybar_data, fprime_data, out=out)
 
     @classmethod
     def _tansec2(cls, x_data, out = None):

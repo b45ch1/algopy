@@ -372,42 +372,6 @@ class Test_Push_Forward(TestCase):
         assert_array_almost_equal(AX3.data, AY7.data )
         assert_array_almost_equal(AX4.data, AY8.data )
 
-    def test_sqrt(self):
-        D,P,N = 5,3,2
-        X = UTPM(numpy.random.rand(D,P,N,N))
-        Y = UTPM.sqrt(X)
-        assert_array_almost_equal(X.data, (Y*Y).data)
-
-    def test_reciprocal(self):
-        D,P,N = 5,3,2
-        X = UTPM(numpy.random.rand(D,P,N,N))
-        Y = UTPM.reciprocal(X)
-        Z = 1 / X
-        assert_array_almost_equal(Y.data, Z.data)
-
-    def test_exp_log(self):
-        D,P,N = 4,2,2
-        X = UTPM(numpy.random.rand(D,P,N,N))
-        X.data[1] = 1.
-        Y = UTPM.exp(X)
-        Z = UTPM.log(Y)
-        assert_array_almost_equal(X.data, Z.data)
-
-    def test_log1p(self):
-        D,P,N = 4,2,2
-        X = UTPM(1. + 2.*numpy.random.rand(D,P,N,N))
-        Y = UTPM.log1p(X)
-        Z = UTPM.log(1. + X)
-        assert_allclose(Y.data, Z.data)
-
-    def test_expm1(self):
-        D,P,N = 4,2,2
-        X = UTPM(numpy.random.randn(D,P,N,N))
-        X.data[1] = 1.
-        Y = UTPM.expm1(X)
-        Z = UTPM.exp(X) - 1.
-        assert_allclose(Y.data, Z.data)
-
     def test_expm1_near_zero(self):
         D,P,N = 2,1,1
         eps = 1e-8
@@ -421,25 +385,6 @@ class Test_Push_Forward(TestCase):
         X = UTPM(numpy.array([eps, 1.]).reshape((D,P,N,N)))
         Y = UTPM.exp(X) - 1.
         assert_array_less(Y.data[0,0,0,0], eps)
-
-    def test_expm1_log1p(self):
-        D,P,N,M = 5,3,4,5
-        x = UTPM(numpy.random.randn(D,P,M,N))
-
-        y = UTPM.expm1(x)
-        x2 = UTPM.log1p(y)
-        y2 = UTPM.expm1(x2)
-
-        assert_allclose(x.data, x2.data)
-        assert_allclose(y.data, y2.data)
-
-    def test_pow(self):
-        D,P,N = 4,2,2
-        X = UTPM(numpy.random.rand(D,P,N,N))
-        Y = X**3
-        Z = X*X*X
-        assert_array_almost_equal(Y.data, Z.data)
-
 
     def test_pow_pullback(self):
         D,P,N = 4,2,2
@@ -460,100 +405,12 @@ class Test_Push_Forward(TestCase):
 
         assert_array_almost_equal((r * ybar * x**(r-1)).data, xbar.data)
 
-    def test_sincos(self):
-        D,P,M,N = 4,3,2,1
-        X = UTPM(numpy.random.rand(D,P,M,N))
-        Z = UTPM.sin(X)**2 + UTPM.cos(X)**2
-        # print Z
-        assert_array_almost_equal(Z.data[0], numpy.ones((P,M,N)))
-        assert_array_almost_equal(Z.data[1], numpy.zeros((P,M,N)))
-
-    def test_tansec(self):
-        D,P,M,N = 4,3,2,1
-
-        x = UTPM(numpy.random.random((D,P,M,N)))
-        y1 = UTPM.tan(x)
-        y2 = UTPM.sin(x)/UTPM.cos(x)
-        assert_array_almost_equal(y2.data, y1.data)
-
-    def test_arcsin(self):
-        D,P,N,M = 5,3,4,5
-        x = UTPM(numpy.random.random((D,P,M,N)))
-
-        y = UTPM.arcsin(x)
-        x2 = UTPM.sin(y)
-        y2 = UTPM.arcsin(x2)
-
-        assert_array_almost_equal(x.data, x2.data)
-        assert_array_almost_equal(y.data, y2.data)
-
-    def test_arccos(self):
-        D,P,N,M = 5,3,4,5
-        x = UTPM(numpy.random.random((D,P,M,N)))
-
-        y = UTPM.arccos(x)
-        x2 = UTPM.cos(y)
-        y2 = UTPM.arccos(x2)
-
-        assert_array_almost_equal(x.data, x2.data)
-        assert_array_almost_equal(y.data, y2.data)
-
-
-
-    def test_arctan(self):
-        D,P,N,M = 5,3,4,5
-        x = UTPM(numpy.random.random((D,P,M,N)))
-        y  = UTPM.tan(x)
-        x2 = UTPM.arctan(y)
-        y2  = UTPM.tan(x2)
-        assert_array_almost_equal(x.data, x2.data)
-        assert_array_almost_equal(y.data, y2.data)
-
-
-
-    def test_sinhcosh(self):
-        D,P,N,M = 5,3,4,5
-        x = UTPM(numpy.random.random((D,P,M,N)))
-        y = UTPM.sinh(x)
-        z = UTPM.cosh(x)
-        assert_array_almost_equal(0., (z**2 - y**2 - 1.).data)
-
-    def test_tanh(self):
-        D,P,N,M = 5,3,4,5
-        x = UTPM(numpy.random.random((D,P,M,N)))
-
-        s = UTPM.sinh(x)
-        c = UTPM.cosh(x)
-        t = UTPM.tanh(x)
-        assert_array_almost_equal(t.data, (s/c).data)
-
     @decorators.skipif(mpmath is None)
     def test_dpm_hyp1f1(self):
         #FIXME: this whole function is copypasted with minimal modification
 
         D,P,N,M = 5,1,3,3
 
-        # Check special case of exp.
-        x = UTPM(numpy.random.random((D,P,M,N)))
-        h = UTPM.dpm_hyp1f1(1., 1., x)
-        e = UTPM.exp(x)
-        assert_array_almost_equal(h.data, e.data)
-
-        # Check another special case.
-        # sample random numbers but not too close to zero
-        tmp = numpy.random.randn(D,P,M,N)
-        x = UTPM(tmp + 0.1*numpy.sign(tmp))
-        h = UTPM.dpm_hyp1f1(1., 2.,  x)
-        s = (UTPM.exp(x) - 1.) / x
-        assert_array_almost_equal(h.data, s.data)
-
-        # Check another special case.
-        x = UTPM(numpy.random.random((D,P,M,N)))
-        h = UTPM.dpm_hyp1f1(0.5, -0.5, x)
-        s = UTPM.exp(x) * (1. - 2*x)
-        assert_array_almost_equal(h.data, s.data)
-
-        # Check another special case.
         x = UTPM(numpy.zeros((D,P,M,N)))
         a,b = 1., 2.
         x.data[0,...] = numpy.random.random((P,M,N))
@@ -590,27 +447,6 @@ class Test_Push_Forward(TestCase):
     def test_hyp1f1(self):
         D,P,N,M = 5,1,3,3
 
-        # Check special case of exp.
-        x = UTPM(numpy.random.random((D,P,M,N)))
-        h = UTPM.hyp1f1(1., 1., x)
-        e = UTPM.exp(x)
-        assert_array_almost_equal(h.data, e.data)
-
-        # Check another special case.
-        # sample random numbers but not too close to zero
-        tmp = numpy.random.randn(D,P,M,N)
-        x = UTPM(tmp + 0.1*numpy.sign(tmp))
-        h = UTPM.hyp1f1(1., 2.,  x)
-        s = (UTPM.exp(x) - 1.) / x
-        assert_array_almost_equal(h.data, s.data)
-
-        # Check another special case.
-        x = UTPM(numpy.random.random((D,P,M,N)))
-        h = UTPM.hyp1f1(0.5, -0.5, x)
-        s = UTPM.exp(x) * (1. - 2*x)
-        assert_array_almost_equal(h.data, s.data)
-
-        # Check another special case.
         x = UTPM(numpy.zeros((D,P,M,N)))
         a,b = 1., 2.
         x.data[0,...] = numpy.random.random((P,M,N))
@@ -642,23 +478,6 @@ class Test_Push_Forward(TestCase):
 
         assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
-    def test_psi(self):
-        D,P,N,M = 5,1,3,3
-
-        # sample some positive random numbers
-        R = numpy.exp(numpy.random.randn(D, P, M, N))
-        x = UTPM(R)
-
-        # check an identity
-        a = UTPM.psi(x + 1)
-        b = UTPM.psi(x) + 1 / x
-        assert_allclose(a.data, b.data)
-
-        # check another identity
-        a = UTPM.psi(2*x)
-        b = 0.5 * UTPM.psi(x) + 0.5 * UTPM.psi(x + 0.5) + numpy.log(2)
-        assert_allclose(a.data, b.data)
-
     def test_psi_pullback(self):
         D,P = 2,1
 
@@ -671,15 +490,6 @@ class Test_Push_Forward(TestCase):
         xbar = UTPM.pb_psi(ybar, x, y)
 
         assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
-
-    def test_gammaln(self):
-        D,P,N,M = 5,1,3,3
-        # sample some nonnegative floats
-        R = numpy.exp(numpy.random.randn(D, P, M, N))
-        x = UTPM(R)
-        a = UTPM.gammaln(x)
-        b = UTPM.gammaln(x + 1) - UTPM.log(x)
-        assert_allclose(a.data, b.data)
 
     def test_gammaln_pullback(self):
         D,P = 2,1
@@ -697,15 +507,6 @@ class Test_Push_Forward(TestCase):
     def test_hyperu(self):
         D,P,N,M = 5,1,3,3
 
-        # Check special case of a rational function.
-        R = numpy.random.randn(D, P, M, N)
-        R += 0.01 * numpy.sign(R)
-        x = UTPM(R)
-        h = UTPM.hyperu(1., 6., x)
-        s = (x*(x*(x*(x+4) + 12) + 24) + 24) / (x**5)
-        assert_allclose(h.data, s.data)
-
-        # Check another special case.
         x = UTPM(numpy.zeros((D,P,M,N)))
         a,b = 1., 2.
         x.data[0,...] = numpy.random.random((P,M,N))
@@ -743,18 +544,6 @@ class Test_Push_Forward(TestCase):
 
         D,P,N,M = 5,1,3,3
 
-        # Check the special case with negative values.
-        n = 2
-        b = 0.1
-        x = UTPM(-0.1 - 0.3 * numpy.random.rand(D,P,M,N))
-        a1 = -n
-        a2 = b
-        h = UTPM.dpm_hyp2f0(a1, a2, x)
-        s = scipy.special.poch(b, n) * ((-x)**n) * (
-                UTPM.dpm_hyp1f1(-n, 1. - b - n, -(1./x)))
-        assert_array_almost_equal(h.data, s.data)
-
-        # Check another special case.
         x = UTPM(numpy.zeros((D,P,M,N)))
         a1, a2 = 1., 2.
         x.data[0,...] = 0.1 + 0.3 * numpy.random.rand(P,M,N)
@@ -796,34 +585,6 @@ class Test_Push_Forward(TestCase):
     def test_hyp2f0(self):
         D,P,N,M = 5,1,3,3
 
-        """
-        # Check a special case.
-        # This is a little tricky because hyp2f0 likes small x
-        # and hyp1f1 likes small 1/x.
-        n = 2
-        b = 0.1
-        x = UTPM(0.1 + 0.3 * numpy.random.rand(D,P,M,N))
-        a1 = -n
-        a2 = b
-        h = UTPM.hyp2f0(a1, a2, x)
-        s = scipy.special.poch(b, n) * ((-x)**n) * (
-                UTPM.hyp1f1(-n, 1. - b - n, -(1./x)))
-        assert_array_almost_equal(h.data, s.data)
-        """
-
-        """
-        # Check the special case with negative values.
-        n = 2
-        b = 0.1
-        x = UTPM(-0.1 - 0.3 * numpy.random.rand(D,P,M,N))
-        a1 = -n
-        a2 = b
-        h = UTPM.hyp2f0(a1, a2, x)
-        s = scipy.special.poch(b, n) * ((-x)**n) * (
-                UTPM.hyp1f1(-n, 1. - b - n, -(1./x)))
-        assert_array_almost_equal(h.data, s.data)
-        """
-
         # Check another special case.
         x = UTPM(numpy.zeros((D,P,M,N)))
         a1, a2 = 1., 2.
@@ -864,28 +625,6 @@ class Test_Push_Forward(TestCase):
     def test_hyp0f1(self):
         D,P,N,M = 5,1,3,3
 
-        # cos
-        x = UTPM(numpy.random.random((D,P,M,N)))
-        h = UTPM.hyp0f1(0.5, -(0.5 * x)**2)
-        c = UTPM.cos(x)
-        assert_array_almost_equal(h.data, c.data)
-
-        # cosh
-        x = UTPM(numpy.random.random((D,P,M,N)))
-        h = UTPM.hyp0f1(0.5, (0.5 * x)**2)
-        c = UTPM.cosh(x)
-        assert_array_almost_equal(h.data, c.data)
-
-        #FIXME: possibly update this if algopy sinc is implemented
-        # numpy sinc (this is the engineer's sinc not the math sinc)
-        # sample random numbers but not too close to zero
-        tmp = numpy.random.randn(D,P,M,N)
-        x = UTPM(tmp + 0.1*numpy.sign(tmp))
-        h = UTPM.hyp0f1(1.5, -(0.5 * math.pi * x)**2)
-        c = UTPM.sin(math.pi * x) / (math.pi * x)
-        assert_array_almost_equal(h.data, c.data)
-
-        # Check another special case.
         x = UTPM(numpy.zeros((D,P,M,N)))
         b = 2.
         x.data[0,...] = numpy.random.random((P,M,N))
@@ -921,12 +660,6 @@ class Test_Push_Forward(TestCase):
     def test_polygamma(self):
         D,P,N,M = 5,1,3,3
 
-        x = UTPM(numpy.exp(numpy.random.randn(D,P,M,N)))
-        n = 2
-        a = UTPM.polygamma(n, x)
-        b = UTPM.polygamma(n, x+1) - ((-1)**n)*math.factorial(n)*(x**(-n-1))
-        assert_allclose(a.data, b.data)
-
         # Check another special case.
         x = UTPM(numpy.zeros((D,P,M,N)))
         n = 2
@@ -959,13 +692,6 @@ class Test_Push_Forward(TestCase):
         assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
 
-    def test_erf(self):
-        D,P,N,M = 5,1,3,3
-        x = UTPM(numpy.random.random((D,P,M,N)))
-        y1 = 2 * x * UTPM.hyp1f1(0.5, 1.5, -x*x) / math.sqrt(math.pi)
-        y2 = UTPM.erf(x)
-        assert_array_almost_equal(y1.data, y2.data)
-
 
     def test_erf_pullback(self):
         D,P = 2,1
@@ -979,18 +705,6 @@ class Test_Push_Forward(TestCase):
         xbar = UTPM.pb_erf(ybar, x, y)
 
         assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
-
-
-    def test_erfi(self):
-        D,P,N,M = 5,1,3,3
-        x = UTPM(numpy.random.random((D,P,M,N)))
-
-        # FIXME: only the 0th order is tested
-        observed = UTPM.erfi(x).data[0]
-        expected = scipy.special.hyp1f1(0.5, 1.5, x.data[0]*x.data[0]) * (
-                x.data[0] * 2.0 / math.sqrt(math.pi))
-
-        assert_array_almost_equal(observed, expected)
 
 
     def test_erfi_pullback(self):
@@ -1030,16 +744,6 @@ class Test_Push_Forward(TestCase):
 
         assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
-    def test_logit(self):
-        D,P,N,M = 5,1,3,3
-        x = UTPM(numpy.random.random((D,P,M,N)))
-
-        # FIXME: only the 0th order is tested
-        observed = UTPM.logit(x).data[0]
-        expected = scipy.special.logit(x.data[0])
-
-        assert_array_almost_equal(observed, expected)
-
 
     def test_logit_pullback(self):
         D,P = 2,1
@@ -1053,16 +757,6 @@ class Test_Push_Forward(TestCase):
         xbar = UTPM.pb_logit(ybar, x, y)
 
         assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
-
-    def test_expit(self):
-        D,P,N,M = 5,1,3,3
-        x = UTPM(numpy.random.random((D,P,M,N)))
-
-        # FIXME: only the 0th order is tested
-        observed = UTPM.expit(x).data[0]
-        expected = scipy.special.expit(x.data[0])
-
-        assert_array_almost_equal(observed, expected)
 
 
     def test_expit_pullback(self):
@@ -1078,47 +772,6 @@ class Test_Push_Forward(TestCase):
 
         assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
-    def test_expit_logit(self):
-        D,P,N,M = 5,3,4,5
-        x = UTPM(numpy.random.randn(D,P,M,N))
-
-        y = UTPM.expit(x)
-        x2 = UTPM.logit(y)
-        y2 = UTPM.expit(x2)
-
-        assert_allclose(x.data, x2.data)
-        assert_allclose(y.data, y2.data)
-
-    def test_sign_tanh(self):
-        D,P,N,M = 5,3,4,5
-
-        # sample random numbers but not too close to zero
-        tmp = numpy.random.randn(D,P,M,N)
-        x = UTPM(tmp + 0.1*numpy.sign(tmp))
-
-        k = 200.
-        y = UTPM.tanh(k*x)
-        z = UTPM.sign(x)
-        assert_allclose(y.data, z.data)
-
-    def test_abs_tanh(self):
-        D,P,N,M = 5,3,4,5
-
-        # sample random numbers but not too close to zero
-        tmp = numpy.random.randn(D,P,M,N)
-        x = UTPM(tmp + 0.1*numpy.sign(tmp))
-
-        k = 200.
-        y = x*UTPM.tanh(k*x)
-        z = abs(x)
-        assert_allclose(y.data, z.data)
-
-    def test_abs_sign(self):
-        D,P,N,M = 5,3,4,5
-        x = UTPM(numpy.random.randn(D,P,M,N))
-        y = x * UTPM.sign(x)
-        z = abs(x)
-        assert_allclose(y.data, z.data)
 
     def test_abs(self):
         D,P,N = 4,3,12

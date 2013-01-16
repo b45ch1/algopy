@@ -876,6 +876,28 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return xbar
 
     @classmethod
+    def square(cls, x):
+        """ computes y = square(x) in UTP arithmetic"""
+
+        retval = x.clone()
+        cls._square(x.data, out = retval.data)
+        return retval
+
+    @classmethod
+    def pb_square(cls, ybar, x, y, out=None):
+        """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
+
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar, = out
+
+        cls._pb_square(ybar.data, x.data, y.data, out = xbar.data)
+        return xbar
+
+    @classmethod
     def erf(cls, x):
         """ computes y = erf(x) in UTP arithmetic"""
 
@@ -925,7 +947,10 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def dawsn(cls, x):
         """ computes y = dawsn(x) in UTP arithmetic"""
-        return x * cls.hyp1f1(1., 1.5, -x*x)
+
+        retval = x.clone()
+        cls._dawsn(x.data, out = retval.data)
+        return retval
 
     @classmethod
     def pb_dawsn(cls, ybar, x, y, out=None):
@@ -938,8 +963,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         else:
             xbar, = out
 
-        xbar += ybar * (1. - 2.*x*cls.dawsn(x))
-
+        cls._pb_dawsn(ybar.data, x.data, y.data, out = xbar.data)
         return xbar
 
 
