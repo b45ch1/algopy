@@ -378,6 +378,13 @@ class Test_Push_Forward(TestCase):
         Y = UTPM.sqrt(X)
         assert_array_almost_equal(X.data, (Y*Y).data)
 
+    def test_reciprocal(self):
+        D,P,N = 5,3,2
+        X = UTPM(numpy.random.rand(D,P,N,N))
+        Y = UTPM.reciprocal(X)
+        Z = 1 / X
+        assert_array_almost_equal(Y.data, Z.data)
+
     def test_exp_log(self):
         D,P,N = 4,2,2
         X = UTPM(numpy.random.rand(D,P,N,N))

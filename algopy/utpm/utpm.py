@@ -383,9 +383,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return self.__class__(z_data)
 
 
-
-
-
     def __pow__(self,r):
         if isinstance(r, UTPM):
             return numpy.exp(numpy.log(self)*r)
@@ -837,6 +834,27 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return xbar
 
     @classmethod
+    def reciprocal(cls, x):
+        """ computes y = reciprocal(x) in UTP arithmetic"""
+
+        retval = x.clone()
+        cls._reciprocal(x.data, out = retval.data)
+        return retval
+
+    @classmethod
+    def pb_reciprocal(cls, ybar, x, y, out=None):
+        """ computes bar y dy = bar x dx in UTP arithmetic"""
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar, = out
+
+        cls._pb_reciprocal(ybar.data, x.data, y.data, out = xbar.data)
+        return xbar
+
+    @classmethod
     def gammaln(cls, x):
         """ computes y = gammaln(x) in UTP arithmetic"""
 
@@ -884,7 +902,10 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def erfi(cls, x):
         """ computes y = erfi(x) in UTP arithmetic"""
-        return 2 * x * cls.hyp1f1(0.5, 1.5, x*x) / math.sqrt(math.pi)
+
+        retval = x.clone()
+        cls._erfi(x.data, out = retval.data)
+        return retval
 
     @classmethod
     def pb_erfi(cls, ybar, x, y, out=None):
@@ -897,8 +918,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         else:
             xbar, = out
 
-        xbar += ybar * 2.*cls.exp(x*x)/math.sqrt(math.pi)
-
+        cls._pb_erfi(ybar.data, x.data, y.data, out = xbar.data)
         return xbar
 
 
@@ -926,7 +946,10 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def logit(cls, x):
         """ computes y = logit(x) in UTP arithmetic"""
-        return cls.log(x) - cls.log(1-x)
+
+        retval = x.clone()
+        cls._logit(x.data, out = retval.data)
+        return retval
 
     @classmethod
     def pb_logit(cls, ybar, x, y, out=None):
@@ -939,15 +962,16 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         else:
             xbar, = out
 
-        xbar += ybar / (x * (1. - x))
-
+        cls._pb_logit(ybar.data, x.data, y.data, out = xbar.data)
         return xbar
-
 
     @classmethod
     def expit(cls, x):
         """ computes y = expit(x) in UTP arithmetic"""
-        return 1. / (1. + cls.exp(-x))
+
+        retval = x.clone()
+        cls._expit(x.data, out = retval.data)
+        return retval
 
     @classmethod
     def pb_expit(cls, ybar, x, y, out=None):
@@ -960,8 +984,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         else:
             xbar, = out
 
-        xbar += ybar * cls.expit(x) * cls.expit(-x)
-
+        cls._pb_expit(ybar.data, x.data, y.data, out = xbar.data)
         return xbar
 
 

@@ -27,6 +27,16 @@ except:
 
 from algopy import nthderiv
 
+def _plus_const(x_data, c, out=None):
+    """
+    Constants are only added to the d=0 slice of the data array.
+    """
+    if out is None:
+        y_data = numpy.copy(x_data)
+    else:
+        y_data = out
+    y_data[0] += c
+    return y_data
 
 def _eval_slow_generic(f, extra_args, x_data, out=None):
     """
@@ -265,6 +275,37 @@ class RawAlgorithmsMixIn:
         for d in range(D):
             z_data[d,:,...] = 1./ y_data[0,:,...] * ( x_data[d,:,...] - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
 
+        return z_data
+
+    @classmethod
+    def _reciprocal(cls, y_data, out=None):
+        """
+        z = 1/y
+        """
+        #FIXME: this function could use some attention;
+        # it was copypasted from div
+        if out is None:
+            z_data = numpy.empty_like(y_data)
+        else:
+            z_data = out
+
+        D = z_data.shape[0]
+        for d in range(D):
+            if d == 0:
+                z_data[d,:,...] = 1./ y_data[0,:,...] * ( 1 - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
+            else:
+                z_data[d,:,...] = 1./ y_data[0,:,...] * ( 0 - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
+
+        return z_data
+
+    @classmethod
+    def _pb_reciprocal(cls, ybar_data, x_data, y_data, out=None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        #FIXME: this is probably dumb
+        tmp = -cls._reciprocal(cls._square(x_data))
+        cls._amul(ybar_data, tmp, out=out)
+
     @classmethod
     def _floordiv(cls, x_data, y_data, out = None):
         """
@@ -461,31 +502,45 @@ class RawAlgorithmsMixIn:
         cls._amul(ybar_data, y_data, xbar_data)
 
     @classmethod
-    def _expm1(cls, x_data, out = None):
-        if out == None:
-            raise NotImplementedError('should implement that')
-        y_data = out
-        D,P = x_data.shape[:2]
-        y_data[0] = numpy.exp(x_data[0])
-        xtctilde = x_data[1:].copy()
-        for d in range(1,D):
-            xtctilde[d-1] *= d
-        for d in range(1, D):
-            y_data[d] = numpy.sum(y_data[:d][::-1]*xtctilde[:d], axis=0)/d
-        y_data[0] = numpy.expm1(x_data[0])
-        return y_data
+    def _expm1(cls, x_data, out=None):
+        fprime_data = cls._exp(x_data)
+        return _black_f_white_fprime(
+                nthderiv.expm1, [], fprime_data, x_data, out=out)
 
     @classmethod
     def _pb_expm1(cls, ybar_data, x_data, y_data, out = None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
+        fprime_data = cls._exp(x_data)
+        cls._amul(ybar_data, fprime_data, out=out)
 
-        xbar_data = out
+    @classmethod
+    def _logit(cls, x_data, out=None):
+        fprime_data = cls._reciprocal(x_data - cls._square(x_data))
+        return _black_f_white_fprime(
+                scipy.special.logit, [], fprime_data, x_data, out=out)
 
-        y_data_1p = y_data.copy()
-        y_data_1p += 1.
+    @classmethod
+    def _pb_logit(cls, ybar_data, x_data, y_data, out = None):
+        if out is None:
+            raise NotImplementedError('should implement that')
+        fprime_data = cls._reciprocal(x_data - cls._square(x_data))
+        cls._amul(ybar_data, fprime_data, out=out)
 
-        cls._amul(ybar_data, y_data_1p, xbar_data)
+    @classmethod
+    def _expit(cls, x_data, out=None):
+        b_data = cls._reciprocal(_plus_const(cls._exp(x_data), 1))
+        fprime_data = b_data - cls._square(b_data)
+        return _black_f_white_fprime(
+                scipy.special.expit, [], fprime_data, x_data, out=out)
+
+    @classmethod
+    def _pb_expit(cls, ybar_data, x_data, y_data, out = None):
+        if out is None:
+            raise NotImplementedError('should implement that')
+        b_data = cls._reciprocal(_plus_const(cls._exp(x_data), 1))
+        fprime_data = b_data - cls._square(b_data)
+        cls._amul(ybar_data, fprime_data, out=out)
 
     @classmethod
     def _sign(cls, x_data, out = None):
@@ -547,48 +602,23 @@ class RawAlgorithmsMixIn:
     def _pb_log(cls, ybar_data, x_data, y_data, out = None):
         if out == None:
             raise NotImplementedError('should implement that')
-
         xbar_data = out
-
-        tmp = xbar_data.copy()
-        cls._div(ybar_data, x_data, tmp)
-        xbar_data += tmp
+        xbar_data += cls._div(ybar_data, x_data, numpy.empty_like(xbar_data))
         return xbar_data
 
     @classmethod
-    def _log1p(cls, x_data, out = None):
-        if out == None:
-            raise NotImplementedError('should implement that')
-        y_data = out
-        D,P = x_data.shape[:2]
-
-        # base point: d = 0
-        y_data[0] = numpy.log1p(x_data[0])
-
-        # higher order coefficients: d > 0
-
-        for d in range(1,D):
-            y_data[d] =  (x_data[d]*d - numpy.sum(x_data[1:d][::-1] * y_data[1:d], axis=0))
-            y_data[d] /= (1. + x_data[0])
-
-        for d in range(1,D):
-            y_data[d] /= d
-
-        return y_data
+    def _log1p(cls, x_data, out=None):
+        fprime_data = cls._reciprocal(_plus_const(x_data, 1))
+        return _black_f_white_fprime(
+                numpy.log1p, [], fprime_data, x_data, out=out)
 
     @classmethod
-    def _pb_log1p(cls, ybar_data, x_data, y_data, out = None):
-        if out == None:
+    def _pb_log1p(cls, ybar_data, x_data, y_data, out=None):
+        if out is None:
             raise NotImplementedError('should implement that')
-
         xbar_data = out
-
-        x_data_1p = x_data.copy()
-        x_data_1p += 1.
-
-        tmp = xbar_data.copy()
-        cls._div(ybar_data, x_data_1p, tmp)
-        xbar_data += tmp
+        xbar_data += cls._div(
+                ybar_data, _plus_const(x_data, 1), numpy.empty_like(xbar_data))
         return xbar_data
 
     @classmethod
@@ -752,6 +782,19 @@ class RawAlgorithmsMixIn:
         if out is None:
             raise NotImplementedError('should implement that')
         fprime_data = (2. / math.sqrt(math.pi)) * cls._exp(-cls._square(x_data))
+        cls._amul(ybar_data, fprime_data, out=out)
+
+    @classmethod
+    def _erfi(cls, x_data, out=None):
+        fprime_data = (2. / math.sqrt(math.pi)) * cls._exp(cls._square(x_data))
+        return _black_f_white_fprime(
+                nthderiv.erfi, [], fprime_data, x_data, out=out)
+
+    @classmethod
+    def _pb_erfi(cls, ybar_data, x_data, y_data, out = None):
+        if out is None:
+            raise NotImplementedError('should implement that')
+        fprime_data = (2. / math.sqrt(math.pi)) * cls._exp(cls._square(x_data))
         cls._amul(ybar_data, fprime_data, out=out)
 
     @classmethod
