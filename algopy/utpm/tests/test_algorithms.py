@@ -104,13 +104,13 @@ class Test_taylor_polynomials_of_ode_solutions(TestCase):
 
     def test_log(self):
 
-        for shapes in (
+        for shape in (
                 (2, 3),
                 (4, 3, 2, 5),
                 ):
 
             # sample some positive numbers for taking logs
-            x = UTPM(numpy.exp(numpy.random.randn(*shapes)))
+            x = UTPM(numpy.exp(numpy.random.randn(*shape)))
 
             # construct the u and v arrays
             u_data = x.data.copy()
@@ -132,13 +132,13 @@ class Test_taylor_polynomials_of_ode_solutions(TestCase):
 
     def test_exp(self):
 
-        for shapes in (
+        for shape in (
                 (2, 3),
                 (4, 3, 2, 5),
                 ):
 
             # sample some random numbers
-            x = UTPM(numpy.random.randn(*shapes))
+            x = UTPM(numpy.random.randn(*shape))
 
             # construct the u and v arrays
             u_data = x.data.copy()
@@ -163,13 +163,13 @@ class Test_taylor_polynomials_of_ode_solutions(TestCase):
         # define a constant real exponent
         r = 1.23
 
-        for shapes in (
+        for shape in (
                 (2, 3),
                 (4, 3, 2, 5),
                 ):
 
             # sample some positive numbers for taking fractional real powers
-            x = UTPM(numpy.exp(numpy.random.randn(*shapes)))
+            x = UTPM(numpy.exp(numpy.random.randn(*shape)))
 
             # construct the u and v arrays
             u_data = x.data.copy()
@@ -188,6 +188,34 @@ class Test_taylor_polynomials_of_ode_solutions(TestCase):
 
             # compare the v_data array to the UTPM power data
             assert_allclose(v_data, (x ** r).data)
+
+    def test_dawsn(self):
+
+        for shape in (
+                (2, 3),
+                (4, 3, 2, 5),
+                ):
+
+            # sample some random numbers
+            x = UTPM(numpy.random.randn(*shape))
+
+            # construct the u and v arrays
+            u_data = x.data.copy()
+            v_data = numpy.empty_like(u_data)
+            v_data[0, ...] = scipy.special.dawsn(u_data[0])
+
+            # construct values like in Table (13.2) of "Evaluating Derivatives"
+            a_data = -2 * u_data.copy()
+            b_data = _plus_const(numpy.zeros_like(u_data), 1)
+            c_data = _plus_const(numpy.zeros_like(u_data), 1)
+
+            # fill the rest of the v_data
+            _taylor_polynomials_of_ode_solutions(
+                a_data, b_data, c_data,
+                u_data, v_data)
+
+            # compare the v_data array to the UTPM dawsn data
+            assert_allclose(v_data, UTPM.dawsn(x).data)
 
 
 
