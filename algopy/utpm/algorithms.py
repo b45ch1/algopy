@@ -252,15 +252,29 @@ class RawAlgorithmsMixIn:
             return NotImplementedError('')
         (D,P) = y_data.shape[:2]
 
-        if type(r) == int:
-            if r == 2:
+        if type(r) == int and r >= 0:
+            if r == 0:
+                y_data[...] = 0.
+                y_data[0, ...] = 1.
+                return y_data
+
+            elif r == 1:
+                y_data[...] = x_data[...]
+                return y_data
+
+            elif r == 2:
                 return cls._mul(x_data, x_data, y_data)
 
-            if r >= 3:
+            elif r >= 3:
                 y_data[...] = x_data[...]
                 for nr in range(r-1):
                     cls._mul(x_data, y_data, y_data)
                 return
+
+            else:
+                raise NotImplementedError("power to %d is not implemented" % r)
+
+
 
 
         y_data[0] = x_data[0]**r
@@ -292,14 +306,26 @@ class RawAlgorithmsMixIn:
         # print 'xbar_data=',xbar_data
         # print 'ybar_data=',ybar_data
 
-        tmp = numpy.zeros_like(xbar_data)
+        if type(r) == int:
 
-        cls._div(y_data, x_data, tmp)
-        tmp[...] = numpy.nan_to_num(tmp)
-        cls._mul(ybar_data, tmp, tmp)
-        tmp *= r
+            if r > 0:
 
-        xbar_data += tmp
+                tmp = numpy.zeros_like(xbar_data)
+                cls._pow_real(x_data, r - 1, out = tmp)
+                tmp *= r
+                cls._mul(ybar_data, tmp, tmp)
+                xbar_data += tmp
+
+        else:
+
+            tmp = numpy.zeros_like(xbar_data)
+
+            cls._div(y_data, x_data, tmp)
+            tmp[...] = numpy.nan_to_num(tmp)
+            cls._mul(ybar_data, tmp, tmp)
+            tmp *= r
+
+            xbar_data += tmp
 
         # print 'xbar_data=',xbar_data
 

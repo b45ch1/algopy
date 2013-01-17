@@ -426,6 +426,53 @@ class Test_Push_Forward(TestCase):
         Z = X*X*X
         assert_array_almost_equal(Y.data, Z.data)
 
+    def test_pow_zero(self):
+        D,P,N = 4,2,2
+        X = UTPM(numpy.zeros((D,P,N,N)))
+
+        r = 2
+        Y = X**r
+        Z = X*X
+        assert_array_almost_equal(Y.data, Z.data)
+
+        r = 3
+        Y = X**r
+        Z = X*X*X
+        assert_array_almost_equal(Y.data, Z.data)
+
+    def test_pow_zero_coeff(self):
+        X = UTPM(numpy.array([0., 0., 1., 0. , -1./3.]).reshape((5,1)))
+
+        r = 2
+        Y = X**r
+        Z = X*X
+        assert_array_almost_equal(Y.data, Z.data)
+
+        r = 3
+        Y = X**r
+        Z = X*X*X
+        assert_array_almost_equal(Y.data, Z.data)
+
+    def test_pow_negative_int_exponentials(self):
+        D,P,M,N = 4,2,2,3
+        x = UTPM(numpy.exp(numpy.random.randn(D,P,M,N)))
+
+        r = -1
+        y = x**r
+        assert_array_almost_equal(y.data, (1./x).data)
+
+        r = -2
+        y = x**r
+        assert_array_almost_equal(y.data, ((1./x)/x).data)
+
+        r = -3
+        y = x**r
+        assert_array_almost_equal(y.data, ((1./x)/x/x).data)
+
+        r = -4
+        y = x**r
+        assert_array_almost_equal(y.data, (1./x/x/x/x).data)
+
 
     def test_pow_pullback(self):
         D,P,N = 4,2,2
@@ -438,12 +485,58 @@ class Test_Push_Forward(TestCase):
 
         assert_array_almost_equal((r * ybar * x**(r-1)).data, xbar.data)
 
-
         r = 3.1
         y = x**r
         ybar = UTPM(numpy.random.rand(D,P,N))
         xbar = UTPM.pb___pow__(ybar, x, r, y)
 
+        assert_array_almost_equal((r * ybar * x**(r-1)).data, xbar.data)
+
+    def test_pow_pullback2(self):
+        D,P,N = 5,1,1
+        x = UTPM(numpy.zeros((D,P,N)))
+
+        r = 0
+        y = x**r
+        ybar = UTPM(numpy.random.rand(D,P,N))
+        xbar = UTPM.pb___pow__(ybar, x, r, y)
+        assert_array_almost_equal(numpy.zeros((D, P, N)), xbar.data)
+
+
+        r = 1
+        y = x**r
+        ybar = UTPM(numpy.random.rand(D,P,N))
+        xbar = UTPM.pb___pow__(ybar, x, r, y)
+
+        assert_array_almost_equal((r * ybar * x**(r-1)).data, xbar.data)
+
+        r = 2
+        y = x**r
+        ybar = UTPM(numpy.random.rand(D,P,N))
+        xbar = UTPM.pb___pow__(ybar, x, r, y)
+
+        assert_array_almost_equal((r * ybar * x**(r-1)).data, xbar.data)
+
+    def test_pow_pullback_zero(self):
+        D,P,N = 5,1,1
+        x = UTPM(numpy.array([0., 0., 1., 0., 0.]).reshape((5, 1, 1)))
+
+        r = 0
+        y = x**r
+        ybar = UTPM(numpy.random.rand(D,P,N))
+        xbar = UTPM.pb___pow__(ybar, x, r, y)
+        assert_array_almost_equal(numpy.zeros((D, P, N)), xbar.data)
+
+        r = 1
+        y = x**r
+        ybar = UTPM(numpy.random.rand(D,P,N))
+        xbar = UTPM.pb___pow__(ybar, x, r, y)
+        assert_array_almost_equal((r * ybar * x**(r-1)).data, xbar.data)
+
+        r = 2
+        y = x**r
+        ybar = UTPM(numpy.random.rand(D,P,N))
+        xbar = UTPM.pb___pow__(ybar, x, r, y)
         assert_array_almost_equal((r * ybar * x**(r-1)).data, xbar.data)
 
     def test_sincos(self):
