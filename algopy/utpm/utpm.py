@@ -370,6 +370,12 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return self.__class__(z_data)
 
 
+    def __truediv__(self, rhs):
+        return self/rhs
+
+    def __rtruediv__(self, rhs):
+        return rhs/self
+
     def __floordiv__(self, rhs):
         """
         self // rhs
@@ -381,7 +387,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         z_data = numpy.zeros_like(x_data)
         self._floordiv(x_data, y_data, z_data)
         return self.__class__(z_data)
-
 
     def __pow__(self,r):
         if isinstance(r, UTPM):
