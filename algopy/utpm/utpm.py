@@ -950,7 +950,11 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             tmp = numpy.prod(self.data.shape[2:])
             return UTPM(numpy.sum(self.data.reshape(self.data.shape[:2] + (tmp,)), axis = 2))
         else:
-            return UTPM(numpy.sum(self.data, axis = axis + 2))
+            if axis < 0:
+                a = self.data.ndim + axis
+            else:
+                a = axis + 2
+            return UTPM(numpy.sum(self.data, axis = a))
 
     @classmethod
     def pb_sum(cls, ybar, x, y, axis, dtype, out2, out = None):
@@ -966,8 +970,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         tmp += ybar.data.T
 
         return xbar
-
-
 
     # def prod(self, axis=None, dtype=None, out=None):
     #     if dtype != None or out != None:

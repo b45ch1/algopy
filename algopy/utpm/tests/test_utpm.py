@@ -38,6 +38,21 @@ class Test_Push_Forward(TestCase):
                 assert_array_almost_equal(numpy.sum(x.data[d,p], axis=0), y1[d,p])
                 assert_array_almost_equal(numpy.sum(x.data[d,p], axis=1), y2[d,p])
 
+    def test_sum_neg_axis(self):
+        # check sum
+        D,P,N,M = 2,3,4,5
+        x = UTPM(numpy.arange(D*P*N*M).reshape((D,P,N,M)))
+
+        y0 = UTPM.sum(x).data
+        y1 = UTPM.sum(x, axis=-1).data
+        y2 = UTPM.sum(x, axis=-2).data
+
+        for d in range(D):
+            for p in range(P):
+                assert_array_almost_equal(numpy.sum(x.data[d,p]), y0[d,p])
+                assert_array_almost_equal(numpy.sum(x.data[d,p], axis=-1), y1[d,p])
+                assert_array_almost_equal(numpy.sum(x.data[d,p], axis=-2), y2[d,p])
+
 
     # def test_prod(self):
     #     x = UTPM(numpy.random.random((2,5,3)))
