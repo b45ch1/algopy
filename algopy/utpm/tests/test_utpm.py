@@ -24,7 +24,6 @@ class Test_Push_Forward(TestCase):
                 assert_array_almost_equal(z[0,0].data, A[0,0].data)
 
     def test_sum(self):
-        # check sum
         D,P,N,M = 2,3,4,5
         x = UTPM(numpy.arange(D*P*N*M).reshape((D,P,N,M)))
 
@@ -39,7 +38,6 @@ class Test_Push_Forward(TestCase):
                 assert_array_almost_equal(numpy.sum(x.data[d,p], axis=1), y2[d,p])
 
     def test_sum_neg_axis(self):
-        # check sum
         D,P,N,M = 2,3,4,5
         x = UTPM(numpy.arange(D*P*N*M).reshape((D,P,N,M)))
 
@@ -53,13 +51,28 @@ class Test_Push_Forward(TestCase):
                 assert_array_almost_equal(numpy.sum(x.data[d,p], axis=-1), y1[d,p])
                 assert_array_almost_equal(numpy.sum(x.data[d,p], axis=-2), y2[d,p])
 
+    def test_pb_sum(self):
+
+        for axis in [None, 0, 1, -1, -2]:
+
+            D,P,N,M = 2,3,4,5
+            x = UTPM(numpy.arange(D*P*N*M).reshape((D,P,N,M)))
+
+            y = UTPM.sum(x, axis=axis)
+            xbar = UTPM(numpy.zeros(x.data.shape))
+            ybar = UTPM(numpy.random.random(y.data.shape))
+
+            UTPM.pb_sum(ybar, x, y, axis, float, None, out = (xbar,))
+
+            for p in range(P):
+                assert_almost_equal(numpy.sum(ybar.data[0, p] * y.data[1, p]),
+                                    numpy.sum(xbar.data[0, p] * x.data[1, p]))
 
     # def test_prod(self):
     #     x = UTPM(numpy.random.random((2,5,3)))
     #     y = UTPM.prod(x)
     #     y2 = x[0]*x[1]*x[2]
     #     assert_array_almost_equal(y.data, y2.data)
-
 
     def test_mul(self):
         x = numpy.array([1.,2.,3.])

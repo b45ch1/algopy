@@ -966,8 +966,23 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         else:
             xbar = out[0]
 
-        tmp = xbar.data.T
-        tmp += ybar.data.T
+        if axis == None:
+
+            tmp = xbar.data.T
+            tmp += ybar.data.T
+
+        else:
+
+            if axis < 0:
+                a = x.data.ndim + axis
+
+            else:
+                a = axis + 2
+
+            shp = list(x.data.shape)
+            shp[a] = 1
+            tmp = ybar.data.reshape(shp)
+            xbar.data += tmp
 
         return xbar
 
