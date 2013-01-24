@@ -66,9 +66,9 @@ class TestAuto(numpy.testing.TestCase):
     def _test_syntax_helper(self, f, x):
         args = [1] * f.extras + [x]
         for n in range(4):
-            print 'n:', n
+            #print 'n:', n
             ya = f(*args, n=n)
-            print ya
+            #print ya
             # the output shape should match the input shape
             assert_equal(np.shape(x), np.shape(ya))
             yb = np.empty_like(x)
@@ -82,23 +82,23 @@ class TestAuto(numpy.testing.TestCase):
             #with np.errstate(divide='ignore'):
             with np.errstate(divide='ignore', invalid='ignore'):
                 for name, f in gen_named_functions():
-                    print
-                    print name
+                    #print
+                    #print name
                     for x in g_complicated_xs:
                         if np.all(f.domain(x)):
-                            print 'x:', x
+                            #print 'x:', x
                             self._test_syntax_helper(f, x)
 
     def _test_numdifftools_helper(self, f, x):
         extra_args = [1] * f.extras
         args = extra_args + [x]
         for n in range(1, 5):
-            print 'n:', n
+            #print 'n:', n
             ya = f(*args, n=n)
-            print 'ya:', ya
+            #print 'ya:', ya
             f_part = functools.partial(f, *extra_args)
             yb = numdifftools.Derivative(f_part, n=n)(x)
-            print 'yb:', yb
+            #print 'yb:', yb
             # detect only gross errors
             assert_allclose_or_small(ya, yb, rtol=1e-2, zerotol=1e-2)
 
@@ -106,14 +106,13 @@ class TestAuto(numpy.testing.TestCase):
     def test_numdifftools(self):
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', np.ComplexWarning)
-            #with np.errstate(divide='ignore'):
             with np.errstate(divide='ignore', invalid='ignore'):
                 for name, f in gen_named_functions():
-                    print
-                    print name
+                    #print
+                    #print name
                     for x in g_simple_xs:
                         if f.domain(x):
-                            print 'x:', x
+                            #print 'x:', x
                             self._test_numdifftools_helper(f, x)
 
 
@@ -231,19 +230,6 @@ class TestMisc(numpy.testing.TestCase):
         a = nthderiv.arccosh(x, n=1)
         b = 1 / np.sqrt(x*x - 1)
         assert_allclose(a, b)
-
-    """
-    def test_hyp2f0_syntax(self):
-        a = 1.5
-        b = 1.0
-        x = 0.03
-        y1 = nthderiv.mpmath_hyp2f0(a, b, x, n=1)
-        print a, b, x
-        print y1
-        y2 = nthderiv.mpmath_hyp2f0(a, b, [x + 0j, x], n=1)
-        print y2
-        raise Exception
-    """
 
 
 

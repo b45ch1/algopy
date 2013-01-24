@@ -1080,9 +1080,9 @@ class Test_CGgraph_on_UTPM(TestCase):
         zbar = UTPM(numpy.random.rand(*z.x.data.shape))
         cg.pullback([zbar])
 
-        print zbar.data[0,0]
-        print y.xbar.data[0,0]
-        print x.xbar.data[0,0]
+        #print zbar.data[0,0]
+        #print y.xbar.data[0,0]
+        #print x.xbar.data[0,0]
         assert_array_almost_equal(numpy.sum(z.x.data[1,0] * zbar.data[0,0]), numpy.sum(x.x.data[1,0] * x.xbar.data[0,0]) + numpy.sum(y.x.data[1,0] * y.xbar.data[0,0]))
 
     def test_broadcasting5(self):

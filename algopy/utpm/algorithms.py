@@ -379,8 +379,8 @@ class RawAlgorithmsMixIn:
         x_data = x_data.copy()
         y_data = y_data.copy()
 
-        print x_data
-        print y_data
+        #print x_data
+        #print y_data
 
 
         # left shifting x_data and y_data if necessary
