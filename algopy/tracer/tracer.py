@@ -1235,8 +1235,12 @@ class Function(Ring):
         return Function.pushforward(algopy.special.hyp0f1, [b, x])
 
     @classmethod
-    def polygamma(cls, n, x):
-        return Function.pushforward(algopy.special.polygamma, [n, x])
+    def polygamma(cls, m, x):
+        return Function.pushforward(algopy.special.polygamma, [m, x])
+
+    @classmethod
+    def psi(cls, x):
+        return Function.pushforward(algopy.special.psi, [x])
 
     @classmethod
     def gammaln(cls, x):

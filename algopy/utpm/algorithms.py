@@ -14,6 +14,7 @@ the function implementations by C or Fortran functions.
 
 """
 
+import math
 
 import numpy
 from numpy.lib.stride_tricks import as_strided, broadcast_arrays
@@ -24,6 +25,131 @@ try:
 except:
     pass
 
+from algopy import nthderiv
+
+def _plus_const(x_data, c, out=None):
+    """
+    Constants are only added to the d=0 slice of the data array.
+    """
+    if out is None:
+        y_data = numpy.copy(x_data)
+    else:
+        y_data = out
+    y_data[0] += c
+    return y_data
+
+def _eval_slow_generic(f, extra_args, x_data, out=None):
+    """
+    This is related to summations associated with the name 'Faa di Bruno.'
+    @param f: a function from the nthderiv module
+    @param extra_args: a list of extra parameters like in hyp1f1 or polygamma
+    @param x_data: something about algorithmic differentiation
+    @param out: something about algorithmic differentiation
+    @param return: something about algorithmic differentiation
+    """
+    #FIXME: Improve or replace this function.
+    # It is intended to help with naive implementations
+    # of truncated taylor expansions
+    # of functions of a low degree polynomial,
+    # when the nth derivatives of the function of interest
+    # can be computed more or less directly.
+
+    y_data = nthderiv.np_filled_like(x_data, 0, out=out)
+    D, P = x_data.shape[:2]
+
+    # base point: d = 0
+    args = extra_args + [x_data[0]]
+    y_data[0] = f(*args)
+
+    # higher order coefficients: d > 0
+    for d in range(1, D):
+        # Accumulate coefficients of truncated expansions of powers
+        # of the polynomial.
+        if d == 1:
+            accum = x_data[1:].copy()
+        else:
+            for i in range(D-2, 0, -1):
+                accum[i] = numpy.sum(accum[:i] * x_data[i:0:-1], axis=0)
+            accum[0] = 0.
+        # Add the contribution of this summation term.
+        y_data[1:] += f(*args, n=d) * accum / float(math.factorial(d))
+
+    return y_data
+
+def _black_f_white_fprime(f, extra_args, fprime_data, x_data, out=None):
+    """
+    The function evaluation is a black box, but the derivative is compound.
+    @param f: a function from the nthderiv module
+    @param extra_args: a list of extra parameters like in hyp1f1 or polygamma
+    @param fprime_data: the array associated with the evaluated derivative
+    @param x_data: something about algorithmic differentiation
+    @param out: something about algorithmic differentiation
+    @param return: something about algorithmic differentiation
+    """
+
+    y_data = nthderiv.np_filled_like(x_data, 0, out=out)
+    D, P = x_data.shape[:2]
+
+    # Do the direct computation efficiently.
+    args = extra_args + [x_data[0]]
+    y_data[0] = f(*args)
+
+    # Compute the truncated series coefficients using discrete convolution.
+    #FIXME: one of these two loops can be vectorized
+    for d in range(1, D):
+        for c in range(d):
+            y_data[d] += fprime_data[d-1-c] * x_data[c+1] * (c+1)
+        y_data[d] /= d
+
+    return y_data
+
+def _taylor_polynomials_of_ode_solutions(
+        a_data, b_data, c_data,
+        u_data, v_data,
+        ):
+    """
+    This is a general O(D^2) algorithm for functions that are ODE solutions.
+    It is an attempt to implement Proposition 13.1
+    of "Evaluating Derivatives" by Griewank and Walther (2008).
+    The function must satisfy the identity
+    b(u) f'(u) - a(u) f(u) = c(u)
+    where a, b and c are already represented by their Taylor expansions.
+    Also u is represented as a Taylor expansion, and so is v.
+    But we are only given the first term of v, which is the recursion base.
+    In this function we use the notation from the book mentioned above.
+    """
+
+    # define the number of terms allowed in the truncated series
+    D = u_data.shape[0]
+    d = D-1
+
+    # these arrays have elements that are scaled slightly differently
+    u_tilde_data = u_data.copy()
+    v_tilde_data = v_data.copy()
+    for j in range(1, D):
+        u_tilde_data[j] *= j
+        v_tilde_data[j] *= j
+
+    # this is just convenient temporary storage which is not so important
+    s = numpy.zeros_like(u_data)
+
+    # on the other hand the e_data is very important for recursion
+    e_data = numpy.zeros_like(u_data)
+
+    # do the dynamic programming to fill the v_data array
+    for k in range(D):
+        if k > 0:
+            for j in range(1, k+1):
+                s[k] += (c_data[k-j] + e_data[k-j]) * u_tilde_data[j]
+            for j in range(1, k):
+                s[k] -= b_data[k-j] * v_tilde_data[j]
+            v_tilde_data[k] = s[k] / b_data[0]
+            v_data[k] = v_tilde_data[k] / k
+        if k < d:
+            for j in range(k+1):
+                e_data[k] += a_data[j] * v_data[k-j]
+
+    return v_data
 
 
 def vdot(x,y, z = None):
@@ -151,19 +277,25 @@ class RawAlgorithmsMixIn:
 
         return x_data, y_data
 
-
     @classmethod
-    def _mul(cls, x_data, y_data, out = None):
+    def _mul(cls, x_data, y_data, out=None):
         """
         z = x*y
         """
-        z_data = out
-        if out == None:
-            return NotImplementedError('')
+        if out is None:
+            if numpy.shape(x_data) != numpy.shape(y_data):
+                raise NotImplementedError
+            else:
+                z_data = numpy.empty_like(x_data)
+        else:
+            z_data = out
 
-        (D,P) = z_data.shape[:2]
+        D, P = z_data.shape[:2]
         for d in range(D)[::-1]:
             numpy.sum(x_data[:d+1,:,...] * y_data[d::-1,:,...], axis=0, out = z_data[d,:,...] )
+
+        return z_data
+
 
     @classmethod
     def _amul(cls, x_data, y_data, out = None):
@@ -172,7 +304,7 @@ class RawAlgorithmsMixIn:
         """
         z_data = out
         if out == None:
-            return NotImplementedError('')
+            raise NotImplementedError
 
         (D,P) = z_data.shape[:2]
         for d in range(D):
@@ -193,11 +325,42 @@ class RawAlgorithmsMixIn:
         """
         z_data = out
         if out == None:
-            return NotImplementedError('')
+            raise NotImplementedError
 
         (D,P) = z_data.shape[:2]
         for d in range(D):
             z_data[d,:,...] = 1./ y_data[0,:,...] * ( x_data[d,:,...] - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
+
+        return z_data
+
+    @classmethod
+    def _reciprocal(cls, y_data, out=None):
+        """
+        z = 1/y
+        """
+        #FIXME: this function could use some attention;
+        # it was copypasted from div
+        if out is None:
+            z_data = numpy.empty_like(y_data)
+        else:
+            z_data = out
+
+        D = z_data.shape[0]
+        for d in range(D):
+            if d == 0:
+                z_data[d,:,...] = 1./ y_data[0,:,...] * ( 1 - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
+            else:
+                z_data[d,:,...] = 1./ y_data[0,:,...] * ( 0 - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
+
+        return z_data
+
+    @classmethod
+    def _pb_reciprocal(cls, ybar_data, x_data, y_data, out=None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        #FIXME: this is probably dumb
+        tmp = -cls._reciprocal(cls._square(x_data))
+        cls._amul(ybar_data, tmp, out=out)
 
     @classmethod
     def _floordiv(cls, x_data, y_data, out = None):
@@ -209,7 +372,7 @@ class RawAlgorithmsMixIn:
         """
         z_data = out
         if out == None:
-            return NotImplementedError('')
+            raise NotImplementedError
 
         (D,P) = z_data.shape[:2]
 
@@ -249,7 +412,7 @@ class RawAlgorithmsMixIn:
         """ y = x**r, where r is scalar """
         y_data = out
         if out == None:
-            return NotImplementedError('')
+            raise NotImplementedError
         (D,P) = y_data.shape[:2]
 
         if type(r) == int and r >= 0:
@@ -358,7 +521,31 @@ class RawAlgorithmsMixIn:
         D,P = a_shp[:2]
         return numpy.argmax(a_data[0].reshape((P,numpy.prod(a_shp[2:]))), axis = 1)
 
+    @classmethod
+    def _negative(cls, x_data, out=None):
+        """
+        z = -x
+        """
+        #FIXME: this can probably be improved
+        if out is None:
+            z_data = numpy.empty_like(x_data)
+        else:
+            z_data = out
+        cls._mul(x_data, -1, out=z_data)
+        return z_data
 
+    @classmethod
+    def _square(cls, x_data, out=None):
+        """
+        z = x*x
+        """
+        #FIXME: you should be able to do this twice as fast as mul
+        if out is None:
+            z_data = numpy.empty_like(x_data)
+        else:
+            z_data = out
+        cls._mul(x_data, x_data, out=z_data)
+        return z_data
 
     @classmethod
     def _sqrt(cls, x_data, out = None):
@@ -374,10 +561,11 @@ class RawAlgorithmsMixIn:
         return y_data
 
     @classmethod
-    def _exp(cls, x_data, out = None):
-        if out == None:
-            raise NotImplementedError('should implement that')
-        y_data = out
+    def _exp(cls, x_data, out=None):
+        if out is None:
+            y_data = numpy.empty_like(x_data)
+        else:
+            y_data = out
         D,P = x_data.shape[:2]
         y_data[0] = numpy.exp(x_data[0])
         xtctilde = x_data[1:].copy()
@@ -396,31 +584,45 @@ class RawAlgorithmsMixIn:
         cls._amul(ybar_data, y_data, xbar_data)
 
     @classmethod
-    def _expm1(cls, x_data, out = None):
-        if out == None:
-            raise NotImplementedError('should implement that')
-        y_data = out
-        D,P = x_data.shape[:2]
-        y_data[0] = numpy.exp(x_data[0])
-        xtctilde = x_data[1:].copy()
-        for d in range(1,D):
-            xtctilde[d-1] *= d
-        for d in range(1, D):
-            y_data[d] = numpy.sum(y_data[:d][::-1]*xtctilde[:d], axis=0)/d
-        y_data[0] = numpy.expm1(x_data[0])
-        return y_data
+    def _expm1(cls, x_data, out=None):
+        fprime_data = cls._exp(x_data)
+        return _black_f_white_fprime(
+                nthderiv.expm1, [], fprime_data, x_data, out=out)
 
     @classmethod
     def _pb_expm1(cls, ybar_data, x_data, y_data, out = None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
+        fprime_data = cls._exp(x_data)
+        cls._amul(ybar_data, fprime_data, out=out)
 
-        xbar_data = out
+    @classmethod
+    def _logit(cls, x_data, out=None):
+        fprime_data = cls._reciprocal(x_data - cls._square(x_data))
+        return _black_f_white_fprime(
+                scipy.special.logit, [], fprime_data, x_data, out=out)
 
-        y_data_1p = y_data.copy()
-        y_data_1p += 1.
+    @classmethod
+    def _pb_logit(cls, ybar_data, x_data, y_data, out = None):
+        if out is None:
+            raise NotImplementedError('should implement that')
+        fprime_data = cls._reciprocal(x_data - cls._square(x_data))
+        cls._amul(ybar_data, fprime_data, out=out)
 
-        cls._amul(ybar_data, y_data_1p, xbar_data)
+    @classmethod
+    def _expit(cls, x_data, out=None):
+        b_data = cls._reciprocal(_plus_const(cls._exp(x_data), 1))
+        fprime_data = b_data - cls._square(b_data)
+        return _black_f_white_fprime(
+                scipy.special.expit, [], fprime_data, x_data, out=out)
+
+    @classmethod
+    def _pb_expit(cls, ybar_data, x_data, y_data, out = None):
+        if out is None:
+            raise NotImplementedError('should implement that')
+        b_data = cls._reciprocal(_plus_const(cls._exp(x_data), 1))
+        fprime_data = b_data - cls._square(b_data)
+        cls._amul(ybar_data, fprime_data, out=out)
 
     @classmethod
     def _sign(cls, x_data, out = None):
@@ -482,49 +684,54 @@ class RawAlgorithmsMixIn:
     def _pb_log(cls, ybar_data, x_data, y_data, out = None):
         if out == None:
             raise NotImplementedError('should implement that')
-
         xbar_data = out
-
-        tmp = xbar_data.copy()
-        cls._div(ybar_data, x_data, tmp)
-        xbar_data += tmp
+        xbar_data += cls._div(ybar_data, x_data, numpy.empty_like(xbar_data))
         return xbar_data
 
     @classmethod
-    def _log1p(cls, x_data, out = None):
-        if out == None:
-            raise NotImplementedError('should implement that')
-        y_data = out
-        D,P = x_data.shape[:2]
-
-        # base point: d = 0
-        y_data[0] = numpy.log1p(x_data[0])
-
-        # higher order coefficients: d > 0
-
-        for d in range(1,D):
-            y_data[d] =  (x_data[d]*d - numpy.sum(x_data[1:d][::-1] * y_data[1:d], axis=0))
-            y_data[d] /= (1. + x_data[0])
-
-        for d in range(1,D):
-            y_data[d] /= d
-
-        return y_data
+    def _log1p(cls, x_data, out=None):
+        fprime_data = cls._reciprocal(_plus_const(x_data, 1))
+        return _black_f_white_fprime(
+                numpy.log1p, [], fprime_data, x_data, out=out)
 
     @classmethod
-    def _pb_log1p(cls, ybar_data, x_data, y_data, out = None):
-        if out == None:
+    def _pb_log1p(cls, ybar_data, x_data, y_data, out=None):
+        if out is None:
             raise NotImplementedError('should implement that')
-
         xbar_data = out
-
-        x_data_1p = x_data.copy()
-        x_data_1p += 1.
-
-        tmp = xbar_data.copy()
-        cls._div(ybar_data, x_data_1p, tmp)
-        xbar_data += tmp
+        xbar_data += cls._div(
+                ybar_data, _plus_const(x_data, 1), numpy.empty_like(xbar_data))
         return xbar_data
+
+    @classmethod
+    def _dawsn(cls, x_data, out=None):
+        if out is None:
+            v_data = numpy.empty_like(x_data)
+        else:
+            v_data = out
+
+        # construct the u and v arrays
+        u_data = x_data
+        v_data[0, ...] = scipy.special.dawsn(u_data[0])
+
+        # construct values like in Table (13.2) of "Evaluating Derivatives"
+        a_data = -2 * u_data.copy()
+        b_data = _plus_const(numpy.zeros_like(u_data), 1)
+        c_data = _plus_const(numpy.zeros_like(u_data), 1)
+
+        # fill the rest of the v_data
+        _taylor_polynomials_of_ode_solutions(
+            a_data, b_data, c_data,
+            u_data, v_data)
+
+        return v_data
+
+    @classmethod
+    def _pb_dawsn(cls, ybar_data, x_data, y_data, out=None):
+        if out is None:
+            raise NotImplementedError('should implement that')
+        fprime_data = _plus_const(-2*cls._mul(x_data, cls._dawsn(x_data)), 1)
+        cls._amul(ybar_data, fprime_data, out=out)
 
     @classmethod
     def _tansec2(cls, x_data, out = None):
@@ -677,392 +884,135 @@ class RawAlgorithmsMixIn:
         return y_data, z_data
 
     @classmethod
-    def _dpm_hyp1f1(cls, a, b, x_data, out = None):
-        try:
-            import mpmath
-        except ImportError:
-            raise Exception('you need to install mpmath to use dpm_ functions')
-        if out == None:
-            raise NotImplementedError('should implement that')
-        y_data = out
-        y_data[...] = 0.
-        D,P = x_data.shape[:2]
-
-        #FIXME: move this function?
-        def _float_dpm_hyp1f1(a_in, b_in, x_in):
-            value = mpmath.hyp1f1(a_in, b_in, x_in)
-            try:
-                return float(value)
-            except:
-                return numpy.nan
-        _dpm_hyp1f1 = numpy.vectorize(_float_dpm_hyp1f1)
-
-        # base point: d = 0
-        y_data[0] = _dpm_hyp1f1(a, b, x_data[0])
-
-        # higher order coefficients: d > 0
-        prefix = 1.
-        for d in range(1, D):
-            # Accumulate coefficients of truncated expansions of powers
-            # of the polynomial.
-            if d == 1:
-                accum = x_data[1:].copy()
-            else:
-                for i in range(D-2, 0, -1):
-                    accum[i] = numpy.sum(accum[:i] * x_data[i:0:-1], axis=0)
-                accum[0] = 0.
-            # Rising factorial ratio, and factorial in denominator.
-            prefix = (prefix * (a+d-1.)) / ((b+d-1.) * d)
-            # Derivative of the hypergeometric function.
-            hyp = _dpm_hyp1f1(a + d, b + d, x_data[0])
-            # Add the contribution of this summation term.
-            y_data[1:] = y_data[1:] + prefix * hyp * accum
-
-        return y_data
+    def _erf(cls, x_data, out=None):
+        fprime_data = (2. / math.sqrt(math.pi)) * cls._exp(-cls._square(x_data))
+        return _black_f_white_fprime(
+                nthderiv.erf, [], fprime_data, x_data, out=out)
 
     @classmethod
-    def _pb_dpm_hyp1f1(cls, ybar_data, a, b, x_data, y_data, out = None):
-        try:
-            import mpmath
-        except ImportError:
-            raise Exception('you need to install mpmath to use dpm_ functions')
-
-        if out == None:
+    def _pb_erf(cls, ybar_data, x_data, y_data, out = None):
+        if out is None:
             raise NotImplementedError('should implement that')
-
-        xbar_data = out
-
-        tmp = numpy.zeros_like(x_data)
-        tmp = cls._dpm_hyp1f1(a+1., b+1., x_data,  out = tmp)
-        tmp *= float(a)/float(b)
-        cls._amul(ybar_data, tmp, xbar_data)
-
+        fprime_data = (2. / math.sqrt(math.pi)) * cls._exp(-cls._square(x_data))
+        cls._amul(ybar_data, fprime_data, out=out)
 
     @classmethod
-    def _hyp1f1(cls, a, b, x_data, out = None):
-        if out == None:
-            raise NotImplementedError('should implement that')
-        y_data = out
-        y_data[...] = 0.
-        D,P = x_data.shape[:2]
-
-        # base point: d = 0
-        y_data[0] = scipy.special.hyp1f1(a, b, x_data[0])
-
-        # higher order coefficients: d > 0
-        prefix = 1.
-        for d in range(1, D):
-            # Accumulate coefficients of truncated expansions of powers
-            # of the polynomial.
-            if d == 1:
-                accum = x_data[1:].copy()
-            else:
-                for i in range(D-2, 0, -1):
-                    accum[i] = numpy.sum(accum[:i] * x_data[i:0:-1], axis=0)
-                accum[0] = 0.
-            # Rising factorial ratio, and factorial in denominator.
-            prefix = (prefix * (a+d-1.)) / ((b+d-1.) * d)
-            # Derivative of the hypergeometric function.
-            hyp = scipy.special.hyp1f1(a + d, b + d, x_data[0])
-            # Add the contribution of this summation term.
-            y_data[1:] = y_data[1:] + prefix * hyp * accum
-
-        return y_data
+    def _erfi(cls, x_data, out=None):
+        fprime_data = (2. / math.sqrt(math.pi)) * cls._exp(cls._square(x_data))
+        return _black_f_white_fprime(
+                nthderiv.erfi, [], fprime_data, x_data, out=out)
 
     @classmethod
-    def _pb_hyp1f1(cls, ybar_data, a, b, x_data, y_data, out = None):
-
-        if out == None:
+    def _pb_erfi(cls, ybar_data, x_data, y_data, out = None):
+        if out is None:
             raise NotImplementedError('should implement that')
-
-        xbar_data = out
-
-        tmp = numpy.zeros_like(x_data)
-        tmp = cls._hyp1f1(a+1., b+1., x_data,  out = tmp)
-        tmp *= float(a)/float(b)
-        cls._amul(ybar_data, tmp, xbar_data)
+        fprime_data = (2. / math.sqrt(math.pi)) * cls._exp(cls._square(x_data))
+        cls._amul(ybar_data, fprime_data, out=out)
 
     @classmethod
-    def _hyperu(cls, a, b, x_data, out = None):
-        if out == None:
-            raise NotImplementedError('should implement that')
-        y_data = out
-        y_data[...] = 0.
-        D,P = x_data.shape[:2]
-
-        # base point: d = 0
-        y_data[0] = scipy.special.hyperu(a, b, x_data[0])
-
-        # higher order coefficients: d > 0
-        prefix = 1.
-        for d in range(1, D):
-            # Accumulate coefficients of truncated expansions of powers
-            # of the polynomial.
-            # This is analogous to the hyp1f1 implementation.
-            if d == 1:
-                accum = x_data[1:].copy()
-            else:
-                for i in range(D-2, 0, -1):
-                    accum[i] = numpy.sum(accum[:i] * x_data[i:0:-1], axis=0)
-                accum[0] = 0.
-            prefix *= -(a+d-1.) / d
-            hyp = scipy.special.hyperu(a + d, b + d, x_data[0])
-            y_data[1:] = y_data[1:] + prefix * hyp * accum
-
-        return y_data
+    def _dpm_hyp1f1(cls, a, b, x_data, out=None):
+        return _eval_slow_generic(
+                nthderiv.mpmath_hyp1f1, [a, b], x_data, out=out)
 
     @classmethod
-    def _pb_hyperu(cls, ybar_data, a, b, x_data, y_data, out = None):
-
-        if out == None:
+    def _pb_dpm_hyp1f1(cls, ybar_data, a, b, x_data, y_data, out=None):
+        if out is None:
             raise NotImplementedError('should implement that')
-
-        xbar_data = out
-
-        tmp = numpy.zeros_like(x_data)
-        tmp = cls._hyperu(a+1., b+1., x_data,  out = tmp)
-        tmp *= -a
-        cls._amul(ybar_data, tmp, xbar_data)
+        tmp = cls._dpm_hyp1f1(a+1., b+1., x_data) * (float(a) / float(b))
+        cls._amul(ybar_data, tmp, out=out)
 
     @classmethod
-    def _dpm_hyp2f0(cls, a1, a2, x_data, out = None):
-        try:
-            import mpmath
-        except ImportError:
-            raise Exception('you need to install mpmath to use dpm_ functions')
-        if out == None:
-            raise NotImplementedError('should implement that')
-        y_data = out
-        y_data[...] = 0.
-        D,P = x_data.shape[:2]
-
-        #FIXME: move this function?
-        def _float_dpm_hyp2f0(a1_in, a2_in, x_in):
-            value = mpmath.hyp2f0(a1_in, a2_in, x_in)
-            try:
-                return float(value)
-            except:
-                return numpy.nan
-        _dpm_hyp2f0 = numpy.vectorize(_float_dpm_hyp2f0)
-
-        # base point: d = 0
-        y_data[0] = _dpm_hyp2f0(a1, a2, x_data[0])
-
-        # higher order coefficients: d > 0
-        prefix = 1.
-        for d in range(1, D):
-            # Accumulate coefficients of truncated expansions of powers
-            # of the polynomial.
-            if d == 1:
-                accum = x_data[1:].copy()
-            else:
-                for i in range(D-2, 0, -1):
-                    accum[i] = numpy.sum(accum[:i] * x_data[i:0:-1], axis=0)
-                accum[0] = 0.
-            prefix *= ((a1+d-1.) * (a2+d-1.)) / d
-            hyp = _dpm_hyp2f0(a1+d, a2+d, x_data[0])
-            # Add the contribution of this summation term.
-            y_data[1:] = y_data[1:] + prefix * hyp * accum
-
-        return y_data
+    def _hyp1f1(cls, a, b, x_data, out=None):
+        return _eval_slow_generic(nthderiv.hyp1f1, [a, b], x_data, out=out)
 
     @classmethod
-    def _pb_dpm_hyp2f0(cls, ybar_data, a1, a2, x_data, y_data, out = None):
-        try:
-            import mpmath
-        except ImportError:
-            raise Exception('you need to install mpmath to use dpm_ functions')
-
-        if out == None:
+    def _pb_hyp1f1(cls, ybar_data, a, b, x_data, y_data, out=None):
+        if out is None:
             raise NotImplementedError('should implement that')
-
-        xbar_data = out
-
-        tmp = numpy.zeros_like(x_data)
-        tmp = cls._dpm_hyp2f0(a1+1., a2+1., x_data,  out = tmp)
-        tmp *= float(a1) * float(a2)
-        cls._amul(ybar_data, tmp, xbar_data)
+        tmp = cls._hyp1f1(a+1., b+1., x_data) * (float(a) / float(b))
+        cls._amul(ybar_data, tmp, out=out)
 
     @classmethod
-    def _hyp2f0(cls, a1, a2, x_data, out = None):
-        if out == None:
-            raise NotImplementedError('should implement that')
-        y_data = out
-        y_data[...] = 0.
-        D,P = x_data.shape[:2]
-
-        # FIXME: move this utility function somewhere better?
-        def _uncheesed_hyp2f0(a1_in, a2_in, x_in):
-            # FIXME: use convergence_type 1 vs. 2 ?  Scipy docs are not helpful.
-            convergence_type = 2
-            value, error_info = scipy.special.hyp2f0(
-                    a1_in, a2_in, x_in, convergence_type)
-            return value
-
-        # base point: d = 0
-        y_data[0] = _uncheesed_hyp2f0(a1, a2, x_data[0])
-
-        # higher order coefficients: d > 0
-        prefix = 1.
-        for d in range(1, D):
-            # Accumulate coefficients of truncated expansions of powers
-            # of the polynomial.
-            if d == 1:
-                accum = x_data[1:].copy()
-            else:
-                for i in range(D-2, 0, -1):
-                    accum[i] = numpy.sum(accum[:i] * x_data[i:0:-1], axis=0)
-                accum[0] = 0.
-            prefix *= ((a1+d-1.) * (a2+d-1.)) / d
-            hyp = _uncheesed_hyp2f0(a1+d, a2+d, x_data[0])
-            # Add the contribution of this summation term.
-            y_data[1:] = y_data[1:] + prefix * hyp * accum
-
-        return y_data
+    def _hyperu(cls, a, b, x_data, out=None):
+        return _eval_slow_generic(nthderiv.hyperu, [a, b], x_data, out=out)
 
     @classmethod
-    def _pb_hyp2f0(cls, ybar_data, a1, a2, x_data, y_data, out = None):
-
+    def _pb_hyperu(cls, ybar_data, a, b, x_data, y_data, out=None):
         if out == None:
             raise NotImplementedError('should implement that')
-
-        xbar_data = out
-
-        tmp = numpy.zeros_like(x_data)
-        tmp = cls._hyp2f0(a1+1., a2+1., x_data,  out = tmp)
-        tmp *= float(a1) * float(a2)
-        cls._amul(ybar_data, tmp, xbar_data)
-
+        tmp = cls._hyperu(a+1., b+1., x_data) * (-a)
+        cls._amul(ybar_data, tmp, out=out)
 
     @classmethod
-    def _hyp0f1(cls, b, x_data, out = None):
-
-        if out == None:
-            raise NotImplementedError('should implement that')
-        y_data = out
-        y_data[...] = 0.
-        D,P = x_data.shape[:2]
-
-        #FIXME: this works around two scipy.special.hyp0f1 failures
-        def _hacked_hyp0f1(b, x):
-            with numpy.errstate(invalid='ignore'):
-                return scipy.special.hyp0f1(b, x + 0j)
-
-        # base point: d = 0
-        y_data[0] = _hacked_hyp0f1(b, x_data[0])
-
-        # higher order coefficients: d > 0
-        prefix = 1.
-        for d in range(1, D):
-            # Accumulate coefficients of truncated expansions of poly powers.
-            if d == 1:
-                accum = x_data[1:].copy()
-            else:
-                for i in range(D-2, 0, -1):
-                    accum[i] = numpy.sum(accum[:i] * x_data[i:0:-1], axis=0)
-                accum[0] = 0.
-            prefix /= b + d - 1.
-            prefix /= d
-            hyp = _hacked_hyp0f1(b + d, x_data[0])
-            # Add the contribution of this summation term.
-            y_data[1:] = y_data[1:] + prefix * hyp * accum
-
-        return y_data
+    def _dpm_hyp2f0(cls, a1, a2, x_data, out=None):
+        return _eval_slow_generic(
+                nthderiv.mpmath_hyp2f0, [a1, a2], x_data, out=out)
 
     @classmethod
-    def _pb_hyp0f1(cls, ybar_data, b, x_data, y_data, out = None):
-
+    def _pb_dpm_hyp2f0(cls, ybar_data, a1, a2, x_data, y_data, out=None):
         if out == None:
             raise NotImplementedError('should implement that')
-
-        xbar_data = out
-
-        tmp = numpy.zeros_like(x_data)
-        tmp = cls._hyp0f1(b+1., x_data,  out = tmp)
-        tmp *= 1. / float(b)
-        cls._amul(ybar_data, tmp, xbar_data)
+        tmp = cls._dpm_hyp2f0(a1+1., a2+1., x_data) * float(a1) * float(a2)
+        cls._amul(ybar_data, tmp, out=out)
 
     @classmethod
-    def _polygamma(cls, n, x_data, out = None):
-
-        if out == None:
-            raise NotImplementedError('should implement that')
-        y_data = out
-        y_data[...] = 0.
-        D,P = x_data.shape[:2]
-
-        # base point: d = 0
-        y_data[0] = scipy.special.polygamma(n, x_data[0])
-
-        # higher order coefficients: d > 0
-        prefix = 1.
-        for d in range(1, D):
-            # Accumulate coefficients of truncated expansions of poly powers.
-            if d == 1:
-                accum = x_data[1:].copy()
-            else:
-                for i in range(D-2, 0, -1):
-                    accum[i] = numpy.sum(accum[:i] * x_data[i:0:-1], axis=0)
-                accum[0] = 0.
-            prefix /= d
-            deriv = scipy.special.polygamma(n + d, x_data[0])
-            # Add the contribution of this summation term.
-            y_data[1:] = y_data[1:] + prefix * deriv * accum
-
-        return y_data
+    def _hyp2f0(cls, a1, a2, x_data, out=None):
+        return _eval_slow_generic(nthderiv.hyp2f0, [a1, a2], x_data, out=out)
 
     @classmethod
-    def _pb_polygamma(cls, ybar_data, n, x_data, y_data, out = None):
-
+    def _pb_hyp2f0(cls, ybar_data, a1, a2, x_data, y_data, out=None):
         if out == None:
             raise NotImplementedError('should implement that')
-
-        xbar_data = out
-
-        tmp = numpy.zeros_like(x_data)
-        tmp = cls._polygamma(n+1, x_data,  out = tmp)
-        cls._amul(ybar_data, tmp, xbar_data)
+        tmp = cls._hyp2f0(a1+1., a2+1., x_data) * float(a1) * float(a2)
+        cls._amul(ybar_data, tmp, out=out)
 
     @classmethod
-    def _gammaln(cls, x_data, out = None):
-
-        if out == None:
-            raise NotImplementedError('should implement that')
-        y_data = out
-        y_data[...] = 0.
-        D,P = x_data.shape[:2]
-
-        # base point: d = 0
-        y_data[0] = scipy.special.gammaln(x_data[0])
-
-        # higher order coefficients: d > 0
-        prefix = 1.
-        for d in range(1, D):
-            # Accumulate coefficients of truncated expansions of poly powers.
-            if d == 1:
-                accum = x_data[1:].copy()
-            else:
-                for i in range(D-2, 0, -1):
-                    accum[i] = numpy.sum(accum[:i] * x_data[i:0:-1], axis=0)
-                accum[0] = 0.
-            prefix /= d
-            deriv = scipy.special.polygamma(d-1, x_data[0])
-            # Add the contribution of this summation term.
-            y_data[1:] = y_data[1:] + prefix * deriv * accum
-
-        return y_data
+    def _hyp0f1(cls, b, x_data, out=None):
+        return _eval_slow_generic(nthderiv.hyp0f1, [b], x_data, out=out)
 
     @classmethod
-    def _pb_gammaln(cls, ybar_data, x_data, y_data, out = None):
-
+    def _pb_hyp0f1(cls, ybar_data, b, x_data, y_data, out=None):
         if out == None:
             raise NotImplementedError('should implement that')
+        tmp = cls._hyp0f1(b+1., x_data) / float(b)
+        cls._amul(ybar_data, tmp, out=out)
 
-        xbar_data = out
+    @classmethod
+    def _polygamma(cls, m, x_data, out=None):
+        return _eval_slow_generic(nthderiv.polygamma, [m], x_data, out=out)
 
-        tmp = numpy.zeros_like(x_data)
-        tmp = cls._polygamma(0, x_data,  out = tmp)
-        cls._amul(ybar_data, tmp, xbar_data)
+    @classmethod
+    def _pb_polygamma(cls, ybar_data, m, x_data, y_data, out=None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        tmp = cls._polygamma(m+1, x_data)
+        cls._amul(ybar_data, tmp, out=out)
+
+    @classmethod
+    def _psi(cls, x_data, out=None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        return _eval_slow_generic(nthderiv.psi, [], x_data, out=out)
+
+    @classmethod
+    def _pb_psi(cls, ybar_data, x_data, y_data, out=None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        tmp = cls._polygamma(1, x_data)
+        cls._amul(ybar_data, tmp, out=out)
+
+    @classmethod
+    def _gammaln(cls, x_data, out=None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        return _eval_slow_generic(nthderiv.gammaln, [], x_data, out=out)
+
+    @classmethod
+    def _pb_gammaln(cls, ybar_data, x_data, y_data, out=None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        tmp = cls._polygamma(0, x_data)
+        cls._amul(ybar_data, tmp, out=out)
 
 
     @classmethod
@@ -1083,11 +1033,13 @@ class RawAlgorithmsMixIn:
         # print 'x_data.shape=', x_data.shape
         # print 'y_data.shape=', y_data.shape
         # print 'z_data.shape=', z_data.shape
-
+        
         for d in range(D):
             for p in range(P):
                 for c in range(d+1):
-                    z_data[d,p,...] += numpy.dot(x_data[c,p,...], y_data[d-c,p,...])
+                    z_data[d,p,...] += numpy.dot(
+                            x_data[c,p,...],
+                            y_data[d-c,p,...])
 
         return out
 
