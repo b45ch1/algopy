@@ -4,18 +4,19 @@ import numpy
 from algopy import UTPM, Function
 from algopy.special import *
 
+try:
+    import mpmath
+except ImportError:
+    mpmath = None
+
 class Test_ScipySpecialFunctions(TestCase):
 
+    @decorators.skipif(mpmath is None)
     def test_dpm_hyp1f1(self):
         """
         check that algopy.special.dpm_hyp1f1 can be called with
         UTPM and Function instances as arguments
         """
-        try:
-            import mpmath
-        except ImportError:
-            #FIXME: use a decorator to conditionally skip the test?
-            return
 
         a, b, x = 1., 2., 3.
         y1 = dpm_hyp1f1(a, b, x)
@@ -45,26 +46,25 @@ class Test_ScipySpecialFunctions(TestCase):
         y3 = hyp1f1(a, b, x)
         assert_almost_equal(y1, y3.x)
 
+    @decorators.skipif(mpmath is None)
     def test_dpm_hyp2f0(self):
         """
         check that algopy.special.dpm_hyp2f0 can be called with
         UTPM and Function instances as arguments
         """
-        try:
-            import mpmath
-        except ImportError:
-            #FIXME: use a decorator to conditionally skip the test?
-            return
+
+        # these give hyp2f0 a chance of outputting real numbers
+        a1, a2 = 1.5, 1.0
 
         # use small x to ameliorate convergence issues
-        a1, a2, x = 1., 2., 0.03
+        x = 0.03
         y1 = dpm_hyp2f0(a1, a2, x)
 
-        a1, a2, x = 1., 2., UTPM(0.03* numpy.ones((1,1)))
+        x = UTPM(0.03* numpy.ones((1,1)))
         y2 = dpm_hyp2f0(a1, a2, x)
         assert_almost_equal(y1, y2.data[0,0])
 
-        a1, a2, x = 1., 2., Function(0.03)
+        x = Function(0.03)
         y3 = dpm_hyp2f0(a1, a2, x)
         assert_almost_equal(y1, y3.x)
 
@@ -118,6 +118,23 @@ class Test_ScipySpecialFunctions(TestCase):
 
         n, x = 2, Function(3.)
         y3 = polygamma(n, x)
+        assert_almost_equal(y1, y3.x)
+
+    def test_psi(self):
+        """
+        check that algopy.special.polygamma can be called with
+        UTPM and Function instances as arguments
+        """
+
+        x = 1.2
+        y1 = psi(x)
+
+        x = UTPM(1.2 * numpy.ones((1,1)))
+        y2 = psi(x)
+        assert_almost_equal(y1, y2.data[0,0])
+
+        x = Function(1.2)
+        y3 = psi(x)
         assert_almost_equal(y1, y3.x)
 
     def test_gammaln(self):

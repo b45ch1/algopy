@@ -76,6 +76,7 @@ import special
 import linalg
 from linalg import *
 
+import nthderiv
 
 try:
     import version

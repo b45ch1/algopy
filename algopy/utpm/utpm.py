@@ -19,6 +19,9 @@ from algorithms import RawAlgorithmsMixIn, broadcast_arrays_shape
 
 import operator
 
+from algopy import nthderiv
+
+
 if float(numpy.__version__[:3]) > 1.5:
 
     def workaround_strides_function(x, y, fun):
@@ -815,6 +818,48 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return xbar
 
     @classmethod
+    def psi(cls, x):
+        """ computes y = psi(x) in UTP arithmetic"""
+
+        retval = x.clone()
+        cls._psi(x.data, out = retval.data)
+        return retval
+
+    @classmethod
+    def pb_psi(cls, ybar, x, y, out=None):
+        """ computes bar y dy = bar x dx in UTP arithmetic"""
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar, = out
+
+        cls._pb_psi(ybar.data, x.data, y.data, out = xbar.data)
+        return xbar
+
+    @classmethod
+    def reciprocal(cls, x):
+        """ computes y = reciprocal(x) in UTP arithmetic"""
+
+        retval = x.clone()
+        cls._reciprocal(x.data, out = retval.data)
+        return retval
+
+    @classmethod
+    def pb_reciprocal(cls, ybar, x, y, out=None):
+        """ computes bar y dy = bar x dx in UTP arithmetic"""
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar, = out
+
+        cls._pb_reciprocal(ybar.data, x.data, y.data, out = xbar.data)
+        return xbar
+
+    @classmethod
     def gammaln(cls, x):
         """ computes y = gammaln(x) in UTP arithmetic"""
 
@@ -836,11 +881,35 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return xbar
 
     @classmethod
+    def square(cls, x):
+        """ computes y = square(x) in UTP arithmetic"""
+
+        retval = x.clone()
+        cls._square(x.data, out = retval.data)
+        return retval
+
+    @classmethod
+    def pb_square(cls, ybar, x, y, out=None):
+        """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
+
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar, = out
+
+        cls._pb_square(ybar.data, x.data, y.data, out = xbar.data)
+        return xbar
+
+    @classmethod
     def erf(cls, x):
         """ computes y = erf(x) in UTP arithmetic"""
-        a = 1. / 2.
-        b = 3. / 2.
-        return 2 * x * cls.hyp1f1(a, b, -x*x) / math.sqrt(math.pi)
+
+        retval = x.clone()
+        cls._erf(x.data, out = retval.data)
+        return retval
+
 
     @classmethod
     def pb_erf(cls, ybar, x, y, out=None):
@@ -853,15 +922,17 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         else:
             xbar, = out
 
-        xbar += ybar * 2.*cls.exp(-x*x)/math.sqrt(math.pi)
-
+        cls._pb_erf(ybar.data, x.data, y.data, out = xbar.data)
         return xbar
 
 
     @classmethod
     def erfi(cls, x):
         """ computes y = erfi(x) in UTP arithmetic"""
-        return 2 * x * cls.hyp1f1(0.5, 1.5, x*x) / math.sqrt(math.pi)
+
+        retval = x.clone()
+        cls._erfi(x.data, out = retval.data)
+        return retval
 
     @classmethod
     def pb_erfi(cls, ybar, x, y, out=None):
@@ -874,15 +945,17 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         else:
             xbar, = out
 
-        xbar += ybar * 2.*cls.exp(x*x)/math.sqrt(math.pi)
-
+        cls._pb_erfi(ybar.data, x.data, y.data, out = xbar.data)
         return xbar
 
 
     @classmethod
     def dawsn(cls, x):
         """ computes y = dawsn(x) in UTP arithmetic"""
-        return x * cls.hyp1f1(1., 1.5, -x*x)
+
+        retval = x.clone()
+        cls._dawsn(x.data, out = retval.data)
+        return retval
 
     @classmethod
     def pb_dawsn(cls, ybar, x, y, out=None):
@@ -895,15 +968,17 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         else:
             xbar, = out
 
-        xbar += ybar * (1. - 2.*x*cls.dawsn(x))
-
+        cls._pb_dawsn(ybar.data, x.data, y.data, out = xbar.data)
         return xbar
 
 
     @classmethod
     def logit(cls, x):
         """ computes y = logit(x) in UTP arithmetic"""
-        return cls.log(x) - cls.log(1-x)
+
+        retval = x.clone()
+        cls._logit(x.data, out = retval.data)
+        return retval
 
     @classmethod
     def pb_logit(cls, ybar, x, y, out=None):
@@ -916,15 +991,16 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         else:
             xbar, = out
 
-        xbar += ybar / (x * (1. - x))
-
+        cls._pb_logit(ybar.data, x.data, y.data, out = xbar.data)
         return xbar
-
 
     @classmethod
     def expit(cls, x):
         """ computes y = expit(x) in UTP arithmetic"""
-        return 1. / (1. + cls.exp(-x))
+
+        retval = x.clone()
+        cls._expit(x.data, out = retval.data)
+        return retval
 
     @classmethod
     def pb_expit(cls, ybar, x, y, out=None):
@@ -937,8 +1013,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         else:
             xbar, = out
 
-        xbar += ybar * cls.expit(x) * cls.expit(-x)
-
+        cls._pb_expit(ybar.data, x.data, y.data, out = xbar.data)
         return xbar
 
 
