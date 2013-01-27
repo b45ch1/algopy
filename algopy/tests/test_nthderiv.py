@@ -116,6 +116,36 @@ class TestAuto(numpy.testing.TestCase):
                             self._test_numdifftools_helper(f, x)
 
 
+class TestExtras(numpy.testing.TestCase):
+    """
+    Test nth derivatives of scalar functions that take auxiliary arguments.
+    """
+
+    def test_clip_n0(self):
+        a_min = -2
+        a_max = 4
+        x = [-3.3, -1, 6, 3.9]
+        a = nthderiv.clip(a_min, a_max, x, n=0)
+        b = np.clip(x, a_min, a_max)
+        assert_allclose(a, b)
+
+    def test_clip_n1(self):
+        a_min = -2
+        a_max = 4
+        x = [-3.3, -1, 6, 3.9]
+        a = nthderiv.clip(a_min, a_max, x, n=1)
+        b = [0, 1, 0, 1]
+        assert_allclose(a, b)
+
+    def test_clip_n2(self):
+        a_min = -2
+        a_max = 4
+        x = [-3.3, -1, 6, 3.9]
+        a = nthderiv.clip(a_min, a_max, x, n=2)
+        b = [0, 0, 0, 0]
+        assert_allclose(a, b)
+
+
 class TestLog(numpy.testing.TestCase):
 
     def test_log_n0(self):
