@@ -15,6 +15,7 @@ the function implementations by C or Fortran functions.
 """
 
 import math
+import functools
 
 import numpy
 from numpy.lib.stride_tricks import as_strided, broadcast_arrays
@@ -38,11 +39,10 @@ def _plus_const(x_data, c, out=None):
     y_data[0] += c
     return y_data
 
-def _eval_slow_generic(f, extra_args, x_data, out=None):
+def _eval_slow_generic(f, x_data, out=None):
     """
     This is related to summations associated with the name 'Faa di Bruno.'
-    @param f: a function from the nthderiv module
-    @param extra_args: a list of extra parameters like in hyp1f1 or polygamma
+    @param f: f(X, out=None, n=0) computes nth derivative of f at X
     @param x_data: something about algorithmic differentiation
     @param out: something about algorithmic differentiation
     @param return: something about algorithmic differentiation
@@ -58,8 +58,7 @@ def _eval_slow_generic(f, extra_args, x_data, out=None):
     D, P = x_data.shape[:2]
 
     # base point: d = 0
-    args = extra_args + [x_data[0]]
-    y_data[0] = f(*args)
+    y_data[0] = f(x_data[0])
 
     # higher order coefficients: d > 0
     for d in range(1, D):
@@ -72,15 +71,14 @@ def _eval_slow_generic(f, extra_args, x_data, out=None):
                 accum[i] = numpy.sum(accum[:i] * x_data[i:0:-1], axis=0)
             accum[0] = 0.
         # Add the contribution of this summation term.
-        y_data[1:] += f(*args, n=d) * accum / float(math.factorial(d))
+        y_data[1:] += f(x_data[0], n=d) * accum / float(math.factorial(d))
 
     return y_data
 
-def _black_f_white_fprime(f, extra_args, fprime_data, x_data, out=None):
+def _black_f_white_fprime(f, fprime_data, x_data, out=None):
     """
     The function evaluation is a black box, but the derivative is compound.
-    @param f: a function from the nthderiv module
-    @param extra_args: a list of extra parameters like in hyp1f1 or polygamma
+    @param f: computes the scalar function directly
     @param fprime_data: the array associated with the evaluated derivative
     @param x_data: something about algorithmic differentiation
     @param out: something about algorithmic differentiation
@@ -90,9 +88,8 @@ def _black_f_white_fprime(f, extra_args, fprime_data, x_data, out=None):
     y_data = nthderiv.np_filled_like(x_data, 0, out=out)
     D, P = x_data.shape[:2]
 
-    # Do the direct computation efficiently.
-    args = extra_args + [x_data[0]]
-    y_data[0] = f(*args)
+    # Do the direct computation efficiently (e.g. using C implemention of erf).
+    y_data[0] = f(x_data[0])
 
     # Compute the truncated series coefficients using discrete convolution.
     #FIXME: one of these two loops can be vectorized
@@ -587,7 +584,7 @@ class RawAlgorithmsMixIn:
     def _expm1(cls, x_data, out=None):
         fprime_data = cls._exp(x_data)
         return _black_f_white_fprime(
-                nthderiv.expm1, [], fprime_data, x_data, out=out)
+                nthderiv.expm1, fprime_data, x_data, out=out)
 
     @classmethod
     def _pb_expm1(cls, ybar_data, x_data, y_data, out = None):
@@ -600,7 +597,7 @@ class RawAlgorithmsMixIn:
     def _logit(cls, x_data, out=None):
         fprime_data = cls._reciprocal(x_data - cls._square(x_data))
         return _black_f_white_fprime(
-                scipy.special.logit, [], fprime_data, x_data, out=out)
+                scipy.special.logit, fprime_data, x_data, out=out)
 
     @classmethod
     def _pb_logit(cls, ybar_data, x_data, y_data, out = None):
@@ -614,7 +611,7 @@ class RawAlgorithmsMixIn:
         b_data = cls._reciprocal(_plus_const(cls._exp(x_data), 1))
         fprime_data = b_data - cls._square(b_data)
         return _black_f_white_fprime(
-                scipy.special.expit, [], fprime_data, x_data, out=out)
+                scipy.special.expit, fprime_data, x_data, out=out)
 
     @classmethod
     def _pb_expit(cls, ybar_data, x_data, y_data, out = None):
@@ -692,7 +689,7 @@ class RawAlgorithmsMixIn:
     def _log1p(cls, x_data, out=None):
         fprime_data = cls._reciprocal(_plus_const(x_data, 1))
         return _black_f_white_fprime(
-                numpy.log1p, [], fprime_data, x_data, out=out)
+                numpy.log1p, fprime_data, x_data, out=out)
 
     @classmethod
     def _pb_log1p(cls, ybar_data, x_data, y_data, out=None):
@@ -887,7 +884,7 @@ class RawAlgorithmsMixIn:
     def _erf(cls, x_data, out=None):
         fprime_data = (2. / math.sqrt(math.pi)) * cls._exp(-cls._square(x_data))
         return _black_f_white_fprime(
-                nthderiv.erf, [], fprime_data, x_data, out=out)
+                nthderiv.erf, fprime_data, x_data, out=out)
 
     @classmethod
     def _pb_erf(cls, ybar_data, x_data, y_data, out = None):
@@ -900,7 +897,7 @@ class RawAlgorithmsMixIn:
     def _erfi(cls, x_data, out=None):
         fprime_data = (2. / math.sqrt(math.pi)) * cls._exp(cls._square(x_data))
         return _black_f_white_fprime(
-                nthderiv.erfi, [], fprime_data, x_data, out=out)
+                nthderiv.erfi, fprime_data, x_data, out=out)
 
     @classmethod
     def _pb_erfi(cls, ybar_data, x_data, y_data, out = None):
@@ -911,8 +908,8 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _dpm_hyp1f1(cls, a, b, x_data, out=None):
-        return _eval_slow_generic(
-                nthderiv.mpmath_hyp1f1, [a, b], x_data, out=out)
+        f = functools.partial(nthderiv.mpmath_hyp1f1, a, b)
+        return _eval_slow_generic(f, x_data, out=out)
 
     @classmethod
     def _pb_dpm_hyp1f1(cls, ybar_data, a, b, x_data, y_data, out=None):
@@ -923,7 +920,8 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _hyp1f1(cls, a, b, x_data, out=None):
-        return _eval_slow_generic(nthderiv.hyp1f1, [a, b], x_data, out=out)
+        f = functools.partial(nthderiv.hyp1f1, a, b)
+        return _eval_slow_generic(f, x_data, out=out)
 
     @classmethod
     def _pb_hyp1f1(cls, ybar_data, a, b, x_data, y_data, out=None):
@@ -934,7 +932,8 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _hyperu(cls, a, b, x_data, out=None):
-        return _eval_slow_generic(nthderiv.hyperu, [a, b], x_data, out=out)
+        f = functools.partial(nthderiv.hyperu, a, b)
+        return _eval_slow_generic(f, x_data, out=out)
 
     @classmethod
     def _pb_hyperu(cls, ybar_data, a, b, x_data, y_data, out=None):
@@ -945,8 +944,8 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _dpm_hyp2f0(cls, a1, a2, x_data, out=None):
-        return _eval_slow_generic(
-                nthderiv.mpmath_hyp2f0, [a1, a2], x_data, out=out)
+        f = functools.partial(nthderiv.mpmath_hyp2f0, a1, a2)
+        return _eval_slow_generic(f, x_data, out=out)
 
     @classmethod
     def _pb_dpm_hyp2f0(cls, ybar_data, a1, a2, x_data, y_data, out=None):
@@ -957,7 +956,8 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _hyp2f0(cls, a1, a2, x_data, out=None):
-        return _eval_slow_generic(nthderiv.hyp2f0, [a1, a2], x_data, out=out)
+        f = functools.partial(nthderiv.hyp2f0, a1, a2)
+        return _eval_slow_generic(f, x_data, out=out)
 
     @classmethod
     def _pb_hyp2f0(cls, ybar_data, a1, a2, x_data, y_data, out=None):
@@ -968,7 +968,8 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _hyp0f1(cls, b, x_data, out=None):
-        return _eval_slow_generic(nthderiv.hyp0f1, [b], x_data, out=out)
+        f = functools.partial(nthderiv.hyp0f1, b)
+        return _eval_slow_generic(f, x_data, out=out)
 
     @classmethod
     def _pb_hyp0f1(cls, ybar_data, b, x_data, y_data, out=None):
@@ -979,7 +980,8 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _polygamma(cls, m, x_data, out=None):
-        return _eval_slow_generic(nthderiv.polygamma, [m], x_data, out=out)
+        f = functools.partial(nthderiv.polygamma, m)
+        return _eval_slow_generic(f, x_data, out=out)
 
     @classmethod
     def _pb_polygamma(cls, ybar_data, m, x_data, y_data, out=None):
@@ -992,7 +994,7 @@ class RawAlgorithmsMixIn:
     def _psi(cls, x_data, out=None):
         if out == None:
             raise NotImplementedError('should implement that')
-        return _eval_slow_generic(nthderiv.psi, [], x_data, out=out)
+        return _eval_slow_generic(nthderiv.psi, x_data, out=out)
 
     @classmethod
     def _pb_psi(cls, ybar_data, x_data, y_data, out=None):
@@ -1005,7 +1007,7 @@ class RawAlgorithmsMixIn:
     def _gammaln(cls, x_data, out=None):
         if out == None:
             raise NotImplementedError('should implement that')
-        return _eval_slow_generic(nthderiv.gammaln, [], x_data, out=out)
+        return _eval_slow_generic(nthderiv.gammaln, x_data, out=out)
 
     @classmethod
     def _pb_gammaln(cls, ybar_data, x_data, y_data, out=None):
