@@ -316,8 +316,8 @@ def sign(x, out=None, n=0):
 def clip(a_min, a_max, x, out=None, n=0):
     if n == 1:
         # the derivative is 1.0 in the interval and 0.0 outside the interval
-        gt = np.greater(x, a_min)
-        lt = np.less(x, a_max)
+        gt = np.greater_equal(x, a_min)
+        lt = np.less_equal(x, a_max)
         if out is None:
             return np.array(gt * lt, dtype=float)
         else:

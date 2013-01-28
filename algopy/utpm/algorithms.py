@@ -626,22 +626,51 @@ class RawAlgorithmsMixIn:
         if out == None:
             raise NotImplementedError('should implement that')
         y_data = out
-        D,P = x_data.shape[:2]
+        D, P = x_data.shape[:2]
         y_data[0] = numpy.sign(x_data[0])
-        for d in range(1,D):
-            y_data[d] = 0.
+        y_data[1:].fill(0)
         return y_data
 
     @classmethod
     def _pb_sign(cls, ybar_data, x_data, y_data, out = None):
         if out == None:
             raise NotImplementedError('should implement that')
-
         xbar_data = out
-
         tmp = numpy.zeros_like(x_data)
         cls._amul(ybar_data, tmp, xbar_data)
 
+    @classmethod
+    def _botched_clip(cls, a_min, a_max, x_data, out= None):
+        """
+        In this function the args are permuted w.r.t numpy.
+        """
+        if out == None:
+            raise NotImplementedError('should implement that')
+        y_data = out
+        D, P = x_data.shape[:2]
+        y_data[0] = numpy.clip(x_data[0], a_min, a_max)
+        mask = numpy.logical_and(
+                numpy.less_equal(x_data[0], a_max),
+                numpy.greater_equal(x_data[0], a_min))
+        for d in range(1, D):
+            y_data[d] *= mask
+        return y_data
+
+    @classmethod
+    def _pb_botched_clip(
+            cls, ybar_data, a_min, a_max, x_data, y_data, out=None):
+        """
+        In this function the args are permuted w.r.t numpy.
+        """
+        if out == None:
+            raise NotImplementedError('should implement that')
+        xbar_data = out
+        tmp = numpy.zeros_like(x_data)
+        numpy.multiply(
+                numpy.less_equal(x_data[0], a_max),
+                numpy.greater_equal(x_data[0], a_min),
+                out=tmp[0])
+        cls._amul(ybar_data, tmp, xbar_data)
 
     @classmethod
     def _pb_sqrt(cls, ybar_data, x_data, y_data, out = None):

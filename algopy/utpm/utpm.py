@@ -705,7 +705,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def hyperu(cls, a, b, x):
         """ computes y = hyperu(a, b, x) in UTP arithmetic"""
-
         retval = x.clone()
         cls._hyperu(a, b, x.data, out = retval.data)
         return retval
@@ -716,13 +715,30 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         if out == None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
-
         else:
             # out = (abar, bbar, xbar)
             xbar = out[2]
-
         cls._pb_hyperu(ybar.data, a, b, x.data, y.data, out = xbar.data)
+        return xbar
 
+    @classmethod
+    def botched_clip(cls, a_min, a_max, x):
+        """ computes y = botched_clip(a_min, a_max, x) in UTP arithmetic"""
+        retval = x.clone()
+        cls._botched_clip(a_min, a_max, x.data, out = retval.data)
+        return retval
+
+    @classmethod
+    def pb_botched_clip(cls, ybar, a_min, a_max, x, y, out=None):
+        """ computes bar y dy = bar x dx in UTP arithmetic"""
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+        else:
+            # out = (aminbar, amaxbar, xbar)
+            xbar = out[2]
+        cls._pb_botched_clip(
+                ybar.data, a_min, a_max, x.data, y.data, out = xbar.data)
         return xbar
 
     @classmethod
@@ -1162,7 +1178,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     def sign(self):
         """ computes y = sign(x) in UTP arithmetic"""
-
         retval = self.clone()
         self._sign(self.data, out = retval.data)
         return retval
@@ -1173,10 +1188,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         if out == None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
-
         else:
             xbar, = out
-
         cls._pb_sign(ybar.data, x.data, y.data, out = xbar.data)
         return out
 

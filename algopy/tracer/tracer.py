@@ -1223,6 +1223,11 @@ class Function(Ring):
         return Function.pushforward(algopy.special.hyperu, [a, b, x])
 
     @classmethod
+    def botched_clip(cls, a_min, a_max, x):
+        return Function.pushforward(
+                algopy.special.botched_clip, [a_min, a_max, x])
+
+    @classmethod
     def dpm_hyp2f0(cls, a1, a2, x):
         return Function.pushforward(algopy.special.dpm_hyp2f0, [a1, a2, x])
 
