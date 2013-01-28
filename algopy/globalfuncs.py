@@ -12,7 +12,7 @@ numpy_function_names = [
         'sin', 'cos', 'tan',
         'arcsin', 'arccos', 'arctan',
         'sinh', 'cosh', 'tanh',
-        'sign', 'absolute', 'square', 'negative',
+        'sign', 'absolute', 'square', 'negative', 'reciprocal',
         #'clip',
         'trace', 'diag',
         'triu', 'tril', 'reshape']

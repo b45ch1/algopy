@@ -151,6 +151,18 @@ class Test_PlainIdentities(TestCase):
         assert_allclose(x.data, x2.data)
         assert_allclose(y.data, y2.data)
 
+    def test_square_mul_v1(self):
+        x = sample_randn(utpm_shape=(5, 3, 4, 5))
+        y1 = UTPM.square(x)
+        y2 = x*x
+        assert_allclose(y1.data, y2.data)
+
+    def test_square_mul_v2(self):
+        x = sample_randn(utpm_shape=(4, 3, 4, 5))
+        y1 = UTPM.square(x)
+        y2 = x*x
+        assert_allclose(y1.data, y2.data)
+
     def test_sign_tanh(self):
         x = sample_nonzero()
         k = 200.

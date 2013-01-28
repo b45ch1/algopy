@@ -1111,6 +1111,9 @@ class Function(Ring):
     def absolute(self):
         return Function.pushforward(algopy.absolute, [self])
 
+    def reciprocal(self):
+        return Function.pushforward(algopy.reciprocal, [self])
+
     def negative(self):
         return Function.pushforward(algopy.negative, [self])
 

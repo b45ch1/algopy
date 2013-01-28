@@ -575,7 +575,19 @@ class RawAlgorithmsMixIn:
         z = x*x
         """
         #FIXME: you should be able to do this twice as fast as mul
-        return cls._mul(x_data, x_data, out=out)
+        #return cls._mul(x_data, x_data, out=out)
+        #
+        # try to speed this up...
+        # break into cases of even and odd for convolution
+        if out is None:
+            z_data = numpy.empty_like(x_data)
+        else:
+            z_data = out
+        D, P = x_data.shape[:2]
+        # this is the part that can be sped up by 2x...
+        for d in range(D)[::-1]:
+            numpy.sum(x_data[:d+1,:,...] * x_data[d::-1,:,...], axis=0, out = z_data[d,:,...] )
+        return z_data
 
     @classmethod
     def _pb_square(cls, ybar_data, x_data, y_data, out = None):
