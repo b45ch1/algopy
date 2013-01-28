@@ -573,20 +573,21 @@ class RawAlgorithmsMixIn:
     def _square(cls, x_data, out=None):
         """
         z = x*x
+        This can theoretically be twice as efficient as mul(x, x).
         """
-        #FIXME: you should be able to do this twice as fast as mul
-        #return cls._mul(x_data, x_data, out=out)
-        #
-        # try to speed this up...
-        # break into cases of even and odd for convolution
         if out is None:
             z_data = numpy.empty_like(x_data)
         else:
             z_data = out
+        z_data.fill(0)
         D, P = x_data.shape[:2]
-        # this is the part that can be sped up by 2x...
-        for d in range(D)[::-1]:
-            numpy.sum(x_data[:d+1,:,...] * x_data[d::-1,:,...], axis=0, out = z_data[d,:,...] )
+        for d in range(D):
+            d_half = (d+1) // 2
+            if d:
+                AB = x_data[:d_half, :, ...] * x_data[d:d-d_half:-1, :, ...]
+                numpy.sum(AB * 2, axis=0, out=z_data[d, :, ...])
+            if (d+1) % 2 == 1:
+                z_data[d, :, ...] += numpy.square(x_data[d_half, :, ...])
         return z_data
 
     @classmethod
