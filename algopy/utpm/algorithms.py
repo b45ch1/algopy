@@ -296,6 +296,39 @@ class RawAlgorithmsMixIn:
 
         return z_data
 
+    @classmethod
+    def _minimum(cls, x_data, y_data, out=None):
+        if x_data.shape != y_data.shape:
+            raise NotImplementedError(
+                    'algopy broadcasting is not implemented for this function')
+        D = x_data.shape[0]
+        xmask = numpy.less_equal(x_data[0], y_data[0])
+        ymask = 1 - xmask
+        z_data = numpy.empty_like(x_data)
+        for d in range(D):
+            numpy.add(xmask * x_data[d], ymask * y_data[d], out=z_data[d])
+        if out is not None:
+            out[...] = z_data[...]
+            return out
+        else:
+            return z_data
+
+    @classmethod
+    def _maximum(cls, x_data, y_data, out=None):
+        if x_data.shape != y_data.shape:
+            raise NotImplementedError(
+                    'algopy broadcasting is not implemented for this function')
+        D = x_data.shape[0]
+        xmask = numpy.greater_equal(x_data[0], y_data[0])
+        ymask = 1 - xmask
+        z_data = numpy.empty_like(x_data)
+        for d in range(D):
+            numpy.add(xmask * x_data[d], ymask * y_data[d], out=z_data[d])
+        if out is not None:
+            out[...] = z_data[...]
+            return out
+        else:
+            return z_data
 
     @classmethod
     def _amul(cls, x_data, y_data, out = None):

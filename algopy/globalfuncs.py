@@ -13,6 +13,7 @@ numpy_function_names = [
         'arcsin', 'arccos', 'arctan',
         'sinh', 'cosh', 'tanh',
         'sign', 'absolute', 'square', 'negative', 'reciprocal',
+        'minimum', 'maximum',
         #'clip',
         'trace', 'diag',
         'triu', 'tril', 'reshape']

@@ -897,6 +897,30 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return xbar
 
     @classmethod
+    def minimum(cls, x, y):
+        # FIXME: this typechecking is probably not flexible enough
+        # FIXME: also add pullback
+        if isinstance(x, UTPM) and isinstance(y, UTPM):
+            return UTPM(cls._minimum(x.data, y.data))
+        elif isinstance(x, numpy.ndarray) and isinstance(y, numpy.ndarray):
+            return numpy.minimum(x, y)
+        else:
+            raise NotImplementedError(
+                    'this combination of types is not yet implemented')
+
+    @classmethod
+    def maximum(cls, x, y):
+        # FIXME: this typechecking is probably not flexible enough
+        # FIXME: also add pullback
+        if isinstance(x, UTPM) and isinstance(y, UTPM):
+            return UTPM(cls._maximum(x.data, y.data))
+        elif isinstance(x, numpy.ndarray) and isinstance(y, numpy.ndarray):
+            return numpy.maximum(x, y)
+        else:
+            raise NotImplementedError(
+                    'this combination of types is not yet implemented')
+
+    @classmethod
     def absolute(cls, x):
         """ computes y = absolute(x) in UTP arithmetic"""
 

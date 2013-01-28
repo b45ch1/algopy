@@ -241,6 +241,26 @@ class Test_PlainIdentities(TestCase):
         y2 = UTPM.absolute(x)
         assert_allclose(y1.data, y2.data)
 
+    def test_minimum_cos(self):
+        x = sample_randn()
+        c1 = UTPM.cos(x)
+        c2 = UTPM.cos(x - math.pi)
+        y1 = UTPM.minimum(c1, c2)
+        y2 = UTPM.negative(UTPM.absolute(c1))
+        y3 = -abs(c1)
+        assert_allclose(y1.data, y2.data)
+        assert_allclose(y1.data, y3.data)
+
+    def test_maximum_cos(self):
+        x = sample_randn()
+        c1 = UTPM.cos(x)
+        c2 = UTPM.cos(x - math.pi)
+        y1 = UTPM.maximum(c1, c2)
+        y2 = UTPM.absolute(c1)
+        y3 = abs(c1)
+        assert_allclose(y1.data, y2.data)
+        assert_allclose(y1.data, y3.data)
+
 
 class Test_SpecialIdentities(TestCase):
     """
