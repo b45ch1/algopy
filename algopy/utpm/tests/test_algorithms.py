@@ -316,7 +316,89 @@ class Test_pushforward_class_functions(TestCase):
         assert_array_almost_equal(X_data.transpose((0,1,3,2)), Y_data)
 
 
+class Test_aliasing(TestCase):
 
+    def test_mul_aliasing(self):
+        D, P, M, N = 5, 4, 3, 2
+        x = numpy.random.randn(D, P, M, N)
+        y1 = numpy.random.randn(D, P, M, N)
+        y2 = numpy.empty_like(x)
+        UTPM._mul(x, y1, out=y2)
+        UTPM._mul(x, y1, out=y1)
+        assert_allclose(y1, y2)
+
+    def test_div_aliasing(self):
+        D, P, M, N = 5, 4, 3, 2
+        x = numpy.random.randn(D, P, M, N)
+        y1 = numpy.random.randn(D, P, M, N)
+        y2 = numpy.empty_like(x)
+        UTPM._div(x, y1, out=y2)
+        UTPM._div(x, y1, out=y1)
+        assert_allclose(y1, y2)
+
+    def test_square_aliasing(self):
+        D, P, M, N = 5, 4, 3, 2
+        x = numpy.random.randn(D, P, M, N)
+        y = numpy.empty_like(x)
+        UTPM._square(x, out=y)
+        UTPM._square(x, out=x)
+        assert_allclose(x, y)
+
+    def test_sign_aliasing(self):
+        D, P, M, N = 5, 4, 3, 2
+        x = numpy.random.randn(D, P, M, N)
+        y = numpy.empty_like(x)
+        UTPM._sign(x, out=y)
+        UTPM._sign(x, out=x)
+        assert_allclose(x, y)
+
+    def test_reciprocal_aliasing(self):
+        D, P, M, N = 5, 4, 3, 2
+        x = numpy.random.randn(D, P, M, N)
+        y = numpy.empty_like(x)
+        UTPM._reciprocal(x, out=y)
+        UTPM._reciprocal(x, out=x)
+        assert_allclose(x, y)
+
+    def test_negative_aliasing(self):
+        D, P, M, N = 5, 4, 3, 2
+        x = numpy.random.randn(D, P, M, N)
+        y = numpy.empty_like(x)
+        UTPM._negative(x, out=y)
+        UTPM._negative(x, out=x)
+        assert_allclose(x, y)
+
+    def test_absolute_aliasing(self):
+        D, P, M, N = 5, 4, 3, 2
+        x = numpy.random.randn(D, P, M, N)
+        y = numpy.empty_like(x)
+        UTPM._absolute(x, out=y)
+        UTPM._absolute(x, out=x)
+        assert_allclose(x, y)
+
+    def test_exp_aliasing(self):
+        D, P, M, N = 5, 4, 3, 2
+        x = numpy.random.randn(D, P, M, N)
+        y = numpy.empty_like(x)
+        UTPM._exp(x, out=y)
+        UTPM._exp(x, out=x)
+        assert_allclose(x, y)
+
+    def test_log_aliasing(self):
+        D, P, M, N = 5, 4, 3, 2
+        x = numpy.exp(numpy.random.randn(D, P, M, N))
+        y = numpy.empty_like(x)
+        UTPM._log(x, out=y)
+        UTPM._log(x, out=x)
+        assert_allclose(x, y)
+
+    def test_sqrt_aliasing(self):
+        D, P, M, N = 5, 4, 3, 2
+        x = numpy.exp(numpy.random.randn(D, P, M, N))
+        y = numpy.empty_like(x)
+        UTPM._sqrt(x, out=y)
+        UTPM._sqrt(x, out=x)
+        assert_allclose(x, y)
 
 
 if __name__ == "__main__":

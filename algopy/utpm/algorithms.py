@@ -323,15 +323,16 @@ class RawAlgorithmsMixIn:
         """
         z = x/y
         """
-        z_data = out
         if out == None:
             raise NotImplementedError
 
+        z_data = numpy.empty_like(out)
         (D,P) = z_data.shape[:2]
         for d in range(D):
             z_data[d,:,...] = 1./ y_data[0,:,...] * ( x_data[d,:,...] - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
 
-        return z_data
+        out[...] = z_data[...]
+        return out
 
     @classmethod
     def _reciprocal(cls, y_data, out=None):
@@ -340,19 +341,19 @@ class RawAlgorithmsMixIn:
         """
         #FIXME: this function could use some attention;
         # it was copypasted from div
-        if out is None:
-            z_data = numpy.empty_like(y_data)
-        else:
-            z_data = out
-
-        D = z_data.shape[0]
+        z_data = numpy.empty_like(y_data)
+        D = y_data.shape[0]
         for d in range(D):
             if d == 0:
                 z_data[d,:,...] = 1./ y_data[0,:,...] * ( 1 - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
             else:
                 z_data[d,:,...] = 1./ y_data[0,:,...] * ( 0 - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
 
-        return z_data
+        if out is not None:
+            out[...] = z_data[...]
+            return out
+        else:
+            return z_data
 
     @classmethod
     def _pb_reciprocal(cls, ybar_data, x_data, y_data, out=None):
@@ -426,7 +427,7 @@ class RawAlgorithmsMixIn:
                 return y_data
 
             elif r == 2:
-                return cls._mul(x_data, x_data, y_data)
+                return cls._square(x_data, out=y_data)
 
             elif r >= 3:
                 y_data[...] = x_data[...]
@@ -579,15 +580,16 @@ class RawAlgorithmsMixIn:
             z_data = numpy.empty_like(x_data)
         else:
             z_data = out
-        z_data.fill(0)
+        tmp = numpy.zeros_like(x_data)
         D, P = x_data.shape[:2]
         for d in range(D):
             d_half = (d+1) // 2
             if d:
                 AB = x_data[:d_half, :, ...] * x_data[d:d-d_half:-1, :, ...]
-                numpy.sum(AB * 2, axis=0, out=z_data[d, :, ...])
+                numpy.sum(AB * 2, axis=0, out=tmp[d, :, ...])
             if (d+1) % 2 == 1:
-                z_data[d, :, ...] += numpy.square(x_data[d_half, :, ...])
+                tmp[d, :, ...] += numpy.square(x_data[d_half, :, ...])
+        z_data[...] = tmp[...]
         return z_data
 
     @classmethod
@@ -600,14 +602,14 @@ class RawAlgorithmsMixIn:
     def _sqrt(cls, x_data, out = None):
         if out == None:
             raise NotImplementedError('should implement that')
-        y_data = out
-        y_data[...] = 0.
+        y_data = numpy.zeros_like(x_data)
         D,P = x_data.shape[:2]
 
         y_data[0] = numpy.sqrt(x_data[0])
         for k in range(1,D):
             y_data[k] = 1./(2.*y_data[0]) * ( x_data[k] - numpy.sum( y_data[1:k] * y_data[k-1:0:-1], axis=0))
-        return y_data
+        out[...] = y_data[...]
+        return out
 
     @classmethod
     def _pb_sqrt(cls, ybar_data, x_data, y_data, out = None):
@@ -741,7 +743,7 @@ class RawAlgorithmsMixIn:
     def _log(cls, x_data, out = None):
         if out == None:
             raise NotImplementedError('should implement that')
-        y_data = out
+        y_data = numpy.empty_like(x_data)
         D,P = x_data.shape[:2]
 
         # base point: d = 0
@@ -756,7 +758,8 @@ class RawAlgorithmsMixIn:
         for d in range(1,D):
             y_data[d] /= d
 
-        return y_data
+        out[...] = y_data[...]
+        return out
 
     @classmethod
     def _pb_log(cls, ybar_data, x_data, y_data, out = None):
