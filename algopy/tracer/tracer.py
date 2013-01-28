@@ -1105,6 +1105,15 @@ class Function(Ring):
     def sqrt(self):
         return Function.pushforward(algopy.sqrt, [self])
 
+    def square(self):
+        return Function.pushforward(algopy.square, [self])
+
+    def absolute(self):
+        return Function.pushforward(algopy.absolute, [self])
+
+    def negative(self):
+        return Function.pushforward(algopy.negative, [self])
+
     def __pow__(self, r):
         return Function.pushforward(operator.pow, [self, r])
 

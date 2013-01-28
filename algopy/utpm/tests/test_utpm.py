@@ -687,6 +687,45 @@ class Test_Push_Forward(TestCase):
 
         assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
+    def test_negative_pullback(self):
+        D,P = 2,1
+
+        # forward
+        x = UTPM(numpy.random.randn(D,P))
+        y = UTPM.negative(x)
+
+        # reverse
+        ybar = UTPM(numpy.random.randn(D,P))
+        xbar = UTPM.pb_negative(ybar, x, y)
+
+        assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
+
+    def test_square_pullback(self):
+        D,P = 2,1
+
+        # forward
+        x = UTPM(numpy.random.randn(D,P))
+        y = UTPM.square(x)
+
+        # reverse
+        ybar = UTPM(numpy.random.randn(D,P))
+        xbar = UTPM.pb_square(ybar, x, y)
+
+        assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
+
+    def test_absolute_pullback(self):
+        D,P = 2,1
+
+        # forward
+        x = UTPM(numpy.random.randn(D,P))
+        y = UTPM.absolute(x)
+
+        # reverse
+        ybar = UTPM(numpy.random.randn(D,P))
+        xbar = UTPM.pb_absolute(ybar, x, y)
+
+        assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
+
     def test_gammaln_pullback(self):
         D,P = 2,1
 

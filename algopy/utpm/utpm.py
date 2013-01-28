@@ -897,6 +897,50 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return xbar
 
     @classmethod
+    def absolute(cls, x):
+        """ computes y = absolute(x) in UTP arithmetic"""
+
+        retval = x.clone()
+        cls._absolute(x.data, out = retval.data)
+        return retval
+
+    @classmethod
+    def pb_absolute(cls, ybar, x, y, out=None):
+        """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
+
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar, = out
+
+        cls._pb_absolute(ybar.data, x.data, y.data, out = xbar.data)
+        return xbar
+
+    @classmethod
+    def negative(cls, x):
+        """ computes y = negative(x) in UTP arithmetic"""
+
+        retval = x.clone()
+        cls._negative(x.data, out = retval.data)
+        return retval
+
+    @classmethod
+    def pb_negative(cls, ybar, x, y, out=None):
+        """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
+
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar, = out
+
+        cls._pb_negative(ybar.data, x.data, y.data, out = xbar.data)
+        return xbar
+
+    @classmethod
     def square(cls, x):
         """ computes y = square(x) in UTP arithmetic"""
 

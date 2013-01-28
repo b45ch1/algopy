@@ -1798,6 +1798,102 @@ class Test_CGgraph_on_UTPM(TestCase):
         assert_array_almost_equal(result2, result3)
         assert_array_almost_equal(result3, result1)
 
+    def test_absolute(self):
+        """
+        compute y = absolute(x**3 + 3.0)
+        """
+
+        def f(x):
+            v1 = x**3 + 3.0
+            y = algopy.absolute(v1)
+            return y
+
+        # use CGraph
+
+        cg = CGraph()
+        x = Function(numpy.array([0.2]))
+        y = f(x)
+
+        cg.independentFunctionList = [x]
+        cg.dependentFunctionList = [y]
+
+        result1 = cg.jac_vec(numpy.array([0.2]), numpy.array([1.]))
+        result2 = cg.jacobian(numpy.array([0.2]))[0]
+
+        # use UTPM
+
+        x = UTPM.init_jacobian(numpy.array([0.2]))
+        y = f(x)
+        result3 = UTPM.extract_jacobian(y)[0]
+
+        assert_array_almost_equal(result1, result2)
+        assert_array_almost_equal(result2, result3)
+        assert_array_almost_equal(result3, result1)
+
+    def test_square(self):
+        """
+        compute y = square(x**3 + 3.0)
+        """
+
+        def f(x):
+            v1 = x**3 + 3.0
+            y = algopy.square(v1)
+            return y
+
+        # use CGraph
+
+        cg = CGraph()
+        x = Function(numpy.array([0.2]))
+        y = f(x)
+
+        cg.independentFunctionList = [x]
+        cg.dependentFunctionList = [y]
+
+        result1 = cg.jac_vec(numpy.array([0.2]), numpy.array([1.]))
+        result2 = cg.jacobian(numpy.array([0.2]))[0]
+
+        # use UTPM
+
+        x = UTPM.init_jacobian(numpy.array([0.2]))
+        y = f(x)
+        result3 = UTPM.extract_jacobian(y)[0]
+
+        assert_array_almost_equal(result1, result2)
+        assert_array_almost_equal(result2, result3)
+        assert_array_almost_equal(result3, result1)
+
+    def test_negative(self):
+        """
+        compute y = negative(x**3 + 3.0)
+        """
+
+        def f(x):
+            v1 = x**3 + 3.0
+            y = algopy.negative(v1)
+            return y
+
+        # use CGraph
+
+        cg = CGraph()
+        x = Function(numpy.array([0.2]))
+        y = f(x)
+
+        cg.independentFunctionList = [x]
+        cg.dependentFunctionList = [y]
+
+        result1 = cg.jac_vec(numpy.array([0.2]), numpy.array([1.]))
+        result2 = cg.jacobian(numpy.array([0.2]))[0]
+
+        # use UTPM
+
+        x = UTPM.init_jacobian(numpy.array([0.2]))
+        y = f(x)
+        result3 = UTPM.extract_jacobian(y)[0]
+
+        assert_array_almost_equal(result1, result2)
+        assert_array_almost_equal(result2, result3)
+        assert_array_almost_equal(result3, result1)
+
     def test_sign(self):
         """
         compute y = sign(x**3 + 3.0)

@@ -31,6 +31,9 @@ from algopy import nthderiv
 def _plus_const(x_data, c, out=None):
     """
     Constants are only added to the d=0 slice of the data array.
+    A function like this is not so useful for multiplication by a constant,
+    because UTPM multiplication by a constant scales the entire data array
+    rather than acting on only the d=0 slice.
     """
     if out is None:
         y_data = numpy.copy(x_data)
@@ -519,17 +522,52 @@ class RawAlgorithmsMixIn:
         return numpy.argmax(a_data[0].reshape((P,numpy.prod(a_shp[2:]))), axis = 1)
 
     @classmethod
-    def _negative(cls, x_data, out=None):
+    def _absolute(cls, x_data, out=None):
         """
-        z = -x
+        z = |x|
         """
-        #FIXME: this can probably be improved
         if out is None:
             z_data = numpy.empty_like(x_data)
         else:
             z_data = out
-        cls._mul(x_data, -1, out=z_data)
+        D = x_data.shape[0]
+        if D > 1:
+            x_data_sign = numpy.sign(x_data[0])
+        for d in range(D):
+            if d == 0:
+                numpy.absolute(x_data[d], out=z_data[d])
+            else:
+                numpy.multiply(x_data[d], x_data_sign, out=z_data[d])
         return z_data
+
+    @classmethod
+    def _pb_absolute(cls, ybar_data, x_data, y_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        fprime_data = numpy.empty_like(x_data)
+        D = x_data.shape[0]
+        for d in range(D):
+            if d == 0:
+                numpy.sign(x_data[d], out=fprime_data[d])
+            else:
+                fprime_data[d].fill(0)
+        cls._amul(ybar_data, fprime_data, out=out)
+
+    @classmethod
+    def _negative(cls, x_data, out=None):
+        """
+        z = -x
+        """
+        return numpy.multiply(x_data, -1, out=out)
+
+    @classmethod
+    def _pb_negative(cls, ybar_data, x_data, y_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        fprime_data = numpy.empty_like(x_data)
+        fprime_data[0].fill(-1)
+        fprime_data[1:].fill(0)
+        cls._amul(ybar_data, fprime_data, out=out)
 
     @classmethod
     def _square(cls, x_data, out=None):
@@ -537,12 +575,13 @@ class RawAlgorithmsMixIn:
         z = x*x
         """
         #FIXME: you should be able to do this twice as fast as mul
-        if out is None:
-            z_data = numpy.empty_like(x_data)
-        else:
-            z_data = out
-        cls._mul(x_data, x_data, out=z_data)
-        return z_data
+        return cls._mul(x_data, x_data, out=out)
+
+    @classmethod
+    def _pb_square(cls, ybar_data, x_data, y_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        cls._amul(ybar_data, x_data*2, out=out)
 
     @classmethod
     def _sqrt(cls, x_data, out = None):
@@ -556,6 +595,18 @@ class RawAlgorithmsMixIn:
         for k in range(1,D):
             y_data[k] = 1./(2.*y_data[0]) * ( x_data[k] - numpy.sum( y_data[1:k] * y_data[k-1:0:-1], axis=0))
         return y_data
+
+    @classmethod
+    def _pb_sqrt(cls, ybar_data, x_data, y_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+
+        xbar_data = out
+        tmp = xbar_data.copy()
+        cls._div(ybar_data, y_data, tmp)
+        tmp /= 2.
+        xbar_data += tmp
+        return xbar_data
 
     @classmethod
     def _exp(cls, x_data, out=None):
@@ -671,18 +722,6 @@ class RawAlgorithmsMixIn:
                 numpy.greater_equal(x_data[0], a_min),
                 out=tmp[0])
         cls._amul(ybar_data, tmp, xbar_data)
-
-    @classmethod
-    def _pb_sqrt(cls, ybar_data, x_data, y_data, out = None):
-        if out == None:
-            raise NotImplementedError('should implement that')
-
-        xbar_data = out
-        tmp = xbar_data.copy()
-        cls._div(ybar_data, y_data, tmp)
-        tmp /= 2.
-        xbar_data += tmp
-        return xbar_data
 
 
     @classmethod
