@@ -112,6 +112,8 @@ class TestExactInterpolation(TestCase):
         for n,deg in enumerate(deg_list):
             Gamma, rays = generate_Gamma_and_rays(N,deg)
             x = UTPM(numpy.zeros((D,) + rays.shape))
+            #print x
+            #print type(x)
             x.data[1,:,:] = rays
             y = f(x)
             coeff_list.append(numpy.dot(Gamma, y.data[deg]))
