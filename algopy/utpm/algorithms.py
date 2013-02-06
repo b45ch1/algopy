@@ -23,10 +23,16 @@ from numpy.lib.stride_tricks import as_strided, broadcast_arrays
 try:
     import scipy.linalg
     import scipy.special
-except:
+except ImportError:
     pass
 
+try:
+    import pytpcore
+except ImportError:
+    pytpcore = None
+
 from algopy import nthderiv
+
 
 def _plus_const(x_data, c, out=None):
     """
@@ -282,19 +288,36 @@ class RawAlgorithmsMixIn:
         """
         z = x*y
         """
-        if out is None:
-            if numpy.shape(x_data) != numpy.shape(y_data):
-                raise NotImplementedError
+        if numpy.shape(x_data) != numpy.shape(y_data):
+            raise NotImplementedError
+        D, P = x_data.shape[:2]
+        #FIXME: there is a memoryview and buffer contiguity checking error
+        # which may or may not be caused by a bug in numpy or cython.
+        if pytpcore and all(s > 1 for s in x_data.shape):
+            # tp_mul is not careful about aliasing
+            z_data = numpy.empty_like(x_data)
+            x_data_reshaped = x_data.reshape((D, -1))
+            y_data_reshaped = y_data.reshape((D, -1))
+            z_data_reshaped = z_data.reshape((D, -1))
+            pytpcore.tp_mul(x_data_reshaped, y_data_reshaped, z_data_reshaped)
+            if out is not None:
+                out[...] = z_data_reshaped.reshape((z_data.shape))
+                return out
             else:
-                z_data = numpy.empty_like(x_data)
+                return z_data
         else:
-            z_data = out
+            # numpy.sum is careful about aliasing so we can use out=z_data
+            if out is None:
+                z_data = numpy.empty_like(x_data)
+            else:
+                z_data = out
+            for d in range(D)[::-1]:
+                numpy.sum(
+                        x_data[:d+1,:,...] * y_data[d::-1,:,...],
+                        axis=0,
+                        out = z_data[d,:,...])
+            return z_data
 
-        D, P = z_data.shape[:2]
-        for d in range(D)[::-1]:
-            numpy.sum(x_data[:d+1,:,...] * y_data[d::-1,:,...], axis=0, out = z_data[d,:,...] )
-
-        return z_data
 
     @classmethod
     def _minimum(cls, x_data, y_data, out=None):
@@ -376,11 +399,16 @@ class RawAlgorithmsMixIn:
         # it was copypasted from div
         z_data = numpy.empty_like(y_data)
         D = y_data.shape[0]
-        for d in range(D):
-            if d == 0:
-                z_data[d,:,...] = 1./ y_data[0,:,...] * ( 1 - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
-            else:
-                z_data[d,:,...] = 1./ y_data[0,:,...] * ( 0 - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
+        if pytpcore:
+            y_data_reshaped = y_data.reshape((D, -1))
+            z_data_reshaped = z_data.reshape((D, -1))
+            pytpcore.tp_reciprocal(y_data_reshaped, z_data_reshaped)
+        else:
+            for d in range(D):
+                if d == 0:
+                    z_data[d,:,...] = 1./ y_data[0,:,...] * ( 1 - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
+                else:
+                    z_data[d,:,...] = 1./ y_data[0,:,...] * ( 0 - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
 
         if out is not None:
             out[...] = z_data[...]
@@ -663,12 +691,18 @@ class RawAlgorithmsMixIn:
         else:
             y_data = out
         D,P = x_data.shape[:2]
-        y_data[0] = numpy.exp(x_data[0])
-        xtctilde = x_data[1:].copy()
-        for d in range(1,D):
-            xtctilde[d-1] *= d
-        for d in range(1, D):
-            y_data[d] = numpy.sum(y_data[:d][::-1]*xtctilde[:d], axis=0)/d
+        if pytpcore:
+            x_data_reshaped = x_data.reshape((D, -1))
+            y_data_reshaped = y_data.reshape((D, -1))
+            tmp = numpy.empty_like(x_data_reshaped)
+            pytpcore.tp_exp(x_data_reshaped, tmp, y_data_reshaped)
+        else:
+            y_data[0] = numpy.exp(x_data[0])
+            xtctilde = x_data[1:].copy()
+            for d in range(1,D):
+                xtctilde[d-1] *= d
+            for d in range(1, D):
+                y_data[d] = numpy.sum(y_data[:d][::-1]*xtctilde[:d], axis=0)/d
         return y_data
 
     @classmethod
