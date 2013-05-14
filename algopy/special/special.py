@@ -85,6 +85,34 @@ def hyperu(a, b, x):
 hyperu.__doc__ += scipy.special.hyperu.__doc__
 
 
+def botched_clip(a_min, a_max, x):
+    """
+    generic implementation of
+
+    y = botched_clip(a_min, a_max, x)
+
+    x:      either a
+
+            * float
+            * numpy.ndarray
+            * algopy.UTPM
+            * algopy.Function
+
+            instance.
+
+
+    """
+
+    if hasattr(x.__class__, 'botched_clip'):
+        return x.__class__.botched_clip(a_min, a_max, x)
+    elif hasattr(x.__class__, 'clip'):
+        return x.__class__.clip(x, a_min, a_max)
+    else:
+        return numpy.clip(x, a_min, a_max)
+
+#clip.__doc__ += scipy.special.clip.__doc__
+
+
 def dpm_hyp2f0(a1, a2, x):
     """
     generic implementation of

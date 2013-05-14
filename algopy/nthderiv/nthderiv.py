@@ -40,7 +40,7 @@ __all__ = [
 
         # these names are standard in numpy, scipy, or scipy.special
         'rint', 'fix', 'floor', 'ceil', 'trunc',
-        'sign', 'absolute',
+        'sign', 'clip', 'absolute',
         'hyperu', 'erf', 'erfi', 'gammaln', 'psi', 'polygamma',
         'exp', 'exp2', 'expm1',
         'log', 'log2', 'log10', 'log1p',
@@ -201,6 +201,15 @@ def np_fix(x, out=None):
     """
     return np.fix(x, out)
 
+def np_clip_reordered_args(a_min, a_max, x, out=None):
+    """
+    This is changed because the extra args are ordered inconsistently.
+    Most numpy and scipy functions are like f(extra_1, extra_2, x, out=None)
+    but numpy.clip is like f(x, extra_1, extra_2, out=None).
+    This is the only function I've seen with this inconsistency.
+    """
+    return np.clip(x, a_min, a_max, out)
+
 def np_polygamma(m, x, out=None):
     """
     This is changed because scipy.special.polygamma does not have 'out'.
@@ -302,6 +311,19 @@ def trunc(x, out=None, n=0):
 @basecase(np.sign)
 def sign(x, out=None, n=0):
     return np_filled_like(x, 0, out)
+
+@basecase(np_clip_reordered_args, extras=2)
+def clip(a_min, a_max, x, out=None, n=0):
+    if n == 1:
+        # the derivative is 1.0 in the interval and 0.0 outside the interval
+        gt = np.greater_equal(x, a_min)
+        lt = np.less_equal(x, a_max)
+        if out is None:
+            return np.array(gt * lt, dtype=float)
+        else:
+            return np.multiply(gt, lt, out)
+    else:
+        return np_filled_like(x, 0, out)
 
 @basecase(np.absolute)
 def absolute(x, out=None, n=0):

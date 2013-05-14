@@ -705,7 +705,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def hyperu(cls, a, b, x):
         """ computes y = hyperu(a, b, x) in UTP arithmetic"""
-
         retval = x.clone()
         cls._hyperu(a, b, x.data, out = retval.data)
         return retval
@@ -716,13 +715,30 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         if out == None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
-
         else:
             # out = (abar, bbar, xbar)
             xbar = out[2]
-
         cls._pb_hyperu(ybar.data, a, b, x.data, y.data, out = xbar.data)
+        return xbar
 
+    @classmethod
+    def botched_clip(cls, a_min, a_max, x):
+        """ computes y = botched_clip(a_min, a_max, x) in UTP arithmetic"""
+        retval = x.clone()
+        cls._botched_clip(a_min, a_max, x.data, out = retval.data)
+        return retval
+
+    @classmethod
+    def pb_botched_clip(cls, ybar, a_min, a_max, x, y, out=None):
+        """ computes bar y dy = bar x dx in UTP arithmetic"""
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+        else:
+            # out = (aminbar, amaxbar, xbar)
+            xbar = out[2]
+        cls._pb_botched_clip(
+                ybar.data, a_min, a_max, x.data, y.data, out = xbar.data)
         return xbar
 
     @classmethod
@@ -878,6 +894,74 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             xbar, = out
 
         cls._pb_gammaln(ybar.data, x.data, y.data, out = xbar.data)
+        return xbar
+
+    @classmethod
+    def minimum(cls, x, y):
+        # FIXME: this typechecking is probably not flexible enough
+        # FIXME: also add pullback
+        if isinstance(x, UTPM) and isinstance(y, UTPM):
+            return UTPM(cls._minimum(x.data, y.data))
+        elif isinstance(x, numpy.ndarray) and isinstance(y, numpy.ndarray):
+            return numpy.minimum(x, y)
+        else:
+            raise NotImplementedError(
+                    'this combination of types is not yet implemented')
+
+    @classmethod
+    def maximum(cls, x, y):
+        # FIXME: this typechecking is probably not flexible enough
+        # FIXME: also add pullback
+        if isinstance(x, UTPM) and isinstance(y, UTPM):
+            return UTPM(cls._maximum(x.data, y.data))
+        elif isinstance(x, numpy.ndarray) and isinstance(y, numpy.ndarray):
+            return numpy.maximum(x, y)
+        else:
+            raise NotImplementedError(
+                    'this combination of types is not yet implemented')
+
+    @classmethod
+    def absolute(cls, x):
+        """ computes y = absolute(x) in UTP arithmetic"""
+
+        retval = x.clone()
+        cls._absolute(x.data, out = retval.data)
+        return retval
+
+    @classmethod
+    def pb_absolute(cls, ybar, x, y, out=None):
+        """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
+
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar, = out
+
+        cls._pb_absolute(ybar.data, x.data, y.data, out = xbar.data)
+        return xbar
+
+    @classmethod
+    def negative(cls, x):
+        """ computes y = negative(x) in UTP arithmetic"""
+
+        retval = x.clone()
+        cls._negative(x.data, out = retval.data)
+        return retval
+
+    @classmethod
+    def pb_negative(cls, ybar, x, y, out=None):
+        """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
+
+        if out == None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar, = out
+
+        cls._pb_negative(ybar.data, x.data, y.data, out = xbar.data)
         return xbar
 
     @classmethod
@@ -1162,7 +1246,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     def sign(self):
         """ computes y = sign(x) in UTP arithmetic"""
-
         retval = self.clone()
         self._sign(self.data, out = retval.data)
         return retval
@@ -1173,10 +1256,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         if out == None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
-
         else:
             xbar, = out
-
         cls._pb_sign(ybar.data, x.data, y.data, out = xbar.data)
         return out
 

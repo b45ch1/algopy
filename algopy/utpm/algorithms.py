@@ -15,6 +15,7 @@ the function implementations by C or Fortran functions.
 """
 
 import math
+import functools
 
 import numpy
 from numpy.lib.stride_tricks import as_strided, broadcast_arrays
@@ -22,14 +23,23 @@ from numpy.lib.stride_tricks import as_strided, broadcast_arrays
 try:
     import scipy.linalg
     import scipy.special
-except:
+except ImportError:
     pass
 
+try:
+    import pytpcore
+except ImportError:
+    pytpcore = None
+
 from algopy import nthderiv
+
 
 def _plus_const(x_data, c, out=None):
     """
     Constants are only added to the d=0 slice of the data array.
+    A function like this is not so useful for multiplication by a constant,
+    because UTPM multiplication by a constant scales the entire data array
+    rather than acting on only the d=0 slice.
     """
     if out is None:
         y_data = numpy.copy(x_data)
@@ -38,11 +48,10 @@ def _plus_const(x_data, c, out=None):
     y_data[0] += c
     return y_data
 
-def _eval_slow_generic(f, extra_args, x_data, out=None):
+def _eval_slow_generic(f, x_data, out=None):
     """
     This is related to summations associated with the name 'Faa di Bruno.'
-    @param f: a function from the nthderiv module
-    @param extra_args: a list of extra parameters like in hyp1f1 or polygamma
+    @param f: f(X, out=None, n=0) computes nth derivative of f at X
     @param x_data: something about algorithmic differentiation
     @param out: something about algorithmic differentiation
     @param return: something about algorithmic differentiation
@@ -58,8 +67,7 @@ def _eval_slow_generic(f, extra_args, x_data, out=None):
     D, P = x_data.shape[:2]
 
     # base point: d = 0
-    args = extra_args + [x_data[0]]
-    y_data[0] = f(*args)
+    y_data[0] = f(x_data[0])
 
     # higher order coefficients: d > 0
     for d in range(1, D):
@@ -72,15 +80,14 @@ def _eval_slow_generic(f, extra_args, x_data, out=None):
                 accum[i] = numpy.sum(accum[:i] * x_data[i:0:-1], axis=0)
             accum[0] = 0.
         # Add the contribution of this summation term.
-        y_data[1:] += f(*args, n=d) * accum / float(math.factorial(d))
+        y_data[1:] += f(x_data[0], n=d) * accum / float(math.factorial(d))
 
     return y_data
 
-def _black_f_white_fprime(f, extra_args, fprime_data, x_data, out=None):
+def _black_f_white_fprime(f, fprime_data, x_data, out=None):
     """
     The function evaluation is a black box, but the derivative is compound.
-    @param f: a function from the nthderiv module
-    @param extra_args: a list of extra parameters like in hyp1f1 or polygamma
+    @param f: computes the scalar function directly
     @param fprime_data: the array associated with the evaluated derivative
     @param x_data: something about algorithmic differentiation
     @param out: something about algorithmic differentiation
@@ -90,9 +97,8 @@ def _black_f_white_fprime(f, extra_args, fprime_data, x_data, out=None):
     y_data = nthderiv.np_filled_like(x_data, 0, out=out)
     D, P = x_data.shape[:2]
 
-    # Do the direct computation efficiently.
-    args = extra_args + [x_data[0]]
-    y_data[0] = f(*args)
+    # Do the direct computation efficiently (e.g. using C implemention of erf).
+    y_data[0] = f(x_data[0])
 
     # Compute the truncated series coefficients using discrete convolution.
     #FIXME: one of these two loops can be vectorized
@@ -282,20 +288,70 @@ class RawAlgorithmsMixIn:
         """
         z = x*y
         """
-        if out is None:
-            if numpy.shape(x_data) != numpy.shape(y_data):
-                raise NotImplementedError
+        if numpy.shape(x_data) != numpy.shape(y_data):
+            raise NotImplementedError
+        D, P = x_data.shape[:2]
+        #FIXME: there is a memoryview and buffer contiguity checking error
+        # which may or may not be caused by a bug in numpy or cython.
+        if pytpcore and all(s > 1 for s in x_data.shape):
+            # tp_mul is not careful about aliasing
+            z_data = numpy.empty_like(x_data)
+            x_data_reshaped = x_data.reshape((D, -1))
+            y_data_reshaped = y_data.reshape((D, -1))
+            z_data_reshaped = z_data.reshape((D, -1))
+            pytpcore.tp_mul(x_data_reshaped, y_data_reshaped, z_data_reshaped)
+            if out is not None:
+                out[...] = z_data_reshaped.reshape((z_data.shape))
+                return out
             else:
-                z_data = numpy.empty_like(x_data)
+                return z_data
         else:
-            z_data = out
+            # numpy.sum is careful about aliasing so we can use out=z_data
+            if out is None:
+                z_data = numpy.empty_like(x_data)
+            else:
+                z_data = out
+            for d in range(D)[::-1]:
+                numpy.sum(
+                        x_data[:d+1,:,...] * y_data[d::-1,:,...],
+                        axis=0,
+                        out = z_data[d,:,...])
+            return z_data
 
-        D, P = z_data.shape[:2]
-        for d in range(D)[::-1]:
-            numpy.sum(x_data[:d+1,:,...] * y_data[d::-1,:,...], axis=0, out = z_data[d,:,...] )
 
-        return z_data
+    @classmethod
+    def _minimum(cls, x_data, y_data, out=None):
+        if x_data.shape != y_data.shape:
+            raise NotImplementedError(
+                    'algopy broadcasting is not implemented for this function')
+        D = x_data.shape[0]
+        xmask = numpy.less_equal(x_data[0], y_data[0])
+        ymask = 1 - xmask
+        z_data = numpy.empty_like(x_data)
+        for d in range(D):
+            numpy.add(xmask * x_data[d], ymask * y_data[d], out=z_data[d])
+        if out is not None:
+            out[...] = z_data[...]
+            return out
+        else:
+            return z_data
 
+    @classmethod
+    def _maximum(cls, x_data, y_data, out=None):
+        if x_data.shape != y_data.shape:
+            raise NotImplementedError(
+                    'algopy broadcasting is not implemented for this function')
+        D = x_data.shape[0]
+        xmask = numpy.greater_equal(x_data[0], y_data[0])
+        ymask = 1 - xmask
+        z_data = numpy.empty_like(x_data)
+        for d in range(D):
+            numpy.add(xmask * x_data[d], ymask * y_data[d], out=z_data[d])
+        if out is not None:
+            out[...] = z_data[...]
+            return out
+        else:
+            return z_data
 
     @classmethod
     def _amul(cls, x_data, y_data, out = None):
@@ -323,15 +379,16 @@ class RawAlgorithmsMixIn:
         """
         z = x/y
         """
-        z_data = out
         if out == None:
             raise NotImplementedError
 
+        z_data = numpy.empty_like(out)
         (D,P) = z_data.shape[:2]
         for d in range(D):
             z_data[d,:,...] = 1./ y_data[0,:,...] * ( x_data[d,:,...] - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
 
-        return z_data
+        out[...] = z_data[...]
+        return out
 
     @classmethod
     def _reciprocal(cls, y_data, out=None):
@@ -340,19 +397,24 @@ class RawAlgorithmsMixIn:
         """
         #FIXME: this function could use some attention;
         # it was copypasted from div
-        if out is None:
-            z_data = numpy.empty_like(y_data)
+        z_data = numpy.empty_like(y_data)
+        D = y_data.shape[0]
+        if pytpcore:
+            y_data_reshaped = y_data.reshape((D, -1))
+            z_data_reshaped = z_data.reshape((D, -1))
+            pytpcore.tp_reciprocal(y_data_reshaped, z_data_reshaped)
         else:
-            z_data = out
+            for d in range(D):
+                if d == 0:
+                    z_data[d,:,...] = 1./ y_data[0,:,...] * ( 1 - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
+                else:
+                    z_data[d,:,...] = 1./ y_data[0,:,...] * ( 0 - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
 
-        D = z_data.shape[0]
-        for d in range(D):
-            if d == 0:
-                z_data[d,:,...] = 1./ y_data[0,:,...] * ( 1 - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
-            else:
-                z_data[d,:,...] = 1./ y_data[0,:,...] * ( 0 - numpy.sum(z_data[:d,:,...] * y_data[d:0:-1,:,...], axis=0))
-
-        return z_data
+        if out is not None:
+            out[...] = z_data[...]
+            return out
+        else:
+            return z_data
 
     @classmethod
     def _pb_reciprocal(cls, ybar_data, x_data, y_data, out=None):
@@ -379,8 +441,8 @@ class RawAlgorithmsMixIn:
         x_data = x_data.copy()
         y_data = y_data.copy()
 
-        print x_data
-        print y_data
+        #print x_data
+        #print y_data
 
 
         # left shifting x_data and y_data if necessary
@@ -426,7 +488,7 @@ class RawAlgorithmsMixIn:
                 return y_data
 
             elif r == 2:
-                return cls._mul(x_data, x_data, y_data)
+                return cls._square(x_data, out=y_data)
 
             elif r >= 3:
                 y_data[...] = x_data[...]
@@ -522,43 +584,105 @@ class RawAlgorithmsMixIn:
         return numpy.argmax(a_data[0].reshape((P,numpy.prod(a_shp[2:]))), axis = 1)
 
     @classmethod
-    def _negative(cls, x_data, out=None):
+    def _absolute(cls, x_data, out=None):
         """
-        z = -x
+        z = |x|
         """
-        #FIXME: this can probably be improved
         if out is None:
             z_data = numpy.empty_like(x_data)
         else:
             z_data = out
-        cls._mul(x_data, -1, out=z_data)
+        D = x_data.shape[0]
+        if D > 1:
+            x_data_sign = numpy.sign(x_data[0])
+        for d in range(D):
+            if d == 0:
+                numpy.absolute(x_data[d], out=z_data[d])
+            else:
+                numpy.multiply(x_data[d], x_data_sign, out=z_data[d])
         return z_data
+
+    @classmethod
+    def _pb_absolute(cls, ybar_data, x_data, y_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        fprime_data = numpy.empty_like(x_data)
+        D = x_data.shape[0]
+        for d in range(D):
+            if d == 0:
+                numpy.sign(x_data[d], out=fprime_data[d])
+            else:
+                fprime_data[d].fill(0)
+        cls._amul(ybar_data, fprime_data, out=out)
+
+    @classmethod
+    def _negative(cls, x_data, out=None):
+        """
+        z = -x
+        """
+        return numpy.multiply(x_data, -1, out=out)
+
+    @classmethod
+    def _pb_negative(cls, ybar_data, x_data, y_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        fprime_data = numpy.empty_like(x_data)
+        fprime_data[0].fill(-1)
+        fprime_data[1:].fill(0)
+        cls._amul(ybar_data, fprime_data, out=out)
 
     @classmethod
     def _square(cls, x_data, out=None):
         """
         z = x*x
+        This can theoretically be twice as efficient as mul(x, x).
         """
-        #FIXME: you should be able to do this twice as fast as mul
         if out is None:
             z_data = numpy.empty_like(x_data)
         else:
             z_data = out
-        cls._mul(x_data, x_data, out=z_data)
+        tmp = numpy.zeros_like(x_data)
+        D, P = x_data.shape[:2]
+        for d in range(D):
+            d_half = (d+1) // 2
+            if d:
+                AB = x_data[:d_half, :, ...] * x_data[d:d-d_half:-1, :, ...]
+                numpy.sum(AB * 2, axis=0, out=tmp[d, :, ...])
+            if (d+1) % 2 == 1:
+                tmp[d, :, ...] += numpy.square(x_data[d_half, :, ...])
+        z_data[...] = tmp[...]
         return z_data
+
+    @classmethod
+    def _pb_square(cls, ybar_data, x_data, y_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+        cls._amul(ybar_data, x_data*2, out=out)
 
     @classmethod
     def _sqrt(cls, x_data, out = None):
         if out == None:
             raise NotImplementedError('should implement that')
-        y_data = out
-        y_data[...] = 0.
+        y_data = numpy.zeros_like(x_data)
         D,P = x_data.shape[:2]
 
         y_data[0] = numpy.sqrt(x_data[0])
         for k in range(1,D):
             y_data[k] = 1./(2.*y_data[0]) * ( x_data[k] - numpy.sum( y_data[1:k] * y_data[k-1:0:-1], axis=0))
-        return y_data
+        out[...] = y_data[...]
+        return out
+
+    @classmethod
+    def _pb_sqrt(cls, ybar_data, x_data, y_data, out = None):
+        if out == None:
+            raise NotImplementedError('should implement that')
+
+        xbar_data = out
+        tmp = xbar_data.copy()
+        cls._div(ybar_data, y_data, tmp)
+        tmp /= 2.
+        xbar_data += tmp
+        return xbar_data
 
     @classmethod
     def _exp(cls, x_data, out=None):
@@ -567,12 +691,18 @@ class RawAlgorithmsMixIn:
         else:
             y_data = out
         D,P = x_data.shape[:2]
-        y_data[0] = numpy.exp(x_data[0])
-        xtctilde = x_data[1:].copy()
-        for d in range(1,D):
-            xtctilde[d-1] *= d
-        for d in range(1, D):
-            y_data[d] = numpy.sum(y_data[:d][::-1]*xtctilde[:d], axis=0)/d
+        if pytpcore:
+            x_data_reshaped = x_data.reshape((D, -1))
+            y_data_reshaped = y_data.reshape((D, -1))
+            tmp = numpy.empty_like(x_data_reshaped)
+            pytpcore.tp_exp(x_data_reshaped, tmp, y_data_reshaped)
+        else:
+            y_data[0] = numpy.exp(x_data[0])
+            xtctilde = x_data[1:].copy()
+            for d in range(1,D):
+                xtctilde[d-1] *= d
+            for d in range(1, D):
+                y_data[d] = numpy.sum(y_data[:d][::-1]*xtctilde[:d], axis=0)/d
         return y_data
 
     @classmethod
@@ -587,7 +717,7 @@ class RawAlgorithmsMixIn:
     def _expm1(cls, x_data, out=None):
         fprime_data = cls._exp(x_data)
         return _black_f_white_fprime(
-                nthderiv.expm1, [], fprime_data, x_data, out=out)
+                nthderiv.expm1, fprime_data, x_data, out=out)
 
     @classmethod
     def _pb_expm1(cls, ybar_data, x_data, y_data, out = None):
@@ -600,7 +730,7 @@ class RawAlgorithmsMixIn:
     def _logit(cls, x_data, out=None):
         fprime_data = cls._reciprocal(x_data - cls._square(x_data))
         return _black_f_white_fprime(
-                scipy.special.logit, [], fprime_data, x_data, out=out)
+                scipy.special.logit, fprime_data, x_data, out=out)
 
     @classmethod
     def _pb_logit(cls, ybar_data, x_data, y_data, out = None):
@@ -614,7 +744,7 @@ class RawAlgorithmsMixIn:
         b_data = cls._reciprocal(_plus_const(cls._exp(x_data), 1))
         fprime_data = b_data - cls._square(b_data)
         return _black_f_white_fprime(
-                scipy.special.expit, [], fprime_data, x_data, out=out)
+                scipy.special.expit, fprime_data, x_data, out=out)
 
     @classmethod
     def _pb_expit(cls, ybar_data, x_data, y_data, out = None):
@@ -629,41 +759,58 @@ class RawAlgorithmsMixIn:
         if out == None:
             raise NotImplementedError('should implement that')
         y_data = out
-        D,P = x_data.shape[:2]
+        D, P = x_data.shape[:2]
         y_data[0] = numpy.sign(x_data[0])
-        for d in range(1,D):
-            y_data[d] = 0.
+        y_data[1:].fill(0)
         return y_data
 
     @classmethod
     def _pb_sign(cls, ybar_data, x_data, y_data, out = None):
         if out == None:
             raise NotImplementedError('should implement that')
-
         xbar_data = out
-
         tmp = numpy.zeros_like(x_data)
         cls._amul(ybar_data, tmp, xbar_data)
 
-
     @classmethod
-    def _pb_sqrt(cls, ybar_data, x_data, y_data, out = None):
+    def _botched_clip(cls, a_min, a_max, x_data, out= None):
+        """
+        In this function the args are permuted w.r.t numpy.
+        """
         if out == None:
             raise NotImplementedError('should implement that')
+        y_data = out
+        D, P = x_data.shape[:2]
+        y_data[0] = numpy.clip(x_data[0], a_min, a_max)
+        mask = numpy.logical_and(
+                numpy.less_equal(x_data[0], a_max),
+                numpy.greater_equal(x_data[0], a_min))
+        for d in range(1, D):
+            y_data[d] *= mask
+        return y_data
 
+    @classmethod
+    def _pb_botched_clip(
+            cls, ybar_data, a_min, a_max, x_data, y_data, out=None):
+        """
+        In this function the args are permuted w.r.t numpy.
+        """
+        if out == None:
+            raise NotImplementedError('should implement that')
         xbar_data = out
-        tmp = xbar_data.copy()
-        cls._div(ybar_data, y_data, tmp)
-        tmp /= 2.
-        xbar_data += tmp
-        return xbar_data
+        tmp = numpy.zeros_like(x_data)
+        numpy.multiply(
+                numpy.less_equal(x_data[0], a_max),
+                numpy.greater_equal(x_data[0], a_min),
+                out=tmp[0])
+        cls._amul(ybar_data, tmp, xbar_data)
 
 
     @classmethod
     def _log(cls, x_data, out = None):
         if out == None:
             raise NotImplementedError('should implement that')
-        y_data = out
+        y_data = numpy.empty_like(x_data)
         D,P = x_data.shape[:2]
 
         # base point: d = 0
@@ -678,7 +825,8 @@ class RawAlgorithmsMixIn:
         for d in range(1,D):
             y_data[d] /= d
 
-        return y_data
+        out[...] = y_data[...]
+        return out
 
     @classmethod
     def _pb_log(cls, ybar_data, x_data, y_data, out = None):
@@ -692,7 +840,7 @@ class RawAlgorithmsMixIn:
     def _log1p(cls, x_data, out=None):
         fprime_data = cls._reciprocal(_plus_const(x_data, 1))
         return _black_f_white_fprime(
-                numpy.log1p, [], fprime_data, x_data, out=out)
+                numpy.log1p, fprime_data, x_data, out=out)
 
     @classmethod
     def _pb_log1p(cls, ybar_data, x_data, y_data, out=None):
@@ -887,7 +1035,7 @@ class RawAlgorithmsMixIn:
     def _erf(cls, x_data, out=None):
         fprime_data = (2. / math.sqrt(math.pi)) * cls._exp(-cls._square(x_data))
         return _black_f_white_fprime(
-                nthderiv.erf, [], fprime_data, x_data, out=out)
+                nthderiv.erf, fprime_data, x_data, out=out)
 
     @classmethod
     def _pb_erf(cls, ybar_data, x_data, y_data, out = None):
@@ -900,7 +1048,7 @@ class RawAlgorithmsMixIn:
     def _erfi(cls, x_data, out=None):
         fprime_data = (2. / math.sqrt(math.pi)) * cls._exp(cls._square(x_data))
         return _black_f_white_fprime(
-                nthderiv.erfi, [], fprime_data, x_data, out=out)
+                nthderiv.erfi, fprime_data, x_data, out=out)
 
     @classmethod
     def _pb_erfi(cls, ybar_data, x_data, y_data, out = None):
@@ -911,8 +1059,8 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _dpm_hyp1f1(cls, a, b, x_data, out=None):
-        return _eval_slow_generic(
-                nthderiv.mpmath_hyp1f1, [a, b], x_data, out=out)
+        f = functools.partial(nthderiv.mpmath_hyp1f1, a, b)
+        return _eval_slow_generic(f, x_data, out=out)
 
     @classmethod
     def _pb_dpm_hyp1f1(cls, ybar_data, a, b, x_data, y_data, out=None):
@@ -923,7 +1071,8 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _hyp1f1(cls, a, b, x_data, out=None):
-        return _eval_slow_generic(nthderiv.hyp1f1, [a, b], x_data, out=out)
+        f = functools.partial(nthderiv.hyp1f1, a, b)
+        return _eval_slow_generic(f, x_data, out=out)
 
     @classmethod
     def _pb_hyp1f1(cls, ybar_data, a, b, x_data, y_data, out=None):
@@ -934,7 +1083,8 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _hyperu(cls, a, b, x_data, out=None):
-        return _eval_slow_generic(nthderiv.hyperu, [a, b], x_data, out=out)
+        f = functools.partial(nthderiv.hyperu, a, b)
+        return _eval_slow_generic(f, x_data, out=out)
 
     @classmethod
     def _pb_hyperu(cls, ybar_data, a, b, x_data, y_data, out=None):
@@ -945,8 +1095,8 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _dpm_hyp2f0(cls, a1, a2, x_data, out=None):
-        return _eval_slow_generic(
-                nthderiv.mpmath_hyp2f0, [a1, a2], x_data, out=out)
+        f = functools.partial(nthderiv.mpmath_hyp2f0, a1, a2)
+        return _eval_slow_generic(f, x_data, out=out)
 
     @classmethod
     def _pb_dpm_hyp2f0(cls, ybar_data, a1, a2, x_data, y_data, out=None):
@@ -957,7 +1107,8 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _hyp2f0(cls, a1, a2, x_data, out=None):
-        return _eval_slow_generic(nthderiv.hyp2f0, [a1, a2], x_data, out=out)
+        f = functools.partial(nthderiv.hyp2f0, a1, a2)
+        return _eval_slow_generic(f, x_data, out=out)
 
     @classmethod
     def _pb_hyp2f0(cls, ybar_data, a1, a2, x_data, y_data, out=None):
@@ -968,7 +1119,8 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _hyp0f1(cls, b, x_data, out=None):
-        return _eval_slow_generic(nthderiv.hyp0f1, [b], x_data, out=out)
+        f = functools.partial(nthderiv.hyp0f1, b)
+        return _eval_slow_generic(f, x_data, out=out)
 
     @classmethod
     def _pb_hyp0f1(cls, ybar_data, b, x_data, y_data, out=None):
@@ -979,7 +1131,8 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _polygamma(cls, m, x_data, out=None):
-        return _eval_slow_generic(nthderiv.polygamma, [m], x_data, out=out)
+        f = functools.partial(nthderiv.polygamma, m)
+        return _eval_slow_generic(f, x_data, out=out)
 
     @classmethod
     def _pb_polygamma(cls, ybar_data, m, x_data, y_data, out=None):
@@ -992,7 +1145,7 @@ class RawAlgorithmsMixIn:
     def _psi(cls, x_data, out=None):
         if out == None:
             raise NotImplementedError('should implement that')
-        return _eval_slow_generic(nthderiv.psi, [], x_data, out=out)
+        return _eval_slow_generic(nthderiv.psi, x_data, out=out)
 
     @classmethod
     def _pb_psi(cls, ybar_data, x_data, y_data, out=None):
@@ -1005,7 +1158,7 @@ class RawAlgorithmsMixIn:
     def _gammaln(cls, x_data, out=None):
         if out == None:
             raise NotImplementedError('should implement that')
-        return _eval_slow_generic(nthderiv.gammaln, [], x_data, out=out)
+        return _eval_slow_generic(nthderiv.gammaln, x_data, out=out)
 
     @classmethod
     def _pb_gammaln(cls, ybar_data, x_data, y_data, out=None):
