@@ -687,6 +687,58 @@ class Test_Push_Forward(TestCase):
 
         assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
+    def test_negative_pullback(self):
+        D,P = 2,1
+
+        # forward
+        x = UTPM(numpy.random.randn(D,P))
+        y = UTPM.negative(x)
+
+        # reverse
+        ybar = UTPM(numpy.random.randn(D,P))
+        xbar = UTPM.pb_negative(ybar, x, y)
+
+        assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
+
+    def test_square_pullback(self):
+        D,P = 2,1
+
+        # forward
+        x = UTPM(numpy.random.randn(D,P))
+        y = UTPM.square(x)
+
+        # reverse
+        ybar = UTPM(numpy.random.randn(D,P))
+        xbar = UTPM.pb_square(ybar, x, y)
+
+        assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
+
+    def test_absolute_pullback(self):
+        D,P = 2,1
+
+        # forward
+        x = UTPM(numpy.random.randn(D,P))
+        y = UTPM.absolute(x)
+
+        # reverse
+        ybar = UTPM(numpy.random.randn(D,P))
+        xbar = UTPM.pb_absolute(ybar, x, y)
+
+        assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
+
+    def test_reciprocal_pullback(self):
+        D,P = 2,1
+
+        # forward
+        x = UTPM(numpy.random.randn(D,P))
+        y = UTPM.reciprocal(x)
+
+        # reverse
+        ybar = UTPM(numpy.random.randn(D,P))
+        xbar = UTPM.pb_reciprocal(ybar, x, y)
+
+        assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
+
     def test_gammaln_pullback(self):
         D,P = 2,1
 
@@ -730,6 +782,42 @@ class Test_Push_Forward(TestCase):
         # reverse
         ybar = UTPM(numpy.random.random((D,P)))
         xbar = UTPM.pb_hyperu(ybar, a, b, x, y)
+
+        assert_allclose(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
+
+    def test_botched_clip(self):
+        D,P,N,M = 5,2,3,3
+        x = UTPM(numpy.random.randn(D,P,M,N))
+
+        # check that wide clipping does not affect sin(x)
+        sin_x = UTPM.sin(x)
+        y = UTPM.botched_clip(-2, 3, sin_x)
+        assert_allclose(y.data, sin_x.data)
+
+        # check a case where clipping should be like sign(x)
+        sin_x_p2 = sin_x + 2
+        y1 = UTPM.botched_clip(-2, 1, sin_x_p2)
+        y2 = UTPM.sign(sin_x_p2)
+        assert_allclose(y1.data, y2.data)
+
+        # check another case where clipping should be like sign(x)
+        sin_x_m2 = sin_x - 2
+        y1 = UTPM.botched_clip(-1, 1, sin_x_m2)
+        y2 = UTPM.sign(sin_x_m2)
+        assert_allclose(y1.data, y2.data)
+
+    def test_botched_clip_pullback(self):
+        D,P = 2,1
+
+        a_min, a_max = 0.5, 0.75
+
+        # forward
+        x = UTPM(numpy.random.random((D,P)))
+        y = UTPM.botched_clip(a_min, a_max, x)
+
+        # reverse
+        ybar = UTPM(numpy.random.random((D,P)))
+        xbar = UTPM.pb_botched_clip(ybar, a_min, a_max, x, y)
 
         assert_allclose(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 

@@ -12,7 +12,7 @@ class Test_future_division(TestCase):
         ax = algopy.UTPM.init_jacobian(x)
         ay = 1./ax
         J = algopy.UTPM.extract_jacobian(ay)
-        print J
+        #print J
 
     def test_function(x):
         x = numpy.array([1.,2.,3.])
@@ -22,7 +22,7 @@ class Test_future_division(TestCase):
         cg.trace_off()
         cg.independentFunctionList = [fx]
         cg.dependentFunctionList = [fy]
-        print cg.jacobian(x)
+        #print cg.jacobian(x)
 
 
 if __name__ == "__main__":

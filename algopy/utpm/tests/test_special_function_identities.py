@@ -80,7 +80,10 @@ def sample_positive(utpm_shape=(5, 3, 4, 5), eps=1e-1):
     return UTPM(numpy.abs(tmp) + eps)
 
 
-class Test_Identities(TestCase):
+class Test_PlainIdentities(TestCase):
+    """
+    Test scalar math identities involving only elementary functions in numpy.
+    """
 
     def test_exp_log_v1(self):
         x = sample_randn()
@@ -114,119 +117,16 @@ class Test_Identities(TestCase):
         y2 = UTPM.exp(x) - 1.
         assert_allclose(y1.data, y2.data)
 
-    def test_hyp1f1_exp_v1(self):
-        x = sample_randn()
-        y1 = UTPM.hyp1f1(1., 1., x)
-        y2 = UTPM.exp(x)
-        assert_allclose(y1.data, y2.data)
-
-    def test_hyp1f1_exp_v2(self):
-        x = sample_randn()
-        y1 = UTPM.hyp1f1(0.5, -0.5, x)
-        y2 = UTPM.exp(x) * (1. - 2*x)
-        assert_allclose(y1.data, y2.data)
-
-    def test_hyp1f1_expm1_exp(self):
-        x = sample_nonzero()
-        y1 = UTPM.hyp1f1(1., 2.,  x)
-        y2 = UTPM.expm1(x) / x
-        y3 = (UTPM.exp(x) - 1.) / x
-        assert_allclose(y1.data, y2.data)
-        assert_allclose(y1.data, y3.data)
-
-    @skipif(mpmath is None)
-    def test_dpm_hyp1f1_exp_v1(self):
-        x = sample_randn()
-        y1 = UTPM.dpm_hyp1f1(1., 1., x)
-        y2 = UTPM.exp(x)
-        assert_allclose(y1.data, y2.data)
-
-    @skipif(mpmath is None)
-    def test_dpm_hyp1f1_exp_v2(self):
-        x = sample_randn()
-        y1 = UTPM.dpm_hyp1f1(0.5, -0.5, x)
-        y2 = UTPM.exp(x) * (1. - 2*x)
-        assert_allclose(y1.data, y2.data)
-
-    @skipif(mpmath is None)
-    def test_dpm_hyp1f1_expm1_exp(self):
-        x = sample_nonzero()
-        y1 = UTPM.dpm_hyp1f1(1., 2.,  x)
-        y2 = UTPM.expm1(x) / x
-        y3 = (UTPM.exp(x) - 1.) / x
-        assert_allclose(y1.data, y2.data)
-        assert_allclose(y1.data, y3.data)
-
-    def test_psi_psi_v1(self):
-        x = sample_positive()
-        y1 = UTPM.psi(x + 1)
-        y2 = UTPM.psi(x) + 1 / x
-        assert_allclose(y1.data, y2.data)
-
-    def test_psi_psi_v2(self):
-        x = sample_positive()
-        y1 = UTPM.psi(2*x)
-        y2 = 0.5 * UTPM.psi(x) + 0.5 * UTPM.psi(x + 0.5) + numpy.log(2)
-        assert_allclose(y1.data, y2.data)
-
-    def test_gammaln_log(self):
-        x = sample_positive()
-        y1 = UTPM.gammaln(x)
-        y2 = UTPM.gammaln(x + 1) - UTPM.log(x)
-        assert_allclose(y1.data, y2.data)
-
     def test_log1p_log(self):
         x = sample_positive() - 0.5
         y1 = UTPM.log1p(x)
         y2 = UTPM.log(1. + x)
         assert_allclose(y1.data, y2.data)
 
-    def test_hyp1f1_erf(self):
-        x = sample_randn()
-        y1 = 2 * x * UTPM.hyp1f1(0.5, 1.5, -x*x) / math.sqrt(math.pi)
-        y2 = UTPM.erf(x)
-        assert_allclose(y1.data, y2.data)
-
-    def test_hyp1f1_erfi(self):
-        x = sample_randn()
-        y1 = 2 * x * UTPM.hyp1f1(0.5, 1.5, x*x) / math.sqrt(math.pi)
-        y2 = UTPM.erfi(x)
-        assert_allclose(y1.data, y2.data)
-
-    def test_expit_logit(self):
-        x = sample_randn()
-        y = UTPM.expit(x)
-        x2 = UTPM.logit(y)
-        y2 = UTPM.expit(x2)
-        assert_allclose(x.data, x2.data)
-        assert_allclose(y.data, y2.data)
-
-    def test_expit_exp(self):
-        x = sample_randn()
-        y1 = UTPM.expit(x)
-        y2 = 1 / (1 + UTPM.exp(-x))
-        y3 = UTPM.exp(x) / (UTPM.exp(x) + 1)
-        assert_allclose(y1.data, y2.data)
-        assert_allclose(y1.data, y3.data)
-
-    def test_logit_log(self):
-        x = sample_unit()
-        y1 = UTPM.logit(x)
-        y2 = UTPM.log(x / (1 - x))
-        y3 = UTPM.log(x) - UTPM.log(1 - x)
-        assert_allclose(y1.data, y2.data)
-        assert_allclose(y1.data, y3.data)
-
     def test_pow_mul(self):
         x = sample_randn()
         y1 = x**3
         y2 = x*x*x
-        assert_allclose(y1.data, y2.data)
-
-    def test_hyperu_rational(self):
-        x = sample_nonzero()
-        y1 = UTPM.hyperu(1., 6., x)
-        y2 = (x*(x*(x*(x+4) + 12) + 24) + 24) / (x**5)
         assert_allclose(y1.data, y2.data)
 
     def test_reciprocal_div(self):
@@ -251,65 +151,16 @@ class Test_Identities(TestCase):
         assert_allclose(x.data, x2.data)
         assert_allclose(y.data, y2.data)
 
-    #FIXME: this test is failing
-    @skipif(True)
-    @skipif(mpmath is None)
-    def test_dpm_hyp2f0_hyp1f1_neg_x(self):
-        shape = (5, 3, 4, 5)
-        x = -UTPM(0.1 + 0.3 * numpy.random.rand(*shape))
-        n = 2
-        b = 0.1
-        a1 = -n
-        a2 = b
-        y1 = UTPM.dpm_hyp2f0(a1, a2, x)
-        y2 = scipy.special.poch(b, n) * ((-x)**n) * (
-                UTPM.dpm_hyp1f1(-n, 1. - b - n, -(1./x)))
-        assert_allclose(y1.data, y2.data, rtol=1e-4)
-
-    #FIXME: this test is failing
-    @skipif(True)
-    @skipif(mpmath is None)
-    def test_dpm_hyp2f0_hyp1f1_pos_x(self):
-        shape = (5, 3, 4, 5)
-        x = UTPM(0.1 + 0.3 * numpy.random.rand(*shape))
-        n = 2
-        b = 0.1
-        a1 = -n
-        a2 = b
-        y1 = UTPM.dpm_hyp2f0(a1, a2, x)
-        y2 = scipy.special.poch(b, n) * ((-x)**n) * (
-                UTPM.dpm_hyp1f1(-n, 1. - b - n, -(1./x)))
-        assert_allclose(y1.data, y2.data, rtol=1e-4)
-
-    def test_hyp0f1_cos(self):
-        x = sample_randn()
-        y1 = UTPM.hyp0f1(0.5, -(0.5 * x)**2)
-        y2 = UTPM.cos(x)
+    def test_square_mul_v1(self):
+        x = sample_randn(utpm_shape=(5, 3, 4, 5))
+        y1 = UTPM.square(x)
+        y2 = x*x
         assert_allclose(y1.data, y2.data)
 
-    def test_hyp0f1_cosh(self):
-        x = sample_randn()
-        y1 = UTPM.hyp0f1(0.5, (0.5 * x)**2)
-        y2 = UTPM.cosh(x)
-        assert_allclose(y1.data, y2.data)
-
-    def test_hyp0f1_engineer_sinc(self):
-        """
-        Note that the sinc in numpy is the engineering sinc not the math sinc.
-        """
-        #FIXME: implement an algopy sinc?
-        #FIXME: note that there are two sinc functions in common use;
-        #FIXME: numpy uses the engineering version not the math version
-        x = sample_nonzero()
-        y1 = UTPM.hyp0f1(1.5, -(0.5 * math.pi * x)**2)
-        y2 = UTPM.sin(math.pi * x) / (math.pi * x)
-        assert_allclose(y1.data, y2.data)
-
-    def test_polygamma_polygamma(self):
-        x = sample_positive()
-        m = 2
-        y1 = UTPM.polygamma(m, x)
-        y2 = UTPM.polygamma(m, x+1) - ((-1)**m)*math.factorial(m)*(x**(-m-1))
+    def test_square_mul_v2(self):
+        x = sample_randn(utpm_shape=(4, 3, 4, 5))
+        y1 = UTPM.square(x)
+        y2 = x*x
         assert_allclose(y1.data, y2.data)
 
     def test_sign_tanh(self):
@@ -377,6 +228,208 @@ class Test_Identities(TestCase):
         y2  = UTPM.tan(x2)
         assert_allclose(x.data, x2.data)
         assert_allclose(y.data, y2.data)
+
+    def test_negative_sin_cos(self):
+        x = sample_randn()
+        y1 = UTPM.negative(UTPM.sin(x))
+        y2 = UTPM.cos(x + math.pi / 2.)
+        assert_allclose(y1.data, y2.data)
+
+    def test_absolute_abs_cos(self):
+        x = sample_randn()
+        y1 = abs(x)
+        y2 = UTPM.absolute(x)
+        assert_allclose(y1.data, y2.data)
+
+    def test_minimum_cos(self):
+        x = sample_randn()
+        c1 = UTPM.cos(x)
+        c2 = UTPM.cos(x - math.pi)
+        y1 = UTPM.minimum(c1, c2)
+        y2 = UTPM.negative(UTPM.absolute(c1))
+        y3 = -abs(c1)
+        assert_allclose(y1.data, y2.data)
+        assert_allclose(y1.data, y3.data)
+
+    def test_maximum_cos(self):
+        x = sample_randn()
+        c1 = UTPM.cos(x)
+        c2 = UTPM.cos(x - math.pi)
+        y1 = UTPM.maximum(c1, c2)
+        y2 = UTPM.absolute(c1)
+        y3 = abs(c1)
+        assert_allclose(y1.data, y2.data)
+        assert_allclose(y1.data, y3.data)
+
+
+class Test_SpecialIdentities(TestCase):
+    """
+    Test scalar math identities involving special functions in scipy.
+    """
+
+    def test_hyp1f1_exp_v1(self):
+        x = sample_randn()
+        y1 = UTPM.hyp1f1(1., 1., x)
+        y2 = UTPM.exp(x)
+        assert_allclose(y1.data, y2.data)
+
+    def test_hyp1f1_exp_v2(self):
+        x = sample_randn()
+        y1 = UTPM.hyp1f1(0.5, -0.5, x)
+        y2 = UTPM.exp(x) * (1. - 2*x)
+        assert_allclose(y1.data, y2.data)
+
+    def test_hyp1f1_expm1_exp(self):
+        x = sample_nonzero()
+        y1 = UTPM.hyp1f1(1., 2.,  x)
+        y2 = UTPM.expm1(x) / x
+        y3 = (UTPM.exp(x) - 1.) / x
+        assert_allclose(y1.data, y2.data)
+        assert_allclose(y1.data, y3.data)
+
+    @skipif(mpmath is None)
+    def test_dpm_hyp1f1_exp_v1(self):
+        x = sample_randn()
+        y1 = UTPM.dpm_hyp1f1(1., 1., x)
+        y2 = UTPM.exp(x)
+        assert_allclose(y1.data, y2.data)
+
+    @skipif(mpmath is None)
+    def test_dpm_hyp1f1_exp_v2(self):
+        x = sample_randn()
+        y1 = UTPM.dpm_hyp1f1(0.5, -0.5, x)
+        y2 = UTPM.exp(x) * (1. - 2*x)
+        assert_allclose(y1.data, y2.data)
+
+    @skipif(mpmath is None)
+    def test_dpm_hyp1f1_expm1_exp(self):
+        x = sample_nonzero()
+        y1 = UTPM.dpm_hyp1f1(1., 2.,  x)
+        y2 = UTPM.expm1(x) / x
+        y3 = (UTPM.exp(x) - 1.) / x
+        assert_allclose(y1.data, y2.data)
+        assert_allclose(y1.data, y3.data)
+
+    def test_psi_psi_v1(self):
+        x = sample_positive()
+        y1 = UTPM.psi(x + 1)
+        y2 = UTPM.psi(x) + 1 / x
+        assert_allclose(y1.data, y2.data)
+
+    def test_psi_psi_v2(self):
+        x = sample_positive()
+        y1 = UTPM.psi(2*x)
+        y2 = 0.5 * UTPM.psi(x) + 0.5 * UTPM.psi(x + 0.5) + numpy.log(2)
+        assert_allclose(y1.data, y2.data)
+
+    def test_gammaln_log(self):
+        x = sample_positive()
+        y1 = UTPM.gammaln(x)
+        y2 = UTPM.gammaln(x + 1) - UTPM.log(x)
+        assert_allclose(y1.data, y2.data)
+
+    def test_hyp1f1_erf(self):
+        x = sample_randn()
+        y1 = 2 * x * UTPM.hyp1f1(0.5, 1.5, -x*x) / math.sqrt(math.pi)
+        y2 = UTPM.erf(x)
+        assert_allclose(y1.data, y2.data)
+
+    def test_hyp1f1_erfi(self):
+        x = sample_randn()
+        y1 = 2 * x * UTPM.hyp1f1(0.5, 1.5, x*x) / math.sqrt(math.pi)
+        y2 = UTPM.erfi(x)
+        assert_allclose(y1.data, y2.data)
+
+    def test_expit_logit(self):
+        x = sample_randn()
+        y = UTPM.expit(x)
+        x2 = UTPM.logit(y)
+        y2 = UTPM.expit(x2)
+        assert_allclose(x.data, x2.data)
+        assert_allclose(y.data, y2.data)
+
+    def test_expit_exp(self):
+        x = sample_randn()
+        y1 = UTPM.expit(x)
+        y2 = 1 / (1 + UTPM.exp(-x))
+        y3 = UTPM.exp(x) / (UTPM.exp(x) + 1)
+        assert_allclose(y1.data, y2.data)
+        assert_allclose(y1.data, y3.data)
+
+    def test_logit_log(self):
+        x = sample_unit()
+        y1 = UTPM.logit(x)
+        y2 = UTPM.log(x / (1 - x))
+        y3 = UTPM.log(x) - UTPM.log(1 - x)
+        assert_allclose(y1.data, y2.data)
+        assert_allclose(y1.data, y3.data)
+
+    def test_hyperu_rational(self):
+        x = sample_nonzero()
+        y1 = UTPM.hyperu(1., 6., x)
+        y2 = (x*(x*(x*(x+4) + 12) + 24) + 24) / (x**5)
+        assert_allclose(y1.data, y2.data)
+
+    #FIXME: this test is failing
+    @skipif(True)
+    @skipif(mpmath is None)
+    def test_dpm_hyp2f0_hyp1f1_neg_x(self):
+        shape = (5, 3, 4, 5)
+        x = -UTPM(0.1 + 0.3 * numpy.random.rand(*shape))
+        n = 2
+        b = 0.1
+        a1 = -n
+        a2 = b
+        y1 = UTPM.dpm_hyp2f0(a1, a2, x)
+        y2 = scipy.special.poch(b, n) * ((-x)**n) * (
+                UTPM.dpm_hyp1f1(-n, 1. - b - n, -(1./x)))
+        assert_allclose(y1.data, y2.data, rtol=1e-4)
+
+    #FIXME: this test is failing
+    @skipif(True)
+    @skipif(mpmath is None)
+    def test_dpm_hyp2f0_hyp1f1_pos_x(self):
+        shape = (5, 3, 4, 5)
+        x = UTPM(0.1 + 0.3 * numpy.random.rand(*shape))
+        n = 2
+        b = 0.1
+        a1 = -n
+        a2 = b
+        y1 = UTPM.dpm_hyp2f0(a1, a2, x)
+        y2 = scipy.special.poch(b, n) * ((-x)**n) * (
+                UTPM.dpm_hyp1f1(-n, 1. - b - n, -(1./x)))
+        assert_allclose(y1.data, y2.data, rtol=1e-4)
+
+    def test_hyp0f1_cos(self):
+        x = sample_randn()
+        y1 = UTPM.hyp0f1(0.5, -(0.5 * x)**2)
+        y2 = UTPM.cos(x)
+        assert_allclose(y1.data, y2.data)
+
+    def test_hyp0f1_cosh(self):
+        x = sample_randn()
+        y1 = UTPM.hyp0f1(0.5, (0.5 * x)**2)
+        y2 = UTPM.cosh(x)
+        assert_allclose(y1.data, y2.data)
+
+    def test_hyp0f1_engineer_sinc(self):
+        """
+        Note that the sinc in numpy is the engineering sinc not the math sinc.
+        """
+        #FIXME: implement an algopy sinc?
+        #FIXME: note that there are two sinc functions in common use;
+        #FIXME: numpy uses the engineering version not the math version
+        x = sample_nonzero()
+        y1 = UTPM.hyp0f1(1.5, -(0.5 * math.pi * x)**2)
+        y2 = UTPM.sin(math.pi * x) / (math.pi * x)
+        assert_allclose(y1.data, y2.data)
+
+    def test_polygamma_polygamma(self):
+        x = sample_positive()
+        m = 2
+        y1 = UTPM.polygamma(m, x)
+        y2 = UTPM.polygamma(m, x+1) - ((-1)**m)*math.factorial(m)*(x**(-m-1))
+        assert_allclose(y1.data, y2.data)
 
     def test_dawsn_erfi(self):
         x = sample_randn()

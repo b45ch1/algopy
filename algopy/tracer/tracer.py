@@ -1105,6 +1105,18 @@ class Function(Ring):
     def sqrt(self):
         return Function.pushforward(algopy.sqrt, [self])
 
+    def square(self):
+        return Function.pushforward(algopy.square, [self])
+
+    def absolute(self):
+        return Function.pushforward(algopy.absolute, [self])
+
+    def reciprocal(self):
+        return Function.pushforward(algopy.reciprocal, [self])
+
+    def negative(self):
+        return Function.pushforward(algopy.negative, [self])
+
     def __pow__(self, r):
         return Function.pushforward(operator.pow, [self, r])
 
@@ -1221,6 +1233,11 @@ class Function(Ring):
     @classmethod
     def hyperu(cls, a, b, x):
         return Function.pushforward(algopy.special.hyperu, [a, b, x])
+
+    @classmethod
+    def botched_clip(cls, a_min, a_max, x):
+        return Function.pushforward(
+                algopy.special.botched_clip, [a_min, a_max, x])
 
     @classmethod
     def dpm_hyp2f0(cls, a1, a2, x):
