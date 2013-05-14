@@ -106,7 +106,7 @@ Issues and common pitfalls
 
 .. note::
 
-    If you use NumPy version > 1.5 the reverse mode could be rather very if
+    If you use NumPy version > 1.5 the reverse mode could be very slow if
     you use broadcasting.
 
     Reason:
@@ -416,6 +416,11 @@ Version Changelog
       in cg.gradient([1.,2.,3.]) one now gets a much more detailed traceback
     * added A.reshape(...) support to the reverse mode
     * improved support for broadcasting for UTPM instances
+
+* Version 0.4.0
+    * added support for a variety of new functions, mostly contributed by
+      Alex Griffing, NCSU:
+      expm, hyp1f1, hyperu, hyp2f0, polygamma, psi, erf, erfi, dawsn, logit, expit
 
 Unit Test
 ---------
