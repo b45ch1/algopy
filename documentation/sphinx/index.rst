@@ -217,7 +217,7 @@ Please cite the following paper if you use AlgoPy::
 Installation and Upgrade:
 -------------------------
 
-Current version is 0.3.2
+Current version is 0.4.0
 
 Official releases:
     * available at:  http://pypi.python.org/pypi/algopy
