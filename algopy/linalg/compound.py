@@ -80,11 +80,11 @@ def svd(A, epsilon=1e-8):
     # compute the rank
     r = 0
     for i in range(N):
-        if abs(l[i]) > epsilon:
+        if numpy.any(abs(l[i].data) > epsilon):
             r = i+1
 
-    if r < N:
-        raise NotImplementedError('rank deficient matrices are not supported')
+    # if r < N:
+    #     raise NotImplementedError('rank deficient matrices are not supported')
 
     # permutation matrix
 
