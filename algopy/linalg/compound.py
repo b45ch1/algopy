@@ -70,9 +70,10 @@ def svd(A, epsilon=1e-8):
     """
 
     M,N = A.shape
+    K = min(M,N)
 
-    if N > M:
-        raise NotImplementedError("A.shape = (M,N) and N > M is not supported (yet)")
+    # if N > M:
+    #     raise NotImplementedError("A.shape = (M,N) and N > M is not supported (yet)")
 
     # real symmetric eigenvalue decomposition
 
@@ -86,7 +87,7 @@ def svd(A, epsilon=1e-8):
     # FIXME: this compound algorith should be generic, i.e., also be applicable
     #        in the reverse mode. Need to replace *.data accesses
     r = 0
-    for i in range(N):
+    for i in range(K):
         if numpy.any(abs(l[i].data) > epsilon):
             r = i+1
 
@@ -115,7 +116,7 @@ def svd(A, epsilon=1e-8):
     V[:,:r] = 2.**0.5*Q[M:,:r]
     # V[:,r:] = Q[M:,r+M:]
     V[:, r:] = qr_full(V[:,:r])[0][:, r:]
-    s = -l[:N]
+    s = -l[:K]
 
     return U, s, V
 
