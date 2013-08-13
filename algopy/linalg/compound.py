@@ -28,7 +28,7 @@ so they are represented by a single node in the CGraph.
 import numpy
 
 from algopy.globalfuncs import zeros, dot
-from algopy.linalg.linalg import eigh, solve
+from algopy.linalg.linalg import eigh, solve, qr_full
 
 
 def svd(A, epsilon=1e-8):
@@ -54,10 +54,15 @@ def svd(A, epsilon=1e-8):
     The singular value decomposition is directly related to the symmetric
     eigenvalue decomposition.
 
-    See A. Bjoerk, Numerical Methods for Least Squares Problems, SIAM, 1996
+    See for Reference
+
+    * Bunse-Gerstner et al., Numerical computation of an analytic singular value
+      decomposition of a matrix valued function
+
+    * A. Bjoerk, Numerical Methods for Least Squares Problems, SIAM, 1996
     for the relation between SVD and symm. eigenvalue decomposition
 
-    and S. F. Walter, Structured Higher-Order Algorithmic Differentiation
+    * S. F. Walter, Structured Higher-Order Algorithmic Differentiation
     in the Forward and Reverse Mode with Application in Optimum Experimental
     Design, PhD thesis, 2011
     for the Taylor polynomial arithmetic.
@@ -83,8 +88,9 @@ def svd(A, epsilon=1e-8):
         if numpy.any(abs(l[i].data) > epsilon):
             r = i+1
 
-    # if r < N:
-    #     raise NotImplementedError('rank deficient matrices are not supported')
+    # print 'numerical rank = ', r
+    if M != N:
+        raise NotImplementedError('rank deficient matrices are not supported')
 
     # permutation matrix
 
@@ -106,9 +112,12 @@ def svd(A, epsilon=1e-8):
     V = zeros((N,N), dtype=Q)
 
     U[:,:r] = 2.**0.5*Q[:M,:r]
-    U[:,r:] = Q[:M, 2*r: r+M]
+    # compute orthogonal columns to U[:, :r]
+    U[:, r:] = qr_full(U[:,:r])[0][:, r:]
+    # U[:,r:] = Q[:M, 2*r: r+M]
     V[:,:r] = 2.**0.5*Q[M:,:r]
-    V[:,r:] = Q[M:,r+M:]
+    # V[:,r:] = Q[M:,r+M:]
+    V[:, r:] = qr_full(V[:,:r])[0][:, r:]
     s = -l[:N]
 
     return U, s, V
