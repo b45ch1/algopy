@@ -10,9 +10,9 @@ from algopy.linalg.compound import svd, expm
 def test_1():
 	D,P,M,N = 2,1,2,2
 
-	U = UTPM(numpy.random.random((D,P,M,N)))
+	U = UTPM(numpy.random.random((D,P,M,M)))
 	S = UTPM(numpy.zeros((D,P,M,N)))
-	V = UTPM(numpy.random.random((D,P,M,N)))
+	V = UTPM(numpy.random.random((D,P,N,N)))
 
 	U = qr(U)[0]
 	V = qr(V)[0]
@@ -43,9 +43,9 @@ def test_1():
 def test_2():
 	D,P,M,N = 2,1,3,3
 
-	U = UTPM(numpy.random.random((D,P,M,N)))
+	U = UTPM(numpy.random.random((D,P,M,M)))
 	S = UTPM(numpy.zeros((D,P,M,N)))
-	V = UTPM(numpy.random.random((D,P,M,N)))
+	V = UTPM(numpy.random.random((D,P,N,N)))
 
 	U = qr(U)[0]
 	V = qr(V)[0]
@@ -80,9 +80,9 @@ def test_2():
 def test_3():
 	D,P,M,N = 4,1,4,4
 
-	U = UTPM(numpy.random.random((D,P,M,N)))
+	U = UTPM(numpy.random.random((D,P,M,M)))
 	S = UTPM(numpy.zeros((D,P,M,N)))
-	V = UTPM(numpy.random.random((D,P,M,N)))
+	V = UTPM(numpy.random.random((D,P,N,N)))
 
 	U = qr(U)[0]
 	V = qr(V)[0]
@@ -125,6 +125,48 @@ def test_3():
 	assert_array_almost_equal( (dot(V2.T, V2) - numpy.eye(N)).data, 0.)
 	assert_array_almost_equal( (dot(V2, V2.T) - numpy.eye(N)).data, 0.)
 
+
+def test_4():
+	D,P,M,N = 4,1,5,3
+
+	U = UTPM(numpy.random.random((D,P,M,M)))
+	S = UTPM(numpy.zeros((D,P,M,N)))
+	V = UTPM(numpy.random.random((D,P,N,N)))
+
+	U = qr(U)[0]
+	V = qr(V)[0]
+
+	# zeroth coefficient
+	S.data[0,0, 0 ,0] = 0.
+	S.data[0,0, 1, 1] = 0.
+	S.data[0,0, 2, 2] = 1.
+
+	# first coefficient
+	S.data[1,0, 0 ,0] = 0.
+	S.data[1,0, 1, 1] = 0.
+
+	A = dot(U, dot(S,V))
+
+	U2,s2,V2 = svd(A)
+	S2 = zeros((M,N),dtype=A)
+	S2[:N,:N] = diag(s2)
+
+	A2 = dot(dot(U2, S2), V2.T)
+
+	# print 'S=', S
+	# print 'S2=', S2
+
+	# print A - A2
+	# print 'U2=\n', U2
+	# print 'V2=\n', V2
+	# print 'dot(U2.T, U2)=\n',dot(U2.T, U2)
+	# print 'dot(V2.T, V2)=\n',dot(V2.T, V2)
+
+	assert_array_almost_equal( (A2 - A).data, 0.)
+	assert_array_almost_equal( (dot(U2.T, U2) - numpy.eye(M)).data, 0.)
+	assert_array_almost_equal( (dot(U2, U2.T) - numpy.eye(M)).data, 0.)
+	assert_array_almost_equal( (dot(V2.T, V2) - numpy.eye(N)).data, 0.)
+	assert_array_almost_equal( (dot(V2, V2.T) - numpy.eye(N)).data, 0.)
 
 
 def test_example2():
@@ -171,3 +213,4 @@ def test_example2():
 test_1()
 test_2()
 test_3()
+test_4()

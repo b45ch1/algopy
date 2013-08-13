@@ -83,17 +83,14 @@ def svd(A, epsilon=1e-8):
 
 
     # compute the rank
+    # FIXME: this compound algorith should be generic, i.e., also be applicable
+    #        in the reverse mode. Need to replace *.data accesses
     r = 0
     for i in range(N):
         if numpy.any(abs(l[i].data) > epsilon):
             r = i+1
 
-    # print 'numerical rank = ', r
-    if M != N:
-        raise NotImplementedError('rank deficient matrices are not supported')
-
     # permutation matrix
-
     tmp  = [M+N-1 - i for i in range(r)] + [i for i in range(r)]
     tmp += [M+N-1-r-i for i in range(N-r)] + [N-1+i for i in range(N-r)]
     tmp += [N+i for i in range(M-N)]
