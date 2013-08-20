@@ -41,6 +41,8 @@ License :: OSI Approved
 Development Status :: 4 - Beta
 Operating System :: OS Independent
 Programming Language :: Python
+Programming Language :: Python
+Programming Language :: Python :: 3
 Topic :: Software Development
 Topic :: Scientific/Engineering
 """
@@ -67,9 +69,6 @@ VERSION             = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 FULLVERSION = VERSION
 if not ISRELEASED:
     FULLVERSION += '.dev'
-    # If in git or something, bypass the svn rev
-    if os.path.exists('.svn'):
-        FULLVERSION += svn_version()
 
 # BEFORE importing distutils, remove MANIFEST. distutils doesn't properly
 # update it when the contents of directories change.
