@@ -22,7 +22,7 @@ for np,P in enumerate(P_list):
     for nn,N in enumerate(N_list):
         for nd,D in enumerate(D_list):
 
-            print 'running runtime tests for A.shape = (D,P,N,N) = %d, %d, %d, %d'%(D,P,N,N)
+            print('running runtime tests for A.shape = (D,P,N,N) = %d, %d, %d, %d'%(D,P,N,N))
             A_data = numpy.random.rand(N,N,P,D)
             Qbar_data = numpy.random.rand(1,N,N,P,D)
             Rbar_data = numpy.random.rand(1,N,N,P,D)
@@ -92,9 +92,9 @@ for np,P in enumerate(P_list):
 
                 push_forward_ratio = runtime_algopy_push_forward/runtime_pyadolc_push_forward
                 pullback_ratio = runtime_algopy_pullback/runtime_pyadolc_pullback
-                print 'relative runtime of the push forward: algopy/pyadolc =', push_forward_ratio
+                print('relative runtime of the push forward: algopy/pyadolc =', push_forward_ratio)
 
-                print 'relative runtime of the pullback: algopy/pyadolc =',pullback_ratio
+                print('relative runtime of the pullback: algopy/pyadolc =',pullback_ratio)
 
                 runtime_ratios_push_forward[nd,np,nn,r] = push_forward_ratio
                 runtime_ratios_pullback[nd,np,nn,r] = pullback_ratio

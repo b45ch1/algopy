@@ -23,7 +23,7 @@ adolc_gradient_times = []
 
 
 for N in Ns:
-	print N
+	print(N)
 	#A = 2.3*numpy.eye(N)
 	x = numpy.ones(N)
 

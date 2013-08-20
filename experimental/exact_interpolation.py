@@ -1,4 +1,4 @@
-from __future__ import division
+
 import numpy as npy
 import numpy
 
@@ -123,7 +123,7 @@ def vector_tensor(f,in_x,D):
         perms = []
         for p in generate_permutations(list(J[m,:])):
             perms += [p]
-        print numpy.array(perms)
+        print(numpy.array(perms))
         for p in perms:
             retval[tuple(p)] = b[m]
         

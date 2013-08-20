@@ -75,20 +75,20 @@ def main():
     num_hessian = numdifftools.Hessian(f)(results)
 
     # report the results of the search including aic and standard error
-    print 'search results:'
-    print results
-    print
-    print 'aic:'
-    print get_aic(y, X, results)
-    print
-    print 'standard error using observed fisher information,'
-    print 'with hessian computed using algopy:'
-    print numpy.sqrt(numpy.diag(scipy.linalg.inv(algopy_hessian)))
-    print
-    print 'standard error using observed fisher information,'
-    print 'with hessian computed using numdifftools:'
-    print numpy.sqrt(numpy.diag(scipy.linalg.inv(num_hessian)))
-    print
+    print('search results:')
+    print(results)
+    print()
+    print('aic:')
+    print(get_aic(y, X, results))
+    print()
+    print('standard error using observed fisher information,')
+    print('with hessian computed using algopy:')
+    print(numpy.sqrt(numpy.diag(scipy.linalg.inv(algopy_hessian))))
+    print()
+    print('standard error using observed fisher information,')
+    print('with hessian computed using numdifftools:')
+    print(numpy.sqrt(numpy.diag(scipy.linalg.inv(num_hessian))))
+    print()
 
 
 if __name__ == '__main__':

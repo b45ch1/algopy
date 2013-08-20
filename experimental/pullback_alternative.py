@@ -34,8 +34,8 @@ if __name__ == "__main__":
     pbr_mul(2, y, x, z, zbar, ybar, xbar)
     pbr_mul(2, x, x, y, ybar, xbar, xbar)
     
-    print x
-    print xbar
+    print(x)
+    print(xbar)
     
     
     

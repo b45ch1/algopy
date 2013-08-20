@@ -8,5 +8,5 @@ z = x * y + x
 cg.trace_off()
 cg.independentFunctionList = [x,y]
 cg.dependentFunctionList = [z]
-print cg
+print(cg)
 cg.plot('example_tracer_cgraph.png')

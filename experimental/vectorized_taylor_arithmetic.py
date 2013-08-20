@@ -119,7 +119,7 @@ class Tc:
         #self.t0 *= rhs.t0
         return self
 
-    def __idiv__(self,rhs):
+    def __itruediv__(self,rhs):
         (rhs,D,E,Ndir,Ndir2) = self.resize_tc(rhs)
         self.t0 /= rhs.t0
         for d in range(D):
@@ -147,7 +147,7 @@ class Tc:
     
     def __div__(self,rhs):
         retval = self.copy()
-        retval.__idiv__(rhs)
+        retval.__itruediv__(rhs)
         return retval
 
     def __radd__(self, lhs):
@@ -548,11 +548,11 @@ class CGraph:
             method = 'dot'
         name, extension = filename.split('.')
         if extension != 'png' and extension != 'svg':
-            print 'Only *.png or *.svg are supported formats!'
-            print 'Using *.png now'
+            print('Only *.png or *.svg are supported formats!')
+            print('Using *.png now')
             extension = 'png'
 
-        print 'name=',name, 'extension=', extension
+        print('name=',name, 'extension=', extension)
 
         # setting the style for the nodes
         A = pygraphviz.agraph.AGraph(directed=True, strict = False)
@@ -666,7 +666,7 @@ def hessian(f, in_x):
     cg = CGraph()
     I = eye(N)
     ax = numpy.array([Function(Tc(x[n], eye(N,1,-n).T )) for n in range(N)])
-    print ax
+    print(ax)
     cg.independentFunctionList = ax
     ay = f(ax)
     cg.dependentFunctionList = numpy.array([ay])

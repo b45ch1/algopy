@@ -85,11 +85,11 @@ def ad_ddf(x):
 
 # point at which the derivatives should be evaluated
 x = random((N,D))
-print '\n\n'
-print 'Sympy vs Hand Derived Gradient check (should be almost zero)'
-print df(x) - sym_df(x)
-print 'Sympy vs Ad Derive Gradient check (should be almost zero)'
-print ad_df(x) - sym_df(x)
+print('\n\n')
+print('Sympy vs Hand Derived Gradient check (should be almost zero)')
+print(df(x) - sym_df(x))
+print('Sympy vs Ad Derive Gradient check (should be almost zero)')
+print(ad_df(x) - sym_df(x))
 
 #print '\n\n'
 #print 'Hessian check (should be almost zero)'

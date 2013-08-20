@@ -2,7 +2,7 @@
 """
 Vector Forward Mode
 """
-from __future__ import division
+
 import numpy as npy
 import numpy
 import instant
@@ -315,7 +315,7 @@ def vector_tensor(f,in_x,D):
         perms = []
         for p in generate_permutations(list(J[m,:])):
             perms += [p]
-        print numpy.array(perms)
+        print(numpy.array(perms))
         for p in perms:
             retval[tuple(p)] = b[m]
         
@@ -452,9 +452,9 @@ if __name__ == "__main__":
     t_start = time()
     vector_hessian(f,x)
     t_end = time()
-    print 'secs for vector:', t_end - t_start
+    print('secs for vector:', t_end - t_start)
 
     t_start = time()
     hessian(f,x)
     t_end = time()
-    print 'secs for normal:', t_end - t_start
+    print('secs for normal:', t_end - t_start)

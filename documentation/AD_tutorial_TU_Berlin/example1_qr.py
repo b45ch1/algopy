@@ -7,13 +7,13 @@ Q,R = UTPM.qr(A)
 B = UTPM.dot(Q,R)
 
 # check that the results are correct
-print 'Q.T Q - 1\n',UTPM.dot(Q.T,Q) - numpy.eye(N)
-print 'QR - A\n',B - A
-print 'triu(R) - R\n', UTPM.triu(R) - R
+print('Q.T Q - 1\n',UTPM.dot(Q.T,Q) - numpy.eye(N))
+print('QR - A\n',B - A)
+print('triu(R) - R\n', UTPM.triu(R) - R)
 
 # QR decomposition, UTPM reverse
 Bbar = UTPM(numpy.random.rand(D,P,M,N))
 Qbar,Rbar = UTPM.pb_dot(Bbar, Q, R, B)
 Abar = UTPM.pb_qr(Qbar, Rbar, A, Q, R)
 
-print 'Abar - Bbar\n',Abar - Bbar
+print('Abar - Bbar\n',Abar - Bbar)

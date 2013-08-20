@@ -99,7 +99,7 @@ Z,s = projected_gradients(u,O_tilde,dO_tilde,[L,U])
 
 
 # # Plot with MAYAVI
-x = y = range(numpy.shape(Z)[0])
+x = y = list(range(numpy.shape(Z)[0]))
 
 try:
     import enthought.mayavi.mlab as mlab

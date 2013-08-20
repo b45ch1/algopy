@@ -22,10 +22,10 @@ def jac_errfunc(p, t, y):
     
 guess = numpy.array([0, max(y_data), 0.1, 140, -0.1, 270])
 p2, C, info, msg, success = optimize.leastsq(errfunc, guess, args=(t, y_data), Dfun = jac_errfunc, full_output=1)
-print 'Estimates from leastsq \n', p2,success
-print 'number of function calls =', info['nfev']
+print('Estimates from leastsq \n', p2,success)
+print('number of function calls =', info['nfev'])
 
 p3, C, info, msg, success = optimize.leastsq(errfunc, guess, args=(t, y_data), full_output=1)
-print 'Estimates from leastsq \n', p3,success
-print 'number of function calls =', info['nfev']
+print('Estimates from leastsq \n', p3,success)
+print('number of function calls =', info['nfev'])
 

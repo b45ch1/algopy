@@ -14,4 +14,4 @@ x = UTPM(x_data)
 y = UTPM(y_data)
 z = dot(x, y)
 
-print 'z.data - z_data', z.data - z_data
+print('z.data - z_data', z.data - z_data)

@@ -10,6 +10,6 @@ l.data[2,0,:4] = [1,2,5,6]
 L = UTPM.diag(l)
 B = UTPM.dot(Q,UTPM.dot(L,Q.T))
 
-print 'B = \n', B
+print('B = \n', B)
 l2,Q2 = UTPM.eigh(B)
-print 'l2 - l =\n',l2 - l
+print('l2 - l =\n',l2 - l)

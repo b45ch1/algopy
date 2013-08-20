@@ -30,4 +30,4 @@ if __name__ == "__main__":
     A.R.append((0,0,12.))
     A.R.append((1,0,13.))
 
-    print A
+    print(A)

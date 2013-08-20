@@ -92,9 +92,9 @@ def test_incremental_addition_multiple_directions_Tc_Tc_same_order():
 
 	a += b
 
-	print 'inputarray3=\n',inputarray3
-	print 'inputarray2=\n',inputarray2
-	print  'inputarray3[1:] + inputarray2[1:]=\n',inputarray3[:] + inputarray2[:]
+	print('inputarray3=\n',inputarray3)
+	print('inputarray2=\n',inputarray2)
+	print('inputarray3[1:] + inputarray2[1:]=\n',inputarray3[:] + inputarray2[:])
 	assert a.t0 == 10.
 	assert numpy.prod(a.tc == (inputarray3[:] + inputarray2[:]))
 
@@ -112,11 +112,11 @@ def test_incremental_substraction_multiple_directions_Tc_Tc_different_order():
 
 	a -= b
 
-	print 'inputarray3=\n',inputarray3
-	print 'inputarray2=\n',inputarray2
-	print  'inputarray3[:G] - inputarray2[:G]=\n',inputarray3[:G] - inputarray2[:G]
-	print 'a.tc[G:]=\n',a.tc[G:]
-	print '-inputarray2[G:]=\n',-inputarray2[G:]
+	print('inputarray3=\n',inputarray3)
+	print('inputarray2=\n',inputarray2)
+	print('inputarray3[:G] - inputarray2[:G]=\n',inputarray3[:G] - inputarray2[:G])
+	print('a.tc[G:]=\n',a.tc[G:])
+	print('-inputarray2[G:]=\n',-inputarray2[G:])
 	assert a.t0 == -4.
 	assert numpy.prod(a.tc[:G] == (inputarray3[:G] - inputarray2[:G]))
 	assert numpy.prod(a.tc[G:] == -inputarray2[G:])
@@ -162,10 +162,10 @@ def test_incremental_multiplication_multiple_directions_Tc_Tc_same_order():
 
 	a *= b
 
-	print 'inputarray3=\n',inputarray3
-	print 'inputarray2=\n',inputarray2
-	print '3. * inputarray2[0,:] + inputarray3[0,:] * 7.=\n',3. * inputarray2[0,:] + inputarray3[0,:] * 7.
-	print 'a.tc[0,:]=\n', a.tc[0,:]
+	print('inputarray3=\n',inputarray3)
+	print('inputarray2=\n',inputarray2)
+	print('3. * inputarray2[0,:] + inputarray3[0,:] * 7.=\n',3. * inputarray2[0,:] + inputarray3[0,:] * 7.)
+	print('a.tc[0,:]=\n', a.tc[0,:])
 	
 	assert a.t0 == 21.
 	assert numpy.prod(a.tc[0,:] == ( 3. * inputarray2[0,:] + inputarray3[0,:] * 7. ))
@@ -185,9 +185,9 @@ def test_incremental_multiplication_multiple_directions_Tc_scalar():
 	tc = array([[1.,2,3],[4,5,6]])
 	a = Tc(t0,tc.copy())
 	a *= 2.
-	print 'a=',a
-	print 'a.tc=',a.tc
-	print '2*tc=',2.*tc
+	print('a=',a)
+	print('a.tc=',a.tc)
+	print('2*tc=',2.*tc)
 	assert a == 4.
 	assert prod(a.tc == 2.*tc)
 
@@ -203,8 +203,8 @@ def test_incremental_division_single_direction_Tc_Tc_same_order():
 	b = Tc(inputarray2)
 
 	a /= b
-	print 'a.tc=\n',a.tc
-	print 'a.tc true=\n', '[',( 1./inputarray2[0,0] *( inputarray3[1,0] - a.t0 * inputarray2[1,0] )),',',( 1./inputarray2[0,0] *( inputarray3[2,0] - a.t0 * inputarray2[2,0] - a.tc[0] * inputarray2[1,0] )), ']'
+	print('a.tc=\n',a.tc)
+	print('a.tc true=\n', '[',( 1./inputarray2[0,0] *( inputarray3[1,0] - a.t0 * inputarray2[1,0] )),',',( 1./inputarray2[0,0] *( inputarray3[2,0] - a.t0 * inputarray2[2,0] - a.tc[0] * inputarray2[1,0] )), ']')
 	assert a.t0 == inputarray3[0,0]/inputarray2[0,0]
 	assert abs(a.tc[0] - ( 1./inputarray2[0,0] *( inputarray3[1,0] - a.t0 * inputarray2[1,0] )))<10**(-8)
 	assert abs(a.tc[1] - ( 1./inputarray2[0,0] *( inputarray3[2,0] - a.t0 * inputarray2[2,0] - a.tc[0] * inputarray2[1,0] )))<10**(-8)
@@ -218,8 +218,8 @@ def test_incremental_division_single_direction_Tc_Tc_different_order():
 	b = Tc(inputarray2)
 
 	a /= b
-	print 'a.tc=\n',a.tc
-	print 'a.tc true=\n', '[',( 1./inputarray2[0,0] *( inputarray3[1,0] - a.t0 * inputarray2[1,0] )),',',( 1./inputarray2[0,0] *( inputarray3[2,0] - a.tc[0] * inputarray2[1,0] )), ']'
+	print('a.tc=\n',a.tc)
+	print('a.tc true=\n', '[',( 1./inputarray2[0,0] *( inputarray3[1,0] - a.t0 * inputarray2[1,0] )),',',( 1./inputarray2[0,0] *( inputarray3[2,0] - a.tc[0] * inputarray2[1,0] )), ']')
 	assert a.t0 == inputarray3[0,0]/inputarray2[0,0]
 	assert abs(a.tc[0] - ( 1./inputarray2[0,0] *( inputarray3[1,0] - a.t0 * inputarray2[1,0] )))<10**(-8)
 	assert abs(a.tc[1] - ( 1./inputarray2[0,0] *( inputarray3[2,0] -  a.tc[0] * inputarray2[1,0] )))<10**(-8)
@@ -269,11 +269,11 @@ def test_addition_single_direction_Tc_Tc_different_order():
 
 	c = a+b
 
-	print 'a.tc=',a.tc
-	print 'b.tc=',b.tc
-	print 'c.tc=',c.tc
-	print 'a.tc[:G]=',a.tc[:G]
-	print 'b.tc[:G]=',b.tc[:G]
+	print('a.tc=',a.tc)
+	print('b.tc=',b.tc)
+	print('c.tc=',c.tc)
+	print('a.tc[:G]=',a.tc[:G])
+	print('b.tc[:G]=',b.tc[:G])
 
 	assert c.t0 == a.t0 + b.t0
 	assert numpy.prod(c.tc[:G] == (a.tc[:G] + b.tc[:G]))
@@ -286,10 +286,10 @@ def test_addition_multiple_directions_Tc_float():
 	c = a+2
 	d = 2+a
 
-	print 'c.t0=',c.t0
-	print 't0=',t0+2
-	print 'c.tc=',c.tc
-	print 'tc=',tc
+	print('c.t0=',c.t0)
+	print('t0=',t0+2)
+	print('c.tc=',c.tc)
+	print('tc=',tc)
 	assert c.t0 == 4.
 	assert prod(c.tc == tc)
 
@@ -304,10 +304,10 @@ def test_division_single_direction_Tc_Tc_different_order():
 
 	c = a/b
 
-	print  ' c.tc[0,0]=', c.tc[0,0]
-	print '-(a.t0/b.t0**2)*b.tc[0,0]=',-(a.t0/b.t0**2)*b.tc[0,0]
-	print 'c.tc[1,0]=',c.tc[1,0]
-	print '( - (a.t0/b.t0**2)*b.tc[1,0] + 2*(a.t0/b.t0**3)*b.tc[1,0]**2 )=',( - (a.t0/b.t0**2)*b.tc[1,0] + (a.t0/b.t0**3)*b.tc[0,0]**2 )
+	print(' c.tc[0,0]=', c.tc[0,0])
+	print('-(a.t0/b.t0**2)*b.tc[0,0]=',-(a.t0/b.t0**2)*b.tc[0,0])
+	print('c.tc[1,0]=',c.tc[1,0])
+	print('( - (a.t0/b.t0**2)*b.tc[1,0] + 2*(a.t0/b.t0**3)*b.tc[1,0]**2 )=',( - (a.t0/b.t0**2)*b.tc[1,0] + (a.t0/b.t0**3)*b.tc[0,0]**2 ))
 	
 	assert c.t0 == a.t0 / b.t0
 	assert abs(c.tc[0,0]  + (a.t0/b.t0**2)*b.tc[0,0]) < 10**-6
@@ -318,15 +318,15 @@ def test_division_single_direction_Tc_Tc_different_order():
 def test_sqrt():
 	a = Tc(2.25)
 	b = sqrt(a)
-	print a,b
+	print(a,b)
 	assert sqrt(a.t0) == b.t0
 
 	a = Tc([2.25,1.,0.])
 	b = sqrt(a)
-	print a,b
+	print(a,b)
 
-	print 0.5*a.t0**(-0.5)
-	print -0.25*a.t0**(-1.5)/2.
+	print(0.5*a.t0**(-0.5))
+	print(-0.25*a.t0**(-1.5)/2.)
 	
 	assert sqrt(a.t0) == b.t0
 	assert 0.5*a.t0**(-0.5) == b.tc[0,0]
@@ -343,7 +343,7 @@ def test_integer_power():
 def test_exponential():
 	a = Tc([2.25,1.,0.])
 	b = exp(a)
-	print b
+	print(b)
 	assert b.t0 == exp(a.t0)
 	assert b.tc[0,0] == exp(a.t0)
 	assert 2*b.tc[1,0] == exp(a.t0)
@@ -352,7 +352,7 @@ def test_logarithm():
 	a = Tc([23.,1.,0.])
 	b = log(a)
 
-	print b
+	print(b)
 	assert b.t0 == log(a.t0)
 	assert b.tc[0,0] == 1./a.t0
 	assert 2*b.tc[1,0] == -1./(a.t0*a.t0)
@@ -460,8 +460,8 @@ def test_forward_mode():
 	cg.dependentFunctionList = [f]
 	cg.forward([Tc([11.,1.]), Tc([13.,2.]), Tc([13.,3.])])
 
-	print f
-	print f_tc
+	print(f)
+	print(f_tc)
 	assert f.x.t0 == f_tc.t0
 	assert f.x.tc[0] == f_tc.tc[0]
 
@@ -489,8 +489,8 @@ def test_reverse_mode_first_order():
 	#print y
 	#print z
 
-	print 'x.xbar.t0=',x.xbar.t0
-	print 'dfdx(11.,13.,17.)', dfdx(11.,13.,17.)
+	print('x.xbar.t0=',x.xbar.t0)
+	print('dfdx(11.,13.,17.)', dfdx(11.,13.,17.))
 	assert x.xbar.t0 == dfdx(11.,13.,17.)
 	assert y.xbar.t0 == dfdy(11.,13.,17.)
 	assert z.xbar.t0 == dfdz(11.,13.,17.)
@@ -512,11 +512,11 @@ def test_reverse_mode_second_order():
 	cg.dependentFunctionList = [f]
 	cg.reverse([Tc(1.)])
 
-	print cg
+	print(cg)
 
 
-	print 'x.xbar.tc[0,0]=',x.xbar.tc[0,0]
-	print 'd2fdxdx(11.,13.,17.)=',d2fdxdx(11.,13.,17.)
+	print('x.xbar.tc[0,0]=',x.xbar.tc[0,0])
+	print('d2fdxdx(11.,13.,17.)=',d2fdxdx(11.,13.,17.))
 
 	assert x.xbar.tc[0,0] == d2fdxdx(11.,13.,17.)
 
@@ -541,17 +541,17 @@ def test_reverse_mode_second_order_two_variables():
 	cg.independentFunctionList = [x,y]
 	cg.dependentFunctionList = [f]
 
-	print cg
+	print(cg)
 	cg.reverse([Tc(1.)])
 
-	print cg
+	print(cg)
 
 
-	print 'x.xbar.tc[0,0]=',x.xbar.tc[0,0]
-	print 'd2fdxdx(11.,13.,17.)=',d2fdxdx(11.,13.)
+	print('x.xbar.tc[0,0]=',x.xbar.tc[0,0])
+	print('d2fdxdx(11.,13.,17.)=',d2fdxdx(11.,13.))
 
-	print 'y.xbar.tc[0,0]=',y.xbar.tc[0,0]
-	print 'd2fdxdy(11.,13.,17.)',d2fdxdy(11.,13.)
+	print('y.xbar.tc[0,0]=',y.xbar.tc[0,0])
+	print('d2fdxdy(11.,13.,17.)',d2fdxdy(11.,13.))
 
 	assert x.xbar.tc[0,0] == d2fdxdx(11.,13.)
 	assert y.xbar.tc[0,0] == d2fdxdy(11.,13.)
@@ -578,19 +578,19 @@ def test_reverse_mode_second_order_three_variables():
 	cg.independentFunctionList = [x,y,z]
 	cg.dependentFunctionList = [f]
 
-	print cg
+	print(cg)
 	cg.reverse([Tc(1.)])
-	print cg
+	print(cg)
 
 
-	print 'x.xbar.tc[0,0]=',x.xbar.tc[0,0]
-	print 'd2fdxdx(11.,13.,17.)=',d2fdxdx(11.,13.,17.)
+	print('x.xbar.tc[0,0]=',x.xbar.tc[0,0])
+	print('d2fdxdx(11.,13.,17.)=',d2fdxdx(11.,13.,17.))
 
-	print 'y.xbar.tc[0,0]=',y.xbar.tc[0,0]
-	print 'd2fdxdy(11.,13.,17.)',d2fdxdy(11.,13.,17.)
+	print('y.xbar.tc[0,0]=',y.xbar.tc[0,0])
+	print('d2fdxdy(11.,13.,17.)',d2fdxdy(11.,13.,17.))
 
-	print 'z.xbar.tc[0,0]=',z.xbar.tc[0,0]
-	print 'd2fdxdz(11.,13.,17.)',d2fdxdz(11.,13.,17.)
+	print('z.xbar.tc[0,0]=',z.xbar.tc[0,0])
+	print('d2fdxdz(11.,13.,17.)',d2fdxdz(11.,13.,17.))
 
 	assert x.xbar.tc[0,0] == d2fdxdx(11.,13.,17.)
 	assert y.xbar.tc[0,0] == d2fdxdy(11.,13.,17.)
@@ -611,10 +611,10 @@ def test_inner_product_gradient():
 
 	y = numpy.dot(A,[2.,7.])
 
-	print 'x[0].xbar=',x[0].xbar
-	print 'x[1].xbar=',x[1].xbar
-	print 'y[0]=',y[0]
-	print 'y[1]=',y[1]
+	print('x[0].xbar=',x[0].xbar)
+	print('x[1].xbar=',x[1].xbar)
+	print('y[0]=',y[0])
+	print('y[1]=',y[1])
 
 	assert x[0].xbar.t0 == y[0]
 	assert x[1].xbar.t0 == y[1]
@@ -632,9 +632,9 @@ def test_vector_forward_inner_product_hessian():
 
 	cg.reverse([Tc(1.)])
 
-	print 'x[0].xbar.tc=',x[0].xbar.tc
-	print 'x[1].xbar.tc=',x[1].xbar.tc
-	print 'A=',A
+	print('x[0].xbar.tc=',x[0].xbar.tc)
+	print('x[1].xbar.tc=',x[1].xbar.tc)
+	print('A=',A)
 
 	assert numpy.prod(x[0].xbar.tc[:,0] == A[:,0])
 	assert numpy.prod(x[1].xbar.tc[:,0] == A[:,1])
@@ -727,15 +727,15 @@ def test_graph__sqrt():
 	cg.dependentFunctionList = [f]
 	cg.reverse([Tc(1)])
 
-	print 'x.x=\n',x.x
-	print 'x.xbar=\n',x.xbar
-	print 'x.bar.tc[0,0]=',x.xbar.tc[0,0]
-	print '0.25 * x.x.t0**(-1.5)=',0.25 * x.x.t0**(-1.5)
+	print('x.x=\n',x.x)
+	print('x.xbar=\n',x.xbar)
+	print('x.bar.tc[0,0]=',x.xbar.tc[0,0])
+	print('0.25 * x.x.t0**(-1.5)=',0.25 * x.x.t0**(-1.5))
 
-	print '2* x.xbar.tc[1,0]=',2* x.xbar.tc[1,0]
-	print ' 3./8 * x.x.t0**-2.5=', 3./8 * x.x.t0**-2.5
+	print('2* x.xbar.tc[1,0]=',2* x.xbar.tc[1,0])
+	print(' 3./8 * x.x.t0**-2.5=', 3./8 * x.x.t0**-2.5)
 
-	print cg
+	print(cg)
 	
 	assert x.xbar.t0 == 0.5 / sqrt(x.x.t0)
 	assert abs(x.xbar.tc[0,0] + 0.25 * x.x.t0**(-1.5)) < 10**-6
@@ -751,11 +751,11 @@ def test_graph_sin():
 	cg.dependentFunctionList = [f]
 	cg.reverse([Tc(1.)])
 
-	print 'x.xbar.t0=',x.xbar.t0
-	print 'cos(x.x.t0)=',cos(x.x.t0)
+	print('x.xbar.t0=',x.xbar.t0)
+	print('cos(x.x.t0)=',cos(x.x.t0))
 
-	print ' x.xbar.tc[0,0]=', x.xbar.tc[0,0]
-	print '-sin(x.x.t0)=',-sin(x.x.t0)
+	print(' x.xbar.tc[0,0]=', x.xbar.tc[0,0])
+	print('-sin(x.x.t0)=',-sin(x.x.t0))
 
 	assert x.xbar.t0 == cos(x.x.t0)
 	assert x.xbar.tc[0,0] == -sin(x.x.t0)
@@ -824,7 +824,7 @@ def test_hessian():
 	# compute the Hessian
 	x = array([3.,7.])
 	H = hessian(fun,x)
-	print H
+	print(H)
 
 	assert prod(H == A)
 	

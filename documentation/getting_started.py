@@ -77,7 +77,7 @@ x.data[0,:] = numpy.random.rand(N,1)
 A.data[1,0,0,0] = 1.
 y = f(A,x)
 
-print 'df/dA_{11] = ',y.data[1,0]
+print('df/dA_{11] = ',y.data[1,0])
 
 """
 Of course it is the goal to obtain all partial derivatives. 
@@ -109,7 +109,7 @@ y = f(A,x)
 
 gradient_AD = y.data[1,:]
 
-print 'AD gradient g(A,x) = ', gradient_AD
+print('AD gradient g(A,x) = ', gradient_AD)
 
 """
 Ok, no idea if that's correct. However, we can check by Finite Differences if
@@ -145,7 +145,7 @@ Checking now how close the AD solution is to FD. The FD solution is at best
 numpy.sqrt(2**-53) digits accurate.
 """
 
-print 'gradient_FD - gradient_AD = ', gradient_FD - gradient_AD 
+print('gradient_FD - gradient_AD = ', gradient_FD - gradient_AD) 
 
 
 

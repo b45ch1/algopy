@@ -78,7 +78,7 @@ def test_trace():
 	N2 = 3
 	N3 = 4
 	N4 = 5
-	x = asarray(range(N1*N2*N3*N4))
+	x = asarray(list(range(N1*N2*N3*N4)))
 	x = x.reshape((N1,N2,N3,N4))
 	AX = Mtc(x)
 	AY = AX.T
@@ -100,7 +100,7 @@ def test_forward_UTPM_add():
 	cg.independentFunctionList = [FX,FY]
 	cg.dependentFunctionList = [FZ]
 
-	print FZ
+	print(FZ)
 	#assert False
 
 def test_forward_UTPM_inv():

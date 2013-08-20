@@ -1,3 +1,3 @@
-from utps import *
+from .utps import *
 
-print 'WARNING: the submodule algopy.utps is deprecated and tagged for removal!'
+print('WARNING: the submodule algopy.utps is deprecated and tagged for removal!')

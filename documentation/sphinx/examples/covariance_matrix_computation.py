@@ -33,7 +33,7 @@ y = C[0,0]
 cg1.trace_off()
 cg1.independentFunctionList = [J1, J2]
 cg1.dependentFunctionList = [y]
-print 'covariance matrix: C =\n',C
+print('covariance matrix: C =\n',C)
 
 # trace the function evaluation of METHOD 2: naive method (potentially numerically unstable)
 cg2 = CGraph()
@@ -44,10 +44,10 @@ y = C2[0,0]
 cg2.trace_off()
 cg2.independentFunctionList = [J1, J2]
 cg2.dependentFunctionList = [y]
-print 'covariance matrix: C =\n',C2
+print('covariance matrix: C =\n',C2)
 
 # check that both algorithms returns the same result
-print 'difference between naive and nullspace method:\n',C - C2
+print('difference between naive and nullspace method:\n',C - C2)
 
 # compute the gradient for another value of J1 and J2
 J1 = numpy.random.rand(*(M,N))
@@ -56,11 +56,11 @@ J2 = numpy.random.rand(*(K,N))
 g1 = cg1.gradient([J1,J2])
 g2 = cg2.gradient([J1,J2])
 
-print 'naive approach: dy/dJ1 = ', g1[0]
-print 'naive approach: dy/dJ2 = ', g1[1]
+print('naive approach: dy/dJ1 = ', g1[0])
+print('naive approach: dy/dJ2 = ', g1[1])
 
-print 'nullspace approach: dy/dJ1 = ', g2[0]
-print 'nullspace approach: dy/dJ2 = ', g2[1]
+print('nullspace approach: dy/dJ1 = ', g2[0])
+print('nullspace approach: dy/dJ2 = ', g2[1])
 
 
 

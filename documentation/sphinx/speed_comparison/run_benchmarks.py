@@ -23,7 +23,7 @@ function_N_list = [1,2,4,8,16,32,64,128,256]
 
 results_function_list = []
 for N in function_N_list:
-    print 'N=',N
+    print('N=',N)
     results_function = np.zeros((11,3))
      
     # pure python
@@ -31,7 +31,7 @@ for N in function_N_list:
     t = time.time(); pass ; preproc_time = time.time() - t
     t = time.time();  ref_f =  f(3*np.ones(N));  run_time = time.time() - t
     results_function[method['python']] = run_time, abs(ref_f - ref_f), preproc_time
-    print 'ref_f=',ref_f
+    print('ref_f=',ref_f)
     
     # pyadolc
     f = benchmark1.F(N)
@@ -66,7 +66,7 @@ for N in function_N_list:
     # print f
 
 results_functions = np.array(results_function_list)
-print 'results_functions=\n',results_functions
+print('results_functions=\n',results_functions)
 
 # GRADIENT COMPUTATION
 # --------------------
@@ -76,7 +76,7 @@ gradient_N_list = [2,4,8,16,32,64,96]
 
 results_gradient_list = []
 for N in gradient_N_list:
-    print 'N=',N
+    print('N=',N)
     results_gradient = np.zeros((11,3))
     
     # pyadolc
@@ -136,17 +136,17 @@ for N in gradient_N_list:
     results_gradient_list.append(results_gradient)
 
 results_gradients = np.array(results_gradient_list)
-print 'results_gradients=\n',results_gradients
+print('results_gradients=\n',results_gradients)
 
 # HESSIAN COMPUTATION
 # -------------------
-print 'starting hessian computation '
+print('starting hessian computation ')
 results_hessian_list = []
 hessian_N_list = [1,2,4,8,16,32,64]
 # hessian_N_list = [2]
 
 for N in hessian_N_list:
-    print 'N=',N
+    print('N=',N)
     results_hessian = np.zeros((11,3))
     
     # pyadolc
@@ -184,13 +184,13 @@ for N in hessian_N_list:
 
 results_hessians = np.array(results_hessian_list)
 
-print hessian_N_list
-print 'results_hessians=\n',results_hessians
+print(hessian_N_list)
+print('results_hessians=\n',results_hessians)
 
 
 # PLOT RESULTS
 
-print results_gradients.shape
+print(results_gradients.shape)
 
 import matplotlib.pyplot as pyplot
 import prettyplotting

@@ -14,8 +14,8 @@ A = UTPM.dot(Q, UTPM.dot(L,Q.T))
 
 l2,Q2 = UTPM.eigh(A)
 
-print 'error between true and reconstructed eigenvalues'
-print l.data[:,:,numpy.argsort(l.data[0,0])] - l2.data
+print('error between true and reconstructed eigenvalues')
+print(l.data[:,:,numpy.argsort(l.data[0,0])] - l2.data)
 
 
 

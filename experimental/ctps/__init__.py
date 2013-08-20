@@ -13,6 +13,6 @@ Warning:
     code consolidation.
 
 """
-from ctps import *
+from .ctps import *
 
-print 'WARNING: the submodule algopy.ctps is deprecated and tagged for removal!'
+print('WARNING: the submodule algopy.ctps is deprecated and tagged for removal!')

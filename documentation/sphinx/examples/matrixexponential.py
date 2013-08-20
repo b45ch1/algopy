@@ -132,49 +132,49 @@ def main():
     Y = np.zeros(5)
 
 
-    print '--------------------------------'
-    print ' simple check (functions)       '
-    print '--------------------------------'
-    print 'eval_f_orig(Y)\n', eval_f_orig(Y)
-    print 'eval_f(Y)\n', eval_f(Y)
-    print 'eval_f_eigh(Y)\n', eval_f_eigh(Y)
-    print 'eval_f_eigh(Y) - eval_f(Y)\n', eval_f_eigh(Y) - eval_f(Y)
-    print '--------------------------------'
-    print
+    print('--------------------------------')
+    print(' simple check (functions)       ')
+    print('--------------------------------')
+    print('eval_f_orig(Y)\n', eval_f_orig(Y))
+    print('eval_f(Y)\n', eval_f(Y))
+    print('eval_f_eigh(Y)\n', eval_f_eigh(Y))
+    print('eval_f_eigh(Y) - eval_f(Y)\n', eval_f_eigh(Y) - eval_f(Y))
+    print('--------------------------------')
+    print()
 
 
-    print '--------------------------------'
-    print ' simple check (gradients)       '
-    print '--------------------------------'
-    print 'eval_grad_f(Y)\n', eval_grad_f(Y)
-    print 'eval_grad_f_eigh(Y)\n', eval_grad_f_eigh(Y)
-    print 'eval_grad_f_eigh(Y) - eval_grad_f(Y)\n', eval_grad_f_eigh(Y) - eval_grad_f(Y)
-    print '--------------------------------'
-    print
+    print('--------------------------------')
+    print(' simple check (gradients)       ')
+    print('--------------------------------')
+    print('eval_grad_f(Y)\n', eval_grad_f(Y))
+    print('eval_grad_f_eigh(Y)\n', eval_grad_f_eigh(Y))
+    print('eval_grad_f_eigh(Y) - eval_grad_f(Y)\n', eval_grad_f_eigh(Y) - eval_grad_f(Y))
+    print('--------------------------------')
+    print()
 
 
-    print '--------------------------------'
-    print ' simple check (hessians)        '
-    print '--------------------------------'
-    print 'eval_hess_f(Y)\n', eval_hess_f(Y)
-    print 'eval_hess_f_eigh(Y)\n', eval_hess_f_eigh(Y)
-    print 'eval_hess_f_eigh(Y) - eval_hess_f(Y)\n', eval_hess_f_eigh(Y) - eval_hess_f(Y)
-    print '--------------------------------'
-    print
+    print('--------------------------------')
+    print(' simple check (hessians)        ')
+    print('--------------------------------')
+    print('eval_hess_f(Y)\n', eval_hess_f(Y))
+    print('eval_hess_f_eigh(Y)\n', eval_hess_f_eigh(Y))
+    print('eval_hess_f_eigh(Y) - eval_hess_f(Y)\n', eval_hess_f_eigh(Y) - eval_hess_f(Y))
+    print('--------------------------------')
+    print()
 
     tm = time.time()
     results = optimize.fmin(
             eval_f, Y,
             maxiter=10000, maxfun=10000, full_output=True)
     tsrate, tvrate, v = transform_params(results[0])
-    print '--------------------------------'
-    print 'time:', time.time() - tm
-    print 'results output from fmin:', results
-    print 'estimated transition rate parameter:', tsrate
-    print 'estimated transversion rate parameter:', tvrate
-    print 'estimated stationary distribution:', v
-    print '--------------------------------'
-    print
+    print('--------------------------------')
+    print('time:', time.time() - tm)
+    print('results output from fmin:', results)
+    print('estimated transition rate parameter:', tsrate)
+    print('estimated transversion rate parameter:', tvrate)
+    print('estimated stationary distribution:', v)
+    print('--------------------------------')
+    print()
 
     tm = time.time()
     results = optimize.fmin_ncg(
@@ -200,22 +200,22 @@ def main():
     tsrate, tvrate, v = transform_params(results[0])
     #hess = eval_hess_f_eigh(results[0])
     hess = eval_hess_f(results[0])
-    print '--------------------------------'
-    print 'time:', time.time() - tm
-    print 'results output from fmin:', results
+    print('--------------------------------')
+    print('time:', time.time() - tm)
+    print('results output from fmin:', results)
     #print 'objective function value:', eval_f_eigh(results[0])
-    print 'objective function value:', eval_f(results[0])
+    print('objective function value:', eval_f(results[0]))
     #print 'gradient:', eval_grad_f_eigh(results[0])
-    print 'gradient:', eval_grad_f(results[0])
-    print 'hessian:', hess
-    print 'hess - hess.T:', hess - hess.T
-    print 'eigvalsh(hess):', linalg.eigvalsh(hess)
-    print 'inverse of hessian:', linalg.inv(hess)
-    print 'determinant of hessian:', linalg.det(hess)
-    print 'estimated transition rate parameter:', tsrate
-    print 'estimated transversion rate parameter:', tvrate
-    print 'estimated stationary distribution:', v
-    print '--------------------------------'
+    print('gradient:', eval_grad_f(results[0]))
+    print('hessian:', hess)
+    print('hess - hess.T:', hess - hess.T)
+    print('eigvalsh(hess):', linalg.eigvalsh(hess))
+    print('inverse of hessian:', linalg.inv(hess))
+    print('determinant of hessian:', linalg.det(hess))
+    print('estimated transition rate parameter:', tsrate)
+    print('estimated transversion rate parameter:', tvrate)
+    print('estimated stationary distribution:', v)
+    print('--------------------------------')
 
 
 if __name__ == '__main__':

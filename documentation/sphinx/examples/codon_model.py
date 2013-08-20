@@ -758,9 +758,9 @@ def main():
             )
 
     # report a summary of the maximum likelihood search
-    print results
+    print(results)
     x = results[0]
-    print numpy.exp(x)
+    print(numpy.exp(x))
 
 
 if __name__ == '__main__':

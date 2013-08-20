@@ -55,7 +55,7 @@ cg.dependentFunctionList = [y]
 J = y.x.data[1].T
 
 # # checking against the analytical result
-print 'J - A =\n', J - A.x.data[0,0]
+print('J - A =\n', J - A.x.data[0,0])
 
 # Now we want to compute the same Jacobian in the reverse mode of AD
 # before we do that we have a look what the computational graph looks like:
@@ -80,11 +80,11 @@ J_row2 = x.xbar.data[0,0]
 
 # build Jacobian
 J2 = numpy.vstack([J_row1.T, J_row2.T])
-print 'J - J2 =\n', J - J2
+print('J - J2 =\n', J - J2)
 
 # one can also easiliy extract the Hessian which is here a (M,N,N)-tensor
 # e.g. the hessian of y[1] is zero since y[1] is linear in x
-print 'Hessian of y[1] w.r.t. x = \n',x.xbar.data[1,:,:,0]
+print('Hessian of y[1] w.r.t. x = \n',x.xbar.data[1,:,:,0])
 
 
 

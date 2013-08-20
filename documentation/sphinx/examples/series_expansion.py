@@ -10,7 +10,7 @@ x.data[0,0] = 0.3
 x.data[1,0] = 1
 
 y = f(x)
-print 'coefficients of y =', y.data[:,0]
+print('coefficients of y =', y.data[:,0])
 
 import matplotlib.pyplot as pyplot; import os
 zs = numpy.linspace(-1,2,100)

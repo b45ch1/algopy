@@ -18,15 +18,15 @@ y.data[1,:] = numpy.eye(Nm)
 
 # print f(y)
 J = f(y).data[1,:,:,0]
-print 'Jacobian J(y) = \n', J
+print('Jacobian J(y) = \n', J)
 
 C_epsilon = 0.3*numpy.eye(Nm)
 
-print J.shape
+print(J.shape)
 
 C = dot(J.T, dot(C_epsilon,J))
 
-print 'Covariance matrix of z: C = \n',C
+print('Covariance matrix of z: C = \n',C)
         
     
         

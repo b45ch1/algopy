@@ -51,7 +51,7 @@ Qdot = Q.data[1,0]
 # print l
 
 # print 'check pushforward:'
-print 'Q.T A Q - L =\n', UTPM.dot(Q.T, UTPM.dot(A,Q)) - L
+print('Q.T A Q - L =\n', UTPM.dot(Q.T, UTPM.dot(A,Q)) - L)
 # print 'Q.T Q - I =\n', UTPM.dot(Q.T, Q) - numpy.eye(N)
 # print 'check pullback:'
 # print 'error measure of the pullback = ', numpy.trace(numpy.dot(Abar.T, Adot)) - numpy.trace( numpy.dot(Lbar.T, Ldot) + numpy.dot(Qbar.T, Qdot))

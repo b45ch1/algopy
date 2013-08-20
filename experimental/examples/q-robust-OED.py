@@ -251,7 +251,7 @@ if __name__ == "__main__":
 					I = array([1,dm])
 					K = zeros((dm+1,2),dtype=int)
 					K[:,0] = 1
-					K[:,1] = range(dm+1)
+					K[:,1] = list(range(dm+1))
 					V = zeros((Nv,dm+1))
 					for k in K:
 						s1 = zeros(Nv)
@@ -262,7 +262,7 @@ if __name__ == "__main__":
 						tmp = adolc.hos_forward(1,v,V,0)[1]
 						J[dm,0,:,np] += (-1)**multi_index_abs( I - k) * multi_index_binomial(I,k) * tmp[:,dm]
 						
-			scale_factor = array([1./prod(range(1,d+1)) for d in range(DM+1)])
+			scale_factor = array([1./prod(list(range(1,d+1))) for d in range(DM+1)])
 			for dm in range(DM+1):
 				J[dm,:,:,:] *= scale_factor[dm]
 
@@ -285,7 +285,7 @@ if __name__ == "__main__":
 					I = array([1,dm])
 					K = zeros((dm+1,2),dtype=int)
 					K[:,0] = 1
-					K[:,1] = range(dm+1)
+					K[:,1] = list(range(dm+1))
 
 					V = zeros((Nv,dm+1))
 					for k in K:
@@ -311,7 +311,7 @@ if __name__ == "__main__":
 						#print shape(Z[0,:,:])
 						#exit()
 						#print Z[0,:,dm+1]
-						tmp =  1./prod(range(1,dm+2)) * (-1)**multi_index_abs( I - k) * multi_index_binomial(I,k) * Z[0,Np:,dm+1]
+						tmp =  1./prod(list(range(1,dm+2))) * (-1)**multi_index_abs( I - k) * multi_index_binomial(I,k) * Z[0,Np:,dm+1]
 						dJ[:,dm] += tmp
 						#vbar += tmp
 			qbar_rays[nq,:,:] = dJ
@@ -328,7 +328,7 @@ if __name__ == "__main__":
 				for nj in range(NJq):
 					derivative_tensor[tuple([0 for i in range(dm+1)])] +=  gamma(I[ni,:], Jq[nj,:]) * qbar_rays[nj,:,d]
 			derivative_tensor_list.append(derivative_tensor)
-		print derivative_tensor_list
+		print(derivative_tensor_list)
 		#print qbar_rays
 		vbar[Np:] = derivative_tensor_list[0]
 		#vbar[Np:] = dJ[:,0]
@@ -349,9 +349,9 @@ if __name__ == "__main__":
 		vbar = gradient_of_E_PHI(v,0)
 		v[2:] -= vbar[2:]
 	
-	print 'number of iterations =',count
-	print 'v_opt =',v
-	print 'v0=',v0
+	print('number of iterations =',count)
+	print('v_opt =',v)
+	print('v0=',v0)
 
 	## plot Phi
 	## --------

@@ -32,7 +32,7 @@ cg.dependentFunctionList = [z]
 # by y.x. That means the Jacobian is
 grad1 = z.x.data[1,:,0]
 
-print 'forward gradient g(x) = \n', grad1
+print('forward gradient g(x) = \n', grad1)
 
 # Now we want to compute the same Jacobian in the reverse mode of AD
 # before we do that we have a look what the computational graph looks like:
@@ -51,17 +51,17 @@ grad2_x = x.xbar.data[0,0]
 grad2_y = y.xbar.data[0,0]
 grad2 = numpy.concatenate([grad2_x, grad2_y])
 
-print 'reverse gradient g(x) = \n', grad2
+print('reverse gradient g(x) = \n', grad2)
 
 #check that the forward computed gradient equals the reverse gradient
-print 'difference forward/reverse gradient=\n',grad1 - grad2
+print('difference forward/reverse gradient=\n',grad1 - grad2)
 
 # one can also easiliy extract the Hessian
 H = numpy.zeros((2*N,2*N))
 H[:,:N] = x.xbar.data[1,:,:,0]
 H[:,N:] = y.xbar.data[1,:,:,0]
 
-print 'Hessian = \n', H
+print('Hessian = \n', H)
 
 
 
