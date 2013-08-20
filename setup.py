@@ -30,7 +30,7 @@ import re
 import subprocess
 
 if sys.version_info[0] < 3:
-    import __builtin__ as builtins
+    import builtins as builtins
 else:
     import builtins
 
@@ -54,7 +54,7 @@ KEYWORDS            = ['algorithmic differentiation', 'computational differentia
 URL                 = "http://packages.python.org/algopy"
 DOWNLOAD_URL        = "http://www.github.com/b45ch1/algopy"
 LICENSE             = 'BSD'
-CLASSIFIERS         = filter(None, CLASSIFIERS.split('\n'))
+CLASSIFIERS         = [_f for _f in CLASSIFIERS.split('\n') if _f]
 AUTHOR              = "Sebastian F. Walter"
 AUTHOR_EMAIL        = "sebastian.walter@gmail.com"
 PLATFORMS           = ["all"]
@@ -83,7 +83,7 @@ def write_version_py(filename='algopy/version.py'):
     except:
         git_revision = '.dev'
 
-    print git_revision
+    print(git_revision)
 
     cnt = """
 # THIS FILE IS GENERATED FROM ALGOPY SETUP.PY

@@ -1,4 +1,4 @@
-from __future__ import division
+
 from numpy.testing import run_module_suite, TestCase
 
 import numpy

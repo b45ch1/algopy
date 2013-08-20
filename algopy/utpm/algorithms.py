@@ -367,7 +367,7 @@ class RawAlgorithmsMixIn:
             z_data[d,:,...] +=  numpy.sum(x_data[:d+1,:,...] * y_data[d::-1,:,...], axis=0)
 
     @classmethod
-    def _idiv(cls, z_data, x_data):
+    def _itruediv(cls, z_data, x_data):
         (D,P) = z_data.shape[:2]
         tmp_data = z_data.copy()
         for d in range(D):
@@ -375,7 +375,7 @@ class RawAlgorithmsMixIn:
         z_data[...] = tmp_data[...]
 
     @classmethod
-    def _div(cls, x_data, y_data, out = None):
+    def _truediv(cls, x_data, y_data, out = None):
         """
         z = x/y
         """
@@ -545,7 +545,7 @@ class RawAlgorithmsMixIn:
 
             tmp = numpy.zeros_like(xbar_data)
 
-            cls._div(y_data, x_data, tmp)
+            cls._truediv(y_data, x_data, tmp)
             tmp[...] = numpy.nan_to_num(tmp)
             cls._mul(ybar_data, tmp, tmp)
             tmp *= r
@@ -679,7 +679,7 @@ class RawAlgorithmsMixIn:
 
         xbar_data = out
         tmp = xbar_data.copy()
-        cls._div(ybar_data, y_data, tmp)
+        cls._truediv(ybar_data, y_data, tmp)
         tmp /= 2.
         xbar_data += tmp
         return xbar_data
@@ -833,7 +833,7 @@ class RawAlgorithmsMixIn:
         if out == None:
             raise NotImplementedError('should implement that')
         xbar_data = out
-        xbar_data += cls._div(ybar_data, x_data, numpy.empty_like(xbar_data))
+        xbar_data += cls._truediv(ybar_data, x_data, numpy.empty_like(xbar_data))
         return xbar_data
 
     @classmethod
@@ -847,7 +847,7 @@ class RawAlgorithmsMixIn:
         if out is None:
             raise NotImplementedError('should implement that')
         xbar_data = out
-        xbar_data += cls._div(
+        xbar_data += cls._truediv(
                 ybar_data, _plus_const(x_data, 1), numpy.empty_like(xbar_data))
         return xbar_data
 
@@ -2167,7 +2167,7 @@ class RawAlgorithmsMixIn:
                         for d in range(D):
                             H[d,p,m,n] = 1./tmp
                 # tmp = lam_data[:,:,n] -   lam_data[:,:,m]
-                # cls._div(Id, tmp, out = H[:,:,m,n])
+                # cls._truediv(Id, tmp, out = H[:,:,m,n])
 
         # STEP 2: compute Lbar +  H * Q^T Qbar
         cls._dot(cls._transpose(Q_data), Qbar_data, out = tmp1)

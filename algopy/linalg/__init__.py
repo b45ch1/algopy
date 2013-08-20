@@ -5,7 +5,7 @@ to apply algopy to numpy.linalg and scipy.linalg functions.
 
 """
 
-from linalg import *
-from compound import *
+from .linalg import *
+from .compound import *
 
 

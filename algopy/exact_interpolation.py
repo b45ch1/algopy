@@ -13,7 +13,7 @@ We use the same notation as in the book since the notation in asci is easier to 
 
 
 """
-from __future__ import division
+
 import numpy
 
 try:
@@ -114,7 +114,7 @@ def multi_index_binomial(i,j):
     """
 
     def mybinomial(i,j):
-        return numpy.prod([ (i-k)/(j-k) for k in range(j)])
+        return numpy.prod([ float(i-k)/(j-k) for k in range(j)])
 
     N = len(i)
     return numpy.prod([mybinomial(i[n],j[n]) for n in range(N)] )
@@ -225,7 +225,7 @@ def gamma(i,j):
         term1 = (-1.)**multi_index_abs(i - k)
         term2 = multi_index_binomial(i,k)
         term3 = multi_index_binomial((1.*deg*k)/multi_index_abs(k),j)
-        term4 = (multi_index_abs(k)/deg)**multi_index_abs(i)
+        term4 = (multi_index_abs(k)/(1.*deg))**multi_index_abs(i)
 
         return term1*term2*term3*term4
 
@@ -234,7 +234,7 @@ def gamma(i,j):
     k = numpy.zeros(N,dtype=int)
     # increment(i,k)
 
-    retval = 0
+    retval = 0.
     while (i == k).all() == False:
         increment(i,k)
         retval += alpha(i,j,k, deg)

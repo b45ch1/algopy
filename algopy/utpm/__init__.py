@@ -26,4 +26,4 @@ utpm.utpm:
 
 """
 
-from utpm import *
+from .utpm import *

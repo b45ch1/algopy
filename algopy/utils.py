@@ -66,7 +66,7 @@ def base_and_dirs2utpm(x,V):
 
 def ndarray2utpm(A):
     """ returns an UTPM instance from an array_like instance A with UTPM elements"""
-    from globalfuncs import zeros
+    from .globalfuncs import zeros
     shp = numpy.shape(A)
     A = numpy.ravel(A)
     retval = zeros(shp,dtype=A[0])
@@ -108,7 +108,7 @@ def symvec(A, UPLO='F'):
         as output
 
     """
-    from globalfuncs import zeros
+    from .globalfuncs import zeros
     N,M = A.shape
 
     assert N == M
@@ -148,7 +148,7 @@ def vecsym(v):
     returns a full symmetric matrix filled
     the distinct elements of v, filled row-wise
     """
-    from globalfuncs import zeros
+    from .globalfuncs import zeros
     Nv = v.size
     N = (int(numpy.sqrt(1 + 8*Nv)) - 1)//2
 

@@ -2,7 +2,7 @@ import math
 import numpy
 
 import string
-import utils
+from . import utils
 from algopy import UTPM
 from algopy import Function
 
@@ -50,8 +50,8 @@ def $function_name(*args, **kwargs):
 ''')
 
 for function_name in numpy_function_names:
-    exec function_template.substitute(function_name=function_name,
-                                      namespace='numpy')
+    exec(function_template.substitute(function_name=function_name,
+                                      namespace='numpy'))
 
 
 def sum(x, axis=None, dtype=None, out=None):

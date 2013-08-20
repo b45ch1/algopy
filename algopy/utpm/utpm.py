@@ -15,7 +15,7 @@ import numpy
 
 from ..base_type import Ring
 
-from algorithms import RawAlgorithmsMixIn, broadcast_arrays_shape
+from .algorithms import RawAlgorithmsMixIn, broadcast_arrays_shape
 
 import operator
 
@@ -248,7 +248,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         old_shp = x.data.__getitem__(sl).shape
         tmp_data = ybar.data.reshape(old_shp)
 
-        print 'tmp_data.shape=',tmp_data.shape
+        print('tmp_data.shape=',tmp_data.shape)
 
         # step 2: revert getitem
         tmp2 = xbar.data[::-1].__getitem__(sl)
@@ -350,7 +350,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         self._mul(x_data, y_data, z_data)
         return self.__class__(z_data)
 
-    def __div__(self,rhs):
+    def __truediv__(self,rhs):
         if numpy.isscalar(rhs):
             return UTPM( self.data/rhs)
 
@@ -366,15 +366,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         x_data, y_data = UTPM._broadcast_arrays(self.data, rhs.data)
         z_data = numpy.zeros_like(x_data)
-        self._div(x_data, y_data, z_data)
+        self._truediv(x_data, y_data, z_data)
         return self.__class__(z_data)
-
-
-    def __truediv__(self, rhs):
-        return self/rhs
-
-    def __rtruediv__(self, rhs):
-        return rhs/self
 
     def __floordiv__(self, rhs):
         """
@@ -387,6 +380,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         z_data = numpy.zeros_like(x_data)
         self._floordiv(x_data, y_data, z_data)
         return self.__class__(z_data)
+
 
     def __pow__(self,r):
         if isinstance(r, UTPM):
@@ -424,7 +418,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def __rmul__(self,rhs):
         return self * rhs
 
-    def __rdiv__(self, rhs):
+    def __rtruediv__(self, rhs):
         tmp = self.zeros_like()
         tmp.data[0,...] = rhs
         return tmp/self
@@ -469,7 +463,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
                         self.data[d,p,...] += self.data[c,p,...] * rhs.data[d-c,p,...]
         return self
 
-    def __idiv__(self,rhs):
+    def __itruediv__(self,rhs):
         (D,P) = self.data.shape[:2]
         if isinstance(rhs,numpy.ndarray) and rhs.dtype == object:
             raise NotImplementedError('should implement that')
@@ -482,6 +476,10 @@ class UTPM(Ring, RawAlgorithmsMixIn):
                 retval.data[d,:,...] = 1./ rhs.data[0,:,...] * ( self.data[d,:,...] - numpy.sum(retval.data[:d,:,...] * rhs.data[d:0:-1,:,...], axis=0))
             self.data[...] = retval.data[...]
         return self
+
+    __div__ = __truediv__
+    __idiv__ = __itruediv__
+    __rdiv__ = __rtruediv__
 
     def sqrt(self):
         retval = self.clone()
@@ -1832,7 +1830,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
             assert A_shp[:2] == x_shp[:2]
             if A_shp[2] != x_shp[2]:
-                print ValueError('A.data.shape = %s does not match x.data.shape = %s'%(str(A_shp), str(x_shp)))
+                print(ValueError('A.data.shape = %s does not match x.data.shape = %s'%(str(A_shp), str(x_shp))))
 
             D, P, M = A_shp[:3]
 
@@ -1916,8 +1914,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return cls.pb_mul(zbar, x, y , z, out = out)
 
     @classmethod
-    def pb___div__(cls, zbar, x, y , z, out = None):
-        return cls.pb_div(zbar, x, y , z, out = out)
+    def pb___truediv__(cls, zbar, x, y , z, out = None):
+        return cls.pb_truediv(zbar, x, y , z, out = out)
 
     @classmethod
     def pb_add(cls, zbar, x, y, z, out=None):
@@ -2058,7 +2056,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             raise NotImplementedError('not implemented')
 
     @classmethod
-    def pb_div(cls, zbar, x, y, z, out=None):
+    def pb_truediv(cls, zbar, x, y, z, out=None):
 
         if isinstance(x, UTPM) and isinstance(y, UTPM):
 
@@ -2077,7 +2075,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
             tmp = zbar.clone()
             # tmp /= y2
-            workaround_strides_function(tmp, y2, operator.idiv)
+            workaround_strides_function(tmp, y2, operator.itruediv)
             # xbar2 += tmp
             workaround_strides_function(xbar2, tmp, operator.iadd)
             # tmp *= z

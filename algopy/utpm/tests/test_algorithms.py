@@ -280,12 +280,12 @@ class Test_pushforward_class_functions(TestCase):
     Test the push forward class functions that operate directly on data.
     """
 
-    def test__idiv(self):
+    def test__itruediv(self):
         X_data = 2 * numpy.random.rand(2,2,2,2)
         Z_data = 3 * numpy.random.rand(2,2,2,2)
         Z2_data = Z_data.copy()
 
-        UTPM._idiv(Z_data, X_data)
+        UTPM._itruediv(Z_data, X_data)
 
         X = UTPM(X_data)
         Z = UTPM(Z2_data)
@@ -304,7 +304,7 @@ class Test_pushforward_class_functions(TestCase):
 
         Z = X/Y
 
-        UTPM._div(X_data, Y_data, out = Z_data)
+        UTPM._truediv(X_data, Y_data, out = Z_data)
 
         assert_array_almost_equal(Z_data, Z.data)
 
@@ -332,8 +332,8 @@ class Test_aliasing(TestCase):
         x = numpy.random.randn(D, P, M, N)
         y1 = numpy.random.randn(D, P, M, N)
         y2 = numpy.empty_like(x)
-        UTPM._div(x, y1, out=y2)
-        UTPM._div(x, y1, out=y1)
+        UTPM._truediv(x, y1, out=y2)
+        UTPM._truediv(x, y1, out=y1)
         assert_allclose(y1, y2)
 
     def test_square_aliasing(self):

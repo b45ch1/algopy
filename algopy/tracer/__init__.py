@@ -1,3 +1,3 @@
-import tracer
-from tracer import *
+from . import tracer
+from .tracer import *
 
