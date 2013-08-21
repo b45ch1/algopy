@@ -29,11 +29,6 @@ import sys
 import re
 import subprocess
 
-if sys.version_info[0] < 3:
-    import builtins as builtins
-else:
-    import builtins
-
 CLASSIFIERS = """\
 Intended Audience :: Science/Research
 Intended Audience :: Developers
