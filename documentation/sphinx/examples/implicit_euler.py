@@ -75,7 +75,7 @@ def x_analytical(t,p):
 def x_p_analytical(t,p):
     return -0.5*numpy.sin(numpy.sqrt(p)*t)*p**(-0.5)*t
 
-print xs.shape
+print(xs.shape)
 import matplotlib.pyplot as pyplot; import os
 pyplot.plot(ts, xs[:,0,0,0], ',k-', label = r'$x(t)$')
 pyplot.plot(ts, x_analytical(ts,p.data[0,0]), 'k-.', label = r'analytic $x(t)$')

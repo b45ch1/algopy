@@ -198,7 +198,7 @@ if __name__ == "__main__":
 	# plot objective function
 	fig = figure()
 	for dm in range(0,7,2):
-		print dm
+		print(dm)
 		Nqs = 100
 		qs = linspace(-1.5,1.5,Nqs)
 		Phis = zeros(Nqs)

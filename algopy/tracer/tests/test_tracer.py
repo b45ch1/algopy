@@ -1,5 +1,5 @@
 from numpy.testing import *
-from environment import Settings
+from .environment import Settings
 import os
 
 import numpy

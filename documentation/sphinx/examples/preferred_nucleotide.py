@@ -231,22 +231,22 @@ def simulation_demo_numeric(log_mu, d, subs_counts, v_emp):
             maxfun=10000,
             full_output=True,
             )
-    print 'fmin result:'
-    print result
-    print
+    print('fmin result:')
+    print(result)
+    print()
     y_opt = result[0]
     log_mu_opt, d_opt = y_opt[0], y_opt[1]
     mu_opt = numpy.exp(log_mu_opt)
     cov = scipy.linalg.inv(numdifftools.Hessian(eval_f_partial)(y_opt))
-    print 'maximum likelihood parameter estimates:'
-    print 'log mu:', log_mu_opt,
-    print 'with standard deviation', numpy.sqrt(cov[0,0])
-    print 'd:', d_opt,
-    print 'with standard deviation', numpy.sqrt(cov[1,1])
-    print
-    print 'gradient:'
-    print numdifftools.Gradient(eval_f_partial)(y_opt)
-    print
+    print('maximum likelihood parameter estimates:')
+    print('log mu:', log_mu_opt, end=' ')
+    print('with standard deviation', numpy.sqrt(cov[0,0]))
+    print('d:', d_opt, end=' ')
+    print('with standard deviation', numpy.sqrt(cov[1,1]))
+    print()
+    print('gradient:')
+    print(numdifftools.Gradient(eval_f_partial)(y_opt))
+    print()
 
 
 def simulation_demo_explicit(log_mu, d, subs_counts, v_emp):
@@ -263,22 +263,22 @@ def simulation_demo_explicit(log_mu, d, subs_counts, v_emp):
             maxiter=10000,
             full_output=True,
             )
-    print 'fmin_ncg result:'
-    print result
-    print
+    print('fmin_ncg result:')
+    print(result)
+    print()
     y_opt = result[0]
     log_mu_opt, d_opt = y_opt[0], y_opt[1]
     mu_opt = numpy.exp(log_mu_opt)
     cov = scipy.linalg.inv(eval_hess_f_partial(y_opt))
-    print 'maximum likelihood parameter estimates:'
-    print 'log mu:', log_mu_opt,
-    print 'with standard deviation', numpy.sqrt(cov[0,0])
-    print 'd:', d_opt,
-    print 'with standard deviation', numpy.sqrt(cov[1,1])
-    print
-    print 'gradient:'
-    print eval_grad_f_partial(y_opt)
-    print
+    print('maximum likelihood parameter estimates:')
+    print('log mu:', log_mu_opt, end=' ')
+    print('with standard deviation', numpy.sqrt(cov[0,0]))
+    print('d:', d_opt, end=' ')
+    print('with standard deviation', numpy.sqrt(cov[1,1]))
+    print()
+    print('gradient:')
+    print(eval_grad_f_partial(y_opt))
+    print()
 
 
 def main():
@@ -313,23 +313,23 @@ def main():
         v_emp_weights += numpy.sum(subs_counts, axis=1)
         v_emp = v_emp_weights / numpy.sum(v_emp_weights)
 
-        print 'simulation parameter values:'
-        print 'log mu:', log_mu
-        print 'd:', d
-        print 'nsamples:', nsamples
-        print 'sampled substitutions:'
-        print subs_counts
-        print
-        print '==============================================================='
-        print '--- estimation via numerical integration, numdifftools, fmin --'
+        print('simulation parameter values:')
+        print('log mu:', log_mu)
+        print('d:', d)
+        print('nsamples:', nsamples)
+        print('sampled substitutions:')
+        print(subs_counts)
+        print()
+        print('===============================================================')
+        print('--- estimation via numerical integration, numdifftools, fmin --')
         simulation_demo_numeric(log_mu, d, subs_counts, v_emp)
-        print '---------------------------------------------------------------'
-        print
-        print '==============================================================='
-        print '--- estimation via hypergeometric functions, algopy, fmin_ncg -'
+        print('---------------------------------------------------------------')
+        print()
+        print('===============================================================')
+        print('--- estimation via hypergeometric functions, algopy, fmin_ncg -')
         simulation_demo_explicit(log_mu, d, subs_counts, v_emp)
-        print '---------------------------------------------------------------'
-        print
+        print('---------------------------------------------------------------')
+        print()
 
 
 if __name__ == '__main__':

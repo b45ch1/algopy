@@ -1,5 +1,5 @@
 # import a tool to use / as a symbol for normal division
-from __future__ import division
+
 
 #import system data
 import sys, os
@@ -68,6 +68,6 @@ x = algopy.UTPM.init_hessian(xopt)
 y = c.potential(x)
 hessian = algopy.UTPM.extract_hessian(2, y)
 
-print hessian
+print(hessian)
 
 

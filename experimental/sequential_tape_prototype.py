@@ -57,4 +57,4 @@ for n in range(N):
     curr_bb = 0
     ax *= ay
     
-print bb_tapes
+print(bb_tapes)

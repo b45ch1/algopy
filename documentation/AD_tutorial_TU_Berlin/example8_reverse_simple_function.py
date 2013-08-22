@@ -18,6 +18,6 @@ vm1bar += v3bar; v2bar += v3bar
 v1bar += v2bar * vm1;  vm1bar += v2bar * v1
 v0bar -= v1bar * sin(v0) 
 g1 = y.data[1:]; g2 = numpy.array([vm1bar.data[0], v0bar.data[0]])
-print 'UTPS gradient g(x_0)=', g1
-print 'reverse gradient g(x_0)=', g2
-print 'Hessian H(x_0)=\n',numpy.vstack([vm1bar.data[1:], v0bar.data[1:]])
+print('UTPS gradient g(x_0)=', g1)
+print('reverse gradient g(x_0)=', g2)
+print('Hessian H(x_0)=\n',numpy.vstack([vm1bar.data[1:], v0bar.data[1:]]))

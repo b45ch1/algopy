@@ -64,6 +64,6 @@ for m in range(M):
 
 H_reshaped =  H.reshape((M*N, M*N))
 
-print H_reshaped - H_reshaped.T
+print(H_reshaped - H_reshaped.T)
 
 # print y.x.data[1]

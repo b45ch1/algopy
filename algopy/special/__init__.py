@@ -1,2 +1,2 @@
-from special import *
-from compound import *
+from .special import *
+from .compound import *

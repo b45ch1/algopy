@@ -27,7 +27,7 @@ h = 10**-8
 yf = (f_fcn(x0 + h * x1) - f_fcn(x0))/h
 
 # Print results
-print 'CSDA result =',yc
-print 'UTP result  =',ay.data[1,0]
-print 'FD  result  =',yf
+print('CSDA result =',yc)
+print('UTP result  =',ay.data[1,0])
+print('FD  result  =',yf)
 

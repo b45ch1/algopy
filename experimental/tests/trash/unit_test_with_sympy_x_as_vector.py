@@ -63,17 +63,17 @@ def ad_ddf(x):
 # point at which the derivatives should be evaluated
 x = random(N)
 
-print '\n\n'
-print 'Sympy function = Ad function  check (should be almost zero)'
-print f(x) - sym_f(x)
+print('\n\n')
+print('Sympy function = Ad function  check (should be almost zero)')
+print(f(x) - sym_f(x))
 
-print '\n\n'
-print 'Sympy vs Ad Derived Gradient check (should be almost zero)'
-print ad_df(x) - sym_df(x)
+print('\n\n')
+print('Sympy vs Ad Derived Gradient check (should be almost zero)')
+print(ad_df(x) - sym_df(x))
 
-print '\n\n'
-print 'Sympy vs Ad Derived Hessian check (should be almost zero)'
-print sym_ddf(x) - ad_ddf(x)
+print('\n\n')
+print('Sympy vs Ad Derived Hessian check (should be almost zero)')
+print(sym_ddf(x) - ad_ddf(x))
 
 
 

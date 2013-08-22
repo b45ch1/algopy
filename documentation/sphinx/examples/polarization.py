@@ -26,8 +26,8 @@ for n1 in range(N):
         
         count += 2
 
-print 'dirs ='
-print dirs
+print('dirs =')
+print(dirs)
 
 # STEP 2: use these directions to initialize the UTPM instance
 xdata = numpy.zeros((D,2*N*N,N))
@@ -59,7 +59,7 @@ J = algopy.UTPM(Jdata)
 
 # STEP 5: evaluate Phi in UTP arithmetic
 Phi = algopy.trace(algopy.dot(J.T, J))
-print 'Phi=',Phi
-print 'gradient of Phi =', Phi.data[1,:]
+print('Phi=',Phi)
+print('gradient of Phi =', Phi.data[1,:])
 
 

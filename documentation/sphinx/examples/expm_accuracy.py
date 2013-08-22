@@ -277,7 +277,7 @@ def main():
             (algopy.expm_higham_2005, 'Higham 2005'),
             )
     for f, name in f_name_pairs:
-        print name
+        print(name)
         for case in g_burkardt_expm_cases:
             observed = f(case.M)
             expected = case.expm_M
@@ -294,8 +294,8 @@ def main():
             else:
                 s_stars = 'OMG'
             s_index = str(case.burkardt_index).rjust(2)
-            print s_index, ':', s_stars, rel_err
-        print
+            print(s_index, ':', s_stars, rel_err)
+        print()
 
 if __name__ == '__main__':
     main()

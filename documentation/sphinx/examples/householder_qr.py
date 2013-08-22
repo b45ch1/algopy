@@ -247,9 +247,9 @@ D,P,M,N = 50,1,3,2
 
 import mpmath
 mpmath.mp.prec = 200 # increase lenght of mantissa
-print mpmath.mp
+print(mpmath.mp)
 
-print 'QR decomposition based on Householder'
+print('QR decomposition based on Householder')
 D,P,M,N = 50,1,3,2
 
 # in float64 arithmetic
@@ -263,14 +263,14 @@ data2 = numpy.asarray(data)*mpmath.mpf(1)
 A2 = algopy.UTPM(data2)
 Q2,R2 = qr_house(A2.copy())
 
-print '-'*20
-print A.data[-1]
-print '-'*20
-print (Q.data[-1] - Q2.data[-1])/Q2.data[-1]
-print '-'*20
-print algopy.dot(Q, R).data[-1] - A.data[-1]
-print '-'*20
-print algopy.dot(Q2, R2).data[-1] - A2.data[-1]
+print('-'*20)
+print(A.data[-1])
+print('-'*20)
+print((Q.data[-1] - Q2.data[-1])/Q2.data[-1])
+print('-'*20)
+print(algopy.dot(Q, R).data[-1] - A.data[-1])
+print('-'*20)
+print(algopy.dot(Q2, R2).data[-1] - A2.data[-1])
 
 
 # # print algopy.dot(Q2.T,Q2) - numpy.eye(M)

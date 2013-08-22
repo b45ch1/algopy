@@ -100,7 +100,7 @@ def newtons_method(x0):
 	g = numpy.inf
 	k = 0
 	while numpy.linalg.norm(g)>10**-12:
-		print 'iteration: %2d'%k; k+=1
+		print('iteration: %2d'%k); k+=1
 		(g,H) = gradient_and_hessian_of_Phi(x)
 		# check correctness of the Hessian
 		# true gradient: d Phi = [ 2 (x[0] - 17)**3, (x[1] - 19 ]
@@ -118,5 +118,5 @@ def newtons_method(x0):
 	return x
 
 x = numpy.array([13.,17.])
-print 'Solution found by Newton\'s method:', newtons_method(x)
-print 'True solution: [17,19]'
+print('Solution found by Newton\'s method:', newtons_method(x))
+print('True solution: [17,19]')

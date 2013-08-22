@@ -62,17 +62,17 @@ def inv(in_A):
 	return QT,R
 
 def print_loc(aA):
-	print '---'
+	print('---')
 	for n in range(N):
-		print '[',
+		print('[', end=' ')
 		for m in range(N):
-			print aA[n,m].loc," ",
-		print ']'
+			print(aA[n,m].loc," ", end=' ')
+		print(']')
 
 if __name__ == "__main__":
 	from numpy.random import random
 
-	Ns = range(1,22)
+	Ns = list(range(1,22))
 	adolc_times = []
 	adolc_taping_times = []
 	adolc_num_operations = []
@@ -82,7 +82,7 @@ if __name__ == "__main__":
 	
 
 	for N in Ns:
-		print 'N=',N
+		print('N=',N)
 		A = random((N,N))
 		#A = array([
 		#[0.018 ,0.0085 ,0.017 ,0.017],
@@ -114,7 +114,7 @@ if __name__ == "__main__":
 		t_start = time()
 		H1 = adolc.hessian(0,A.ravel())
 		t_end = time()
-		print 'adolc needs %0.6f seconds'%(t_end - t_start)
+		print('adolc needs %0.6f seconds'%(t_end - t_start))
 		adolc_times.append(t_end-t_start)
 
 		# with ALGOPY
@@ -147,7 +147,7 @@ if __name__ == "__main__":
 			H2[n,:] = FA.xbar.TC[1,n,:].ravel()
 		
 		t_end = time()
-		print 'algopy needs %0.6f seconds'%(t_end - t_start)
+		print('algopy needs %0.6f seconds'%(t_end - t_start))
 		algopy_times.append(t_end-t_start)
 
 		#print H1 - H2

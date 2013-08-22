@@ -182,15 +182,15 @@ if __name__ == "__main__":
 			adolc.hos_forward(1,x,V,keep)
 			Z = adolc.hos_reverse(1,D,u)
 			V[np,0] = 0
-			print 'Z=',Z
+			print('Z=',Z)
 			vbar += Z[2,1]
-		print vbar
+		print(vbar)
 		exit()
 		#update v:  x_k+1 = v_k - g
 		v[2:] -= vbar[2:]
-	print 'number of iterations =',count
-	print 'v_opt =',v
-	print 'v0=',v0
+	print('number of iterations =',count)
+	print('v_opt =',v)
+	print('v0=',v0)
 
 	# plot Phi
 	# --------

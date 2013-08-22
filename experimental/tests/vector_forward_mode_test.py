@@ -18,7 +18,7 @@ def almost_equal(ax,ay):
 		ayshp = numpy.shape(ay)
 		assert axshp == ayshp
 		for n in range(len(ax)):
-			print numpy.ravel(ax)
+			print(numpy.ravel(ax))
 			tmp.append(numpy.ravel(ax)[n].tc - numpy.ravel(ay)[n].tc)
 		tmp = numpy.asarray(tmp)
 	else:
@@ -47,7 +47,7 @@ def test_sum_of_squares():
 		return npy.sum( taylor_coefficients * y)
 	a = adouble(1,1,0)
 	taylor_coefficients = npy.array([13.,17.,19.])
-	print poly(taylor_coefficients,a)
+	print(poly(taylor_coefficients,a))
 	
 def	test_simple_multipication():
 	"""differentiation of f(x,y) = x*y at [5,7] in direction [13,17]"""
@@ -73,7 +73,7 @@ def test_abs():
 	assert True == flag1*flag2
 
 def test_numpy_linalg_norm():	
-	print """\ndirectional derivative of norm(x) at x=[2.1,3.4] with direction d = [5.6,7.8]"""
+	print("""\ndirectional derivative of norm(x) at x=[2.1,3.4] with direction d = [5.6,7.8]""")
 	def f(x):
 		return numpy.linalg.norm(x)
 	a = numpy.array([adouble(2.1,5.6),adouble(3.4,7.8)])
@@ -107,7 +107,7 @@ def test_double_mul_adouble():
 	a1 = adouble(2.,13.)
 	a2 = 5.
 	b = f(a1,a2)
-	print 'b=',b
+	print('b=',b)
 	correct_result = adouble(f(a1.tc[0],a2), 65.)
 	assert almost_equal(correct_result,b)
 
@@ -251,8 +251,8 @@ def test_tensor():
  [[ 0.,  1.,  0.],
   [ 1.,  0.,  0.],
   [ 0.,  0.,  0.]]])
-	print 'true_tensor=', true_tensor
-	print 'computed_tensor=', computed_tensor
+	print('true_tensor=', true_tensor)
+	print('computed_tensor=', computed_tensor)
 	assert numpy.prod(computed_tensor == true_tensor)
 
 def test_vector_hessian():
@@ -263,8 +263,8 @@ def test_vector_hessian():
 	start_time = time.time()
 	computed_hessian = vector_hessian(f,x)
 	end_time = time.time()
-	print computed_hessian
-	print 'run time=%0.6f seconds'%(end_time-start_time)
+	print(computed_hessian)
+	print('run time=%0.6f seconds'%(end_time-start_time))
 	assert True
 
 	#def f(x):

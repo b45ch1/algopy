@@ -57,8 +57,8 @@ cg1.trace_off()
 cg1.independentFunctionList = [J1, J2]
 cg1.dependentFunctionList = [C]
 
-print 'covariance matrix: C =\n',C
-print 'check that Q2.T spans the nullspace of J2:\n', dot(J2,Q2.T)
+print('covariance matrix: C =\n',C)
+print('check that Q2.T spans the nullspace of J2:\n', dot(J2,Q2.T))
 
 # METHOD 2: image space method (potentially numerically unstable)
 cg2 = CGraph()
@@ -76,16 +76,16 @@ cg2.trace_off()
 cg2.independentFunctionList = [J1, J2]
 cg2.dependentFunctionList = [C2]
 
-print 'covariance matrix: C =\n',C2
-print 'difference between image and nullspace method:\n',C - C2
+print('covariance matrix: C =\n',C2)
+print('difference between image and nullspace method:\n',C - C2)
 
 Cbar = UTPM(numpy.random.rand(D,P,N,N))
 
 cg1.pullback([Cbar])
 
 cg2.pullback([Cbar])
-print 'J1\n',cg2.independentFunctionList[0].xbar - cg1.independentFunctionList[0].xbar
-print 'J2\n',cg2.independentFunctionList[1].xbar - cg1.independentFunctionList[1].xbar
+print('J1\n',cg2.independentFunctionList[0].xbar - cg1.independentFunctionList[0].xbar)
+print('J2\n',cg2.independentFunctionList[1].xbar - cg1.independentFunctionList[1].xbar)
 
 
 

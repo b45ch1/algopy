@@ -38,7 +38,7 @@ def $function_name(*args, **kwargs):
 ''')
 
 for function_name in numpy_linalg_function_names:
-    exec function_template.substitute(function_name=function_name, namespace='numpy.linalg')
+    exec(function_template.substitute(function_name=function_name, namespace='numpy.linalg'))
 
 def qr_full(A):
     """

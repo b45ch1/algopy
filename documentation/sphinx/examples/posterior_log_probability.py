@@ -15,14 +15,14 @@ N = 35
 x = numpy.random.normal(actual_mu, sigma, size = N)
 mu = UTPM([[3.5],[1],[0]]) #unknown variable
 
-print 'function evaluation =\n',logp(x,3.5,sigma)
+print('function evaluation =\n',logp(x,3.5,sigma))
 
 # forward mode with ALGOPY
 utp = logp(x, mu, sigma).data[:,0]
-print 'function evaluation = %f\n1st directional derivative = %f\n2nd directional derivative = %f'%(utp[0], 1.*utp[1], 2.*utp[2])
+print('function evaluation = %f\n1st directional derivative = %f\n2nd directional derivative = %f'%(utp[0], 1.*utp[1], 2.*utp[2]))
 
 # finite differences solution:
-print 'finite differences derivative =\n',(logp(x,3.5+10**-8,sigma) - logp(x, 3.5, sigma))/10**-8
+print('finite differences derivative =\n',(logp(x,3.5+10**-8,sigma) - logp(x, 3.5, sigma))/10**-8)
 
 # trace function evaluation
 cg = CGraph()
@@ -40,8 +40,8 @@ cg.pullback([outbar])
 gradient =  mu.xbar.data[0,0]
 Hess_vec =  mu.xbar.data[1,0]
 
-print 'gradient = ', gradient
-print 'Hessian vector product = ', Hess_vec
+print('gradient = ', gradient)
+print('Hessian vector product = ', Hess_vec)
 
 
 

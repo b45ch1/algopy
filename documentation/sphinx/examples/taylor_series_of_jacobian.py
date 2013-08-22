@@ -54,5 +54,5 @@ cg.pullback([azbar])
 Jx = cg.independentFunctionList[0].xbar
 Jy = cg.independentFunctionList[1].xbar
 
-print 'Taylor series of Jx =\n', Jx
-print 'Taylor series of Jy =\n', Jy
+print('Taylor series of Jx =\n', Jx)
+print('Taylor series of Jy =\n', Jy)

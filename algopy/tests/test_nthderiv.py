@@ -54,7 +54,7 @@ def assert_allclose_or_small(a, b, rtol=1e-7, zerotol=1e-7):
         numpy.testing.assert_allclose(a, b, rtol=rtol)
 
 def gen_named_functions():
-    for name, f in nthderiv.__dict__.items():
+    for name, f in list(nthderiv.__dict__.items()):
         domain = getattr(f, 'domain', None)
         extras = getattr(f, 'extras', None)
         if domain is not None and extras is not None:

@@ -104,7 +104,7 @@ class CGraph:
         for nf,f in enumerate(self.functionList):
             try:
                 f.__class__.pushforward(f.func, f.args, Fout = f)
-            except Exception, e:
+            except Exception as e:
                 err_str = 'pushforward of node %d failed (%s)'%(nf,f.func.__name__)
                 err_str += 'reported error is:\n%s'%e
                 err_str += 'traceback:\n%s'%traceback.format_exc()
@@ -144,7 +144,7 @@ class CGraph:
         for nf,f in enumerate(self.dependentFunctionList):
             try:
                 f.xbar[...] = xbar_list[nf]
-            except Exception, e:
+            except Exception as e:
                 err_str  = 'tried to initialize the bar value of  cg.dependentFunctionList[%d], but some error occured:\n'%nf
                 err_str += 'the assignment:  f.xbar[...] = xbar_list[%d]\n'%(nf)
                 err_str += 'where f.xbar[...].shape =%s and type(f.xbar)=%s\n'%(str(f.xbar[...].shape), str(type(f.xbar)))
@@ -158,7 +158,7 @@ class CGraph:
         for i,f in enumerate(self.functionList[::-1]):
             try:
                 f.__class__.pullback(f)
-            except Exception, e:
+            except Exception as e:
                 err_str = '\npullback of node %d failed\n\n'%(len(self.functionList) - i - 1)
                 err_str +='tried to evaluate the pullback of %s(*args) with\n'%(f.func.__name__)
 
@@ -1050,9 +1050,9 @@ class Function(Ring):
         rhs = self.totype(rhs)
         return Function.pushforward(operator.mul,[self,rhs])
 
-    def __div__(self,rhs):
+    def __truediv__(self,rhs):
         rhs = self.totype(rhs)
-        return Function.pushforward(operator.div,[self,rhs])
+        return Function.pushforward(operator.truediv,[self,rhs])
 
     def __radd__(self,lhs):
         return self + lhs
@@ -1063,13 +1063,13 @@ class Function(Ring):
     def __rmul__(self,lhs):
         return self * lhs
 
-    def __rdiv__(self, lhs):
+    def __rtruediv__(self, lhs):
         lhs = self.__class__.totype(lhs)
         return lhs/self
 
-    __truediv__ = __div__
-    __rtruediv__ = __rdiv__
-
+    __div__ = __truediv__
+    # __idiv__ = __itruediv__  # itruediv is not implemented yet
+    __rdiv__ = __rtruediv__
 
     # #########################################################
     # numpy functions

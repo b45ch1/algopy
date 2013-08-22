@@ -117,7 +117,7 @@ def test_matrix_2x2_mul_2x2_reverse():
 			cg.reverse([Mtc(Phibar, Phibardot)])
 			H[n,m,:,:] = cg.independentFunctionList[0].xbar.Xdot
 			Adot[n,m] = 0.
-	print H
+	print(H)
 	assert sum(H) == 4
 	assert H[0,0,0,0] == 2
 	assert H[1,1,1,1] == 2
@@ -353,8 +353,8 @@ def test_taping():
 	cg.dependentFunctionList=[FZ]
 	cg.reverse([FZbar])
 
-	print cg
-	print FX.xbar.X
+	print(cg)
+	print(FX.xbar.X)
 	cg.plot('trash/matrix_ad_test_taping.png')
 
 
@@ -374,7 +374,7 @@ if __name__ == "__main__":
 	cg.dependentFunctionList = [FT]
 	cg.reverse([Mtc([[1.]])])
 
-	print cg
+	print(cg)
 
 	#zer = Mtc(array([[0.]]))
 	#Fzer = Function(zer)

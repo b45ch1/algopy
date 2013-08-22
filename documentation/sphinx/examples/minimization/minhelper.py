@@ -33,155 +33,155 @@ def eval_hess(f, theta):
 
 
 def show_local_curvature(f, g, h, x0):
-    print 'point:'
-    print x0
-    print 'function value:'
-    print f(x0)
-    print 'autodiff gradient:'
-    print g(x0)
-    print 'finite differences gradient:'
-    print numdifftools.Gradient(f)(x0)
-    print 'autodiff hessian:'
-    print h(x0)
-    print 'finite differences hessian:'
-    print numdifftools.Hessian(f)(x0)
+    print('point:')
+    print(x0)
+    print('function value:')
+    print(f(x0))
+    print('autodiff gradient:')
+    print(g(x0))
+    print('finite differences gradient:')
+    print(numdifftools.Gradient(f)(x0))
+    print('autodiff hessian:')
+    print(h(x0))
+    print('finite differences hessian:')
+    print(numdifftools.Hessian(f)(x0))
 
 
 def do_searches(f, g, h, x0):
 
-    print 'properties of the function at the initial guess:'
+    print('properties of the function at the initial guess:')
     show_local_curvature(f, g, h, x0)
-    print
+    print()
 
-    print 'strategy:', 'default (Nelder-Mead)'
-    print 'options:', 'default'
+    print('strategy:', 'default (Nelder-Mead)')
+    print('options:', 'default')
     results = scipy.optimize.fmin(
             f,
             x0,
             )
-    print results
-    print
+    print(results)
+    print()
 
-    print 'strategy:', 'ncg'
-    print 'options:', 'default'
-    print 'gradient:', 'autodiff'
-    print 'hessian:', 'autodiff'
+    print('strategy:', 'ncg')
+    print('options:', 'default')
+    print('gradient:', 'autodiff')
+    print('hessian:', 'autodiff')
     results = scipy.optimize.fmin_ncg(
             f,
             x0,
             fprime=g,
             fhess=h,
             )
-    print results
-    print
+    print(results)
+    print()
 
-    print 'strategy:', 'ncg'
-    print 'options:', 'default'
-    print 'gradient:', 'autodiff'
-    print 'hessian:', 'finite differences'
+    print('strategy:', 'ncg')
+    print('options:', 'default')
+    print('gradient:', 'autodiff')
+    print('hessian:', 'finite differences')
     results = scipy.optimize.fmin_ncg(
             f,
             x0,
             fprime=g,
             )
-    print results
-    print
+    print(results)
+    print()
 
-    print 'strategy:', 'cg'
-    print 'options:', 'default'
-    print 'gradient:', 'autodiff'
+    print('strategy:', 'cg')
+    print('options:', 'default')
+    print('gradient:', 'autodiff')
     results = scipy.optimize.fmin_cg(
             f,
             x0,
             fprime=g,
             )
-    print results
-    print
+    print(results)
+    print()
 
-    print 'strategy:', 'cg'
-    print 'options:', 'default'
-    print 'gradient:', 'finite differences'
+    print('strategy:', 'cg')
+    print('options:', 'default')
+    print('gradient:', 'finite differences')
     results = scipy.optimize.fmin_cg(
             f,
             x0,
             )
-    print results
-    print
+    print(results)
+    print()
 
-    print 'strategy:', 'bfgs'
-    print 'options:', 'default'
-    print 'gradient:', 'autodiff'
+    print('strategy:', 'bfgs')
+    print('options:', 'default')
+    print('gradient:', 'autodiff')
     results = scipy.optimize.fmin_bfgs(
             f,
             x0,
             fprime=g,
             )
-    print results
-    print
+    print(results)
+    print()
 
-    print 'strategy:', 'bfgs'
-    print 'options:', 'default'
-    print 'gradient:', 'finite differences'
+    print('strategy:', 'bfgs')
+    print('options:', 'default')
+    print('gradient:', 'finite differences')
     results = scipy.optimize.fmin_bfgs(
             f,
             x0,
             )
-    print results
-    print
+    print(results)
+    print()
 
-    print 'strategy:', 'slsqp'
-    print 'options:', 'default'
-    print 'gradient:', 'autodiff'
+    print('strategy:', 'slsqp')
+    print('options:', 'default')
+    print('gradient:', 'autodiff')
     results = scipy.optimize.fmin_slsqp(
             f,
             x0,
             fprime=g,
             )
-    print results
-    print
+    print(results)
+    print()
 
-    print 'strategy:', 'slsqp'
-    print 'options:', 'default'
-    print 'gradient:', 'finite differences'
+    print('strategy:', 'slsqp')
+    print('options:', 'default')
+    print('gradient:', 'finite differences')
     results = scipy.optimize.fmin_slsqp(
             f,
             x0,
             )
-    print results
-    print
+    print(results)
+    print()
 
-    print 'strategy:', 'powell'
-    print 'options:', 'default'
+    print('strategy:', 'powell')
+    print('options:', 'default')
     results = scipy.optimize.fmin_powell(
             f,
             x0,
             )
-    print results
-    print
+    print(results)
+    print()
 
-    print 'strategy:', 'tnc'
-    print 'options:', 'default'
-    print 'gradient:', 'autodiff'
+    print('strategy:', 'tnc')
+    print('options:', 'default')
+    print('gradient:', 'autodiff')
     results = scipy.optimize.fmin_tnc(
             f,
             x0,
             fprime=g,
             disp=0,
             )
-    print results
-    print
+    print(results)
+    print()
 
-    print 'strategy:', 'tnc'
-    print 'options:', 'default'
-    print 'gradient:', 'finite differences'
+    print('strategy:', 'tnc')
+    print('options:', 'default')
+    print('gradient:', 'finite differences')
     results = scipy.optimize.fmin_tnc(
             f,
             x0,
             approx_grad=True,
             disp=0,
             )
-    print results
-    print
+    print(results)
+    print()
 
     #print 'strategy:', 'ipopt'
     #print 'options:', 'default'
@@ -228,23 +228,23 @@ def show_minimization_results(f, target_in, easy_init_in, hard_init_in):
     h = functools.partial(eval_hess, f)
 
     x0 = target
-    print 'properties of the function at a local min:'
+    print('properties of the function at a local min:')
     show_local_curvature(f, g, h, x0)
-    print
+    print()
 
     x0 = easy_init
-    print '---------------------------------------------------------'
-    print 'searches beginning from the easier init point', x0
-    print '---------------------------------------------------------'
-    print
+    print('---------------------------------------------------------')
+    print('searches beginning from the easier init point', x0)
+    print('---------------------------------------------------------')
+    print()
     do_searches(f, g, h, x0)
-    print
+    print()
 
     x0 = hard_init
-    print '---------------------------------------------------------'
-    print 'searches beginning from the more difficult init point', x0
-    print '---------------------------------------------------------'
-    print
+    print('---------------------------------------------------------')
+    print('searches beginning from the more difficult init point', x0)
+    print('---------------------------------------------------------')
+    print()
     do_searches(f, g, h, x0)
-    print
+    print()
 

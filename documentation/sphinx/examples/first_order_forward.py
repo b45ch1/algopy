@@ -22,11 +22,11 @@ y0 = F(x0)
 # UTP function evaluation
 y = F(x)
 
-print 'y0 = ', y0
-print 'y  = ', y
-print 'y.shape =', y.shape
-print 'y.data.shape =', y.data.shape
-print 'dF/dx(x0) * x1 =', y.data[1,0]
+print('y0 = ', y0)
+print('y  = ', y)
+print('y.shape =', y.shape)
+print('y.data.shape =', y.data.shape)
+print('dF/dx(x0) * x1 =', y.data[1,0])
 
 
 
@@ -46,6 +46,6 @@ x = UTPM.init_jacobian(x)
 
 y = f(x)
 
-print 'normal function evaluation f(x) = ',y.data[0,0]
-print 'Jacobian df/dx = ', UTPM.extract_jacobian(y)
+print('normal function evaluation f(x) = ',y.data[0,0])
+print('Jacobian df/dx = ', UTPM.extract_jacobian(y))
 

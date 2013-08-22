@@ -1,4 +1,3 @@
 include *.py
 recursive-include algopy *.py
 recursive-include documentation *.py
-recursive-include experimental *.py

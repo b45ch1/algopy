@@ -24,4 +24,4 @@ start_time = time.time()
 speelpenning(ax)
 end_time =time.time()
 
-print 'needed time was %0.6f seconds!'%(end_time-start_time)
+print('needed time was %0.6f seconds!'%(end_time-start_time))

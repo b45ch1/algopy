@@ -87,20 +87,20 @@ V = numpy.eye(7)
 
 m = Model()
 
-print 'normal function evaluation'
+print('normal function evaluation')
 m.eval_f(x)
 m.eval_g(x)
 
-print 'Forward Mode'
+print('Forward Mode')
 # print m.eval_grad_f_forward(x)
-print m.eval_jac_g_forward(x)
+print(m.eval_jac_g_forward(x))
 # print m.eval_jac_vec_g_forward(x,[1,0,0,0,0,0,0])
 # print m.eval_grad_Lagrangian_forward(lam, x)
 # print m.eval_hess_Lagrangian_forward(lam, x)
-print m.eval_vec_hess_g_forward(lagra, x)
+print(m.eval_vec_hess_g_forward(lagra, x))
 
 
-print 'Reverse Mode'
+print('Reverse Mode')
 m.trace_eval_f(x)
 m.trace_eval_g(x)
 
@@ -111,5 +111,5 @@ m.trace_eval_g(x)
 
 # print m.eval_hess_f_reverse(x)
 # print m.eval_hess_vec_f_reverse(x,v)
-print m.eval_vec_hess_g_reverse(lagra, x)
+print(m.eval_vec_hess_g_reverse(lagra, x))
 

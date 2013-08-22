@@ -94,21 +94,21 @@ def sym_ddf(x):
 x = random((N,D))
 
 
-print '\n\n'
-print 'Sympy function = Ad function  check (should be almost zero)'
-print f(x) - sym_f(x)
+print('\n\n')
+print('Sympy function = Ad function  check (should be almost zero)')
+print(f(x) - sym_f(x))
 
-print '\n\n'
-print 'Sympy vs Hand Derived Gradient check (should be almost zero)'
-print df(x) - sym_df(x)
-print 'Sympy vs Ad Derive Gradient check (should be almost zero)'
-print ad_df(x) - sym_df(x)
+print('\n\n')
+print('Sympy vs Hand Derived Gradient check (should be almost zero)')
+print(df(x) - sym_df(x))
+print('Sympy vs Ad Derive Gradient check (should be almost zero)')
+print(ad_df(x) - sym_df(x))
 
-print '\n\n'
-print 'Sympy vs Hand Derived Hessian check (should be almost zero)'
-print ddf(x) - sym_ddf(x)
-print 'Sympy vs Ad Derive Hessian check (should be almost zero)'
-print ad_ddf(x) - sym_ddf(x)
+print('\n\n')
+print('Sympy vs Hand Derived Hessian check (should be almost zero)')
+print(ddf(x) - sym_ddf(x))
+print('Sympy vs Ad Derive Hessian check (should be almost zero)')
+print(ad_ddf(x) - sym_ddf(x))
 
 
 

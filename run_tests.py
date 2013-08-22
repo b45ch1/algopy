@@ -10,6 +10,6 @@ if __name__ == '__main__':
     try:
         import nose
     except:
-        print 'Please install nose for unit testing'
+        print('Please install nose for unit testing')
     nose.runmodule()
 

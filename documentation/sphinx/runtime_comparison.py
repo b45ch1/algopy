@@ -121,19 +121,19 @@ for rep in range(reps):
 end_time = time.time()
 time_hov_reverse_cgraph = end_time - start_time
 
-print '----------------'
-print time_trace_algopy
-print time_trace_adolc
-print time_trace_cgraph
-print '----------------'
-print time_hos_forward_algopy
-print time_hos_forward_adolc
-print time_hos_forward_cgraph
-print '----------------'
-print time_hov_forward_algopy
-print time_hov_forward_adolc
-print time_hov_forward_cgraph
-print '----------------'
-print time_hov_reverse_algopy
-print time_hov_reverse_adolc
-print time_hov_reverse_cgraph 
+print('----------------')
+print(time_trace_algopy)
+print(time_trace_adolc)
+print(time_trace_cgraph)
+print('----------------')
+print(time_hos_forward_algopy)
+print(time_hos_forward_adolc)
+print(time_hos_forward_cgraph)
+print('----------------')
+print(time_hov_forward_algopy)
+print(time_hov_forward_adolc)
+print(time_hov_forward_cgraph)
+print('----------------')
+print(time_hov_reverse_algopy)
+print(time_hov_reverse_adolc)
+print(time_hov_reverse_cgraph) 

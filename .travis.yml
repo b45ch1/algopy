@@ -1,0 +1,23 @@
+# Config file for automatic testing at travis-ci.org
+
+language: python
+
+env:
+    - NUMPY=false PY=''
+    - NUMPY=true  PY=''
+    - NUMPY=false PY=3
+    - NUMPY=true PY=3
+
+install:
+  # Deactivate the virtualenv to get fast install of dependencies
+  - deactivate
+  - sudo apt-get install -qq python$PY-sphinx python$PY-nose
+  - if $NUMPY; then sudo apt-get install -qq python$PY-numpy; fi
+
+script:
+  - python$PY setup.py install --user
+
+  - python$PY run_tests.py
+
+  - cd documentation/sphinx
+  - make html

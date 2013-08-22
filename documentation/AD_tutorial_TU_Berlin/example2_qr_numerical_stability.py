@@ -29,9 +29,9 @@ res_1_list = []
 res_2_list = []
 res_3_list = []
 
-betas = range(0,200,10)
+betas = list(range(0,200,10))
 for beta in betas:
-    print 'perform QR decomposition'
+    print('perform QR decomposition')
     a = alpha(beta)
     A = a[0]*dot(x1,x1.T) + a[1]*dot(x2,x2.T) + a[2]*dot(x3,x3.T)
     

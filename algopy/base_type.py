@@ -91,7 +91,7 @@ class Ring(object):
         self.__class__.mul(retval.data, self.data, rhs.data)
         return retval
         
-    def __div__(self,rhs):
+    def __truediv__(self,rhs):
         rhs = self.totype(rhs)
         retval = self.__class__(self.__class__.__zeros_like__(self.data))
         self.__class__.div(retval.data, self.data, rhs.data)

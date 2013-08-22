@@ -29,11 +29,6 @@ import sys
 import re
 import subprocess
 
-if sys.version_info[0] < 3:
-    import __builtin__ as builtins
-else:
-    import builtins
-
 CLASSIFIERS = """\
 Intended Audience :: Science/Research
 Intended Audience :: Developers
@@ -41,6 +36,8 @@ License :: OSI Approved
 Development Status :: 4 - Beta
 Operating System :: OS Independent
 Programming Language :: Python
+Programming Language :: Python
+Programming Language :: Python :: 3
 Topic :: Software Development
 Topic :: Scientific/Engineering
 """
@@ -54,7 +51,7 @@ KEYWORDS            = ['algorithmic differentiation', 'computational differentia
 URL                 = "http://packages.python.org/algopy"
 DOWNLOAD_URL        = "http://www.github.com/b45ch1/algopy"
 LICENSE             = 'BSD'
-CLASSIFIERS         = filter(None, CLASSIFIERS.split('\n'))
+CLASSIFIERS         = [_f for _f in CLASSIFIERS.split('\n') if _f]
 AUTHOR              = "Sebastian F. Walter"
 AUTHOR_EMAIL        = "sebastian.walter@gmail.com"
 PLATFORMS           = ["all"]
@@ -67,9 +64,6 @@ VERSION             = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 FULLVERSION = VERSION
 if not ISRELEASED:
     FULLVERSION += '.dev'
-    # If in git or something, bypass the svn rev
-    if os.path.exists('.svn'):
-        FULLVERSION += svn_version()
 
 # BEFORE importing distutils, remove MANIFEST. distutils doesn't properly
 # update it when the contents of directories change.
@@ -83,7 +77,7 @@ def write_version_py(filename='algopy/version.py'):
     except:
         git_revision = '.dev'
 
-    print git_revision
+    print(git_revision)
 
     cnt = """
 # THIS FILE IS GENERATED FROM ALGOPY SETUP.PY

@@ -60,26 +60,26 @@ from numpy.testing import Tester
 test = Tester().test
 
 # import standard submodules and important classes/functions
-import tracer
-from tracer import CGraph, Function
+from . import tracer
+from .tracer import CGraph, Function
 
-import utpm
-from utpm import UTPM, UTP
+from . import utpm
+from .utpm import UTPM, UTP
 
-import globalfuncs
-from globalfuncs import *
+from . import globalfuncs
+from .globalfuncs import *
 
-from compound import *
+from .compound import *
 
-import special
+from . import special
 
-import linalg
-from linalg import *
+from . import linalg
+from .linalg import *
 
-import nthderiv
+from . import nthderiv
 
 try:
-    import version
+    from . import version
     __version__ = version.version
 
 except ImportError:

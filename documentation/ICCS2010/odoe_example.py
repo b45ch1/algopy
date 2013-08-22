@@ -79,7 +79,7 @@ c = numpy.max(numpy.linalg.eig( numpy.linalg.inv(numpy.dot(B0.T, B0)))[0])
 dPhidq = - 2* c * q0**-3
 
 assert_almost_equal( dPhidq, qbar.data[1,0])
-print 'symbolical - UTPM pullback = %e'%( numpy.abs(dPhidq - qbar.data[1,0]))
+print('symbolical - UTPM pullback = %e'%( numpy.abs(dPhidq - qbar.data[1,0])))
 
 
 

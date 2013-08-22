@@ -266,20 +266,20 @@ def main():
     h = functools.partial(eval_hess, f)
 
     # show the neg log likelihood for the good parameters
-    print 'hardcoded good values:'
-    print vBeta_star
-    print
-    print 'neg log likelihood for good values:'
-    print f(vBeta_star)
-    print
-    print
-    print 'hardcoded okay values:'
-    print vBeta_0
-    print
-    print 'neg log likelihood for okay values:'
-    print f(vBeta_0)
-    print
-    print
+    print('hardcoded good values:')
+    print(vBeta_star)
+    print()
+    print('neg log likelihood for good values:')
+    print(f(vBeta_star))
+    print()
+    print()
+    print('hardcoded okay values:')
+    print(vBeta_0)
+    print()
+    print('neg log likelihood for okay values:')
+    print(f(vBeta_0))
+    print()
+    print()
 
     # do the max likelihood search
     results = scipy.optimize.fmin_ncg(
@@ -294,12 +294,12 @@ def main():
     # extract the max likelihood values
     vBeta_mle = results
 
-    print 'maximum likelihood estimates:'
-    print vBeta_mle
-    print
-    print 'neg log likelihood for maximum likelihood estimates:'
-    print f(vBeta_mle)
-    print
+    print('maximum likelihood estimates:')
+    print(vBeta_mle)
+    print()
+    print('neg log likelihood for maximum likelihood estimates:')
+    print(f(vBeta_mle))
+    print()
 
 
 if __name__ == '__main__':
