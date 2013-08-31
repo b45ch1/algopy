@@ -2,33 +2,16 @@
 
 language: python
 
-python:
-  - 2.6
-  - 3.3
-
-before_install:
-  - uname -a
-  - free -m
-  - df -h
-  - ulimit -a
-  - mkdir builds
-  - pushd builds
-  - pip install nose
-  - pip install numpy
-  - pip install Cython
-  # mpmath for scipy.special tests
-  - pip install mpmath
-  # For Python 2.6 we also need argparse
-  - pip install argparse
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq libatlas-dev libatlas-base-dev liblapack-dev gfortran
-  - python -V
-  - popd
+env:
+    - PY=''
+    - PY=3
 
 install:
-  - sudo pip install nose
-  - sudo pip install numpy
-  - sudo pip install scipy
+  # Deactivate the virtualenv to get fast install of dependencies
+  - deactivate
+  # add ppa with more recent scipy version
+  - echo 'yes' | sudo add-apt-repository ppa:pylab/stable 
+  - sudo apt-get install -qq python$PY-sphinx python$PY-nose python$PY-numpy python$PY-scipy
 
 script:
   - python$PY setup.py install --user
