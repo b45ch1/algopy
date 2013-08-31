@@ -7,11 +7,9 @@ env:
     - PY=3
 
 install:
-  # Deactivate the virtualenv to get fast install of dependencies
-  - deactivate
-  - sudo apt-get install -qq python$PY-sphinx python$PY-nose
-  - sudo apt-get install -qq python$PY-numpy
-  - sudo apt-get install -qq python$PY-scipy
+  - sudo pip install nose
+  - sudo pip install numpy
+  - sudo pip install scipy
 
 script:
   - python$PY setup.py install --user
