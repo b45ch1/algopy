@@ -217,7 +217,9 @@ Please cite the following paper if you use AlgoPy::
 Installation and Upgrade:
 -------------------------
 
-Current version is 0.4.0
+AlgoPy works on Python 2.6+ and Python 3.0+.
+
+Current version is 0.5.0
 
 Official releases:
     * available at:  http://pypi.python.org/pypi/algopy
@@ -231,6 +233,9 @@ Official releases:
         - http://cvsweb.se.netbsd.org/cgi-bin/bsdweb.cgi/wip/py-algopy
 
 Bleeding edge:
+    
+    .. image:: https://api.travis-ci.org/b45ch1/algopy.png
+
     * the most recent version is available at https://github.com/b45ch1/algopy
     * includes additional documentation, e.g. talks and additional examples and
       the sphinx `*.rst` documents
@@ -239,8 +244,8 @@ Bleeding edge:
 Dependencies:
 
     ALGOPY Core:
-        * numpy
-        * scipy
+        * numpy (known to work with numpy >= 1.6.2)
+        * scipy (known to work with scipy >= 0.11.0)
 
     ALGOPY Examples:
         * pyadolc
@@ -252,7 +257,29 @@ Dependencies:
         * sphinx
         * matplotlib, mayavi2, yapgvb
 
+    You can install these dependencies with pip::
 
+      pip install nose
+      pip install numpy
+      pip install scipy
+
+    Or on Debian/Ubuntu::
+
+      sudo apt-get install -qq python-sphinx python-nose python$-numpy python-scipy
+
+    or::
+
+      sudo apt-get install -qq python3-sphinx python3-nose python3$-numpy python3-scipy
+
+
+.. note::
+
+    If your scipy-version is too outdated, you can install a more recent version using::
+
+        echo 'yes' | sudo add-apt-repository ppa:pylab/stable 
+        sudo apt-get update
+
+    Please note that this adds an unofficial package repository to your system. 
 
 
 How does it work?:
@@ -421,6 +448,11 @@ Version Changelog
     * added support for a variety of new functions, mostly contributed by
       Alex Griffing, NCSU:
       expm, hyp1f1, hyperu, hyp2f0, polygamma, psi, erf, erfi, dawsn, logit, expit
+
+* Version 0.5.0
+
+    * add Python 3 compatibility
+    * add Travis CI
 
 Unit Test
 ---------

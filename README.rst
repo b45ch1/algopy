@@ -1,6 +1,8 @@
 AlgoPy, a library for Automatic Differentation (AD) in Python
 -------------------------------------------------------------
 
+.. image:: https://api.travis-ci.org/b45ch1/algopy.png
+
 Description:
     AlgoPy allows you to differentiate functions implemented as computer programs
     by using Algorithmic Differentiation (AD) techniques in the forward and

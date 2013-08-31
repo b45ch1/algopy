@@ -18,7 +18,7 @@ Documentation with examples is available at http://packages.python.org/algopy/.
 
 # upload sphinx documentation
 #    python setup.py build_sphinx
-#    python setup.py upload_sphinx
+#    python setup.py upload_sphinx (pip install sphinx-pypi-upload to make this command available)
 # need to uncomment some code for that (look for comments containging build_sphinx)
 
 DOCLINES = __doc__.split("\n")
@@ -34,6 +34,7 @@ Development Status :: 4 - Beta
 Operating System :: OS Independent
 Programming Language :: Python
 Programming Language :: Python :: 3
+Topic :: Education
 Topic :: Software Development
 Topic :: Scientific/Engineering
 """
@@ -52,7 +53,7 @@ AUTHOR              = "Sebastian F. Walter"
 AUTHOR_EMAIL        = "sebastian.walter@gmail.com"
 PLATFORMS           = ["all"]
 MAJOR               = 0
-MINOR               = 4
+MINOR               = 5
 MICRO               = 0
 ISRELEASED          = False
 VERSION             = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
@@ -137,7 +138,7 @@ def setup_package():
 
     from distutils.core import setup
     # from distutils.core import setup, Extension
-    # from setuptools import setup #uncomment for build_sphinx and upload_sphinx
+    # from setuptools import setup  #uncomment for build_sphinx and upload_sphinx
 
     try:
         setup(name=NAME,
