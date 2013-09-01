@@ -191,15 +191,15 @@ Publications related to AlgoPy
 Please cite the following paper if you use AlgoPy::
 
     @article{Walter2011,
-    title = "Algorithmic differentiation in Python with AlgoPy",
-    journal = "Journal of Computational Science",
-    volume = "",
-    number = "0",
-    pages = " - ",
-    year = "2011",
+    title = "Algorithmic differentiation in Python with AlgoPy ",
+    journal = "Journal of Computational Science ",
+    volume = "4",
+    number = "5",
+    pages = "334 - 344",
+    year = "2013",
     note = "",
     issn = "1877-7503",
-    doi = "10.1016/j.jocs.2011.10.007",
+    doi = "http://dx.doi.org/10.1016/j.jocs.2011.10.007",
     url = "http://www.sciencedirect.com/science/article/pii/S1877750311001013",
     author = "Sebastian F. Walter and Lutz Lehmann",
     keywords = "Automatic differentiation",
@@ -208,8 +208,10 @@ Please cite the following paper if you use AlgoPy::
     keywords = "Higher-order derivatives",
     keywords = "Numerical linear algebra",
     keywords = "NumPy",
-    keywords = "Taylor arithmetic"
+    keywords = "Taylor arithmetic "
     }
+
+
 
 
 
