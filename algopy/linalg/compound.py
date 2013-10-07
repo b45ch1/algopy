@@ -84,7 +84,7 @@ def svd(A, epsilon=1e-8):
 
 
     # compute the rank
-    # FIXME: this compound algorith should be generic, i.e., also be applicable
+    # FIXME: this compound algorithm should be generic, i.e., also be applicable
     #        in the reverse mode. Need to replace *.data accesses
     r = 0
     for i in range(K):
