@@ -91,24 +91,17 @@ def svd(A, epsilon=1e-8):
         if numpy.any(abs(l[i].data) > epsilon):
             r = i+1
 
-    # permutation matrix
-    tmp  = [M+N-1 - i for i in range(r)] + [i for i in range(r)]
-    tmp += [M+N-1-r-i for i in range(N-r)] + [N-1+i for i in range(N-r)]
-    tmp += [N+i for i in range(M-N)]
+    # resort eigenvalues from large to small
+    # and update l and Q accordingly
+    tmp = numpy.arange(M+N)[::-1]
     P = numpy.eye(M+N)
     P = P[tmp]
-
-
-    # bring Q into the required format
-
+    l = dot(P, l)
     Q = dot(Q, P.T)
 
-
     # find U S V.T
-
     U = zeros((M,M), dtype=Q)
     V = zeros((N,N), dtype=Q)
-
     U[:,:r] = 2.**0.5*Q[:M,:r]
     # compute orthogonal columns to U[:, :r]
     U[:, r:] = qr_full(U[:,:r])[0][:, r:]
@@ -116,7 +109,7 @@ def svd(A, epsilon=1e-8):
     V[:,:r] = 2.**0.5*Q[M:,:r]
     # V[:,r:] = Q[M:,r+M:]
     V[:, r:] = qr_full(V[:,:r])[0][:, r:]
-    s = -l[:K]
+    s = l[:K]
 
     return U, s, V
 
