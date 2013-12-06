@@ -56,8 +56,8 @@ AUTHOR              = "Sebastian F. Walter"
 AUTHOR_EMAIL        = "sebastian.walter@gmail.com"
 PLATFORMS           = ["all"]
 MAJOR               = 0
-MINOR               = 4
-MICRO               = 2
+MINOR               = 5
+MICRO               = 1
 ISRELEASED          = False
 VERSION             = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 

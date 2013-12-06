@@ -221,7 +221,7 @@ Installation and Upgrade:
 
 AlgoPy works on Python 2.6+ and Python 3.0+.
 
-Current version is 0.5.0
+Current version is 0.5.1
 
 Official releases:
     * available at:  http://pypi.python.org/pypi/algopy
