@@ -55,6 +55,23 @@ How to cite AlgoPy::
 import os
 __install_path__ = os.path.realpath(__file__)
 
+# check that dependencies are satisfied
+
+try:
+    import numpy
+except:
+    raise ImportError('NumPy is a requirement of AlgoPy. Please install Scipy >= 1.6.2')
+try:
+    import scipy
+except:
+    raise ImportError('SciPy is a requirement of AlgoPy. Please install Scipy >= 0.11.0')
+
+scipy_version = scipy.version.version.split('.')
+
+if scipy_version[0] < 1 and scipy_version[1] < 11:
+    raise ImportError('Need Scipy >= 0.11.0')
+
+
 # testing
 from numpy.testing import Tester
 test = Tester().test
