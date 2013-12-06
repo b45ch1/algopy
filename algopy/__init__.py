@@ -66,7 +66,7 @@ try:
 except:
     raise ImportError('SciPy is a requirement of AlgoPy. Please install Scipy >= 0.11.0')
 
-scipy_version = scipy.version.version.split('.')
+scipy_version = [int(i) for i in scipy.version.version.split('.')]
 
 if scipy_version[0] < 1 and scipy_version[1] < 11:
     raise ImportError('Need Scipy >= 0.11.0')
