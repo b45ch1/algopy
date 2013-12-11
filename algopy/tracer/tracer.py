@@ -222,15 +222,14 @@ class CGraph:
 
         import algopy
 
-        def f(x1, x2):
-            return x1*x2
+        def f(x):
+            return x[0]*x[1]
 
         cg = algopy.CGraph()
-        x1 = algopy.Function(3.)
-        x2 = algopy.Function(5.)
-        y = f(x1, x2)
+        x = algopy.Function([3., 7.])
+        y = f(x)
         cg.trace_off()
-        cg.independentFunctionList = [x1, x2]
+        cg.independentFunctionList = [x]
         cg.dependentFunctionList = [y]
         print cg.gradient([1.,2.])
         """
