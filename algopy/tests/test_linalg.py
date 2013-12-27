@@ -11,10 +11,17 @@ depending on the type of x.
 
 
 from numpy.testing import *
+from numpy.testing.decorators import skipif
 import numpy
 
 from algopy import UTPM, Function, CGraph, diag, sum
 from algopy.linalg import *
+
+try:
+    from scipy.linalg import expm_frechet
+except ImportError as e:
+    expm_frechet = None
+
 
 class Test_NumpyScipyLinalgFunctions(TestCase):
 
@@ -61,6 +68,45 @@ class Test_NumpyScipyLinalgFunctions(TestCase):
         g2 = cg.gradient(x)
 
         assert_array_almost_equal(g1, g2)
+
+
+    @skipif(expm_frechet is None, msg='expm_frechet is not available')
+    def test_expm_jacobian(self):
+        n = 4
+        x = numpy.random.randn(n, n)
+
+        # use algopy to get the jacobian
+        ax = UTPM.init_jacobian(x)
+        ay = expm(ax)
+        g1 = UTPM.extract_jacobian(ay)
+
+        # compute the jacobian directly using expm_frechet
+        M = numpy.zeros((n, n, n*n))
+        ident = numpy.identity(n*n)
+        for i in range(n*n):
+            E = ident[i].reshape(n, n)
+            M[:, :, i] = expm_frechet(x, E, compute_expm=False)
+
+        assert_allclose(g1, M)
+
+
+    @skipif(expm_frechet is None, msg='expm_frechet is not available')
+    def test_expm_jacobian_vector_product(self):
+        n = 4
+        x = numpy.random.randn(n, n)
+        E = numpy.random.randn(n, n)
+
+        # use algopy to get the jacobian vector product
+        ax = UTPM.init_jac_vec(x.flatten(), E.flatten())
+        ay = expm(ax.reshape((n, n))).reshape((n*n,))
+        g1 = UTPM.extract_jac_vec(ay)
+
+        # compute the jacobian vector product directly using expm_frechet
+        M = expm_frechet(x, E, compute_expm=False).flatten()
+
+        assert_allclose(g1, M)
+
+
 
 if __name__ == "__main__":
     run_module_suite()
