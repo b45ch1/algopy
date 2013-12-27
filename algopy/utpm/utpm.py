@@ -14,6 +14,7 @@ import numpy.linalg
 import numpy
 
 from ..base_type import Ring
+from .._npversion import NumpyVersion
 
 from .algorithms import RawAlgorithmsMixIn, broadcast_arrays_shape
 
@@ -22,7 +23,7 @@ import operator
 from algopy import nthderiv
 
 
-if float(numpy.__version__[:3]) > 1.5:
+if NumpyVersion(numpy.version.version) >= '1.6.0':
 
     def workaround_strides_function(x, y, fun):
         """

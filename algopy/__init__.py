@@ -57,19 +57,38 @@ __install_path__ = os.path.realpath(__file__)
 
 # check that dependencies are satisfied
 
+from ._npversion import NumpyVersion
+
+_min_numpy_version = '1.6.2'
+_min_scipy_version = '0.11.0'
+
 try:
     import numpy
-except:
-    raise ImportError('NumPy is a requirement of AlgoPy. Please install Scipy >= 1.6.2')
+except ImportError as e:
+    raise ImportError(
+            "NumPy import error (%s)\n"
+            "NumPy is a requirement of AlgoPy.\n"
+            "Please install NumPy >= %s" % (e, min_numpy_version))
+
+if NumpyVersion(numpy.version.version) < _min_numpy_version:
+    raise ImportError(
+            "NumPy version %s was detected.\n"
+            "Please install NumPy >= %s" % (
+                numpy.version.version, _min_numpy_version))
+
 try:
     import scipy
-except:
-    raise ImportError('SciPy is a requirement of AlgoPy. Please install Scipy >= 0.11.0')
+except ImportError as e:
+    raise ImportError(
+        "SciPy import error (%s)\n"
+        "SciPy is a requirement of AlgoPy.\n"
+        "Please install SciPy >= " + (e, min_scipy_version))
 
-scipy_version = [int(i) for i in scipy.version.version.split('.')]
-
-if scipy_version[0] < 1 and scipy_version[1] < 11:
-    raise ImportError('Need Scipy >= 0.11.0')
+if NumpyVersion(scipy.version.version) < _min_scipy_version:
+    raise ImportError(
+            "SciPy version %s was detected.\n"
+            "Please install SciPy >= %s" % (
+                scipy.version.version, _min_scipy_version))
 
 
 # testing
