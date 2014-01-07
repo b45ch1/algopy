@@ -1585,7 +1585,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def extract_jac_vec(cls, x):
-        """ extracts the Jacobian vector from a UTPM instance
+        """ extracts the Jacobian vector product from a UTPM instance
         if x.ndim == 1 it is equivalent to the gradient
         """
         return x.data[1,...].transpose([i for i in range(1,x.data[1,...].ndim)] + [0])[:,0]
@@ -1729,7 +1729,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def extract_hess_vec(cls, N, x):
-        """ extracts the Hessian vector from a UTPM instance
+        """ extracts the Hessian-vector product from a UTPM instance
         """
         Hv = numpy.zeros(N)
         for n in range(N):
