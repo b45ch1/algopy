@@ -1724,7 +1724,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             data[1, n, :] = ident[n]
             data[1, n+N, :] = v + ident[n]
         data[1, 2*N, :] = v
-        print(data)
 
         return cls(data)
 
