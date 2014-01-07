@@ -1693,8 +1693,49 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             H[n,n] = 2*y.data[2,a]
         return H
 
+    @classmethod
+    def init_hess_vec(cls, x, v, dtype=None):
+        """ initializes this UTPM instance to compute the Hessian vector product H v,
 
+        it is possible to force the dtype to a certain dtype,
+        if no dtype is provided, the dtype is inferred from x
+        """
 
+        x = numpy.asarray(x)
+        if x.ndim != 1:
+            raise NotImplementedError(
+                    'non vector inputs are not implemented yet')
+
+        if dtype is None:
+            # try to infer the dtype from x
+            dtype= x.dtype
+
+            if dtype==int:
+                dtype=float
+
+        N = numpy.size(x)
+        P = 2*N + 1
+        ident = numpy.identity(N)
+
+        # Construct the UTPM data.
+        data = numpy.zeros((3, P, N), dtype=dtype)
+        data[0] = x
+        for n in range(N):
+            data[1, n, :] = ident[n]
+            data[1, n+N, :] = v + ident[n]
+        data[1, 2*N, :] = v
+        print(data)
+
+        return cls(data)
+
+    @classmethod
+    def extract_hess_vec(cls, N, x):
+        """ extracts the Hessian vector from a UTPM instance
+        """
+        Hv = numpy.zeros(N)
+        for n in range(N):
+            Hv[n] = -x.data[2, n] + x.data[2, n+N] - x.data[2, 2*N]
+        return Hv
 
     @classmethod
     def dot(cls, x, y, out = None):
