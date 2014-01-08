@@ -1,5 +1,6 @@
 from algopy.tracer.tests.test_tracer import *
 from algopy.utpm.tests.test_utpm import *
+from algopy.utpm.tests.test_utpm_convenience import *
 from algopy.utpm.tests.test_algorithms import *
 from algopy.tests.test_globalfuncs import *
 from algopy.tests.test_exact_interpolation import *
