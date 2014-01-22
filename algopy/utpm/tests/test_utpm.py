@@ -6,6 +6,7 @@ import scipy.special
 
 import algopy.nthderiv
 from algopy.utpm import *
+from algopy import zeros
 
 try:
     import mpmath
@@ -2059,6 +2060,325 @@ class Test_Eigenvalue_Decomposition(TestCase):
         Qdot = Q.data[1,0]
 
         assert_almost_equal(numpy.trace(numpy.dot(Abar.T, Adot)), numpy.trace( numpy.dot(Lbar.T, Ldot) + numpy.dot(Qbar.T, Qdot)))
+
+
+
+class Test_Singular_Value_Decomposition(TestCase):
+
+
+    def test_svd(self):
+        D,P,M,N = 3,1,5,2
+        A = UTPM(numpy.random.random((D,P,M,N)))
+
+        U,s,V = UTPM.svd(A)
+
+        S = zeros((M,N),dtype=A)
+        S[:N,:N] = UTPM.diag(s)
+
+        assert_array_almost_equal( (UTPM.dot(UTPM.dot(U, S), V.T) - A).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(U.T, U) - numpy.eye(M)).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(U, U.T) - numpy.eye(M)).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(V.T, V) - numpy.eye(N)).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(V, V.T) - numpy.eye(N)).data, 0.)
+
+    def test_svd1(self):
+        D,P,M,N = 2,1,2,2
+
+        U = UTPM(numpy.random.random((D,P,M,M)))
+        S = UTPM(numpy.zeros((D,P,M,N)))
+        V = UTPM(numpy.random.random((D,P,N,N)))
+
+        U = UTPM.qr(U)[0]
+        V = UTPM.qr(V)[0]
+
+        S.data[1,0, 0 ,0] = 1.
+        S.data[1,0, 1, 1] = 1.
+
+        A = UTPM.dot(U, UTPM.dot(S,V))
+
+        U2,s2,V2 = UTPM.svd(A)
+        S2 = zeros((M,N),dtype=A)
+        S2[:N,:N] = UTPM.diag(s2)
+
+        A2 = UTPM.dot(UTPM.dot(U2, S2), V2.T)
+
+        # print 'S=', S
+        # print 'S2=', S2
+
+        # print A - A2
+
+
+        assert_array_almost_equal( (A2 - A).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(U2.T, U2) - numpy.eye(M)).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(U2, U2.T) - numpy.eye(M)).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(V2.T, V2) - numpy.eye(N)).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(V2, V2.T) - numpy.eye(N)).data, 0.)
+
+    def test_svd2(self):
+        D,P,M,N = 2,1,3,3
+
+        U = UTPM(numpy.random.random((D,P,M,M)))
+        S = UTPM(numpy.zeros((D,P,M,N)))
+        V = UTPM(numpy.random.random((D,P,N,N)))
+
+        U = UTPM.qr(U)[0]
+        V = UTPM.qr(V)[0]
+
+        S.data[1,0, 0 ,0] = 1.
+        S.data[1,0, 1, 1] = 1.
+
+        A = UTPM.dot(U, UTPM.dot(S,V))
+
+        U2,s2,V2 = UTPM.svd(A)
+        S2 = zeros((M,N),dtype=A)
+        S2[:N,:N] = UTPM.diag(s2)
+
+        A2 = UTPM.dot(UTPM.dot(U2, S2), V2.T)
+
+        # print 'S=', S
+        # print 'S2=', S2
+
+        # print A - A2
+        # print 'U2=\n', U2
+        # print 'V2=\n', V2
+        # print 'UTPM.dot(U2.T, U2)=\n',UTPM.dot(U2.T, U2)
+        # print 'UTPM.dot(V2.T, V2)=\n',UTPM.dot(V2.T, V2)
+
+
+        assert_array_almost_equal( (A2 - A).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(U2.T, U2) - numpy.eye(M)).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(U2, U2.T) - numpy.eye(M)).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(V2.T, V2) - numpy.eye(N)).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(V2, V2.T) - numpy.eye(N)).data, 0.)
+
+    def test_svd3(self):
+        """
+        M == N, repeated singular values
+        """
+        D,P,M,N = 4,1,4,4
+
+        U = UTPM(numpy.random.random((D,P,M,M)))
+        S = UTPM(numpy.zeros((D,P,M,N)))
+        V = UTPM(numpy.random.random((D,P,N,N)))
+
+        U = UTPM.qr(U)[0]
+        V = UTPM.qr(V)[0]
+
+        # zeroth coefficient
+        S.data[0,0, 0 ,0] = 1.
+        S.data[0,0, 1, 1] = 1.
+        S.data[0,0, 2, 2] = 0
+        S.data[0,0, 3, 3] = 0
+
+        # first coefficient
+        S.data[1,0, 0 ,0] = 1.
+        S.data[1,0, 1, 1] = -2.
+        S.data[1,0, 2, 2] = 0
+        S.data[1,0, 3, 3] = 0
+
+
+        A = UTPM.dot(U, UTPM.dot(S,V))
+
+        U2,s2,V2 = UTPM.svd(A)
+        S2 = zeros((M,N),dtype=A)
+        S2[:N,:N] = UTPM.diag(s2)
+
+        A2 = UTPM.dot(UTPM.dot(U2, S2), V2.T)
+
+        # print 'S=', S
+        # print 'S2=', S2
+
+        # print A - A2
+        # print 'U2=\n', U2
+        # print 'V2=\n', V2
+        # print 'UTPM.dot(U2.T, U2)=\n',UTPM.dot(U2.T, U2)
+        # print 'UTPM.dot(V2.T, V2)=\n',UTPM.dot(V2.T, V2)
+
+
+        assert_array_almost_equal( (A2 - A).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(U2.T, U2) - numpy.eye(M)).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(U2, U2.T) - numpy.eye(M)).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(V2.T, V2) - numpy.eye(N)).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(V2, V2.T) - numpy.eye(N)).data, 0.)
+
+
+    def test_svd4(self):
+        """
+        M > N
+        """
+        D,P,M,N = 4,1,5,3
+
+        U = UTPM(numpy.random.random((D,P,M,M)))
+        S = UTPM(numpy.zeros((D,P,M,N)))
+        V = UTPM(numpy.random.random((D,P,N,N)))
+
+        U = UTPM.qr(U)[0]
+        V = UTPM.qr(V)[0]
+
+        # zeroth coefficient
+        S.data[0,0, 0 ,0] = 0.
+        S.data[0,0, 1, 1] = 0.
+        S.data[0,0, 2, 2] = 1.
+
+        # first coefficient
+        S.data[1,0, 0 ,0] = 0.
+        S.data[1,0, 1, 1] = 0.
+
+        A = UTPM.dot(U, UTPM.dot(S,V))
+
+        U2,s2,V2 = UTPM.svd(A)
+        S2 = zeros((M,N),dtype=A)
+        S2[:N,:N] = UTPM.diag(s2)
+
+        A2 = UTPM.dot(UTPM.dot(U2, S2), V2.T)
+
+        # print 'S=', S
+        # print 'S2=', S2
+
+        # print A - A2
+        # print 'U2=\n', U2
+        # print 'V2=\n', V2
+        # print 'UTPM.dot(U2.T, U2)=\n',UTPM.dot(U2.T, U2)
+        # print 'UTPM.dot(V2.T, V2)=\n',UTPM.dot(V2.T, V2)
+
+        assert_array_almost_equal( (A2 - A).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(U2.T, U2) - numpy.eye(M)).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(U2, U2.T) - numpy.eye(M)).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(V2.T, V2) - numpy.eye(N)).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(V2, V2.T) - numpy.eye(N)).data, 0.)
+
+
+    def test_svd5(self):
+        """
+        M < N
+        """
+        D,P,M,N = 4,1,3,5
+        K = min(M,N)
+
+        U = UTPM(numpy.random.random((D,P,M,M)))
+        S = UTPM(numpy.zeros((D,P,M,N)))
+        V = UTPM(numpy.random.random((D,P,N,N)))
+
+        U = UTPM.qr(U)[0]
+        V = UTPM.qr(V)[0]
+
+        # zeroth coefficient
+        S.data[0,0, 0 ,0] = 1.
+        S.data[0,0, 1, 1] = 1.
+        S.data[0,0, 2, 2] = 0.
+
+        # first coefficient
+        S.data[1,0, 0 ,0] = 0.
+        S.data[1,0, 1, 1] = 0.
+
+        A = UTPM.dot(U, UTPM.dot(S,V))
+        U2,s2,V2 = UTPM.svd(A)
+        S2 = zeros((M,N),dtype=A)
+        S2[:K,:K] = UTPM.diag(s2)
+
+        A2 = UTPM.dot(UTPM.dot(U2, S2), V2.T)
+
+        # print 'S=', S
+        # print 'S2=', S2
+
+        # print A - A2
+        # print 'U2=\n', U2
+        # print 'V2=\n', V2
+        # print 'UTPM.dot(U2.T, U2)=\n',UTPM.dot(U2.T, U2)
+        # print 'UTPM.dot(V2.T, V2)=\n',UTPM.dot(V2.T, V2)
+
+        assert_array_almost_equal( (A2 - A).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(U2.T, U2) - numpy.eye(M)).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(U2, U2.T) - numpy.eye(M)).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(V2.T, V2) - numpy.eye(N)).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(V2, V2.T) - numpy.eye(N)).data, 0.)
+
+    def test_svd_example2(self):
+        """
+        Example 2 from the paper "Numerical Computatoin of an Analytic Singular
+        Value Decomposition of a Matrix Valued Function", by Bunse-Gerstner, Byers,
+        Mehrmann, Nichols
+        """
+
+        D,P,M,N = 2,1,2,2
+
+        U = UTPM(numpy.zeros((D,P,M,N)))
+        S = UTPM(numpy.zeros((D,P,M,N)))
+        V = UTPM(numpy.zeros((D,P,M,N)))
+
+        U.data[0,0, ...] = numpy.eye(2)
+        V.data[0,0, ...] = numpy.eye(2)
+        S.data[0,0, ...] = numpy.eye(2)
+        S.data[1,0, 0 ,0] = - 1.
+        S.data[1,0, 1, 1] = 1.
+
+        A = UTPM.dot(U, UTPM.dot(S, V.T))
+
+        U2,s2,V2 = UTPM.svd(A)
+
+        S2 = zeros((M,N),dtype=A)
+        S2[:N,:N] = UTPM.diag(s2)
+
+        assert_array_almost_equal( (UTPM.dot(UTPM.dot(U2, S2), V2.T) - A).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(U2.T, U2) - numpy.eye(M)).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(U2, U2.T) - numpy.eye(M)).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(V2.T, V2) - numpy.eye(N)).data, 0.)
+        assert_array_almost_equal( (UTPM.dot(V2, V2.T) - numpy.eye(N)).data, 0.)
+
+
+
+    def test_pb_svd(self):
+        # initialization
+        D,P,N = 2,1,4
+
+        U = numpy.random.rand(D,P,N,N)
+        V = numpy.random.rand(D,P,N,N)
+        d = numpy.random.rand(D,P,N)
+        d[0,0, :] = [1,2,3,4]
+
+        U = UTPM(U)
+        V = UTPM(V)
+        s = UTPM(d)
+
+        U = UTPM.qr(U)[0]
+        V = UTPM.qr(V)[0]
+        A = UTPM.dot(U, UTPM.dot(UTPM.diag(s), V.T))
+
+
+        # forward mode
+        U2, s2, V2 = UTPM.svd(A)
+
+        error1 = UTPM.dot(U2, UTPM.dot(UTPM.diag(s2), V2.T)) - A
+        error2 = UTPM.dot(U2.T, U2) - numpy.eye(N)
+        error3 = UTPM.dot(V2.T, V2) - numpy.eye(N)
+        error4 = UTPM.dot(U2, U2.T) - numpy.eye(N)
+        error5 = UTPM.dot(V2, V2.T) - numpy.eye(N)
+
+        assert_almost_equal(0, error1.data)
+        assert_almost_equal(0, error2.data)
+        assert_almost_equal(0, error3.data)
+        assert_almost_equal(0, error4.data)
+        assert_almost_equal(0, error5.data)
+
+        # reverse mode
+        U2bar = U2.zeros_like()
+        s2bar = s2.zeros_like()
+        V2bar = V2.zeros_like()
+
+        U2bar.data[...] = numpy.random.random(U2bar.data.shape)
+        s2bar.data[...] = numpy.random.random(s2bar.data.shape)
+        V2bar.data[...] = numpy.random.random(V2bar.data.shape)
+
+        Abar = UTPM.pb_svd(U2bar, s2bar, V2bar,  A, U2, s2, V2)
+
+        in1 = numpy.sum(U2bar.data[0,0]*U2.data[1,0])
+        in2 = numpy.sum(s2bar.data[0,0]*s2.data[1,0])
+        in3 = numpy.sum(V2bar.data[0,0]*V2.data[1,0])
+        out = numpy.sum(Abar.data[0,0]*A.data[1,0])
+
+        assert_almost_equal(out, in1 + in2 + in3)
+
+
 
 
 class TestFunctionOfJacobian(TestCase):

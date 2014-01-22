@@ -33,7 +33,30 @@ class Test_NumpyScipyLinalgFunctions(TestCase):
         assert_array_almost_equal( (dot(V.T, V) - numpy.eye(N)).data, 0.)
         assert_array_almost_equal( (dot(V, V.T) - numpy.eye(N)).data, 0.)
 
+    def test_reverse_mode_svd(self):
+        def f(A):
 
+            U, d, V = algopy.svd(A)
+
+            return algopy.sum(U) + algopy.sum(V) + algopy.prod(d)
+
+        A = numpy.random.random((2,2))
+
+        # forward mode
+
+        uA = algopy.UTPM.init_jacobian(A)
+        ud = f(uA)
+        jac = algopy.UTPM.extract_jacobian(ud).reshape(A.shape)
+
+        # reverse mode
+        cg = algopy.CGraph()
+        fA = algopy.Function(A)
+        fd = f(fA)
+        cg.independentFunctionList = [fA]
+        cg.dependentFunctionList = [fd]
+        grad = cg.gradient(A)
+
+        assert_almost_equal(grad, jac)
 
     def test_expm(self):
 

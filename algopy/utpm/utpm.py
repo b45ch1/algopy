@@ -2400,9 +2400,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         return L,Q,b_list
 
-
-
-
     @classmethod
     def pb_eigh(cls, lbar, Qbar,  A, l, Q,  out = None):
         D,P,M,N = numpy.shape(A.data)
@@ -2427,6 +2424,132 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             Abar, = out
 
         UTPM._eigh1_pullback( Lbar.data,  Qbar.data, A.data,  L.data, Q.data, b_list, out = Abar.data)
+        return Abar
+
+
+    @classmethod
+    def svd(cls, A, out = None, epsilon = 1e-8):
+        """
+        computes the singular value decomposition A = U S V.T
+        of matrices A with full rank (i.e. nonzero singular values)
+        by reformulation to eigh.
+
+        (U, S, VT) = UTPM.svd(A, epsilon= 1e-8)
+
+        Parameters
+        ----------
+
+        A: array_like
+            input array (numpy.ndarray, algopy.UTPM or algopy.Function instance)
+
+        epsilon:   float
+            threshold to evaluate the rank of A
+
+        Implementation
+        --------------
+
+        The singular value decomposition is directly related to the symmetric
+        eigenvalue decomposition.
+
+        See for Reference
+
+        * Bunse-Gerstner et al., Numerical computation of an analytic singular value
+          decomposition of a matrix valued function
+
+        * A. Bjoerk, Numerical Methods for Least Squares Problems, SIAM, 1996
+        for the relation between SVD and symm. eigenvalue decomposition
+
+        * S. F. Walter, Structured Higher-Order Algorithmic Differentiation
+        in the Forward and Reverse Mode with Application in Optimum Experimental
+        Design, PhD thesis, 2011
+        for the Taylor polynomial arithmetic.
+
+        """
+
+        D,P,M,N = numpy.shape(A.data)
+        K = min(M,N)
+
+        if out == None:
+            U = cls(cls.__zeros__((D,P,M,M), dtype=A.data.dtype))
+            s = cls(cls.__zeros__((D,P,K), dtype=A.data.dtype))
+            V = cls(cls.__zeros__((D,P,N,N), dtype=A.data.dtype))
+
+        # real symmetric eigenvalue decomposition
+
+        B = cls(cls.__zeros__((D,P, M+N, M+N), dtype=A.data.dtype))
+        B[:M,M:] = A
+        B[M:,:M] = A.T
+        l,Q = cls.eigh(B, epsilon=epsilon)
+
+
+        # compute the rank
+        # FIXME: this compound algorithm should be generic, i.e., also be applicable
+        #        in the reverse mode. Need to replace *.data accesses
+        r = 0
+
+        for i in range(K):
+            if numpy.any(abs(l[i].data) > epsilon):
+                r = i+1
+
+        # resort eigenvalues from large to small
+        # and update l and Q accordingly
+        tmp = numpy.arange(M+N)[::-1]
+        Pr = numpy.eye(M+N)
+        Pr = Pr[tmp]
+        l = cls.dot(Pr, l)
+        Q = cls.dot(Q, Pr.T)
+
+        # find U S V.T
+        U = cls(cls.__zeros__((D,P, M,M), dtype=Q.data.dtype))
+        V = cls(cls.__zeros__((D,P, N,N), dtype=Q.data.dtype))
+        U[:,:r] = 2.**0.5*Q[:M,:r]
+        # compute orthogonal columns to U[:, :r]
+        U[:, r:] = cls.qr_full(U[:,:r])[0][:, r:]
+        # U[:,r:] = Q[:M, 2*r: r+M]
+        V[:,:r] = 2.**0.5*Q[M:,:r]
+        # V[:,r:] = Q[M:,r+M:]
+        V[:, r:] = cls.qr_full(V[:,:r])[0][:, r:]
+        s[:] = l[:K]
+
+        return U, s, V
+
+    @classmethod
+    def pb_svd(cls, Ubar, sbar, Vbar,  A, U, s, V,  out = None):
+        D,P,M,N = numpy.shape(A.data)
+
+        assert M <= N, "only M <= N is supported, please use the SVD of the transpose"
+
+        if out == None:
+            Abar = A.zeros_like()
+
+        else:
+            Abar, = out
+
+        Abar += UTPM.dot(U, UTPM.dot(UTPM.diag(sbar), V.T))
+
+        F = A.zeros_like()
+        for i in range(M):
+            F[i, :] -= s[i]**2
+
+        for j in range(M):
+            F[:, j] += s[j]**2
+            F[j, j] = numpy.infty
+
+        F = 1./F
+
+        B = F * UTPM.dot(U.T, Ubar)
+        Dbar = UTPM.dot(V.T, Vbar)
+
+        D1bar, D2bar = Dbar[:M], Dbar[M:]
+        G = F * D1bar
+        Pbar = A.zeros_like()
+        P1bar, P2bar = Pbar[:M], Pbar[M:]
+
+        P1bar[...] = s.reshape((M, 1)) * (G + G.T) + s.reshape((1, M)) * (B + B.T)
+        P2bar[...] = D2bar/s
+
+        Abar += UTPM.dot(U, UTPM.dot(Pbar, V.T))
+
         return Abar
 
     @classmethod

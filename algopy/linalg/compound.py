@@ -26,92 +26,14 @@ so they are represented by a single node in the CGraph.
 """
 
 import numpy
+import algopy
 
 from algopy.globalfuncs import zeros, dot
 from algopy.linalg.linalg import eigh, solve, qr_full
 
 
-def svd(A, epsilon=1e-8):
-    """
-    computes the singular value decomposition A = U S V.T
-    of matrices A with full rank (i.e. nonzero singular values)
-    by reformulation to eigh.
-
-    (U, S, VT) = UTPM.svd(A, epsilon= 1e-8)
-
-    Parameters
-    ----------
-
-    A: array_like
-        input array (numpy.ndarray, algopy.UTPM or algopy.Function instance)
-
-    epsilon:   float
-        threshold to evaluate the rank of A
-
-    Implementation
-    --------------
-
-    The singular value decomposition is directly related to the symmetric
-    eigenvalue decomposition.
-
-    See for Reference
-
-    * Bunse-Gerstner et al., Numerical computation of an analytic singular value
-      decomposition of a matrix valued function
-
-    * A. Bjoerk, Numerical Methods for Least Squares Problems, SIAM, 1996
-    for the relation between SVD and symm. eigenvalue decomposition
-
-    * S. F. Walter, Structured Higher-Order Algorithmic Differentiation
-    in the Forward and Reverse Mode with Application in Optimum Experimental
-    Design, PhD thesis, 2011
-    for the Taylor polynomial arithmetic.
-
-    """
-
-    M,N = A.shape
-    K = min(M,N)
-
-    # if N > M:
-    #     raise NotImplementedError("A.shape = (M,N) and N > M is not supported (yet)")
-
-    # real symmetric eigenvalue decomposition
-
-    B = zeros((M+N, M+N),dtype=A)
-    B[:M,M:] = A
-    B[M:,:M] = A.T
-    l,Q = eigh(B, epsilon=epsilon)
 
 
-    # compute the rank
-    # FIXME: this compound algorithm should be generic, i.e., also be applicable
-    #        in the reverse mode. Need to replace *.data accesses
-    r = 0
-    for i in range(K):
-        if numpy.any(abs(l[i].data) > epsilon):
-            r = i+1
-
-    # resort eigenvalues from large to small
-    # and update l and Q accordingly
-    tmp = numpy.arange(M+N)[::-1]
-    P = numpy.eye(M+N)
-    P = P[tmp]
-    l = dot(P, l)
-    Q = dot(Q, P.T)
-
-    # find U S V.T
-    U = zeros((M,M), dtype=Q)
-    V = zeros((N,N), dtype=Q)
-    U[:,:r] = 2.**0.5*Q[:M,:r]
-    # compute orthogonal columns to U[:, :r]
-    U[:, r:] = qr_full(U[:,:r])[0][:, r:]
-    # U[:,r:] = Q[:M, 2*r: r+M]
-    V[:,:r] = 2.**0.5*Q[M:,:r]
-    # V[:,r:] = Q[M:,r+M:]
-    V[:, r:] = qr_full(V[:,:r])[0][:, r:]
-    s = l[:K]
-
-    return U, s, V
 
 
 def expm(A):
