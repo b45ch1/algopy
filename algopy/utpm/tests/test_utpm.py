@@ -2379,6 +2379,67 @@ class Test_Singular_Value_Decomposition(TestCase):
         assert_almost_equal(out, in1 + in2 + in3)
 
 
+    def test_pb_svd2(self):
+        # initialization
+        D,P,M,N = 2,1,2,4
+
+        U = numpy.random.rand(D,P,M,M)
+        V = numpy.random.rand(D,P,N,N)
+        d = numpy.random.rand(D,P,M)
+        d[0,0, :] = [1,2]
+
+        U = algopy.UTPM(U)
+        V = algopy.UTPM(V)
+        s = algopy.UTPM(d)
+
+        U = algopy.qr_full(U)[0]
+        V = algopy.qr_full(V)[0]
+        S = algopy.zeros((M,N), dtype=U)
+        for i in range(M):
+            S[i,i] = s[i]
+        A = algopy.dot(U, algopy.dot(S, V.T))
+
+        print U.shape
+        print V.shape
+        print A.shape
+
+        # forward mode
+        U2, s2, V2 = algopy.UTPM.svd(A)
+
+        for i in range(M):
+            S[i,i] = s2[i]
+
+        error1 = algopy.dot(U2, algopy.dot(S, V2.T)) - A
+        error2 = algopy.dot(U2.T, U2) - numpy.eye(M)
+        error3 = algopy.dot(V2.T, V2) - numpy.eye(N)
+        error4 = algopy.dot(U2, U2.T) - numpy.eye(M)
+        error5 = algopy.dot(V2, V2.T) - numpy.eye(N)
+
+        assert_almost_equal(0, error1.data)
+        assert_almost_equal(0, error2.data)
+        assert_almost_equal(0, error3.data)
+        assert_almost_equal(0, error4.data)
+        assert_almost_equal(0, error5.data)
+
+        # reverse mode
+        U2bar = algopy.zeros(U2.shape, dtype=U2)
+        s2bar = algopy.zeros(s2.shape, dtype=s2)
+        V2bar = algopy.zeros(V2.shape, dtype=V2)
+
+        U2bar.data[...] = numpy.random.random(U2bar.data.shape)
+        s2bar.data[...] = numpy.random.random(s2bar.data.shape)
+        V2bar.data[...] = numpy.random.random(V2bar.data.shape)
+
+        Abar = algopy.UTPM.pb_svd(U2bar, s2bar, V2bar,  A, U2, s2, V2)
+
+        in1 = numpy.sum(U2bar.data[0,0]*U2.data[1,0])
+        in2 = numpy.sum(s2bar.data[0,0]*s2.data[1,0])
+        in3 = numpy.sum(V2bar.data[0,0]*V2.data[1,0])
+        out = numpy.sum(Abar.data[0,0]*A.data[1,0])
+
+        assert_almost_equal(out, in1 + in2 + in3)
+
+
 
 
 class TestFunctionOfJacobian(TestCase):

@@ -2525,9 +2525,19 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         else:
             Abar, = out
 
-        Abar += UTPM.dot(U, UTPM.dot(UTPM.diag(sbar), V.T))
+        print '-*10'
+        print U.shape
+        print sbar.shape
+        print V.shape
 
-        F = A.zeros_like()
+        Sbar = A.zeros_like()
+
+        for i in range(M):
+            Sbar[i,i] = sbar[i]
+
+        Abar += UTPM.dot(U, UTPM.dot(Sbar, V.T))
+
+        F = U.zeros_like()
         for i in range(M):
             F[i, :] -= s[i]**2
 
@@ -2537,16 +2547,35 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         F = 1./F
 
+        print 'F.shape', F.shape
+
         B = F * UTPM.dot(U.T, Ubar)
         Dbar = UTPM.dot(V.T, Vbar)
 
-        D1bar, D2bar = Dbar[:M], Dbar[M:]
+        D1bar, D2hat = Dbar[:M, :M], Dbar[:M, M:]
+        D2til, D3bar = Dbar[M:, :M], Dbar[M:, M:]
+
+
+        print 'D2hat.shape', D2hat.shape
+        print 'D2til.shape', D2til.shape
+
+        D2bar = D2til.T - D2hat
+
+        print 'D1bar.shape', D1bar.shape
+        print 'D2bar.shape', D2bar.shape
+
         G = F * D1bar
         Pbar = A.zeros_like()
-        P1bar, P2bar = Pbar[:M], Pbar[M:]
+        P1bar, P2bar = Pbar[:, :M], Pbar[:, M:]
+
+        print 'G.shape', G.shape
+        print 'B.shape', B.shape
+        print 'P1bar.shape', P1bar.shape
+        print 'P2bar.shape', P2bar.shape
+
 
         P1bar[...] = s.reshape((M, 1)) * (G + G.T) + s.reshape((1, M)) * (B + B.T)
-        P2bar[...] = D2bar/s
+        P2bar[...] = D2bar/s.reshape((M, 1))
 
         Abar += UTPM.dot(U, UTPM.dot(Pbar, V.T))
 
