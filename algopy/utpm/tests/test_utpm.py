@@ -1224,7 +1224,6 @@ class Test_Push_Forward(TestCase):
         assert_array_almost_equal(Z.data, X.data)
 
 
-
     def test_diag(self):
         D,P,N = 2,3,4
         x = UTPM(numpy.random.rand(D,P,N))
@@ -1250,6 +1249,8 @@ class Test_Push_Forward(TestCase):
 
 
     def test_trace(self):
+        #NOTE: Is this test mis-named?
+        #      Does it not test the transpose, not trace?
         N1 = 2
         N2 = 3
         N3 = 4
@@ -1260,6 +1261,67 @@ class Test_Push_Forward(TestCase):
         AY = AX.T
         AY.data[0,0,2,0] = 1234
         assert AX.data[0,0,0,2] == AY.data[0,0,2,0]
+
+
+    def test_det(self):
+        # This example is from "Structured Higher-Ordered Algorithmic
+        # differentiation in the Forward and Reverse Mode with Application
+        # in Optimum Experimental Design" by Sebastian Walter.
+
+        # NOTE: The UTPM determinant uses cholesky decomposition,
+        #       so it may only be applicable to positive definite matrices
+        #       such as the one tested here.
+
+        D, P, N = 3, 5, 4
+
+        # Define some univariate values of x.
+        x = UTPM(numpy.random.randn(D, P, 1))
+
+        # Define the lambda vector as a function of x.
+        # The product of its entries is the expected determinant.
+        lam = UTPM(numpy.zeros((D, P, N)))
+        lam[0] = UTPM.sin(x*x) + 1
+        lam[1] = UTPM.log(x*x + 2)
+        lam[2] = 1
+        lam[3] = UTPM.cos(5*x) + 1
+        desired_det = lam[0] * lam[1] * lam[2] * lam[3]
+
+        # Turn lambda into a diagonal matrix.
+        lam = UTPM.diag(lam)
+
+        # Make an orthogonal matrix as a function of x.
+        Q = UTPM(numpy.zeros((D, P, N, N)))
+        #
+        Q[0, 0] = UTPM.cos(x)
+        Q[0, 1] = 1
+        Q[0, 2] = UTPM.sin(x)
+        Q[0, 3] = -1
+        #
+        Q[1, 0] = -UTPM.sin(x)
+        Q[1, 1] = -1
+        Q[1, 2] = UTPM.cos(x)
+        Q[1, 3] = -1
+        #
+        Q[2, 0] = 1
+        Q[2, 1] = -UTPM.sin(x)
+        Q[2, 2] = 1
+        Q[2, 3] = UTPM.cos(x)
+        #
+        Q[3, 0] = -1
+        Q[3, 1] = UTPM.cos(x)
+        Q[3, 2] = 1
+        Q[3, 3] = UTPM.sin(x)
+        #
+        Q = Q / numpy.sqrt(3)
+
+        # Construct the matrix product.
+        # Compute its determinant.
+        A = UTPM.dot(Q, UTPM.dot(lam, Q.T))
+        observed_det = UTPM.det(A)
+
+        # Compare the Taylor expansions of the determinants.
+        assert_allclose(observed_det.data, desired_det.data)
+
 
     def test_inv(self):
         (D,P,N,M) = 2,3,5,1
