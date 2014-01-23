@@ -1755,7 +1755,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             else:
                 out_shp = x_shp[:2] + x_shp[2:-1] + y_shp[2:][:-2] + y_shp[2:][-1:]
 
-            out = cls(cls.__zeros__(out_shp, dtype = x.data.dtype))
+            out = cls(cls.__zeros__(out_shp, dtype=numpy.promote_types(x.data.dtype, y.data.dtype)))
             cls._dot( x.data, y.data, out = out.data)
 
         elif isinstance(x, UTPM) and not isinstance(y, UTPM):
@@ -1768,7 +1768,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             else:
                 out_shp = x_shp[:2] + x_shp[2:-1] + y_shp[:-2] + y_shp[-1:]
 
-            out = cls(cls.__zeros__(out_shp, dtype = x.data.dtype))
+            out = cls(cls.__zeros__(out_shp, dtype=numpy.promote_types(x.data.dtype, y.dtype)))
             cls._dot_non_UTPM_y(x.data, y, out = out.data)
 
         elif not isinstance(x, UTPM) and isinstance(y, UTPM):
@@ -1781,7 +1781,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             else:
                 out_shp = y_shp[:2] + x_shp[:-1] + y_shp[2:][:-2] + y_shp[2:][-1:]
 
-            out = cls(cls.__zeros__(out_shp, dtype = y.data.dtype))
+            out = cls(cls.__zeros__(out_shp, dtype=numpy.promote_types(x.dtype, y.data.dtype)))
             cls._dot_non_UTPM_x(x, y.data, out = out.data)
 
 
@@ -1876,7 +1876,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             D, P, M = A_shp[:3]
 
             if out == None:
-                out = cls(cls.__zeros__((D,P,M) + x_shp[3:], dtype = A.data.dtype))
+                dtype = numpy.promote_types(A.data.dtype, x.data.dtype)
+                out = cls(cls.__zeros__((D,P,M) + x_shp[3:], dtype=dtype))
 
             UTPM._solve(A.data, x.data, out = out.data)
 
@@ -1885,14 +1886,16 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             x_shp = numpy.shape(x.data)
             M = A_shp[0]
             D,P = x_shp[:2]
-            out = cls(cls.__zeros__((D,P,M) + x_shp[3:], dtype = A.data.dtype))
+            dtype = numpy.promote_types(A.dtype, x.data.dtype)
+            out = cls(cls.__zeros__((D,P,M) + x_shp[3:], dtype=dtype))
             cls._solve_non_UTPM_A(A, x.data, out = out.data)
 
         elif isinstance(A, UTPM) and not isinstance(x, UTPM):
             A_shp = numpy.shape(A.data)
             x_shp = numpy.shape(x)
             D,P,M = A_shp[:3]
-            out = cls(cls.__zeros__((D,P,M) + x_shp[1:], dtype = A.data.dtype))
+            dtype = numpy.promote_types(A.data.dtype, x.dtype)
+            out = cls(cls.__zeros__((D,P,M) + x_shp[1:], dtype=dtype))
             cls._solve_non_UTPM_x(A.data, x, out = out.data)
 
         else:
@@ -2357,7 +2360,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         computes the eigenvalue decomposition A = Q^T L Q
         of a symmetrical matrix A with distinct eigenvalues
 
-        (l,Q) = UTPM.eig(A, out=None)
+        (l,Q) = UTPM.eigh(A, out=None)
 
         """
 
@@ -2424,6 +2427,96 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             Abar, = out
 
         UTPM._eigh1_pullback( Lbar.data,  Qbar.data, A.data,  L.data, Q.data, b_list, out = Abar.data)
+        return Abar
+
+
+    @classmethod
+    def eig(cls, A, out = None):
+        """
+        computes the eigenvalue decomposition Q^-1 A Q = L
+        of a diagonalizable matrix A with distinct eigenvalues
+
+        (l,Q) = UTPM.eig(A, out=None)
+
+        """
+
+        D,P,M,N = numpy.shape(A.data)
+
+        assert M == N, 'A must be a square matrix, but A.shape = (%d, %d)!'%A.shape
+
+        assert D == 2, 'sorry: only first-order Taylor polynomials are supported right now'
+
+        if out == None:
+            l = cls(cls.__zeros__((D,P,N), dtype='complex'))
+            Q = cls(cls.__zeros__((D,P,N,N), dtype='complex'))
+
+        else:
+            l,Q = out
+
+        for p in range(P):
+
+            # d=0: nominal computation
+            t1, t2 = numpy.linalg.eig(A.data[0,p])
+
+            l.data[0,p], Q.data[0,p] = t1, t2
+
+            # d=1: first-order coefficient
+            v1 = numpy.linalg.solve(Q.data[0,p], A.data[1,p])
+            v2 = numpy.dot(v1, Q.data[0,p])
+            l.data[1,p] = numpy.diag(v2)
+
+            F = numpy.zeros((M,M), dtype=l.data.dtype)
+            for i in range(M):
+                F[i, :] -= l.data[0,p,i]
+
+            for j in range(M):
+                F[:, j] += l.data[0,p,j]
+                F[j, j] = numpy.infty
+
+            F = 1./F
+
+            Q.data[1,p] = numpy.dot(Q.data[0,p], F * v2)
+
+        if numpy.allclose(0, l.data.imag) and numpy.allclose(0, Q.data.imag):
+            l = cls(l.data.real.astype(float))
+            Q = cls(Q.data.real.astype(float))
+
+        return l, Q
+
+
+    @classmethod
+    def pb_eig(cls, lbar, Qbar,  A, l, Q,  out = None):
+        D,P,M,N = numpy.shape(A.data)
+
+        if out == None:
+            Abar = A.zeros_like()
+
+        else:
+            Abar, = out
+
+        E = Q.zeros_like()
+        for i in range(M):
+            E[i, :] -= l[i]
+
+        for j in range(M):
+            E[:, j] += l[j]
+            E[j, j] = numpy.infty
+
+        F = 1./E
+        print 'F = ',F
+        print 'E*F=', E*F
+
+        Lbar = UTPM.diag(lbar)
+
+        v1 = Lbar + F * UTPM.dot(Q.T, Qbar)
+        # print 'v1=', v1
+        v2 = UTPM.dot(v1, Q.T)
+        # print 'v2=',v2
+        v3 = UTPM.solve(Q.T, v2)
+
+        print 'v3=',v3
+        Abar += v3
+
         return Abar
 
 
@@ -2525,11 +2618,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         else:
             Abar, = out
 
-        print '-*10'
-        print U.shape
-        print sbar.shape
-        print V.shape
-
         Sbar = A.zeros_like()
 
         for i in range(M):
@@ -2547,7 +2635,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         F = 1./F
 
-        print 'F.shape', F.shape
 
         B = F * UTPM.dot(U.T, Ubar)
         Dbar = UTPM.dot(V.T, Vbar)
@@ -2555,24 +2642,11 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         D1bar, D2hat = Dbar[:M, :M], Dbar[:M, M:]
         D2til, D3bar = Dbar[M:, :M], Dbar[M:, M:]
 
-
-        print 'D2hat.shape', D2hat.shape
-        print 'D2til.shape', D2til.shape
-
         D2bar = D2til.T - D2hat
-
-        print 'D1bar.shape', D1bar.shape
-        print 'D2bar.shape', D2bar.shape
 
         G = F * D1bar
         Pbar = A.zeros_like()
         P1bar, P2bar = Pbar[:, :M], Pbar[:, M:]
-
-        print 'G.shape', G.shape
-        print 'B.shape', B.shape
-        print 'P1bar.shape', P1bar.shape
-        print 'P2bar.shape', P2bar.shape
-
 
         P1bar[...] = s.reshape((M, 1)) * (G + G.T) + s.reshape((1, M)) * (B + B.T)
         P2bar[...] = D2bar/s.reshape((M, 1))

@@ -1176,7 +1176,7 @@ class RawAlgorithmsMixIn:
 
         if out == None:
             new_shp = x_data.shape[:-1] + y_data.shape[2:-2] + (y_data.shape[-1],)
-            out = numpy.zeros(new_shp, dtype=x_data.dtype)
+            out = numpy.zeros(new_shp, dtype=numpy.promote_types(x_data.dtype, y_data.dtype) )
 
         z_data = out
         z_data[...] = 0.
@@ -1186,7 +1186,7 @@ class RawAlgorithmsMixIn:
         # print 'x_data.shape=', x_data.shape
         # print 'y_data.shape=', y_data.shape
         # print 'z_data.shape=', z_data.shape
-        
+
         for d in range(D):
             for p in range(P):
                 for c in range(d+1):
@@ -1429,7 +1429,8 @@ class RawAlgorithmsMixIn:
             y_data[0,p,...] = numpy.linalg.solve(A_data[0,p,...], x_data[0,p,...])
 
         # d = 1,...,D-1
-        tmp = numpy.zeros((M,K),dtype=float)
+        dtype = numpy.promote_types(A_data.dtype, x_data.dtype)
+        tmp = numpy.zeros((M,K),dtype=dtype)
         for d in range(1, D):
             for p in range(P):
                 tmp[:,:] = x_data[d,p,:,:]
@@ -2370,7 +2371,7 @@ class RawAlgorithmsMixIn:
         if numpy.ndim(v_data) == 3:
             D,P,N = v_data.shape
             if out == None:
-                out = numpy.zeros((D,P,N,N),dtype=float)
+                out = numpy.zeros((D,P,N,N),dtype=v_data.dtype)
             else:
                 out[...] = 0.
 
@@ -2383,7 +2384,7 @@ class RawAlgorithmsMixIn:
         else:
             D,P,M,N = v_data.shape
             if out == None:
-                out = numpy.zeros((D,P,N),dtype=float)
+                out = numpy.zeros((D,P,N),dtype=v_data.dtype)
 
             for d in range(D):
                 for p in range(P):
