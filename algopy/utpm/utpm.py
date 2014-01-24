@@ -282,7 +282,9 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     def __add__(self,rhs):
         if numpy.isscalar(rhs):
-            retval = UTPM(numpy.copy(self.data))
+            dtype = numpy.promote_types(self.data.dtype, type(rhs))
+            retval = UTPM(numpy.zeros(self.data.shape, dtype=dtype))
+            retval.data[...] = self.data
             retval.data[0,:] += rhs
             return retval
 
@@ -301,19 +303,22 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             if numpy.isscalar(rhs_shape):
                 rhs_shape = (rhs_shape,)
             x_data, y_data = UTPM._broadcast_arrays(self.data, rhs.reshape((1,1)+rhs_shape))
-            z_data = x_data.copy()
+            dtype = numpy.promote_types(x_data.dtype, y_data.dtype)
+            z_data = numpy.zeros(x_data.shape, dtype=dtype)
+            z_data[...] = x_data
             z_data[0] += y_data[0]
             return UTPM(z_data)
 
         else:
             x_data, y_data = UTPM._broadcast_arrays(self.data, rhs.data)
-            z_data = x_data.copy()
-            z_data += y_data
-            return UTPM(z_data)
+
+            return UTPM(x_data + y_data)
 
     def __sub__(self,rhs):
         if numpy.isscalar(rhs):
-            retval = UTPM(numpy.copy(self.data))
+            dtype = numpy.promote_types(self.data.dtype, type(rhs))
+            retval = UTPM(numpy.zeros(self.data.shape, dtype=dtype))
+            retval.data[...] = self.data
             retval.data[0,:] -= rhs
             return retval
 
@@ -325,7 +330,9 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             if numpy.isscalar(rhs_shape):
                 rhs_shape = (rhs_shape,)
             x_data, y_data = UTPM._broadcast_arrays(self.data, rhs.reshape((1,1)+rhs_shape))
-            z_data = x_data.copy()
+            dtype = numpy.promote_types(x_data.dtype, y_data.dtype)
+            z_data = numpy.zeros(x_data.shape, dtype=dtype)
+            z_data[...] = x_data
             z_data[0] -= y_data[0]
             return UTPM(z_data)
 
@@ -347,7 +354,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             return UTPM(x_data * y_data)
 
         x_data, y_data = UTPM._broadcast_arrays(self.data, rhs.data)
-        z_data = numpy.zeros_like(x_data)
+        dtype = numpy.promote_types(x_data.dtype, y_data.dtype)
+        z_data = numpy.zeros(x_data.shape, dtype=dtype)
         self._mul(x_data, y_data, z_data)
         return self.__class__(z_data)
 
@@ -366,7 +374,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             return UTPM(x_data / y_data)
 
         x_data, y_data = UTPM._broadcast_arrays(self.data, rhs.data)
-        z_data = numpy.zeros_like(x_data)
+        dtype = numpy.promote_types(x_data.dtype, y_data.dtype)
+        z_data = numpy.zeros(x_data.shape, dtype=dtype)
         self._truediv(x_data, y_data, z_data)
         return self.__class__(z_data)
 
@@ -378,7 +387,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         """
 
         x_data, y_data = UTPM._broadcast_arrays(self.data, rhs.data)
-        z_data = numpy.zeros_like(x_data)
+        dtype = numpy.promote_types(x_data.dtype, y_data.dtype)
+        z_data = numpy.zeros(x_data.shape, dtype=dtype)
         self._floordiv(x_data, y_data, z_data)
         return self.__class__(z_data)
 
@@ -2483,7 +2493,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         return l, Q
 
-
     @classmethod
     def pb_eig(cls, lbar, Qbar,  A, l, Q,  out = None):
         D,P,M,N = numpy.shape(A.data)
@@ -2503,18 +2512,10 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             E[j, j] = numpy.infty
 
         F = 1./E
-        print 'F = ',F
-        print 'E*F=', E*F
-
         Lbar = UTPM.diag(lbar)
-
         v1 = Lbar + F * UTPM.dot(Q.T, Qbar)
-        # print 'v1=', v1
         v2 = UTPM.dot(v1, Q.T)
-        # print 'v2=',v2
         v3 = UTPM.solve(Q.T, v2)
-
-        print 'v3=',v3
         Abar += v3
 
         return Abar

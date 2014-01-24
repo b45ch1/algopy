@@ -15,6 +15,46 @@ except ImportError:
 
 
 class Test_Forward_Complex(TestCase):
+
+    def test_add(self):
+        D,P = 3,1
+        x = UTPM(numpy.zeros((D,P), dtype='complex'))
+        y = UTPM(numpy.zeros((D,P), dtype='complex'))
+
+        x.data[:,0] = [1+1j,2+2j,3+3j]
+        y.data[:,0] = [4+4j,5+5j,6+6j]
+
+        z = UTPM(numpy.zeros((D,P), dtype='complex'))
+        z.data[0,0] = 5+5j
+        z.data[1,0] = 7+7j
+        z.data[2,0] = 9+9j
+
+        z1 = y + x
+        z2 = x + y
+
+        print 'z1=\n',z1
+        print 'z2=\n',z2
+
+        assert_array_almost_equal(z.data, z1.data)
+        assert_array_almost_equal(z.data, z2.data)
+
+    def test_sub(self):
+        D,P = 3,1
+        x = UTPM(numpy.zeros((D,P), dtype='complex'))
+        y = UTPM(numpy.zeros((D,P), dtype='complex'))
+
+        x.data[:,0] = [1+1j,2+2j,3+3j]
+        y.data[:,0] = [4+4j,5+5j,6+6j]
+
+        z = UTPM(numpy.zeros((D,P), dtype='complex'))
+        z.data[0,0] = 3+3j
+        z.data[1,0] = 3+3j
+        z.data[2,0] = 3+3j
+
+        z1 = y - x
+        assert_array_almost_equal(z.data, z1.data)
+
+
     def test_mul(self):
         D,P = 3,1
         x = UTPM(numpy.zeros((D,P), dtype='complex'))

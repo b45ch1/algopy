@@ -1693,7 +1693,7 @@ class Test_QR_Decomposition(TestCase):
 
         # check that columns of Q2 span the nullspace of A
         Q2 = Q[:,N:]
-        assert_array_almost_equal(0, UTPM.dot(A.T, Q2).data)
+        assert_array_almost_equal(0, UTPM.dot(A.T, Q2).data, decimal=10)
 
     def test_singular_matrix3(self):
         D,P,M,N = 3,1,40,20
@@ -2500,6 +2500,37 @@ class Test_Singular_Value_Decomposition(TestCase):
         out = numpy.sum(Abar.data[0,0]*A.data[1,0])
 
         assert_almost_equal(out, in1 + in2 + in3)
+
+class Test_Eigen_Value_Decomposition(TestCase):
+
+    def test_pb_eig(self):
+
+        # forward mode
+        D,P,M = 2,1,4
+        A = algopy.UTPM(numpy.random.random((D,P,M, M)) * (1. + 0j))
+        l, Q = algopy.UTPM.eig(A)
+        L = algopy.diag(l)
+        error1 = algopy.dot(Q, L) - algopy.dot(A, Q)
+        error2 = algopy.dot(Q, algopy.dot(L, algopy.inv(Q))) - A
+        assert_almost_equal(0, error1.data)
+        assert_almost_equal(0, error2.data)
+
+        # reverse mode
+        Qbar = algopy.UTPM(numpy.zeros((D,P,M,M)))
+        lbar = algopy.UTPM(numpy.zeros((D,P,M)))
+
+        Qbar.data[...] = numpy.random.random(Qbar.data.shape)
+        lbar.data[...] = numpy.random.random(lbar.data.shape)
+
+        Abar = Q.zeros_like()
+        Abar = algopy.UTPM.pb_eig(lbar, Qbar, A, l, Q, out=(Abar,))
+
+        # # compare forward/reverse result
+        # in1 = numpy.sum(Qbar.data[0,0]*Q.data[1,0])
+        # in2 = numpy.sum(lbar.data[0,0]*l.data[1,0])
+        # out = numpy.sum(Abar.data[0,0]*A.data[1,0])
+        # assert_almost_equal(out, in1 + in2)
+
 
 
 
