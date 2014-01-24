@@ -451,23 +451,23 @@ class Test_Push_Forward(TestCase):
 
     def test_pow_negative_int_exponentials(self):
         D,P,M,N = 4,2,2,3
-        x = UTPM(numpy.exp(numpy.random.randn(D,P,M,N)))
+        x = UTPM(numpy.exp(numpy.random.rand(D,P,M,N)))
 
         r = -1
         y = x**r
-        assert_array_almost_equal(y.data, (1./x).data)
+        assert_array_almost_equal(y.data, (1./x).data, decimal=10)
 
         r = -2
         y = x**r
-        assert_array_almost_equal(y.data, ((1./x)/x).data)
+        assert_array_almost_equal(y.data, ((1./x)/x).data, decimal=10)
 
         r = -3
         y = x**r
-        assert_array_almost_equal(y.data, ((1./x)/x/x).data)
+        assert_array_almost_equal(y.data, ((1./x)/x/x).data, decimal=10)
 
         r = -4
         y = x**r
-        assert_array_almost_equal(y.data, (1./x/x/x/x).data)
+        assert_array_almost_equal(y.data, (1./x/x/x/x).data, decimal=10)
 
 
     def test_pow_pullback(self):
@@ -1693,7 +1693,7 @@ class Test_QR_Decomposition(TestCase):
 
         # check that columns of Q2 span the nullspace of A
         Q2 = Q[:,N:]
-        assert_array_almost_equal(0, UTPM.dot(A.T, Q2).data, decimal=10)
+        assert_array_almost_equal(0, UTPM.dot(A.T, Q2).data, decimal=8)
 
     def test_singular_matrix3(self):
         D,P,M,N = 3,1,40,20
@@ -2027,7 +2027,7 @@ class Test_Eigenvalue_Decomposition(TestCase):
 
         # print l
 
-        assert_array_almost_equal(UTPM.dot(Q, UTPM.dot(L,Q.T)).data, A.data, decimal = 12)
+        assert_array_almost_equal(UTPM.dot(Q, UTPM.dot(L,Q.T)).data, A.data, decimal = 10)
 
     def test_pushforward_repeated_eigenvalues_higher_order_multiple_direction(self):
         D,P,N = 4,7,6
@@ -2460,10 +2460,6 @@ class Test_Singular_Value_Decomposition(TestCase):
         for i in range(M):
             S[i,i] = s[i]
         A = algopy.dot(U, algopy.dot(S, V.T))
-
-        print U.shape
-        print V.shape
-        print A.shape
 
         # forward mode
         U2, s2, V2 = algopy.UTPM.svd(A)

@@ -32,9 +32,6 @@ class Test_Forward_Complex(TestCase):
         z1 = y + x
         z2 = x + y
 
-        print 'z1=\n',z1
-        print 'z2=\n',z2
-
         assert_array_almost_equal(z.data, z1.data)
         assert_array_almost_equal(z.data, z2.data)
 

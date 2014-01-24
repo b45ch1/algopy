@@ -249,7 +249,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         old_shp = x.data.__getitem__(sl).shape
         tmp_data = ybar.data.reshape(old_shp)
 
-        print('tmp_data.shape=',tmp_data.shape)
+        # print('tmp_data.shape=',tmp_data.shape)
 
         # step 2: revert getitem
         tmp2 = xbar.data[::-1].__getitem__(sl)
