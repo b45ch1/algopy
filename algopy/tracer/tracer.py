@@ -1171,6 +1171,9 @@ class Function(Ring):
     def eigh1(self):
         return Function.pushforward(algopy.eigh1, [self])
 
+    def eig(self):
+        return Function.pushforward(algopy.eig, [self])
+
     def svd(self):
         return Function.pushforward(algopy.svd, [self])
 

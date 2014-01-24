@@ -2454,7 +2454,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         assert M == N, 'A must be a square matrix, but A.shape = (%d, %d)!'%A.shape
 
-        assert D == 2, 'sorry: only first-order Taylor polynomials are supported right now'
+        assert D <= 2, 'sorry: only first-order Taylor polynomials are supported right now'
 
         if out == None:
             l = cls(cls.__zeros__((D,P,N), dtype='complex'))
@@ -2470,22 +2470,23 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
             l.data[0,p], Q.data[0,p] = t1, t2
 
-            # d=1: first-order coefficient
-            v1 = numpy.linalg.solve(Q.data[0,p], A.data[1,p])
-            v2 = numpy.dot(v1, Q.data[0,p])
-            l.data[1,p] = numpy.diag(v2)
+            if D == 2:
+                # d=1: first-order coefficient
+                v1 = numpy.linalg.solve(Q.data[0,p], A.data[1,p])
+                v2 = numpy.dot(v1, Q.data[0,p])
+                l.data[1,p] = numpy.diag(v2)
 
-            F = numpy.zeros((M,M), dtype=l.data.dtype)
-            for i in range(M):
-                F[i, :] -= l.data[0,p,i]
+                F = numpy.zeros((M,M), dtype=l.data.dtype)
+                for i in range(M):
+                    F[i, :] -= l.data[0,p,i]
 
-            for j in range(M):
-                F[:, j] += l.data[0,p,j]
-                F[j, j] = numpy.infty
+                for j in range(M):
+                    F[:, j] += l.data[0,p,j]
+                    F[j, j] = numpy.infty
 
-            F = 1./F
+                F = 1./F
 
-            Q.data[1,p] = numpy.dot(Q.data[0,p], F * v2)
+                Q.data[1,p] = numpy.dot(Q.data[0,p], F * v2)
 
         if numpy.allclose(0, l.data.imag) and numpy.allclose(0, Q.data.imag):
             l = cls(l.data.real.astype(float))

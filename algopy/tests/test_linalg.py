@@ -92,6 +92,32 @@ class Test_NumpyScipyLinalgFunctions(TestCase):
         assert_almost_equal(grad, jac)
 
 
+    def test_reverse_mode_eig(self):
+        def f(A):
+
+            d, U = algopy.eig(A)
+
+            return algopy.sum(U) + algopy.prod(d)
+
+        A = numpy.random.random((5,5))
+
+        # forward mode
+
+        uA = algopy.UTPM.init_jacobian(A)
+        ud = f(uA)
+        jac = algopy.UTPM.extract_jacobian(ud).reshape(A.shape)
+
+        # reverse mode
+        cg = algopy.CGraph()
+        fA = algopy.Function(A)
+        fd = f(fA)
+        cg.independentFunctionList = [fA]
+        cg.dependentFunctionList = [fd]
+
+        grad = cg.gradient(A)
+        assert_almost_equal(grad, jac)
+
+
     def test_expm(self):
 
         def f(x):

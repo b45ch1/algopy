@@ -5,7 +5,7 @@ import scipy.linalg
 
 from algopy import UTPM, Function
 
-numpy_linalg_function_names = ['inv', 'solve', 'eigh', 'svd', 'qr', 'cholesky','transpose', 'det']
+numpy_linalg_function_names = ['inv', 'solve', 'eigh', 'eig', 'svd', 'qr', 'cholesky','transpose', 'det']
 
 function_template = string.Template('''
 def $function_name(*args, **kwargs):
