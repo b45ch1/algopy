@@ -8,7 +8,7 @@ class PlotError(Exception): pass
 
 class NotSet:
     def __init__(self, descr=None):
-        if descr == None:
+        if descr is None:
             descr = ''
         self.descr = descr
     def __str__(self):
@@ -728,7 +728,7 @@ class Function(Ring):
             and it is given a unique ID.
 
         """
-        if cls.cgraph != None:
+        if cls.cgraph is not None:
             return cls.cgraph.functionCount
         else:
             return None
@@ -771,12 +771,12 @@ class Function(Ring):
         if not isinstance(fargs, list):
             raise ValueError('fargs must be of type list')
 
-        if f == None:
+        if f is None:
             f = Function()
         f.x = x
         f.args = fargs
         f.func = func
-        if cls.cgraph != None:
+        if cls.cgraph is not None:
             f.ID = cls.get_ID()
             cls.cgraph.append(f)
         return f
@@ -809,7 +809,7 @@ class Function(Ring):
         out  = func(*args)
 
         # STEP 3: create new Function instance for output
-        if Fout == None:
+        if Fout is None:
             # this is called when pushforward is called by a function like mul,add, ...
             Fout = cls.create(out, Fargs, func)
             # return retval
@@ -820,7 +820,7 @@ class Function(Ring):
 
         # in case the function has side effects on a buffer
         # we need to store the values that are going to be changed
-        if setitem != None:
+        if setitem is not None:
             Fout.setitem = setitem
 
         return Fout
@@ -973,7 +973,7 @@ class Function(Ring):
             self.xbar = tuple(tmp)
             # self.xbar = tuple( [xi.zeros_like() for xi in self.x])
 
-        elif self.x == None:
+        elif self.x is None:
             pass
 
         # case that the output of the function is an UTPM instance

@@ -29,7 +29,7 @@ def prod(x, axis=None, dtype=None, out=None):
     generic prod function
     """
 
-    if axis != None or dtype != None or out != None:
+    if axis is not None or dtype is not None or out is not None:
         raise NotImplementedError('')
 
     elif isinstance(x, numpy.ndarray):
