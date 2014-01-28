@@ -185,7 +185,7 @@ class Test_OdoeExample(TestCase):
 
             # create temporary matrix M if not provided
             # to store M = [[J_1^T J_1, J_2^T],[J_2, 0]]
-            if work == None:
+            if work is None:
                 work = zeros((Np,Np), dtype=F1p_list[0])
             M = work
 
@@ -195,7 +195,7 @@ class Test_OdoeExample(TestCase):
 
             # Step 2: invert M and prepare output
 
-            if out == None:
+            if out is None:
                 out = inv(M)
             else:
                 out[...] = M

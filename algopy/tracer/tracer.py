@@ -8,7 +8,7 @@ class PlotError(Exception): pass
 
 class NotSet:
     def __init__(self, descr=None):
-        if descr == None:
+        if descr is None:
             descr = ''
         self.descr = descr
     def __str__(self):
@@ -771,7 +771,7 @@ class Function(Ring):
         if not isinstance(fargs, list):
             raise ValueError('fargs must be of type list')
 
-        if f == None:
+        if f is None:
             f = Function()
         f.x = x
         f.args = fargs
@@ -809,7 +809,7 @@ class Function(Ring):
         out  = func(*args)
 
         # STEP 3: create new Function instance for output
-        if Fout == None:
+        if Fout is None:
             # this is called when pushforward is called by a function like mul,add, ...
             Fout = cls.create(out, Fargs, func)
             # return retval
@@ -973,7 +973,7 @@ class Function(Ring):
             self.xbar = tuple(tmp)
             # self.xbar = tuple( [xi.zeros_like() for xi in self.x])
 
-        elif self.x == None:
+        elif self.x is None:
             pass
 
         # case that the output of the function is an UTPM instance

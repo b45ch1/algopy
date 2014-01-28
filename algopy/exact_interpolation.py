@@ -287,7 +287,7 @@ def generate_Gamma_and_rays(N,deg, S = None):
         input rays
     """
 
-    if S == None:
+    if S is None:
         S = numpy.eye(N)
 
     J = generate_multi_indices(N,deg)

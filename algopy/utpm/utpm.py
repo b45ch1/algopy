@@ -156,7 +156,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         this includes a workaround for tuples, e.g. for Q,R = qr(A)
         where A,Q,R are Function objects
         """
-        if out == None:
+        if out is None:
             raise NotImplementedError('I\'m not sure that this makes sense')
 
         # workaround for qr and eigh
@@ -238,7 +238,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def pb_coeff_op(cls, ybar, x, sl, shp, out = None):
 
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -265,7 +265,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         y.__setitem(sl,x)
         """
 
-        if out == None:
+        if out is None:
             raise NotImplementedError('I\'m not sure if this makes sense')
 
         ybar, dummy, xbar = out
@@ -404,7 +404,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def pb___pow__(cls, ybar, x, r, y, out = None):
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -500,7 +500,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def pb_sqrt(cls, ybar, x, y, out=None):
         """ computes bar y dy = bar x dx in UTP arithmetic"""
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -522,7 +522,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def pb_exp(cls, ybar, x, y, out=None):
         """ computes bar y dy = bar x dx in UTP arithmetic"""
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -542,7 +542,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def pb_expm1(cls, ybar, x, y, out=None):
         """ computes bar y dy = bar x dx in UTP arithmetic"""
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -561,7 +561,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def pb_log(cls, ybar, x, y, out=None):
         """ computes bar y dy = bar x dx in UTP arithmetic"""
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -580,7 +580,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def pb_log1p(cls, ybar, x, y, out=None):
         """ computes bar y dy = bar x dx in UTP arithmetic"""
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -605,7 +605,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def pb_sin(cls, sbar, x, s,  out = None):
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -625,7 +625,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def pb_cos(cls, cbar, x, c,  out = None):
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -653,7 +653,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def pb_tan(cls, ybar, x, y,  out = None):
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -676,7 +676,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def pb_dpm_hyp1f1(cls, ybar, a, b, x, y, out=None):
         """ computes bar y dy = bar x dx in UTP arithmetic"""
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -699,7 +699,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def pb_hyp1f1(cls, ybar, a, b, x, y, out=None):
         """ computes bar y dy = bar x dx in UTP arithmetic"""
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -721,7 +721,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def pb_hyperu(cls, ybar, a, b, x, y, out=None):
         """ computes bar y dy = bar x dx in UTP arithmetic"""
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
         else:
@@ -740,7 +740,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def pb_botched_clip(cls, ybar, a_min, a_max, x, y, out=None):
         """ computes bar y dy = bar x dx in UTP arithmetic"""
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
         else:
@@ -761,7 +761,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def pb_dpm_hyp2f0(cls, ybar, a1, a2, x, y, out=None):
         """ computes bar y dy = bar x dx in UTP arithmetic"""
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -784,7 +784,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def pb_hyp2f0(cls, ybar, a1, a2, x, y, out=None):
         """ computes bar y dy = bar x dx in UTP arithmetic"""
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -807,7 +807,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def pb_hyp0f1(cls, ybar, b, x, y, out=None):
         """ computes bar y dy = bar x dx in UTP arithmetic"""
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -830,7 +830,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def pb_polygamma(cls, ybar, n, x, y, out=None):
         """ computes bar y dy = bar x dx in UTP arithmetic"""
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -853,7 +853,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def pb_psi(cls, ybar, x, y, out=None):
         """ computes bar y dy = bar x dx in UTP arithmetic"""
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -874,7 +874,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def pb_reciprocal(cls, ybar, x, y, out=None):
         """ computes bar y dy = bar x dx in UTP arithmetic"""
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -895,7 +895,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def pb_gammaln(cls, ybar, x, y, out=None):
         """ computes bar y dy = bar x dx in UTP arithmetic"""
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -941,7 +941,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def pb_absolute(cls, ybar, x, y, out=None):
         """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
 
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -963,7 +963,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def pb_negative(cls, ybar, x, y, out=None):
         """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
 
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -985,7 +985,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def pb_square(cls, ybar, x, y, out=None):
         """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
 
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -1008,7 +1008,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def pb_erf(cls, ybar, x, y, out=None):
         """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
 
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -1031,7 +1031,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def pb_erfi(cls, ybar, x, y, out=None):
         """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
 
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -1054,7 +1054,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def pb_dawsn(cls, ybar, x, y, out=None):
         """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
 
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -1077,7 +1077,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def pb_logit(cls, ybar, x, y, out=None):
         """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
 
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -1099,7 +1099,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def pb_expit(cls, ybar, x, y, out=None):
         """ computes ybar * ydot = xbar * xdot in UTP arithmetic"""
 
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -1114,7 +1114,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         if dtype != None or out != None:
             raise NotImplementedError('not implemented yet')
 
-        if axis == None:
+        if axis is None:
             tmp = numpy.prod(self.data.shape[2:])
             return UTPM(numpy.sum(self.data.reshape(self.data.shape[:2] + (tmp,)), axis = 2))
         else:
@@ -1127,14 +1127,14 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def pb_sum(cls, ybar, x, y, axis, dtype, out2, out = None):
 
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
         else:
             xbar = out[0]
 
-        if axis == None:
+        if axis is None:
 
             tmp = xbar.data.T
             tmp += ybar.data.T
@@ -1158,7 +1158,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     #     if dtype != None or out != None:
     #         raise NotImplementedError('not implemented yet')
 
-    #     if axis == None:
+    #     if axis is None:
     #         D,P = self.data.shape[:2]
     #         tmp = self.__class__(numpy.zeros((D,P)))
     #         tmp.data[0] = 1.
@@ -1171,7 +1171,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     # @classmethod
     # def pb_prod(cls, ybar, x, axis, dtype, dummy, y, out = None):
     #     D,P = x.data.shape[:2]
-    #     if out == None:
+    #     if out is None:
     #         xbar = x.zeros_like()
 
     #     else:
@@ -1192,7 +1192,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def pb_sincos(cls, sbar, cbar, x, s, c, out = None):
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -1262,7 +1262,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def pb_sign(cls, ybar, x, y, out=None):
         """ computes bar y dy = bar x dx in UTP arithmetic"""
-        if out == None:
+        if out is None:
             D,P = x.data.shape[:2]
             xbar = x.zeros_like()
         else:
@@ -1383,7 +1383,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def pb_det(cls, ybar, x, y, out = None):
-        if out == None:
+        if out is None:
             out = (x.zeros_like(),)
 
         raise NotImplementedError('should implement that')
@@ -1494,7 +1494,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
              shift([x0,x1,x2,x3], +1) = [0,x0,x1,x2]
         """
 
-        if out == None:
+        if out is None:
             out = self.zeros_like()
 
         if s <= 0:
@@ -1548,7 +1548,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         x = numpy.asarray(x)
 
-        if dtype==None:
+        if dtype is None:
             # try to infer the dtype from x
             dtype= x.dtype
 
@@ -1580,7 +1580,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         x = numpy.asarray(x)
 
-        if dtype==None:
+        if dtype is None:
             # try to infer the dtype from x
             dtype= x.dtype
 
@@ -1836,7 +1836,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def pb_outer(cls, zbar, x, y, z, out = None):
-        if out == None:
+        if out is None:
             D,P = y.data.shape[:2]
             xbar = x.zeros_like()
             ybar = y.zeros_like()
@@ -1850,7 +1850,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def inv(cls, A, out = None):
-        if out == None:
+        if out is None:
             out = cls(cls.__zeros__(A.data.shape, dtype = A.data.dtype))
         else:
             raise NotImplementedError('')
@@ -1885,7 +1885,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
             D, P, M = A_shp[:3]
 
-            if out == None:
+            if out is None:
                 dtype = numpy.promote_types(A.data.dtype, x.data.dtype)
                 out = cls(cls.__zeros__((D,P,M) + x_shp[3:], dtype=dtype))
 
@@ -1915,7 +1915,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def cholesky(cls, A, out = None):
-        if out == None:
+        if out is None:
             out = A.zeros_like()
 
         cls._cholesky(A.data, out.data)
@@ -1924,7 +1924,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def pb_cholesky(cls, Lbar, A, L, out = None):
-        if out == None:
+        if out is None:
             D,P = A.data.shape[:2]
             Abar = A.zeros_like()
 
@@ -1942,7 +1942,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def pb_neg(cls, ybar, x, y, out = None):
-        if out == None:
+        if out is None:
             xbar = x.zeros_like()
 
         else:
@@ -1973,7 +1973,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def pb_add(cls, zbar, x, y, z, out=None):
-        if out == None:
+        if out is None:
             D, P = y.data.shape[:2]
             xbar = x.zeros_like()
             ybar = y.zeros_like()
@@ -2015,7 +2015,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         # FIXME: this is a workaround/hack, review this
         x = x.copy()
         return cls.pb___add__(zbar, x, y, z, out = out)
-        # if out == None:
+        # if out is None:
             # D,P = y.data.shape[:2]
             # xbar = cls(cls.__zeros__(x.data.shape))
             # ybar = cls(cls.__zeros__(y.data.shape))
@@ -2031,7 +2031,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def pb_sub(cls, zbar, x, y , z, out = None):
-        if out == None:
+        if out is None:
             D,P = y.data.shape[:2]
             xbar = x.zeros_like()
             ybar = y.zeros_like()
@@ -2056,7 +2056,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def pb_mul(cls, zbar, x, y , z, out = None):
 
         if isinstance(x, UTPM) and isinstance(y, UTPM):
-            if out == None:
+            if out is None:
                 D,P = z.data.shape[:2]
                 xbar = x.zeros_like()
                 ybar = y.zeros_like()
@@ -2075,7 +2075,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             return (xbar, ybar)
 
         elif isinstance(x, UTPM):
-            if out == None:
+            if out is None:
                 D, P = z.data.shape[:2]
                 xbar = x.zeros_like()
                 ybar = None
@@ -2091,7 +2091,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             return (xbar, ybar)
 
         elif isinstance(y, UTPM):
-            if out == None:
+            if out is None:
                 D, P = z.data.shape[:2]
                 xbar = None
                 ybar = y.zeros_like()
@@ -2114,7 +2114,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         if isinstance(x, UTPM) and isinstance(y, UTPM):
 
-            if out == None:
+            if out is None:
                 D,P = y.data.shape[:2]
                 xbar = x.zeros_like()
                 ybar = y.zeros_like()
@@ -2141,7 +2141,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         elif isinstance(x, UTPM):
 
-            if out == None:
+            if out is None:
                 D, P = z.data.shape[:2]
                 xbar = x.zeros_like()
                 ybar = None
@@ -2159,7 +2159,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         elif isinstance(y, UTPM):
 
-            if out == None:
+            if out is None:
                 D, P = z.data.shape[:2]
                 xbar = None
                 ybar = y.zeros_like()
@@ -2192,7 +2192,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def pb_dot(cls, zbar, x, y, z, out = None):
-        if out == None:
+        if out is None:
             D,P = y.data.shape[:2]
             xbar = x.zeros_like()
             ybar = y.zeros_like()
@@ -2231,7 +2231,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def pb_reshape(cls, ybar, x, newshape, y, out = None):
-        if out == None:
+        if out is None:
             D,P = y.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -2244,7 +2244,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def pb_inv(cls, ybar, x, y, out = None):
-        if out == None:
+        if out is None:
             D,P = y.data.shape[:2]
             xbar = x.zeros_like()
 
@@ -2270,12 +2270,12 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             for p in range(P):
                 x.data[0,p] = tmp[...]
 
-        if out == None:
+        if out is None:
             xbar = x.zeros_like()
             Abar = A.zeros_like()
 
         else:
-            if out[1] == None:
+            if out[1] is None:
                 Abar = out[0]
                 xbar = x.zeros_like()
 
@@ -2288,7 +2288,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def pb_trace(cls, ybar, x, y, out = None):
-        if out == None:
+        if out is None:
             out = (x.zeros_like(),)
 
         xbar, = out
@@ -2300,7 +2300,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def pb_transpose(cls, ybar, x, y, out = None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
 
         xbar, = out
@@ -2312,7 +2312,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         D,P,M,N = numpy.shape(A.data)
         K = min(M,N)
 
-        if out == None:
+        if out is None:
             Q = cls(cls.__zeros__((D,P,M,K), dtype=A.data.dtype))
             R = cls(cls.__zeros__((D,P,K,N), dtype=A.data.dtype))
 
@@ -2326,7 +2326,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def pb_qr(cls, Qbar, Rbar, A, Q, R, out = None):
         D,P,M,N = numpy.shape(A.data)
 
-        if out == None:
+        if out is None:
             Abar = A.zeros_like()
 
         else:
@@ -2339,7 +2339,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def qr_full(cls, A, out = None, work = None):
         D,P,M,N = numpy.shape(A.data)
 
-        if out == None:
+        if out is None:
             Q = cls(cls.__zeros__((D,P,M,M), dtype=A.data.dtype))
             R = cls(cls.__zeros__((D,P,M,N), dtype=A.data.dtype))
 
@@ -2354,7 +2354,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def pb_qr_full(cls, Qbar, Rbar, A, Q, R, out = None):
         D,P,M,N = numpy.shape(A.data)
 
-        if out == None:
+        if out is None:
             Abar = A.zeros_like()
 
         else:
@@ -2376,7 +2376,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         D,P,M,N = numpy.shape(A.data)
 
-        if out == None:
+        if out is None:
             l = cls(cls.__zeros__((D,P,N), dtype=A.data.dtype))
             Q = cls(cls.__zeros__((D,P,N,N), dtype=A.data.dtype))
 
@@ -2399,7 +2399,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         D,P,M,N = numpy.shape(A.data)
 
-        if out == None:
+        if out is None:
             L = cls(cls.__zeros__((D,P,N,N), dtype=A.data.dtype))
             Q = cls(cls.__zeros__((D,P,N,N), dtype=A.data.dtype))
 
@@ -2417,7 +2417,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def pb_eigh(cls, lbar, Qbar,  A, l, Q,  out = None):
         D,P,M,N = numpy.shape(A.data)
 
-        if out == None:
+        if out is None:
             Abar = A.zeros_like()
 
         else:
@@ -2430,7 +2430,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def pb_eigh1(cls, Lbar, Qbar, bbar_list, A, L, Q, b_list,  out = None):
         D,P,M,N = numpy.shape(A.data)
 
-        if out == None:
+        if out is None:
             Abar = A.zeros_like()
 
         else:
@@ -2456,7 +2456,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         assert D <= 2, 'sorry: only first-order Taylor polynomials are supported right now'
 
-        if out == None:
+        if out is None:
             l = cls(cls.__zeros__((D,P,N), dtype='complex'))
             Q = cls(cls.__zeros__((D,P,N,N), dtype='complex'))
 
@@ -2498,7 +2498,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def pb_eig(cls, lbar, Qbar,  A, l, Q,  out = None):
         D,P,M,N = numpy.shape(A.data)
 
-        if out == None:
+        if out is None:
             Abar = A.zeros_like()
 
         else:
@@ -2564,7 +2564,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         D,P,M,N = numpy.shape(A.data)
         K = min(M,N)
 
-        if out == None:
+        if out is None:
             U = cls(cls.__zeros__((D,P,M,M), dtype=A.data.dtype))
             s = cls(cls.__zeros__((D,P,K), dtype=A.data.dtype))
             V = cls(cls.__zeros__((D,P,N,N), dtype=A.data.dtype))
@@ -2614,7 +2614,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         assert M <= N, "only M <= N is supported, please use the SVD of the transpose"
 
-        if out == None:
+        if out is None:
             Abar = A.zeros_like()
 
         else:
@@ -2666,7 +2666,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def pb_diag(cls, ybar, x, y, k = 0, out = None):
         """Extract a diagonal or construct  diagonal UTPM instance"""
 
-        if out == None:
+        if out is None:
             xbar = x.zeros_like()
 
         else:
@@ -2686,7 +2686,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def pb_symvec(cls, vbar, A, UPLO, v, out = None):
 
-        if out == None:
+        if out is None:
             Abar = A.zeros_like()
 
         else:
@@ -2750,7 +2750,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def pb_vecsym(cls, Abar, v, A, out = None):
 
-        if out == None:
+        if out is None:
             vbar = v.zeros_like()
 
         else:

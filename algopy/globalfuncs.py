@@ -162,7 +162,7 @@ def zeros_like(a, dtype=None, order = 'C'):
     """
     generic implementation of numpy.zeros_like
     """
-    if dtype==None:
+    if dtype is None:
         dtype = a
     return zeros( a.shape, dtype=dtype, order = order)
 zeros_like.__doc__ += numpy.zeros_like.__doc__
@@ -172,7 +172,7 @@ def ones_like(a, dtype=None, order = 'C'):
     """
     generic implementation of numpy.ones_like
     """
-    if dtype==None:
+    if dtype is None:
         dtype = a
     return ones( a.shape, dtype=dtype, order = order)
 ones_like.__doc__ += numpy.ones_like.__doc__

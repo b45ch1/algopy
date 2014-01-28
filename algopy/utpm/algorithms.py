@@ -171,7 +171,7 @@ def vdot(x,y, z = None):
 
             z[i] = numpy.dot(x[i],y[i])
 
-        if z == None, this function allocates the necessary memory
+        if z is None, this function allocates the necessary memory
 
     Warning: the naming is inconsistent with numpy.vdot
     Warning: this is a preliminary version that is likely to be changed
@@ -359,7 +359,7 @@ class RawAlgorithmsMixIn:
         z += x*y
         """
         z_data = out
-        if out == None:
+        if out is None:
             raise NotImplementedError
 
         (D,P) = z_data.shape[:2]
@@ -379,7 +379,7 @@ class RawAlgorithmsMixIn:
         """
         z = x/y
         """
-        if out == None:
+        if out is None:
             raise NotImplementedError
 
         z_data = numpy.empty_like(out)
@@ -418,7 +418,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _pb_reciprocal(cls, ybar_data, x_data, y_data, out=None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         #FIXME: this is probably dumb
         tmp = -cls._reciprocal(cls._square(x_data))
@@ -433,7 +433,7 @@ class RawAlgorithmsMixIn:
 
         """
         z_data = out
-        if out == None:
+        if out is None:
             raise NotImplementedError
 
         (D,P) = z_data.shape[:2]
@@ -473,7 +473,7 @@ class RawAlgorithmsMixIn:
     def _pow_real(cls, x_data, r, out = None):
         """ y = x**r, where r is scalar """
         y_data = out
-        if out == None:
+        if out is None:
             raise NotImplementedError
         (D,P) = y_data.shape[:2]
 
@@ -513,7 +513,7 @@ class RawAlgorithmsMixIn:
     @classmethod
     def _pb_pow_real(cls, ybar_data, x_data, r, y_data, out = None):
         """ pullback function of y = pow(x,r) """
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
 
         xbar_data = out
@@ -558,7 +558,7 @@ class RawAlgorithmsMixIn:
     @classmethod
     def _max(cls, x_data, axis = None, out = None):
 
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
 
         x_shp = x_data.shape
@@ -604,7 +604,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _pb_absolute(cls, ybar_data, x_data, y_data, out = None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         fprime_data = numpy.empty_like(x_data)
         D = x_data.shape[0]
@@ -624,7 +624,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _pb_negative(cls, ybar_data, x_data, y_data, out = None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         fprime_data = numpy.empty_like(x_data)
         fprime_data[0].fill(-1)
@@ -655,13 +655,13 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _pb_square(cls, ybar_data, x_data, y_data, out = None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         cls._amul(ybar_data, x_data*2, out=out)
 
     @classmethod
     def _sqrt(cls, x_data, out = None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         y_data = numpy.zeros_like(x_data)
         D,P = x_data.shape[:2]
@@ -674,7 +674,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _pb_sqrt(cls, ybar_data, x_data, y_data, out = None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
 
         xbar_data = out
@@ -707,7 +707,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _pb_exp(cls, ybar_data, x_data, y_data, out = None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
 
         xbar_data = out
@@ -756,7 +756,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _sign(cls, x_data, out = None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         y_data = out
         D, P = x_data.shape[:2]
@@ -766,7 +766,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _pb_sign(cls, ybar_data, x_data, y_data, out = None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         xbar_data = out
         tmp = numpy.zeros_like(x_data)
@@ -777,7 +777,7 @@ class RawAlgorithmsMixIn:
         """
         In this function the args are permuted w.r.t numpy.
         """
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         y_data = out
         D, P = x_data.shape[:2]
@@ -795,7 +795,7 @@ class RawAlgorithmsMixIn:
         """
         In this function the args are permuted w.r.t numpy.
         """
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         xbar_data = out
         tmp = numpy.zeros_like(x_data)
@@ -808,7 +808,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _log(cls, x_data, out = None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         y_data = numpy.empty_like(x_data)
         D,P = x_data.shape[:2]
@@ -830,7 +830,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _pb_log(cls, ybar_data, x_data, y_data, out = None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         xbar_data = out
         xbar_data += cls._truediv(ybar_data, x_data, numpy.empty_like(xbar_data))
@@ -884,7 +884,7 @@ class RawAlgorithmsMixIn:
     @classmethod
     def _tansec2(cls, x_data, out = None):
         """ computes tan and sec in Taylor arithmetic"""
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         y_data, z_data = out
         D,P = x_data.shape[:2]
@@ -902,7 +902,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _pb_tansec(cls, ybar_data, zbar_data, x_data, y_data, z_data, out = None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
 
         xbar_data = out
@@ -914,7 +914,7 @@ class RawAlgorithmsMixIn:
     @classmethod
     def _sincos(cls, x_data, out = None):
         """ computes sin and cos in Taylor arithmetic"""
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         s_data,c_data = out
         D,P = x_data.shape[:2]
@@ -932,7 +932,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _pb_sincos(cls, sbar_data, cbar_data, x_data, s_data, c_data, out = None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
 
         xbar_data = out
@@ -941,7 +941,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _arcsin(cls, x_data, out = None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         y_data,z_data = out
         D,P = x_data.shape[:2]
@@ -959,7 +959,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _arccos(cls, x_data, out = None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         y_data,z_data = out
         D,P = x_data.shape[:2]
@@ -977,7 +977,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _arctan(cls, x_data, out = None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         y_data,z_data = out
         D,P = x_data.shape[:2]
@@ -997,7 +997,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _sinhcosh(cls, x_data, out = None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         s_data,c_data = out
         D,P = x_data.shape[:2]
@@ -1015,7 +1015,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _tanhsech2(cls, x_data, out = None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         y_data,z_data = out
         D,P = x_data.shape[:2]
@@ -1088,7 +1088,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _pb_hyperu(cls, ybar_data, a, b, x_data, y_data, out=None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         tmp = cls._hyperu(a+1., b+1., x_data) * (-a)
         cls._amul(ybar_data, tmp, out=out)
@@ -1100,7 +1100,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _pb_dpm_hyp2f0(cls, ybar_data, a1, a2, x_data, y_data, out=None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         tmp = cls._dpm_hyp2f0(a1+1., a2+1., x_data) * float(a1) * float(a2)
         cls._amul(ybar_data, tmp, out=out)
@@ -1112,7 +1112,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _pb_hyp2f0(cls, ybar_data, a1, a2, x_data, y_data, out=None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         tmp = cls._hyp2f0(a1+1., a2+1., x_data) * float(a1) * float(a2)
         cls._amul(ybar_data, tmp, out=out)
@@ -1124,7 +1124,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _pb_hyp0f1(cls, ybar_data, b, x_data, y_data, out=None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         tmp = cls._hyp0f1(b+1., x_data) / float(b)
         cls._amul(ybar_data, tmp, out=out)
@@ -1136,33 +1136,33 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _pb_polygamma(cls, ybar_data, m, x_data, y_data, out=None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         tmp = cls._polygamma(m+1, x_data)
         cls._amul(ybar_data, tmp, out=out)
 
     @classmethod
     def _psi(cls, x_data, out=None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         return _eval_slow_generic(nthderiv.psi, x_data, out=out)
 
     @classmethod
     def _pb_psi(cls, ybar_data, x_data, y_data, out=None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         tmp = cls._polygamma(1, x_data)
         cls._amul(ybar_data, tmp, out=out)
 
     @classmethod
     def _gammaln(cls, x_data, out=None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         return _eval_slow_generic(nthderiv.gammaln, x_data, out=out)
 
     @classmethod
     def _pb_gammaln(cls, ybar_data, x_data, y_data, out=None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
         tmp = cls._polygamma(0, x_data)
         cls._amul(ybar_data, tmp, out=out)
@@ -1174,7 +1174,7 @@ class RawAlgorithmsMixIn:
         z = dot(x,y)
         """
 
-        if out == None:
+        if out is None:
             new_shp = x_data.shape[:-1] + y_data.shape[2:-2] + (y_data.shape[-1],)
             out = numpy.zeros(new_shp, dtype=numpy.promote_types(x_data.dtype, y_data.dtype) )
 
@@ -1198,7 +1198,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _dot_pullback(cls, zbar_data, x_data, y_data, z_data, out = None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
 
         (xbar_data, ybar_data) = out
@@ -1214,7 +1214,7 @@ class RawAlgorithmsMixIn:
         z = dot(x,y)
         """
 
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
 
         z_data = out
@@ -1236,7 +1236,7 @@ class RawAlgorithmsMixIn:
         z = dot(x,y)
         """
 
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
 
         z_data = out
@@ -1256,7 +1256,7 @@ class RawAlgorithmsMixIn:
         z = outer(x,y)
         """
 
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
 
         z_data = out
@@ -1278,7 +1278,7 @@ class RawAlgorithmsMixIn:
         where x is UTPM and y is ndarray
         """
 
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
 
         z_data = out
@@ -1300,7 +1300,7 @@ class RawAlgorithmsMixIn:
         where y is UTPM and x is ndarray
         """
 
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
 
         z_data = out
@@ -1318,7 +1318,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _outer_pullback(cls, zbar_data, x_data, y_data, z_data, out = None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
 
         (xbar_data, ybar_data) = out
@@ -1334,7 +1334,7 @@ class RawAlgorithmsMixIn:
         computes y = inv(x)
         """
 
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
 
         y_data, = out
@@ -1355,7 +1355,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _inv_pullback(cls, ybar_data, x_data, y_data, out = None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
 
         xbar_data = out
@@ -1372,7 +1372,7 @@ class RawAlgorithmsMixIn:
     @classmethod
     def _solve_pullback(cls, ybar_data, A_data, x_data, y_data, out = None):
 
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
 
         Abar_data = out[0]
@@ -1390,7 +1390,7 @@ class RawAlgorithmsMixIn:
     @classmethod
     def _solve_non_UTPM_x_pullback(cls, ybar_data, A_data, x_data, y_data, out = None):
 
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
 
         Abar_data = out
@@ -1413,7 +1413,7 @@ class RawAlgorithmsMixIn:
 
         """
 
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
 
         y_data = out
@@ -1451,7 +1451,7 @@ class RawAlgorithmsMixIn:
         when A is a simple (N,N) float array
         """
 
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
 
         y_data = out
@@ -1479,7 +1479,7 @@ class RawAlgorithmsMixIn:
         where x is simple (N,K) float array
         """
 
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
 
         y_data = out
@@ -1591,7 +1591,7 @@ class RawAlgorithmsMixIn:
         pullback of the linear form of the cholesky decomposition
         """
 
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement this')
 
         Abar_data = out
@@ -1636,7 +1636,7 @@ class RawAlgorithmsMixIn:
 
     @classmethod
     def _pb_reshape(cls, ybar_data, x_data, y_data,  out=None):
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
 
         return numpy.reshape(out, x_data.shape)
@@ -1688,7 +1688,7 @@ class RawAlgorithmsMixIn:
         """
 
         # check if the output array is provided
-        if out == None:
+        if out is None:
             raise NotImplementedError('need to implement that...')
         Q_data = out[0]
         R_data = out[1]
@@ -1725,7 +1725,7 @@ class RawAlgorithmsMixIn:
         K = min(M,N)
 
         # check if the output array is provided
-        if out == None:
+        if out is None:
             raise NotImplementedError('need to implement that...')
         Q_data = out[0]
         R_data = out[1]
@@ -1740,7 +1740,7 @@ class RawAlgorithmsMixIn:
 
 
         # check if work arrays are provided, if not allocate them
-        if work == None:
+        if work is None:
             dF = numpy.zeros((P,M,N))
             dG = numpy.zeros((P,K,K))
             X  = numpy.zeros((P,K,K))
@@ -1822,7 +1822,7 @@ class RawAlgorithmsMixIn:
         D,P,M,N = numpy.shape(A_data)
 
         # check if the output array is provided
-        if out == None:
+        if out is None:
             raise NotImplementedError('need to implement that...')
         Q_data = out[0]
         R_data = out[1]
@@ -1836,7 +1836,7 @@ class RawAlgorithmsMixIn:
             raise NotImplementedError('A_data.shape = (DT,P,M,N) = %s but require (for now) that M>=N')
 
         # check if work arrays are provided, if not allocate them
-        if work == None:
+        if work is None:
             dF = numpy.zeros((M,N))
             S = numpy.zeros((M,M))
             X  = numpy.zeros((M,M))
@@ -1887,7 +1887,7 @@ class RawAlgorithmsMixIn:
         """
 
 
-        if out == None:
+        if out is None:
             raise NotImplementedError('need to implement that...')
 
         Abar_data = out
@@ -2125,7 +2125,7 @@ class RawAlgorithmsMixIn:
         z = x * y
         """
 
-        if out == None:
+        if out is None:
             raise NotImplementedError('need to implement that...')
         z_data = out
 
@@ -2138,7 +2138,7 @@ class RawAlgorithmsMixIn:
     @classmethod
     def _eigh_pullback(cls, lambar_data, Qbar_data, A_data, lam_data, Q_data, out = None):
 
-        if out == None:
+        if out is None:
             raise NotImplementedError('need to implement that...')
 
         Abar_data = out
@@ -2187,7 +2187,7 @@ class RawAlgorithmsMixIn:
     @classmethod
     def _eigh1_pullback(cls, Lambar_data, Qbar_data, A_data, Lam_data, Q_data, b_list, out = None):
 
-        if out == None:
+        if out is None:
             raise NotImplementedError('need to implement that...')
 
         Abar_data = out
@@ -2246,7 +2246,7 @@ class RawAlgorithmsMixIn:
         """
 
         # check if the output array is provided
-        if out == None:
+        if out is None:
             raise NotImplementedError('need to implement that...')
         Abar_data = out
 
@@ -2279,7 +2279,7 @@ class RawAlgorithmsMixIn:
         assumes that A.shape = M,N with M >= N
         """
 
-        if out == None:
+        if out is None:
             raise NotImplementedError('need to implement that...')
 
         Abar_data = out
@@ -2370,7 +2370,7 @@ class RawAlgorithmsMixIn:
 
         if numpy.ndim(v_data) == 3:
             D,P,N = v_data.shape
-            if out == None:
+            if out is None:
                 out = numpy.zeros((D,P,N,N),dtype=v_data.dtype)
             else:
                 out[...] = 0.
@@ -2383,7 +2383,7 @@ class RawAlgorithmsMixIn:
 
         else:
             D,P,M,N = v_data.shape
-            if out == None:
+            if out is None:
                 out = numpy.zeros((D,P,N),dtype=v_data.dtype)
 
             for d in range(D):
@@ -2398,7 +2398,7 @@ class RawAlgorithmsMixIn:
         where y = diag(x)
         """
 
-        if out == None:
+        if out is None:
             raise NotImplementedError('should implement that')
 
         if k != 0:

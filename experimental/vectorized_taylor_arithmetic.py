@@ -23,7 +23,7 @@ class Tc:
     """
     
     def __init__(self,in_t0,tc=None):
-        if tc == None: # case x0 = [t0,t1,t2,...,tD]
+        if tc is None: # case x0 = [t0,t1,t2,...,tD]
             if ndim(in_t0) == 0:
                 self.t0 = in_t0
                 self.tc = array([[0.]],dtype=float)
@@ -541,7 +541,7 @@ class CGraph:
         import os
 
         # checking filename and converting appropriately
-        if filename == None:
+        if filename is None:
             filename = 'computational_graph.png'
 
         if method != 'dot' and method != 'circo':
