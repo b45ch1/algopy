@@ -1111,7 +1111,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
 
     def sum(self, axis=None, dtype=None, out=None):
-        if dtype != None or out != None:
+        if dtype is not None or out is not None:
             raise NotImplementedError('not implemented yet')
 
         if axis is None:
@@ -1155,7 +1155,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return xbar
 
     # def prod(self, axis=None, dtype=None, out=None):
-    #     if dtype != None or out != None:
+    #     if dtype is not None or out is not None:
     #         raise NotImplementedError('not implemented yet')
 
     #     if axis is None:
@@ -1345,10 +1345,10 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def max(cls, a, axis = None, out = None):
-        if out != None:
+        if out is not None:
             raise NotImplementedError('should implement that')
 
-        if axis != None:
+        if axis is not None:
             raise NotImplementedError('should implement that')
 
         a_shp = a.data.shape
@@ -1359,7 +1359,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def argmax(cls, a, axis = None):
-        if axis != None:
+        if axis is not None:
             raise NotImplementedError('should implement that')
 
         return cls._argmax( a.data, axis = axis)

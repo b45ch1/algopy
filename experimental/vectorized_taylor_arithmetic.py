@@ -650,7 +650,7 @@ def tape(f,in_x):
     return cg
 
 def gradient_from_graph(cg,x=None):
-    if x != None:
+    if x is not None:
         cg.forward(x)
     cg.reverse(numpy.array([Tc([1.])]))
     N = size(cg.independentFunctionList)

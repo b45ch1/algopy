@@ -728,7 +728,7 @@ class Function(Ring):
             and it is given a unique ID.
 
         """
-        if cls.cgraph != None:
+        if cls.cgraph is not None:
             return cls.cgraph.functionCount
         else:
             return None
@@ -776,7 +776,7 @@ class Function(Ring):
         f.x = x
         f.args = fargs
         f.func = func
-        if cls.cgraph != None:
+        if cls.cgraph is not None:
             f.ID = cls.get_ID()
             cls.cgraph.append(f)
         return f
@@ -820,7 +820,7 @@ class Function(Ring):
 
         # in case the function has side effects on a buffer
         # we need to store the values that are going to be changed
-        if setitem != None:
+        if setitem is not None:
             Fout.setitem = setitem
 
         return Fout

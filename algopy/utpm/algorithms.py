@@ -576,7 +576,7 @@ class RawAlgorithmsMixIn:
     @classmethod
     def _argmax(cls, a_data, axis = None):
 
-        if axis != None:
+        if axis is not None:
             raise NotImplementedError('should implement that')
 
         a_shp = a_data.shape
@@ -2357,7 +2357,7 @@ class RawAlgorithmsMixIn:
     @classmethod
     def _transpose(cls, a_data, axes = None):
         """Permute the dimensions of UTPM data"""
-        if axes != None:
+        if axes is not None:
             raise NotImplementedError('should implement that')
 
         Nshp = len(a_data.shape)
