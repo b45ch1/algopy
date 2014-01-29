@@ -1380,31 +1380,31 @@ class UTPM(Ring, RawAlgorithmsMixIn):
                 retval[d,p] = numpy.trace(x.data[d,p,...])
         return UTPM(retval)
 
-    @classmethod
-    def logdet(cls, x):
-        D,P = x.data.shape[:2]
-        Q,R = cls.qr(x)
+    # @classmethod
+    # def logdet(cls, x):
+    #     D,P = x.data.shape[:2]
+    #     Q,R = cls.qr(x)
 
-        return cls.sum(cls.log(cls.diag(R)))
+    #     return cls.sum(cls.log(cls.diag(R)))
 
-    @classmethod
-    def pb_logdet(cls, ybar, x, y, out = None):
-        if out is None:
-            xbar = x.zeros_like()
-        else:
-            xbar ,= out
+    # @classmethod
+    # def pb_logdet(cls, ybar, x, y, out = None):
+    #     if out is None:
+    #         xbar = x.zeros_like()
+    #     else:
+    #         xbar ,= out
 
-        Q,R = cls.qr(x)
-        d   = cls.diag(R)
-        l   = cls.log(d)
-        y   = cls.sum(l)
+    #     Q,R = cls.qr(x)
+    #     d   = cls.diag(R)
+    #     l   = cls.log(d)
+    #     y   = cls.sum(l)
 
-        lbar = cls.pb_sum(ybar, l, y, None, None, None)
-        dbar = cls.pb_log(lbar, d, l)
-        Rbar = cls.pb_diag(dbar, R, d)
-        Qbar = Q.zeros_like()
-        cls.pb_qr(Qbar, Rbar, x, Q, R, out=(xbar,))
-        return xbar
+    #     lbar = cls.pb_sum(ybar, l, y, None, None, None)
+    #     dbar = cls.pb_log(lbar, d, l)
+    #     Rbar = cls.pb_diag(dbar, R, d)
+    #     Qbar = Q.zeros_like()
+    #     cls.pb_qr(Qbar, Rbar, x, Q, R, out=(xbar,))
+    #     return xbar
 
     def FtoJT(self):
         """
