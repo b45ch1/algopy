@@ -569,7 +569,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             xbar, = out
 
         cls._pb_log(ybar.data, x.data, y.data, out = xbar.data)
-        return out
+        return xbar
 
     def log1p(self):
         """ computes y = log1p(x) in UTP arithmetic"""
@@ -1154,40 +1154,47 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         return xbar
 
-    # def prod(self, axis=None, dtype=None, out=None):
-    #     if dtype is not None or out is not None:
-    #         raise NotImplementedError('not implemented yet')
+    def prod(self):
+        x = self
+        D,P = x.data.shape[:2]
+        y = UTPM(numpy.zeros((D,P), dtype=x.data.dtype))
+        y.data[0,:] = 1.
+        for i in range(0, x.size):
+            y *= x[i]
+        return y
 
-    #     if axis is None:
-    #         D,P = self.data.shape[:2]
-    #         tmp = self.__class__(numpy.zeros((D,P)))
-    #         tmp.data[0] = 1.
-    #         for xi in self.flat:
-    #             tmp *= xi
-    #         return tmp
-    #     else:
-    #         raise NotImplementedError('should implement this case')
+    @classmethod
+    def pb_prod(cls, ybar, x, y, out=None):
+        D,P = x.data.shape[:2]
+        if out is None:
+            xbar = x.zeros_like()
 
-    # @classmethod
-    # def pb_prod(cls, ybar, x, axis, dtype, dummy, y, out = None):
-    #     D,P = x.data.shape[:2]
-    #     if out is None:
-    #         xbar = x.zeros_like()
+        else:
+            xbar, = out
 
-    #     else:
-    #         xbar = out[0]
+        # forward and store intermediates
+        z = x.zeros_like()
+        zbar = x.zeros_like()
+        z.data[0,:, 0] = 1.
+        z[0] = x[0]
+        for i in range(1, x.size):
+            z[i] = z[i-1]*x[i]
 
-    #     tmp = x.copy()
+        # reverse
+        zbar[x.size-1] = ybar
+        for i in range(x.size-1, 0, -1):
+            zbar[i-1] += zbar[i]*x[i]
+            xbar[i]   += zbar[i]*z[i-1]
+        xbar[0] = zbar[0]
+        return xbar
 
-    #     tmp = y/x
-    #     xbar += tmp
-
-    #     if numpy.any(numpy.isnan(xbar.data)):
-    #         raise NotImplementedError('should treat the case when one element of the product is zero')
-
-
-    #     return xbar
-
+        # z = y.copy()
+        # zbar = ybar.copy()
+        # for i in range(x.size-1, -1, -1):
+        #     xbar[i] += ybar*z
+        #     zbar *= x[i]
+        #     z /= x[i]
+        # return xbar
 
 
     @classmethod
@@ -1366,7 +1373,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def trace(cls, x):
-        """ returns a new UTPM in standard format, i.e. the matrices are 1x1 matrices"""
         D,P = x.data.shape[:2]
         retval = numpy.zeros((D,P))
         for d in range(D):
@@ -1375,28 +1381,30 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return UTPM(retval)
 
     @classmethod
-    def det(cls, x):
-        """ returns a new UTPM in standard format, i.e. the matrices are 1x1 matrices"""
+    def logdet(cls, x):
         D,P = x.data.shape[:2]
-        L = cls.cholesky(x)
-        return numpy.prod(cls.diag(L))**2
+        Q,R = cls.qr(x)
+
+        return cls.sum(cls.log(cls.diag(R)))
 
     @classmethod
-    def pb_det(cls, ybar, x, y, out = None):
+    def pb_logdet(cls, ybar, x, y, out = None):
         if out is None:
-            out = (x.zeros_like(),)
+            xbar = x.zeros_like()
+        else:
+            xbar ,= out
 
-        raise NotImplementedError('should implement that')
+        Q,R = cls.qr(x)
+        d   = cls.diag(R)
+        l   = cls.log(d)
+        y   = cls.sum(l)
 
-        # xbar, = out
-        # Nx = xbar.shape[0]
-        # for nx in range(Nx):
-        #     xbar[nx,nx] += ybar
-
-        # return xbar
-
-
-
+        lbar = cls.pb_sum(ybar, l, y, None, None, None)
+        dbar = cls.pb_log(lbar, d, l)
+        Rbar = cls.pb_diag(dbar, R, d)
+        Qbar = Q.zeros_like()
+        cls.pb_qr(Qbar, Rbar, x, Q, R, out=(xbar,))
+        return xbar
 
     def FtoJT(self):
         """
@@ -1477,6 +1485,17 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def set_zero(self):
         self.data[...] = 0.
         return self
+
+    @classmethod
+    def zeros(cls, shape, dtype=None):
+        if not isinstance(dtype, self.__class__):
+            raise NotImplementedError('dtype must be a UTPM object')
+        D,P = dtype.data.shape[:2]
+
+        if isinstance(shape, int):
+            shape = (shape,)
+
+        return self.__class__(numpy.zeros((D,P) + shape))
 
     def zeros_like(self):
         return self.__class__(numpy.zeros_like(self.data))

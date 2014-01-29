@@ -1125,8 +1125,8 @@ class Function(Ring):
     def sum(self, axis=None, dtype=None, out=None):
         return Function.pushforward(algopy.sum, [self, axis, dtype, out])
 
-    def prod(self, axis=None, dtype=None, out=None):
-        return Function.pushforward(algopy.prod, [self, axis, dtype, out])
+    def prod(self):
+        return Function.pushforward(algopy.prod, [self])
 
     @classmethod
     def dot(cls, lhs,rhs):
@@ -1183,8 +1183,8 @@ class Function(Ring):
     def trace(self):
         return Function.pushforward(algopy.trace, [self])
 
-    def det(self):
-        return Function.pushforward(algopy.det, [self])
+    def logdet(self):
+        return Function.pushforward(algopy.logdet, [self])
 
     def transpose(self):
         return Function.pushforward(algopy.transpose, [self])

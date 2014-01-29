@@ -16,7 +16,7 @@ numpy_function_names = [
         'minimum', 'maximum',
         #'clip',
         'trace', 'diag',
-        'triu', 'tril', 'reshape']
+        'triu', 'tril', 'reshape',]
 
 
 function_template = string.Template('''
@@ -69,6 +69,39 @@ def sum(x, axis=None, dtype=None, out=None):
     else:
         raise ValueError('don\'t know what to do with this input!')
 sum.__doc__ += numpy.sum.__doc__
+
+def prod(x):
+    """ generic sum function
+    calls either numpy.sum or Function.sum resp. UTPM.sum depending on
+    the input
+    """
+
+    if isinstance(x, numpy.ndarray) or numpy.isscalar(x):
+        return numpy.prod(x)
+
+    elif isinstance(x, UTPM) or isinstance(x, Function):
+       return x.prod()
+
+    else:
+        raise ValueError('don\'t know what to do with this input!')
+sum.__doc__ += numpy.sum.__doc__
+
+
+def logdet(x):
+    """
+    computes log(det(x))
+    """
+
+    if isinstance(x, numpy.ndarray) or numpy.isscalar(x):
+        return numpy.linalg.slogdet(x)[1]
+
+    elif isinstance(x, UTPM) or isinstance(x, Function):
+       return x.__class__.logdet(x)
+
+    else:
+        raise ValueError('don\'t know what to do with this input!')
+
+
 
 
 def coeff_op(x, sl, shp):

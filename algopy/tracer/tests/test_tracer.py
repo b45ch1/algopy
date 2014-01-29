@@ -145,6 +145,30 @@ class Test_Function_on_UTPM(TestCase):
         assert_array_almost_equal(x1.xbar.data, x2.xbar.data)
 
 
+    def test_prod(self):
+        x = numpy.random.random(4)
+
+        def f(x):
+
+            return algopy.prod(x)
+
+        cg = algopy.CGraph()
+        fx = algopy.Function(x)
+        fd = f(fx)
+        cg.independentFunctionList = [fx]
+        cg.dependentFunctionList = [fd]
+
+        grad = cg.gradient(x)
+
+
+        # test forward mode
+        ux = algopy.UTPM.init_jacobian(x)
+        uy = algopy.UTPM.prod(ux)
+        jac = algopy.UTPM.extract_jacobian(uy).reshape(x.shape)
+
+        assert_almost_equal(grad, jac)
+
+
 
 
     def test_sqrt_in_norm_computation(self):
@@ -1991,6 +2015,28 @@ class Test_CGgraph_on_UTPM(TestCase):
         assert_array_almost_equal(result3, result1)
 
 
+    def test_logdet(self):
+        x = numpy.random.random((3,3))
+        x = x.dot(x.T)
+
+        def f(x):
+
+            return algopy.logdet(x)
+
+        cg = algopy.CGraph()
+        fx = algopy.Function(x)
+        fd = f(fx)
+        cg.independentFunctionList = [fx]
+        cg.dependentFunctionList = [fd]
+        grad = cg.gradient(x)
+
+
+        # test forward mode
+        ux = algopy.UTPM.init_jacobian(x)
+        uy = algopy.UTPM.logdet(ux)
+        jac = algopy.UTPM.extract_jacobian(uy).reshape(x.shape)
+
+        assert_almost_equal(jac, grad)
 
     def test_more_complicated_ODOE_objective_function(self):
         """
