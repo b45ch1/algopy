@@ -1607,6 +1607,14 @@ class Test_Cholesky_Decomposition(TestCase):
         assert_array_almost_equal( A.data, UTPM.dot(L,L.T).data)
 
 
+class Test_LU_Decomposition(TestCase):
+    def test_pushforward(self):
+        x = algopy.UTPM(numpy.random.random((5,2,7,7)))
+        W,L,U = algopy.UTPM.lu(x)
+        y = algopy.dot(W.T,x)
+        assert_almost_equal(y.data, algopy.dot(L, U).data)
+
+
 
 class Test_QR_Decomposition(TestCase):
     def test_pushforward(self):

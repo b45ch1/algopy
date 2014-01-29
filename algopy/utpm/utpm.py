@@ -12,6 +12,7 @@ import math
 
 import numpy.linalg
 import numpy
+import scipy.linalg
 
 from ..base_type import Ring
 from .._npversion import NumpyVersion
@@ -1952,6 +1953,45 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         cls._pb_cholesky(Lbar.data, A.data, L.data, out = Abar.data)
         return Abar
+
+
+    @classmethod
+    def lu(cls, A, out = None):
+        """
+        univariate Taylor arithmetic of scipy.linalg.lu
+        """
+        D,P,N = A.data.shape[:3]
+
+        if out is None:
+            L = A.zeros_like()
+            U = A.zeros_like()
+            W = A.zeros_like() # permutation matrix
+
+
+        for p in range(P):
+            # D = 0
+            w,l,u = scipy.linalg.lu(A.data[0,p])
+            W.data[0,p] = w
+            L.data[0,p] = l
+            U.data[0,p] = u
+
+            # allocate temporary storage
+            L0inv = numpy.linalg.inv(L.data[0,p])
+            U0inv = numpy.linalg.inv(U.data[0,p])
+            dF    = numpy.zeros((N,N),dtype=float)
+
+            for d in range(1,D):
+                dF *= 0
+                for i in range(1,d):
+                    dF -= numpy.dot(L.data[d-i,p], U.data[i,p])
+                dF += numpy.dot(w.T, A.data[d,p])
+                dF = numpy.dot(L0inv, numpy.dot(dF, U0inv))
+
+                U.data[d,p] = numpy.dot(numpy.triu(dF, 0), U.data[0,p])
+                L.data[d,p] = numpy.dot(L.data[0,p], numpy.tril(dF, -1))
+
+        return W, L, U
+
 
 
     @classmethod
