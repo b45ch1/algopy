@@ -1153,6 +1153,9 @@ class Function(Ring):
     def inv(self):
         return Function.pushforward(algopy.inv, [self])
 
+    def lu(self):
+        return Function.pushforward(algopy.lu, [self])
+
     def qr(self):
         return Function.pushforward(algopy.qr, [self])
 

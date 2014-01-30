@@ -1614,7 +1614,20 @@ class Test_LU_Decomposition(TestCase):
         y = algopy.dot(W.T,x)
         assert_almost_equal(y.data, algopy.dot(L, U).data)
 
+    def test_pullback(self):
+        A = algopy.UTPM(numpy.random.random((2,1,2,2)))
+        W,L,U = algopy.UTPM.lu(A)
 
+        B = algopy.dot(W.T,A)
+
+        assert_almost_equal(B.data, algopy.dot(L,U).data)
+
+        Wbar = algopy.UTPM(numpy.random.random(W.data.shape))
+        Lbar = algopy.tril(algopy.UTPM(numpy.random.random(L.data.shape)), -1)
+        Ubar = algopy.triu(algopy.UTPM(numpy.random.random(U.data.shape)), 0)
+
+        Abar = algopy.UTPM.pb_lu(Wbar, Lbar, Ubar, A, W, L, U)
+        assert_almost_equal(numpy.sum(Lbar.data[0,0]*L.data[1,0]) + numpy.sum(Ubar.data[0,0]*U.data[1,0]), numpy.sum(Abar.data[0,0]*A.data[1,0]))
 
 class Test_QR_Decomposition(TestCase):
     def test_pushforward(self):

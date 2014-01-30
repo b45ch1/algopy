@@ -1941,7 +1941,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         cls._cholesky(A.data, out.data)
         return out
 
-
     @classmethod
     def pb_cholesky(cls, Lbar, A, L, out = None):
         if out is None:
@@ -1953,7 +1952,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         cls._pb_cholesky(Lbar.data, A.data, L.data, out = Abar.data)
         return Abar
-
 
     @classmethod
     def lu(cls, A, out = None):
@@ -1992,7 +1990,23 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         return W, L, U
 
+    @classmethod
+    def pb_lu(cls, Wbar, Lbar, Ubar, A, W, L, U, out = None):
+        D,P,M,N = numpy.shape(A.data)
 
+        if out is None:
+            Abar = A.zeros_like()
+
+        else:
+            Abar, = out
+
+        v1 = cls.tril(cls.dot(L.T, Lbar), -1) + cls.triu(cls.dot(Ubar, U.T), 0)
+        v2 = cls.solve(L.T, v1)
+        v3 = cls.solve(U, v2.T).T
+
+        Abar += cls.dot(W, v3)
+
+        return Abar
 
     @classmethod
     def pb_Id(cls, ybar, x, y, out = None):

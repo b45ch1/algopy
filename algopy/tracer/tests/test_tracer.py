@@ -407,6 +407,29 @@ class Test_CGgraph_on_UTPM(TestCase):
 
         assert_array_almost_equal(x.data,UTPM.dot(Q,R).data)
 
+    def test_lu(self):
+        def f(x):
+
+            W, L, U = algopy.lu(x)
+
+            return algopy.sum(algopy.diag(U))
+
+        # reverse mode
+        x = numpy.random.random((2,2))
+        cg = algopy.CGraph()
+        fx = algopy.Function(x)
+        fd = f(fx)
+        cg.independentFunctionList = [fx]
+        cg.dependentFunctionList = [fd]
+
+        grad = cg.gradient(x)
+
+        # test forward mode
+        ux = algopy.UTPM.init_jacobian(x)
+        uy = f(ux)
+        jac = algopy.UTPM.extract_jacobian(uy).reshape(x.shape)
+        assert_almost_equal(jac, grad)
+
     def test_pullback_symvec_vecsym(self):
         (D,P,N) = 2,1,6
         cg = CGraph()

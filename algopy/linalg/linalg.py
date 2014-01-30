@@ -6,6 +6,8 @@ import scipy.linalg
 from algopy import UTPM, Function
 
 numpy_linalg_function_names = ['inv', 'solve', 'eigh', 'eig', 'svd', 'qr', 'cholesky','transpose', 'det']
+scipy_linalg_function_names = ['lu']
+
 
 function_template = string.Template('''
 def $function_name(*args, **kwargs):
@@ -39,6 +41,9 @@ def $function_name(*args, **kwargs):
 
 for function_name in numpy_linalg_function_names:
     exec(function_template.substitute(function_name=function_name, namespace='numpy.linalg'))
+
+for function_name in scipy_linalg_function_names:
+    exec(function_template.substitute(function_name=function_name, namespace='scipy.linalg'))
 
 def qr_full(A):
     """
