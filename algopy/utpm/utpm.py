@@ -22,6 +22,7 @@ from .algorithms import RawAlgorithmsMixIn, broadcast_arrays_shape
 import operator
 
 from algopy import nthderiv
+import algopy.utils
 
 
 if NumpyVersion(numpy.version.version) >= '1.6.0':
@@ -1381,31 +1382,57 @@ class UTPM(Ring, RawAlgorithmsMixIn):
                 retval[d,p] = numpy.trace(x.data[d,p,...])
         return UTPM(retval)
 
-    # @classmethod
-    # def logdet(cls, x):
-    #     D,P = x.data.shape[:2]
-    #     Q,R = cls.qr(x)
+    @classmethod
+    def det(cls, x):
+        D,P = x.data.shape[:2]
+        W,L,U = cls.lu(x)
 
-    #     return cls.sum(cls.log(cls.diag(R)))
+        return cls.prod(cls.diag(U))
 
-    # @classmethod
-    # def pb_logdet(cls, ybar, x, y, out = None):
-    #     if out is None:
-    #         xbar = x.zeros_like()
-    #     else:
-    #         xbar ,= out
+    @classmethod
+    def pb_det(cls, ybar, x, y, out = None):
+        if out is None:
+            xbar = x.zeros_like()
+        else:
+            xbar ,= out
 
-    #     Q,R = cls.qr(x)
-    #     d   = cls.diag(R)
-    #     l   = cls.log(d)
-    #     y   = cls.sum(l)
+        W,L,U = cls.lu(x)
+        d   = cls.diag(U)
+        y   = cls.prod(d)
 
-    #     lbar = cls.pb_sum(ybar, l, y, None, None, None)
-    #     dbar = cls.pb_log(lbar, d, l)
-    #     Rbar = cls.pb_diag(dbar, R, d)
-    #     Qbar = Q.zeros_like()
-    #     cls.pb_qr(Qbar, Rbar, x, Q, R, out=(xbar,))
-    #     return xbar
+        dbar = cls.pb_prod(ybar, d, y)
+        Wbar = W.zeros_like()
+        Lbar = L.zeros_like()
+        Ubar = cls.pb_diag(dbar, U, d)
+        cls.pb_lu(Wbar, Lbar, Ubar, x, W, L, U, out=(xbar,))
+        return xbar
+
+    @classmethod
+    def logdet(cls, x):
+        D,P = x.data.shape[:2]
+        W,L,U = cls.lu(x)
+
+        return cls.sum(cls.log(cls.diag(U)))
+
+    @classmethod
+    def pb_logdet(cls, ybar, x, y, out = None):
+        if out is None:
+            xbar = x.zeros_like()
+        else:
+            xbar ,= out
+
+        W,L,U = cls.lu(x)
+        d   = cls.diag(U)
+        l   = cls.log(d)
+        y   = cls.sum(l)
+
+        lbar = cls.pb_sum(ybar, l, y, None, None, None)
+        dbar = cls.pb_log(lbar, d, l)
+        Wbar = W.zeros_like()
+        Lbar = L.zeros_like()
+        Ubar = cls.pb_diag(dbar, U, d)
+        cls.pb_lu(Wbar, Lbar, Ubar, x, W, L, U, out=(xbar,))
+        return xbar
 
     def FtoJT(self):
         """
@@ -1952,6 +1979,50 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         cls._pb_cholesky(Lbar.data, A.data, L.data, out = Abar.data)
         return Abar
+
+    @classmethod
+    def lu_factor(cls, A, out = None):
+        """
+        univariate Taylor arithmetic of scipy.linalg.lu_factor
+        """
+        D,P,N = A.data.shape[:3]
+
+        if out is None:
+            LU  = A.zeros_like()
+            PIV = cls(numpy.zeros((D,P,N))) # permutation
+
+        for p in range(P):
+            # D = 0
+            lu, piv = scipy.linalg.lu_factor(A.data[0,p])
+            w = algopy.utils.piv2mat(piv)
+
+            LU.data[0,p] = lu
+            PIV.data[0,p] = piv
+
+            L0 = numpy.tril(lu, -1) + numpy.eye(N)
+            U0 = numpy.triu(lu, 0)
+
+            # allocate temporary storage
+            L0inv = numpy.linalg.inv(L0)
+            U0inv = numpy.linalg.inv(U0)
+            dF    = numpy.zeros((N,N),dtype=float)
+
+            for d in range(1,D):
+                dF *= 0
+                for i in range(1,d):
+                    tmp1 = numpy.tril(LU.data[d-i,p], -1)
+                    tmp2 = numpy.triu(LU.data[i,p], 0)
+                    dF -= numpy.dot(tmp1, tmp2)
+                dF += numpy.dot(w.T, A.data[d,p])
+                dF = numpy.dot(L0inv, numpy.dot(dF, U0inv))
+
+                Ud = numpy.dot(numpy.triu(dF, 0), U0)
+                Ld = numpy.dot(L0, numpy.tril(dF, -1))
+
+                LU.data[d, p] += Ud
+                LU.data[d, p] += Ld
+
+        return LU, PIV
 
     @classmethod
     def lu(cls, A, out = None):

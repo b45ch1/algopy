@@ -163,3 +163,23 @@ def vecsym(v):
     return A
 
 
+def piv2mat(piv):
+    """
+    convert a pivot indices as returned by scipy.linalg.lu_factor into
+    a permutation matrix
+    """
+    N = len(piv)
+    swap = numpy.arange(N)
+    for i in range(N):
+        tmp = swap[i]
+        swap[i] = swap[piv[i]]
+        swap[piv[i]] = tmp
+    return numpy.eye(N)[:, swap]
+
+def piv2det(piv):
+    """
+    computes the determinant of the permutation matrix that is defined by pivot indices as returned by scipy.linalg.lu_factor
+    """
+    N = len(piv)
+    piv = numpy.array(piv)
+    return (-1)**(1-numpy.sum(piv == numpy.arange(N))%2)

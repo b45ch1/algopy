@@ -2037,29 +2037,71 @@ class Test_CGgraph_on_UTPM(TestCase):
         assert_array_almost_equal(result2, result3)
         assert_array_almost_equal(result3, result1)
 
+    def test_logdet(self):
+        x = numpy.random.random((3,3))
+        x = x.dot(x.T)
 
-    # def test_logdet(self):
-    #     x = numpy.random.random((3,3))
-    #     x = x.dot(x.T)
+        def f(x):
 
-    #     def f(x):
+            return algopy.logdet(x)
 
-    #         return algopy.logdet(x)
-
-    #     cg = algopy.CGraph()
-    #     fx = algopy.Function(x)
-    #     fd = f(fx)
-    #     cg.independentFunctionList = [fx]
-    #     cg.dependentFunctionList = [fd]
-    #     grad = cg.gradient(x)
+        # reverse mode
+        cg = algopy.CGraph()
+        fx = algopy.Function(x)
+        fd = f(fx)
+        cg.independentFunctionList = [fx]
+        cg.dependentFunctionList = [fd]
+        grad = cg.gradient(x)
 
 
-    #     # test forward mode
-    #     ux = algopy.UTPM.init_jacobian(x)
-    #     uy = algopy.UTPM.logdet(ux)
-    #     jac = algopy.UTPM.extract_jacobian(uy).reshape(x.shape)
+        # forward mode
+        ux = algopy.UTPM.init_jacobian(x)
+        uy = algopy.UTPM.logdet(ux)
+        jac = algopy.UTPM.extract_jacobian(uy).reshape(x.shape)
 
-    #     assert_almost_equal(jac, grad)
+        # compare forward to reverse mode
+        assert_almost_equal(jac, grad)
+
+    def test_compare_det_and_logdet(self):
+
+        def f(x):
+            return algopy.log(algopy.det(x))
+
+        def g(x):
+            return algopy.logdet(x)
+
+
+        x = numpy.random.random((2,2))
+        x = x.dot(x.T) # make sure that det >= 0
+
+        cg = algopy.CGraph()
+        fx = algopy.Function(x)
+        fd = f(fx)
+        cg.independentFunctionList = [fx]
+        cg.dependentFunctionList = [fd]
+
+        cg2 = algopy.CGraph()
+        fx = algopy.Function(x)
+        fd = g(fx)
+        cg2.independentFunctionList = [fx]
+        cg2.dependentFunctionList = [fd]
+
+        grad  = cg.gradient(x)
+        grad2 = cg2.gradient(x)
+        assert_almost_equal(grad, grad2)
+
+        # forward mode
+        ux = algopy.UTPM.init_jacobian(x)
+        uy = f(ux)
+        jac = algopy.UTPM.extract_jacobian(uy).reshape(x.shape)
+
+        # forward mode
+        ux = algopy.UTPM.init_jacobian(x)
+        uy = g(ux)
+        jac2 = algopy.UTPM.extract_jacobian(uy).reshape(x.shape)
+
+        assert_almost_equal(jac, jac2)
+        assert_almost_equal(jac, grad)
 
     def test_more_complicated_ODOE_objective_function(self):
         """
