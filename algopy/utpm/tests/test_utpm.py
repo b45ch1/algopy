@@ -1298,6 +1298,7 @@ class Test_Push_Forward(TestCase):
 
         # test reverse mode
         ux = algopy.UTPM(numpy.random.random((2,1,3,3)))
+        ux = algopy.dot(ux.T, ux)
         uy = algopy.UTPM.logdet(ux)
         yb = uy.zeros_like()
         yb.data[0,:] = 1
