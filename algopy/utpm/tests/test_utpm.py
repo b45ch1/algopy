@@ -1278,6 +1278,22 @@ class Test_Push_Forward(TestCase):
         assert AX.data[0,0,0,2] == AY.data[0,0,2,0]
 
 
+    def test_logdet(self):
+
+        # test reverse mode
+        ux = algopy.UTPM(numpy.random.random((2,1,3,3)))
+        ux = algopy.dot(ux.T, ux)
+        uy = algopy.UTPM.logdet(ux)
+
+        assert_almost_equal(uy.data[0,0], numpy.linalg.slogdet(ux.data[0,0])[1])
+
+        yb = uy.zeros_like()
+        yb.data[0,:] = 1
+        xb = algopy.UTPM.pb_logdet(yb, ux, uy)
+        assert_almost_equal(numpy.sum(xb.data[0,0]*ux.data[1,0]),
+                            numpy.sum(yb.data[0,0]*uy.data[1,0]))
+
+
     def test_pb_logdet(self):
 
         # test reverse mode

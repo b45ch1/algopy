@@ -1268,6 +1268,10 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         self._sign(self.data, out = retval.data)
         return retval
 
+    def abs(self):
+        """ computes y = sign(x) in UTP arithmetic"""
+        return self.__abs__()
+
     @classmethod
     def pb_sign(cls, ybar, x, y, out=None):
         """ computes bar y dy = bar x dx in UTP arithmetic"""
@@ -1385,9 +1389,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def det(cls, x):
         D,P = x.data.shape[:2]
-        W,L,U = cls.lu(x)
-
-        return cls.prod(cls.diag(U))
+        PIV,L,U = cls.lu2(x)
+        return cls.piv2det(PIV) * cls.prod(cls.diag(U))
 
     @classmethod
     def pb_det(cls, ybar, x, y, out = None):
@@ -1396,23 +1399,33 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         else:
             xbar ,= out
 
-        W,L,U = cls.lu(x)
+        PIV,L,U = cls.lu2(x)
         d   = cls.diag(U)
-        y   = cls.prod(d)
+        z   = cls.prod(d)
+        y   = cls.piv2det(PIV) * z
 
-        dbar = cls.pb_prod(ybar, d, y)
-        Wbar = W.zeros_like()
-        Lbar = L.zeros_like()
-        Ubar = cls.pb_diag(dbar, U, d)
-        cls.pb_lu(Wbar, Lbar, Ubar, x, W, L, U, out=(xbar,))
+        zbar   = cls.piv2det(PIV) * ybar
+        dbar   = cls.pb_prod(zbar, d, z)
+        PIVbar = PIV.zeros_like()
+        Lbar   = L.zeros_like()
+        Ubar   = cls.pb_diag(dbar, U, d)
+        cls.pb_lu2(PIVbar, Lbar, Ubar, x, PIV, L, U, out=(xbar,))
         return xbar
 
     @classmethod
     def logdet(cls, x):
-        D,P = x.data.shape[:2]
-        W,L,U = cls.lu(x)
+        """
+        compute logdet using algopy.lu2 as described in
+        http://www.mathworks.com/matlabcentral/fileexchange/22026-safe-computation-of-logarithm-determinat-of-large-matrix/content/logdet.m
+        """
+        D,P,N = x.data.shape[:3]
+        PIV,L,U = cls.lu2(x)
+        du = cls.diag(U)
+        su = cls.sign(du)
+        au = cls.abs(du)
+        c = cls.piv2det(PIV) * cls.prod(su)
+        return cls.log(c) + cls.sum(cls.log(au))
 
-        return cls.sum(cls.log(cls.diag(U)))
 
     @classmethod
     def pb_logdet(cls, ybar, x, y, out = None):
@@ -1421,17 +1434,21 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         else:
             xbar ,= out
 
-        W,L,U = cls.lu(x)
-        d   = cls.diag(U)
-        l   = cls.log(d)
-        y   = cls.sum(l)
+        PIV,L,U = cls.lu2(x)
+        du = cls.diag(U)
+        su = cls.sign(du)
+        au = cls.abs(du)
+        c  = cls.piv2det(PIV) * cls.prod(su)
+        l  = cls.log(au)
+        y  = cls.log(c) + cls.sum(l)
 
-        lbar = cls.pb_sum(ybar, l, y, None, None, None)
-        dbar = cls.pb_log(lbar, d, l)
-        Wbar = W.zeros_like()
-        Lbar = L.zeros_like()
-        Ubar = cls.pb_diag(dbar, U, d)
-        cls.pb_lu(Wbar, Lbar, Ubar, x, W, L, U, out=(xbar,))
+        lbar    = cls.pb_sum(ybar, l, y, None, None, None)
+        aubar   = cls.pb_log(lbar, au, l)
+        dubar   = su * aubar
+        PIVbar  = PIV.zeros_like()
+        Lbar    = L.zeros_like()
+        Ubar    = cls.pb_diag(dubar, U, du)
+        cls.pb_lu2(PIVbar, Lbar, Ubar, x, PIV, L, U, out=(xbar,))
         return xbar
 
     def FtoJT(self):
@@ -2080,9 +2097,83 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return Abar
 
     @classmethod
+    def lu2(cls, A, out = None):
+        """
+        univariate Taylor arithmetic of scipy.linalg.lu_factor
+        but returns piv, L, U = lu2(A)
+        """
+        D,P,N = A.data.shape[:3]
+
+        if out is None:
+            PIV = cls(numpy.zeros((D,P,N))) # pivot elements
+            L = A.zeros_like()
+            U = A.zeros_like()
+
+        for p in range(P):
+            # D = 0
+            lu, piv = scipy.linalg.lu_factor(A.data[0,p])
+            w = algopy.utils.piv2mat(piv)
+            L.data[0,p] = numpy.tril(lu, -1) + numpy.eye(N)
+            U.data[0,p] = numpy.triu(lu, 0)
+            PIV.data[0,p] = piv
+
+            # allocate temporary storage
+            L0inv = numpy.linalg.inv(L.data[0,p])
+            U0inv = numpy.linalg.inv(U.data[0,p])
+            dF    = numpy.zeros((N,N),dtype=float)
+
+            for d in range(1,D):
+                dF *= 0
+                for i in range(1,d):
+                    dF -= numpy.dot(L.data[d-i,p], U.data[i,p])
+                dF += numpy.dot(w.T, A.data[d,p])
+                dF = numpy.dot(L0inv, numpy.dot(dF, U0inv))
+
+                U.data[d,p] = numpy.dot(numpy.triu(dF, 0), U.data[0,p])
+                L.data[d,p] = numpy.dot(L.data[0,p], numpy.tril(dF, -1))
+
+        return PIV, L, U
+
+    @classmethod
+    def pb_lu2(cls, PIVbar, Lbar, Ubar, A, PIV, L, U, out = None):
+        D,P,M,N = numpy.shape(A.data)
+
+        if out is None:
+            Abar = A.zeros_like()
+
+        else:
+            Abar, = out
+
+        v1 = cls.tril(cls.dot(L.T, Lbar), -1) + cls.triu(cls.dot(Ubar, U.T), 0)
+        v2 = cls.solve(L.T, v1)
+        v3 = cls.solve(U, v2.T).T
+
+        W = cls.piv2mat(PIV)
+        Abar += cls.dot(W, v3)
+
+        return Abar
+
+
+    @classmethod
+    def piv2mat(cls, piv):
+        D,P,N = piv.data.shape
+        W = cls(numpy.zeros((D,P,N,N)))
+        for p in range(P):
+            W.data[0,p] = algopy.utils.piv2mat(piv.data[0,p])
+
+        return W
+
+    @classmethod
+    def piv2det(cls, piv):
+        D,P,N = piv.data.shape
+        det = cls(numpy.zeros((D,P)))
+        for p in range(P):
+            det.data[0,p] = algopy.utils.piv2det(piv.data[0,p])
+        return det
+
+    @classmethod
     def pb_Id(cls, ybar, x, y, out = None):
         return out
-
 
     @classmethod
     def pb_neg(cls, ybar, x, y, out = None):

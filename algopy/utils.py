@@ -182,4 +182,5 @@ def piv2det(piv):
     """
     N = len(piv)
     piv = numpy.array(piv)
-    return (-1)**(1-numpy.sum(piv == numpy.arange(N))%2)
+    # print piv !=  numpy.arange(N)
+    return  (-1)**(numpy.sum(piv != numpy.arange(N))%2)
