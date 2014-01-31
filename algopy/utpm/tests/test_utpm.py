@@ -1308,6 +1308,28 @@ class Test_Push_Forward(TestCase):
         assert_almost_equal(numpy.sum(xb.data[0,0]*ux.data[1,0]),
                             numpy.sum(yb.data[0,0]*uy.data[1,0]))
 
+    def test_det_2x2(self):
+        D, P, N = 3, 5, 2
+
+        # Make a random UTPM 2x2 matrix.
+        # Check the closed-form determinant.
+        x = UTPM(numpy.random.randn(D, P, N, N))
+        desired_det = x[0, 0] * x[1, 1] - x[0, 1] * x[1, 0]
+        observed_det = UTPM.det(x)
+        assert_allclose(observed_det.data, desired_det.data)
+
+    def test_det_3x3(self):
+        D, P, N = 3, 5, 3
+
+        # Make a random UTPM 3x3 matrix.
+        # Check the closed-form determinant.
+        x = UTPM(numpy.random.randn(D, P, N, N))
+        a, b, c = x[0, 0], x[0, 1], x[0, 2]
+        d, e, f = x[1, 0], x[1, 1], x[1, 2]
+        g, h, i = x[2, 0], x[2, 1], x[2, 2]
+        desired_det = (a*e*i + b*f*g + c*d*h) - (c*e*g + b*d*i + a*f*h)
+        observed_det = UTPM.det(x)
+        assert_allclose(observed_det.data, desired_det.data)
 
     def test_det(self):
         # This example is from "Structured Higher-Ordered Algorithmic
