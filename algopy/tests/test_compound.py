@@ -34,6 +34,16 @@ class Test_NumpyScipyLinalgFunctions(TestCase):
 
         assert_array_almost_equal(g1, g2)
 
+    def test_utpm_logdet_trace_expm(self):
+        D, P, N = 3, 5, 4
+
+        x = 0.1 * UTPM(numpy.random.randn(D, P, N, N))
+        x = UTPM.dot(x.T, x)
+        observed_logdet = UTPM.logdet(expm(x))
+        desired_logdet = UTPM.trace(x)
+        assert_allclose(observed_logdet.data, desired_logdet.data)
+
+
 if __name__ == "__main__":
     run_module_suite()
 

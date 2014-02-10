@@ -83,7 +83,7 @@ except ImportError as e:
     raise ImportError(
         "SciPy import error (%s)\n"
         "SciPy is a requirement of AlgoPy.\n"
-        "Please install SciPy >= " + (e, min_scipy_version))
+        "Please install SciPy >= " + _min_scipy_version)
 
 if NumpyVersion(scipy.version.version) < _min_scipy_version:
     raise ImportError(

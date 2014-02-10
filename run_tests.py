@@ -6,6 +6,7 @@ from algopy.tests.test_globalfuncs import *
 from algopy.tests.test_exact_interpolation import *
 from algopy.tests.test_utils import *
 from algopy.tests.test_npversion import *
+from algopy.tests.test_compound import *
 
 
 if __name__ == '__main__':
