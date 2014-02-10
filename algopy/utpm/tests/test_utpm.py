@@ -437,6 +437,19 @@ class Test_Push_Forward(TestCase):
         Z = X*X*X
         assert_array_almost_equal(Y.data, Z.data)
 
+    def test_rpow(self):
+        def f(x):
+            return 2.0**x
+
+        def g(x):
+            return algopy.exp(algopy.log(2.0)*x)
+
+        x=2.0
+        x = algopy.UTPM.init_jacobian(x)
+        y1 = f(x)
+        y2 =g(x)
+        assert_almost_equal(y1.data, y2.data)
+
     def test_pow_zero(self):
         D,P,N = 4,2,2
         X = UTPM(numpy.zeros((D,P,N,N)))

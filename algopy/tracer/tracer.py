@@ -1119,6 +1119,9 @@ class Function(Ring):
     def __pow__(self, r):
         return Function.pushforward(operator.pow, [self, r])
 
+    def __rpow__(self, r):
+        raise NotImplementedError('please use the identity x**y = exp(log(x)*y)')
+
     def sign(self):
         return Function.pushforward(algopy.sign, [self])
 

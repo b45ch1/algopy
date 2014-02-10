@@ -394,15 +394,18 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         self._floordiv(x_data, y_data, z_data)
         return self.__class__(z_data)
 
-
     def __pow__(self,r):
         if isinstance(r, UTPM):
-            return numpy.exp(numpy.log(self)*r)
+            return UTPM.exp(UTPM.log(self)*r)
         else:
             x_data = self.data
             y_data = numpy.zeros_like(x_data)
             self._pow_real(x_data, r, y_data)
             return self.__class__(y_data)
+
+    def __rpow__(self,r):
+        return UTPM.exp(numpy.log(r)*self)
+
 
     @classmethod
     def pb___pow__(cls, ybar, x, r, y, out = None):
@@ -412,6 +415,9 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         else:
             xbar = out[0]
+
+        if isinstance(r, cls):
+            raise NotImplementedError('r must be int or float, or use the identity x**y = exp(log(x)*y)')
 
         cls._pb_pow_real(ybar.data, x.data, r, y.data, out = xbar.data)
         return xbar
