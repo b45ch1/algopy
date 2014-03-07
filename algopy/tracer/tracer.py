@@ -711,6 +711,10 @@ class Function(Ring):
             cls = self.__class__
             cls.create(x, [self], cls.Id, self)
 
+    @property
+    def dtype(self):
+        return self.x.dtype
+
     cgraph = None
     @classmethod
     def get_ID(cls):

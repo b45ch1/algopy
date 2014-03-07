@@ -149,6 +149,11 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             self.data.__setitem__((slice(1,None),slice(None)) + sl, 0)
             return self.data.__setitem__((0,slice(None)) + sl, rhs)
 
+
+    @property
+    def dtype(self):
+        return self.data.dtype
+
     @classmethod
     def pb___getitem__(cls, ybar, x, sl, y, out = None):
         """
