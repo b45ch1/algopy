@@ -434,9 +434,6 @@ class CGraph:
         if w.ndim != 1:
             raise ValueError("w.ndim must be 1 but provided %d"%w.ndim)
 
-        if x.shape != w.shape:
-            raise ValueError("x.shape must be the same w.shape, but provided x.shape=%s and w.shape=%s"%(x.shape, w.shape))
-
         M = self.dependentFunctionList[0].size
 
         tmp = numpy.zeros((1,1) + numpy.shape(x))
@@ -527,7 +524,7 @@ class CGraph:
     def vec_hess(self, w, x):
         """ computes  the hessian of dot(w, F(x)), where F:R^N ---> R^M
 
-        Hv = self.vec_hess(w, x)
+        wH = self.vec_hess(w, x)
 
         Parameters
         ----------
@@ -541,8 +538,8 @@ class CGraph:
 
         Returns
         -------
-        Hv: array
-            one-dimensional array containing the Hessian vector product
+        wH: array
+            one-dimensional array containing the vector Hessian product
 
         """
 
@@ -554,9 +551,6 @@ class CGraph:
 
         if w.ndim != 1:
             raise ValueError("w.ndim must be 1 but provided %d"%w.ndim)
-
-        if x.shape != w.shape:
-            raise ValueError("x.shape must be the same as w.shape, but provided x.shape=%s and w.shape=%s"%(x.shape, w.shape))
 
         self.pushforward([algopy.UTPM.init_jacobian(x)])
         ybar = self.dependentFunctionList[0].x.zeros_like()
