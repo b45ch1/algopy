@@ -298,11 +298,11 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         elif isinstance(rhs,numpy.ndarray) and rhs.dtype == object:
 
             if not isinstance(rhs.flatten()[0], UTPM):
-                err_str = 'you are trying to add a UTPM instance with a numpy.ndarray with elements of type %s\n'%type(rhs.flatten()[0])
+                err_str = 'you are trying to perform an operation involving 1) a UTPM instance and 2)a numpy.ndarray with elements of type %s\n'%type(rhs.flatten()[0])
                 err_str+= 'this operation is not supported!\n'
                 raise NotImplementedError(err_str)
             else:
-                err_str = 'should implement that!!!'
+                err_str = 'binary operations between UTPM instances and object arrays are not supported'
                 raise NotImplementedError(err_str)
 
         elif isinstance(rhs, numpy.ndarray):
@@ -330,7 +330,13 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             return retval
 
         elif isinstance(rhs,numpy.ndarray) and rhs.dtype == object:
-            raise NotImplementedError('should implement that')
+            if not isinstance(rhs.flatten()[0], UTPM):
+                err_str = 'you are trying to perform an operation involving 1) a UTPM instance and 2)a numpy.ndarray with elements of type %s\n'%type(rhs.flatten()[0])
+                err_str+= 'this operation is not supported!\n'
+                raise NotImplementedError(err_str)
+            else:
+                err_str = 'binary operations between UTPM instances and object arrays are not supported'
+                raise NotImplementedError(err_str)
 
         elif isinstance(rhs, numpy.ndarray):
             rhs_shape = rhs.shape
@@ -351,7 +357,13 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             return UTPM( self.data * rhs)
 
         elif isinstance(rhs,numpy.ndarray) and rhs.dtype == object:
-            raise NotImplementedError('should implement that')
+            if not isinstance(rhs.flatten()[0], UTPM):
+                err_str = 'you are trying to perform an operation involving 1) a UTPM instance and 2)a numpy.ndarray with elements of type %s\n'%type(rhs.flatten()[0])
+                err_str+= 'this operation is not supported!\n'
+                raise NotImplementedError(err_str)
+            else:
+                err_str = 'binary operations between UTPM instances and object arrays are not supported'
+                raise NotImplementedError(err_str)
 
         elif isinstance(rhs,numpy.ndarray):
             rhs_shape = rhs.shape
@@ -371,7 +383,14 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             return UTPM( self.data/rhs)
 
         elif isinstance(rhs,numpy.ndarray) and rhs.dtype == object:
-            raise NotImplementedError('should implement that')
+            if not isinstance(rhs.flatten()[0], UTPM):
+                err_str = 'you are trying to perform an operation involving 1) a UTPM instance and 2)a numpy.ndarray with elements of type %s\n'%type(rhs.flatten()[0])
+                err_str+= 'this operation is not supported!\n'
+                raise NotImplementedError(err_str)
+            else:
+                err_str = 'binary operations between UTPM instances and object arrays are not supported'
+                raise NotImplementedError(err_str)
+
 
         elif isinstance(rhs,numpy.ndarray):
             rhs_shape = rhs.shape
@@ -522,8 +541,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         cls._pb_sqrt(ybar.data, x.data, y.data, out = xbar.data)
         return out
-
-
 
     def exp(self):
         """ computes y = exp(x) in UTP arithmetic"""
