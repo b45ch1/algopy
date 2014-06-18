@@ -69,7 +69,7 @@ except ImportError as e:
     raise ImportError(
             "NumPy import error (%s)\n"
             "NumPy is a requirement of AlgoPy.\n"
-            "Please install NumPy >= %s" % (e, preferred_numpy_version))
+            "Please install NumPy >= %s" % (e, _preferred_numpy_version))
 
 if NumpyVersion(numpy.version.version) < _min_numpy_version:
     raise ImportError(
