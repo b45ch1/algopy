@@ -6,12 +6,13 @@ env:
     - PY=''
     - PY=3
 
-install:
+
+before_script:
   # Deactivate the virtualenv to get fast install of dependencies
   - deactivate
   # add ppa with more recent scipy version
-  - echo 'yes' | sudo add-apt-repository ppa:pylab/stable 
-  - sudo apt-get update
+  - sudo add-apt-repository ppa:rethinkdb/ppa -y
+  - sudo apt-get update -q
   - sudo apt-get install -qq python$PY-sphinx python$PY-nose python$PY-numpy python$PY-scipy
 
 script:
