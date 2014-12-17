@@ -960,6 +960,17 @@ class UTPM(Ring, RawAlgorithmsMixIn):
                     'this combination of types is not yet implemented')
 
     @classmethod
+    def real(cls, x):
+        """ UTPM equivalent to numpy.real """
+        return cls(x.data.real)
+
+    @classmethod
+    def imag(cls, x):
+        """ UTPM equivalent to numpy.imag """
+        return cls(x.data.imag)
+
+
+    @classmethod
     def absolute(cls, x):
         """ computes y = absolute(x) in UTP arithmetic"""
 
@@ -3107,7 +3118,25 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
     @classmethod
     def fft(cls, a, n=None, axis=-1, out = None):
-        """UTPM implementation of numpy.fft.fft(a, n=None, axis=-1)"""
+        """UTPM equivalent to numpy.fft.fft(a, n=None, axis=-1)"""
+        D,P = a.data.shape[:2]
+
+        if out is None:
+            r = cls(numpy.zeros(a.data.shape, dtype=complex))
+
+        else:
+            r, = out
+
+        print D,P
+        for d in range(D):
+            for p in range(P):
+                r.data[d,p, ...] = numpy.fft.fft(a.data[d,p], n=n, axis=axis)
+
+        return r
+
+    @classmethod
+    def ifft(cls, a, n=None, axis=-1, out = None):
+        """UTPM equivalent to numpy.fft.ifft(a, n=None, axis=-1)"""
         D,P = a.data.shape[:2]
 
         if out is None:
@@ -3118,7 +3147,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         for d in range(D):
             for p in range(P):
-                r.data[d,p, ...] = numpy.fft.fft(a.data[d,p], n=n, axis=axis)
+                r.data[d,p, ...] = numpy.fft.ifft(a.data[d,p], n=n, axis=axis)
 
         return r
 

@@ -17,7 +17,7 @@ numpy_function_names = [
         #'clip',
         'trace', 'diag',
         'triu', 'tril', 'reshape',
-        'tile',]
+        'tile']
 
 
 function_template = string.Template('''
@@ -70,6 +70,40 @@ def sum(x, axis=None, dtype=None, out=None):
     else:
         raise ValueError('don\'t know what to do with this input!')
 sum.__doc__ += numpy.sum.__doc__
+
+
+def real(x):
+    """
+    algopy equivalent to numpy.real
+    """
+
+    if isinstance(x, numpy.ndarray) or numpy.isscalar(x):
+        return numpy.real(x)
+
+    elif isinstance(x, UTPM) or isinstance(x, Function):
+       return x.__class__.real(x)
+
+    else:
+        raise ValueError('don\'t know what to do with this input!')
+real.__doc__ += numpy.real.__doc__
+
+
+def imag(x):
+    """
+    algopy equivalent to numpy.imag
+    """
+
+    if isinstance(x, numpy.ndarray) or numpy.isscalar(x):
+        return numpy.imag(x)
+
+    elif isinstance(x, UTPM) or isinstance(x, Function):
+       return x.__class__.imag(x)
+
+    else:
+        raise ValueError('don\'t know what to do with this input!')
+imag.__doc__ += numpy.imag.__doc__
+
+
 
 def prod(x):
     """ generic sum function
