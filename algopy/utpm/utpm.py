@@ -3099,7 +3099,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def tile(cls, A, reps, out = None):
         """UTPM implementation of numpy.tile(A, reps)"""
-        D,P, shp = numpy.shape(A.data)
+        D,P = A.data.shape[:2]
 
         Bshp = numpy.tile(A.data[0,0], reps).shape
 
@@ -3115,6 +3115,45 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         return B
 
+    @classmethod
+    def pb_tile(cls, Bbar, A, reps, B, out = None):
+
+        if(isinstance(reps, int)):
+            reps=[reps]
+        
+        d = len(reps)
+
+        assert Bbar.shape == B.shape
+
+        if A.ndim < d:
+            A2shp = [1]*(d - A.ndim) + list(A.shape)
+            d2shp = list(reps)
+        elif A.ndim > d:
+            A2shp = list(A.shape)
+            d2shp = [1]*(A.ndim - d) + list(reps)
+        else:
+            A2shp = list(A.shape)
+            d2shp = list(reps)
+
+        if out is None:
+            Abar = A.zeros_like()
+
+        else:
+            Abar ,= out
+
+        A2shp = numpy.array(A2shp)
+
+        # loop over all tiles and add tile to Abar
+        # K = [7*3*2, 3*2, 2, 1]
+        K = [int(numpy.prod(d2shp[::-1][:k])) for k in range(1+len(d2shp))][::-1]
+        for i in range(K[0]):
+            # convert i into multi-index
+            m = numpy.array([(i/K[j+1]) % d2shp[j] for j in range(len(d2shp))])
+            # create slice of B
+            s = [slice(A2shp[k]*m[k], A2shp[k]*(m[k]+1)) for k in range(len(m))]
+            Abar += Bbar[s]
+
+        return Abar
 
     @classmethod
     def fft(cls, a, n=None, axis=-1, out = None):
@@ -3127,12 +3166,27 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         else:
             r, = out
 
-        print D,P
         for d in range(D):
             for p in range(P):
                 r.data[d,p, ...] = numpy.fft.fft(a.data[d,p], n=n, axis=axis)
 
         return r
+
+    @classmethod
+    def pb_fft(cls, bbar, a, b, n=None, axis=-1, out = None):
+        D,P = a.data.shape[:2]
+
+        if out is None:
+            abar = cls(numpy.zeros(a.data.shape, dtype=complex))
+
+        else:
+            abar, = out
+
+        for d in range(D):
+            for p in range(P):
+                abar.data[d,p, ...] += numpy.fft.fft(bbar.data[d,p], n=n, axis=axis)
+
+        return abar
 
     @classmethod
     def ifft(cls, a, n=None, axis=-1, out = None):
@@ -3150,6 +3204,23 @@ class UTPM(Ring, RawAlgorithmsMixIn):
                 r.data[d,p, ...] = numpy.fft.ifft(a.data[d,p], n=n, axis=axis)
 
         return r
+
+    @classmethod
+    def pb_ifft(cls, bbar, a, b, n=None, axis=-1, out = None):
+        D,P = a.data.shape[:2]
+
+        if out is None:
+            abar = cls(numpy.zeros(a.data.shape, dtype=complex))
+
+        else:
+            abar, = out
+
+        for d in range(D):
+            for p in range(P):
+                abar.data[d,p, ...] += numpy.fft.ifft(bbar.data[d,p], n=n, axis=axis)
+
+        return abar
+
 
 
 

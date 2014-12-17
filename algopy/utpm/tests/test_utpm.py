@@ -2653,5 +2653,44 @@ class TestFunctionOfJacobian(TestCase):
         assert_array_almost_equal(x.data[1:,...], z.data[:-1,...])
 
 
+class TestFFT(TestCase):
+
+    def test_fft(self):
+
+        signal = numpy.random.random(100)
+        x = UTPM.init_jacobian(algopy.tile(signal, 10))
+        y = UTPM.fft(x, axis = 0)
+
+        ybar = UTPM(numpy.random.random(y.data.shape))
+        xbar = UTPM.pb_fft(ybar, x, y, axis = 0)
+
+        for p in range(x.data.shape[1]):
+            assert_almost_equal(numpy.sum(xbar.data[0, p]*x.data[1,p]), numpy.sum(ybar.data[0,p]*y.data[1,p]))
+
+    def test_ifft(self):
+        signal = numpy.random.random(100)
+        x = UTPM.init_jacobian(algopy.tile(signal, 10))
+        y = UTPM.ifft(x, axis = 0)
+
+        ybar = UTPM(numpy.random.random(y.data.shape))
+        xbar = UTPM.pb_ifft(ybar, x, y, axis = 0)
+
+        for p in range(x.data.shape[1]):
+            assert_almost_equal(numpy.sum(xbar.data[0, p]*x.data[1,p]), numpy.sum(ybar.data[0,p]*y.data[1,p]))
+
+    def test_fft_ifft(self):
+        x = numpy.random.random(100)
+        x = UTPM.init_jacobian(x)
+        y = UTPM.fft(x, axis=0)
+        z = UTPM.ifft(y, axis=0)
+        u = algopy.real(z)
+        v = UTPM.extract_jacobian(u)
+
+        assert_almost_equal(v, numpy.eye(100))
+
+
+
+
+
 if __name__ == "__main__":
     run_module_suite()
