@@ -16,7 +16,8 @@ numpy_function_names = [
         'minimum', 'maximum',
         #'clip',
         'trace', 'diag',
-        'triu', 'tril', 'reshape',]
+        'triu', 'tril', 'reshape',
+        'tile',]
 
 
 function_template = string.Template('''

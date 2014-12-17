@@ -115,6 +115,8 @@ from .linalg import *
 
 from . import nthderiv
 
+from . import fft
+
 try:
     from . import version
     __version__ = version.version

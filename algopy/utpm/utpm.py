@@ -3085,6 +3085,44 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         return UTPM(tc)
 
+    @classmethod
+    def tile(cls, A, reps, out = None):
+        """UTPM implementation of numpy.tile(A, reps)"""
+        D,P, shp = numpy.shape(A.data)
+
+        Bshp = numpy.tile(A.data[0,0], reps).shape
+
+        if out is None:
+            B = cls( numpy.zeros( (D,P) + Bshp, dtype=A.dtype))
+
+        else:
+            r, = out
+
+        for d in range(D):
+            for p in range(P):
+                B.data[d,p, ...] = numpy.tile(A.data[d,p], reps)
+
+        return B
+
+
+    @classmethod
+    def fft(cls, a, n=None, axis=-1, out = None):
+        """UTPM implementation of numpy.fft.fft(a, n=None, axis=-1)"""
+        D,P = a.data.shape[:2]
+
+        if out is None:
+            r = cls(numpy.zeros(a.data.shape, dtype=complex))
+
+        else:
+            r, = out
+
+        for d in range(D):
+            for p in range(P):
+                r.data[d,p, ...] = numpy.fft.fft(a.data[d,p], n=n, axis=axis)
+
+        return r
+
+
 
 class UTP(UTPM):
     """
