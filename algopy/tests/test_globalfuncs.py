@@ -169,6 +169,7 @@ class Test_global_functions(TestCase):
         cg.independentFunctionList = [ax]
         cg.dependentFunctionList = [ay]
 
+        x = numpy.random.random((2,2))
         assert_array_almost_equal(A, cg.gradient(x))
 
 

@@ -168,7 +168,25 @@ class Test_Function_on_UTPM(TestCase):
 
         assert_almost_equal(grad, jac)
 
+    def test_fft(self):
 
+        def eval_f2(x):
+            y = algopy.fft.fft(x, axis=0)
+            z = algopy.fft.ifft(y, axis=0)
+            return algopy.real(z)
+
+        signal = numpy.array([1,2,3,4,5.])
+
+        cg = algopy.CGraph()
+        x = algopy.Function(signal)
+        y = eval_f2(x)
+        cg.independentFunctionList = [x]
+        cg.dependentFunctionList = [y]
+
+
+        algopy_jacobian = cg.jacobian(signal)
+
+        assert_almost_equal(algopy_jacobian, numpy.eye(signal.size))
 
 
     def test_sqrt_in_norm_computation(self):
@@ -1230,7 +1248,7 @@ class Test_CGgraph_on_UTPM(TestCase):
             return numpy.array([ y[1]/y[2],
                                  (y[0] + 2*y[1])/y[2],
                                  -(y[0] + y[1]) * y[1]/(y[2]*y[2])
-                                 ])
+                                 ], dtype=object)
 
 
         # check correctness of the push forward

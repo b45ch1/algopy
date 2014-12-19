@@ -1,4 +1,7 @@
 import traceback
+import time
+import copy
+
 import numpy
 import algopy
 import operator
@@ -73,7 +76,7 @@ class CGraph:
                     arg_IDs.append(a.ID)
                 else:
                     arg_IDs.append('c(%s)'%str(a))
-            retval += '\n\n%s: IDs: %s <- %s\n'%(str(f.func.__name__), str(f.ID), str(arg_IDs))
+            retval += '\n\n%s: ID=%s, args=%s, kwargs=%s\n'%(str(f.func.__name__), str(f.ID), str(arg_IDs), str(f.kwargs))
             retval += 'class:    %s \n'%( str(f.x.__class__))
 
             retval += 'x:\n    %s \n'%( str(f.x))
@@ -111,9 +114,6 @@ class CGraph:
 
                 raise Exception(err_str)
 
-
-
-
     def pullback(self, xbar_list):
         """
         Apply the pullback of the cotangent element,
@@ -128,7 +128,6 @@ class CGraph:
 
         """
 
-        import time
 
         if len(self.dependentFunctionList) == 0:
             raise Exception('You forgot to specify which variables are dependent!\n'\
@@ -161,15 +160,15 @@ class CGraph:
             except Exception as e:
                 err_str = '\npullback of node %d failed\n\n'%(len(self.functionList) - i - 1)
                 err_str +='tried to evaluate the pullback of %s(*args) with\n'%(f.func.__name__)
-
                 for narg, arg in enumerate(f.args):
                     if hasattr(arg, 'x'):
                         err_str += 'type(arg[%d].x) = \n%s\n'%(narg, type(arg.x) )
+                        if isinstance(arg.x, algopy.UTPM):
+                            err_str += 'arg[%d].x.data.shape = \n%s\n'%(narg, arg.x.data.shape)
+                            err_str += 'arg[%d].xbar.data.shape = \n%s\n'%(narg, arg.xbar.data.shape)
+
                     else:
                         err_str += 'type(arg[%d]) = \n%s\n'%(narg, type(arg) )
-                    if isinstance(arg.x, algopy.UTPM):
-                        err_str += 'arg[%d].x.data.shape = \n%s\n'%(narg, arg.x.data.shape)
-                        err_str += 'arg[%d].xbar.data.shape = \n%s\n'%(narg, arg.xbar.data.shape)
 
                 err_str += '\n%s'%traceback.format_exc()
                 raise Exception(err_str)
@@ -279,7 +278,7 @@ class CGraph:
         -------
         J: array_like or UTPM instance
             the Jacobian evaluated at x
-            J.ndim = 2 when M>=1 and J.ndim = 1 when M == 0
+            J.ndim = 2 when M>1 and J.ndim = 1 when M == 1
 
 
         Example
@@ -709,7 +708,7 @@ class Function(Ring):
             # create a Function node with value x referring to itself, i.e.
             # returning x when called
             cls = self.__class__
-            cls.create(x, [self], cls.Id, self)
+            cls.create(x, [self], {}, cls.Id, self)
 
     @property
     def dtype(self):
@@ -751,13 +750,14 @@ class Function(Ring):
 
 
     @classmethod
-    def create(cls, x, fargs, func, f = None):
+    def create(cls, x, fargs, fkwargs, func, f = None):
         """
         Creates a new function node.
 
         INPUTS:
             x           anything                            current value
             args        tuple of Function objects           arguments of the new Function node
+            kwargs      dict of Function objects            keyword arguments of the new Function node
             func        callable                            the function that can evaluate func(x)
 
         OPTIONAL:
@@ -773,6 +773,7 @@ class Function(Ring):
             f = Function()
         f.x = x
         f.args = fargs
+        f.kwargs = fkwargs
         f.func = func
         if cls.cgraph is not None:
             f.ID = cls.get_ID()
@@ -780,7 +781,7 @@ class Function(Ring):
         return f
 
     @classmethod
-    def pushforward(cls, func, Fargs, Fout = None, setitem = None):
+    def pushforward(cls, func, Fargs, Fkwargs={}, Fout=None, setitem=None):
         """
         Computes the push forward of func
 
@@ -804,12 +805,12 @@ class Function(Ring):
         # STEP 2: call the function
         # print 'func=',func
         # print 'args=',args
-        out  = func(*args)
+        out  = func(*args, **Fkwargs)
 
         # STEP 3: create new Function instance for output
         if Fout is None:
             # this is called when pushforward is called by a function like mul,add, ...
-            Fout = cls.create(out, Fargs, func)
+            Fout = cls.create(out, Fargs, Fkwargs, func)
             # return retval
 
         else:
@@ -901,11 +902,14 @@ class Function(Ring):
 
         # STEP 2: call the pullback function
         kwargs = {'out': list(argsbar)}
+        kwargs.update(F.kwargs)
 
-#         print 'func_name = ',func_name
-#         print 'calling pullback function f=',f
-#         print 'args = ',args
-#         print 'kwargs = ',kwargs
+        # print 'func_name = ',func_name
+        # print 'calling pullback function f=',f
+        # print 'argsbar=',argsbar
+        # print 'args = ',args
+        # print 'kwargs = ',kwargs
+        # print 'F.kwargs=', F.kwargs
 
         f(*args, **kwargs )
 
@@ -1004,7 +1008,6 @@ class Function(Ring):
                 # raise NotImplementedError('should implement that')
 
         else:
-            import copy
 
             # this is a hack to get L,Q,b = eigh1 to work, should be fixed soon!
             self.xbar = None # copy.deepcopy(self.x)
@@ -1129,6 +1132,15 @@ class Function(Ring):
     def prod(self):
         return Function.pushforward(algopy.prod, [self])
 
+    def tile(self, reps):
+        return Function.pushforward(algopy.tile, [self, reps])
+
+    def real(self):
+        return Function.pushforward(algopy.real, [self])
+    
+    def imag(self):
+        return Function.pushforward(algopy.imag, [self])
+
     @classmethod
     def dot(cls, lhs,rhs):
         lhs = cls.totype(lhs)
@@ -1228,6 +1240,18 @@ class Function(Ring):
     def get_flat(self):
         return self.x.flat
     flat = property(get_flat)
+
+
+    # #########################################################
+    # numpy.fft functions
+    # #########################################################
+    def fft(self, n=None, axis=-1):
+        return Function.pushforward(algopy.fft.fft, [self],
+                                    Fkwargs={'n':n, 'axis':axis})
+
+    def ifft(self, n=None, axis=-1):
+        return Function.pushforward(algopy.fft.ifft, [self],
+                                    Fkwargs={'n':n, 'axis':axis})
 
 
     # #########################################################

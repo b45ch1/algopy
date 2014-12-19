@@ -17,8 +17,7 @@ def fft(a, n=None, axis=-1):
         return UTPM.fft(a, n=n, axis=axis)
 
     elif isinstance(a, Function):
-    	raise NotImplementedError
-        # return Function.qr_full(A)
+        return Function.fft(a, n=n, axis=axis)
 
     elif isinstance(a, numpy.ndarray):
         return numpy.fft.fft(a, n=n, axis=axis)
@@ -38,8 +37,7 @@ def ifft(a, n=None, axis=-1):
         return UTPM.ifft(a, n=n, axis=axis)
 
     elif isinstance(a, Function):
-        raise NotImplementedError
-        # return Function.qr_full(A)
+        return Function.ifft(a, n=n, axis=axis)
 
     elif isinstance(a, numpy.ndarray):
         return numpy.fft.ifft(a, n=n, axis=axis)

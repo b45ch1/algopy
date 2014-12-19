@@ -965,9 +965,31 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return cls(x.data.real)
 
     @classmethod
+    def pb_real(cls, ybar, x, y, out=None):
+        if out is None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar, = out
+
+        xbar.data.real = ybar.data
+
+    @classmethod
     def imag(cls, x):
         """ UTPM equivalent to numpy.imag """
         return cls(x.data.imag)
+
+    @classmethod
+    def pb_imag(cls, ybar, x, y, out=None):
+        if out is None:
+            D,P = x.data.shape[:2]
+            xbar = x.zeros_like()
+
+        else:
+            xbar, = out
+
+        xbar.data.imag = ybar
 
 
     @classmethod
@@ -3139,7 +3161,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             Abar = A.zeros_like()
 
         else:
-            Abar ,= out
+            Abar = out[0]
 
         A2shp = numpy.array(A2shp)
 
@@ -3156,7 +3178,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return Abar
 
     @classmethod
-    def fft(cls, a, n=None, axis=-1, out = None):
+    def fft(cls, a, n=None, axis=-1, out=None):
         """UTPM equivalent to numpy.fft.fft(a, n=None, axis=-1)"""
         D,P = a.data.shape[:2]
 
@@ -3173,7 +3195,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return r
 
     @classmethod
-    def pb_fft(cls, bbar, a, b, n=None, axis=-1, out = None):
+    def pb_fft(cls, bbar, a, b, n=None, axis=-1, out=None):
         D,P = a.data.shape[:2]
 
         if out is None:
@@ -3189,7 +3211,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return abar
 
     @classmethod
-    def ifft(cls, a, n=None, axis=-1, out = None):
+    def ifft(cls, a, n=None, axis=-1, out=None):
         """UTPM equivalent to numpy.fft.ifft(a, n=None, axis=-1)"""
         D,P = a.data.shape[:2]
 
@@ -3206,7 +3228,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return r
 
     @classmethod
-    def pb_ifft(cls, bbar, a, b, n=None, axis=-1, out = None):
+    def pb_ifft(cls, bbar, a, b, n=None, axis=-1, out=None):
         D,P = a.data.shape[:2]
 
         if out is None:
