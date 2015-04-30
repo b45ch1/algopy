@@ -1441,7 +1441,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def trace(cls, x):
         D,P = x.data.shape[:2]
-        retval = numpy.zeros((D,P))
+        retval = numpy.zeros((D,P), dtype=x.dtype)
         for d in range(D):
             for p in range(P):
                 retval[d,p] = numpy.trace(x.data[d,p,...])
