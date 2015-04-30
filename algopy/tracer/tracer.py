@@ -213,7 +213,7 @@ class CGraph:
         cg.trace_off()
         cg.independentFunctionList = [x]
         cg.dependentFunctionList = [y]
-        print cg.gradient(7.)
+        print(cg.gradient(7.))
 
 
         Example 2
@@ -230,7 +230,7 @@ class CGraph:
         cg.trace_off()
         cg.independentFunctionList = [x]
         cg.dependentFunctionList = [y]
-        print cg.gradient([1.,2.])
+        print(cg.gradient([1.,2.]))
         """
 
         if self.dependentFunctionList[0].ndim != 0:

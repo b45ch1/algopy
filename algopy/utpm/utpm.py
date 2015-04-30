@@ -988,8 +988,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         else:
             xbar, = out
-
-        xbar.data.imag = ybar
+        xbar.data.imag = -ybar.data
 
 
     @classmethod

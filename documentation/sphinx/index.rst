@@ -346,6 +346,7 @@ Advanced Examples:
 .. toctree::
    :maxdepth: 1
 
+   examples/complex_differentiation.rst
    examples/covariance_matrix_computation.rst
    examples/error_propagation.rst
    examples/moore_penrose_pseudoinverse.rst
