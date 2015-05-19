@@ -1,5 +1,6 @@
 from numpy.testing import *
 import numpy
+numpy.random.seed(0)
 
 from algopy import UTPM, Function
 from algopy.special import *

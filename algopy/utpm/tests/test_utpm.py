@@ -2,6 +2,7 @@ import math
 
 from numpy.testing import *
 import numpy
+numpy.random.seed(0)
 import scipy.special
 
 import algopy.nthderiv

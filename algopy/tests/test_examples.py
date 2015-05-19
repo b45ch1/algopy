@@ -4,6 +4,7 @@ More complicated test examples.
 from numpy.testing import *
 from numpy.testing.decorators import *
 import numpy
+numpy.random.seed(0)
 
 from algopy import *
 from algopy.linalg import *
