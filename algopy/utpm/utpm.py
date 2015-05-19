@@ -474,7 +474,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             self.data[0,...] += rhs
         else:
             self_data, rhs_data = UTPM._broadcast_arrays(self.data, rhs.data)
-            self_data[...] += rhs_data[...]
+            # self_data[...] += rhs_data[...]
+            numpy.add(self_data, rhs_data, out=self_data, casting="unsafe")
         return self
 
     def __isub__(self,rhs):
@@ -1441,7 +1442,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     @classmethod
     def trace(cls, x):
         D,P = x.data.shape[:2]
-        retval = numpy.zeros((D,P))
+        retval = numpy.zeros((D,P), dtype=x.dtype)
         for d in range(D):
             for p in range(P):
                 retval[d,p] = numpy.trace(x.data[d,p,...])
@@ -1682,7 +1683,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
 
         shp = numpy.shape(x)
-        data = numpy.zeros(numpy.hstack( [2, numpy.size(x), shp]), dtype=dtype)
+        data = numpy.zeros(numpy.hstack( (2, numpy.size(x)) +  shp), dtype=dtype)
         data[0] = x
         data[1,:].flat = numpy.eye(numpy.size(x))
 
@@ -2166,7 +2167,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         D,P,N = A.data.shape[:3]
 
         if out is None:
-            PIV = cls(numpy.zeros((D,P,N))) # pivot elements
+            PIV = cls(numpy.zeros((D,P,N), dtype=int)) # pivot elements
             L = A.zeros_like()
             U = A.zeros_like()
 
@@ -3206,7 +3207,9 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         for d in range(D):
             for p in range(P):
-                abar.data[d,p, ...] += numpy.fft.fft(bbar.data[d,p], n=n, axis=axis)
+
+                # abar.data[d,p, ...] += numpy.fft.fft(bbar.data[d,p], n=n, axis=axis)
+                numpy.add(abar.data[d,p, ...], numpy.fft.fft(bbar.data[d,p], n=n, axis=axis), out=abar.data[d,p, ...], casting="unsafe")
 
         return abar
 
