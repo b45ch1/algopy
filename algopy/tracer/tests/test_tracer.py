@@ -1212,6 +1212,96 @@ class Test_CGgraph_on_UTPM(TestCase):
 
         assert_almost_equal(numpy.trace(numpy.dot(Abar.T, Adot)), numpy.trace( numpy.dot(Lbar.T, Ldot) + numpy.dot(Qbar.T, Qdot)))
 
+    def test_complex1(self):
+
+        import algopy
+        import numpy as np
+
+        def f(x, A, module):
+              y = module.dot(A, x)
+              return module.real(module.sum(y))
+
+        size = 4
+        Ar = np.random.random((size, size))
+        Ai = np.random.random((size, size))
+        Ac = Ar +1j*Ai
+        A  = Ac
+        x  = np.random.random((size,))
+
+        cg = algopy.CGraph()
+        xf = algopy.Function(x)
+        sf = f(xf, A, algopy)
+        cg.trace_off()
+        assert_array_almost_equal(sf.x, f(x , A, np))
+
+        cg.independentFunctionList = [xf]
+        cg.dependentFunctionList = [sf]
+        gf = cg.gradient(x)
+        ganalytic = np.real(np.sum(A, axis=0))
+
+        assert_array_almost_equal(gf, ganalytic)
+
+
+    def test_complex2(self):
+
+        import algopy
+        import numpy as np
+
+        def f(x, A, module):
+              y = module.dot(A, x)
+              return module.imag(module.sum(y))
+
+        size = 4
+        Ar = np.random.random((size, size))
+        Ai = np.random.random((size, size))
+        Ac = Ar +1j*Ai
+        A  = Ac
+        x  = np.random.random((size,))
+
+        cg = algopy.CGraph()
+        xf = algopy.Function(x)
+        sf = f(xf, A, algopy)
+        cg.trace_off()
+
+        assert_array_almost_equal(sf.x, f(x , A, np))
+
+
+        cg.independentFunctionList = [xf]
+        cg.dependentFunctionList = [sf]
+        gf = cg.gradient(x)
+        ganalytic = np.imag(np.sum(A, axis=0))
+        assert_array_almost_equal(gf, ganalytic)
+
+
+    def test_complex3(self):
+
+        import algopy
+        import numpy as np
+
+        def f(x, A, module):
+              y = module.dot(A, x)
+              return module.sum(y)
+
+        size = 4
+        Ar = np.random.random((size, size))
+        Ai = np.random.random((size, size))
+        Ac = Ar +1j*Ai
+        A  = Ac
+        x  = np.random.random((size,)) + 0j
+
+        cg = algopy.CGraph()
+        xf = algopy.Function(x)
+        sf = f(xf, A, algopy)
+        cg.trace_off()
+
+        assert_array_almost_equal(sf.x, f(x , A, np))
+
+        cg.independentFunctionList = [xf]
+        cg.dependentFunctionList = [sf]
+        gf = cg.gradient(x)
+        ganalytic = np.sum(A, axis=0)
+
+        assert_array_almost_equal(gf, ganalytic)
 
 
 
