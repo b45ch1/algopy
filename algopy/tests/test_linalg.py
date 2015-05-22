@@ -13,6 +13,7 @@ depending on the type of x.
 from numpy.testing import *
 from numpy.testing.decorators import skipif
 import numpy
+numpy.random.seed(0)
 
 from algopy import UTPM, Function, CGraph, diag, sum
 from algopy.linalg import *
