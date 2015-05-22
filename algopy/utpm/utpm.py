@@ -1602,8 +1602,10 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         return self.__class__(numpy.zeros((D,P) + shape))
 
-    def zeros_like(self):
-        return self.__class__(numpy.zeros_like(self.data))
+    def zeros_like(self, dtype=None):
+        if dtype is None:
+            dtype = self.data.dtype
+        return self.__class__(numpy.zeros_like(self.data, dtype))
 
     def ones_like(self):
         data = numpy.zeros_like(self.data)

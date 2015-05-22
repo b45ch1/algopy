@@ -133,10 +133,14 @@ class CGraph:
             raise Exception('You forgot to specify which variables are dependent!\n'\
                             ' e.g. with cg.dependentFunctionList = [F1,F2]')
 
+        # determine result_dtype
+        dtypes = [xbar.dtype for xbar in xbar_list]
+        result_dtype = reduce(numpy.result_type, dtypes, 1)
+
         # initial all xbar to zero
         for f in self.functionList:
             # print 'f=',f.func.__name__
-            f.xbar_from_x()
+            f.xbar_from_x(result_dtype)
 
         # print 'before pullback',self
 
@@ -852,7 +856,6 @@ class Function(Ring):
         The Function F contains information about its arguments, F.y and F.ybar.
         Thus, pullback(F) computes F.args[i].xbar
         """
-
         func_name = F.func.__name__
 
         # STEP 1: extract arguments
@@ -937,7 +940,7 @@ class Function(Ring):
         else:
             return cls(x)
 
-    def xbar_from_x(self):
+    def xbar_from_x(self, result_dtype):
         """
 
         Warning for the faint-hearted: this function is quite a hack and
@@ -960,8 +963,7 @@ class Function(Ring):
 
         """
         if numpy.isscalar(self.x):
-            self.xbar = 0.
-
+            self.xbar = 0
 
         # case that the function f had a tuple of outputs
         elif isinstance(self.x, tuple):
@@ -969,7 +971,8 @@ class Function(Ring):
 
             for xi in self.x:
                 if isinstance(xi, algopy.UTPM):
-                    tmp.append(xi.zeros_like())
+                    dtype = numpy.result_type(xi.dtype, result_dtype)
+                    tmp.append(xi.zeros_like(dtype))
                 else:
                     tmp.append(None)
             self.xbar = tuple(tmp)
@@ -982,7 +985,8 @@ class Function(Ring):
         elif isinstance(self.x, algopy.UTPM):
 
             if self.x.owndata == True or self.func == self.Id:
-                self.xbar = self.x.zeros_like()
+                dtype = numpy.result_type(self.x.dtype, result_dtype)
+                self.xbar = self.x.zeros_like(dtype)
             else:
 
                 # STEP 1: extract arguments for func

@@ -1218,8 +1218,8 @@ class Test_CGgraph_on_UTPM(TestCase):
         import numpy as np
 
         def f(x, A, module):
-              y = module.dot(A, x)
-              return module.real(module.sum(y))
+            y = module.dot(A, x)
+            return module.real(module.sum(y))
 
         size = 4
         Ar = np.random.random((size, size))
@@ -1248,8 +1248,8 @@ class Test_CGgraph_on_UTPM(TestCase):
         import numpy as np
 
         def f(x, A, module):
-              y = module.dot(A, x)
-              return module.imag(module.sum(y))
+            y = module.dot(A, x)
+            return module.imag(module.sum(y))
 
         size = 4
         Ar = np.random.random((size, size))
@@ -1279,15 +1279,15 @@ class Test_CGgraph_on_UTPM(TestCase):
         import numpy as np
 
         def f(x, A, module):
-              y = module.dot(A, x)
-              return module.sum(y)
+            y = module.dot(A, x)
+            return module.sum(y)
 
         size = 4
         Ar = np.random.random((size, size))
         Ai = np.random.random((size, size))
         Ac = Ar +1j*Ai
         A  = Ac
-        x  = np.random.random((size,)) + 0j
+        x  = np.random.random((size,))
 
         cg = algopy.CGraph()
         xf = algopy.Function(x)
