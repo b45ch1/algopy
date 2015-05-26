@@ -17,7 +17,8 @@ numpy_function_names = [
         #'clip',
         'trace', 'diag',
         'triu', 'tril', 'reshape',
-        'tile']
+        'tile',
+        'conjugate']
 
 
 function_template = string.Template('''

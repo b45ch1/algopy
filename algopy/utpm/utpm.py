@@ -1582,6 +1582,17 @@ class UTPM(Ring, RawAlgorithmsMixIn):
     def transpose(self, axes = None):
         return UTPM( UTPM._transpose(self.data))
 
+    def transpose(self, axes = None):
+        return UTPM( UTPM._transpose(self.data))
+    def transpose(self, axes=None):
+        return UTPM(UTPM._transpose(self.data, axes=axes))
+
+    def conj(self):
+        return self.conjugate()
+
+    def conjugate(self):
+        return UTPM(UTPM._conjugate(self.data))
+
     def get_owndata(self):
         return self.data.flags['OWNDATA']
 
