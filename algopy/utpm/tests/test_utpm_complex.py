@@ -93,5 +93,61 @@ class Test_Forward_Complex(TestCase):
             for j in range(M):
                 assert_array_almost_equal(A[i,j].data, B[j,i].data)
 
+    def test_composite_function1(self):
+        """ test example as communicated by Ralf Juengling via email """
+        np = numpy
+        size = 4
+        Ar = np.random.random((size, size))
+        Ai = np.random.random((size, size))
+        A  = Ar + 1j*Ai
+
+        def f(x, module):
+            y = module.dot(A, x)
+            u = module.conjugate(y)
+            yDy = module.dot(u, y)
+            return yDy
+
+
+        def eval_g1(x):
+            """gradient via analytic formula 1"""
+            C = np.dot(A.transpose(), A.conjugate())
+            return np.dot(C.transpose() + C, x)    
+
+        def eval_g2(x):
+            """gradient via analytic formula 2"""
+            y = np.dot(A,x)
+            return 2*(np.dot(np.real(y),np.real(A)) + np.dot(np.imag(y),np.imag(A)) ) 
+
+        def eval_gf(x):
+            """gradient via forward mode"""
+            # forward ode
+            ax = UTPM.init_jacobian(x)
+            ay = f(ax, algopy)
+            return UTPM.extract_jacobian(ay)
+
+        def eval_gr(x):
+            """gradient via reverse mode"""
+            cg = algopy.CGraph()
+            xf = algopy.Function(x)
+            sf = f(xf, algopy)
+            cg.trace_off()
+            assert sf.x == f(x, np)
+            cg.independentFunctionList = [xf]
+            cg.dependentFunctionList = [sf]
+            return cg.gradient(x)
+
+        x  = np.random.random((size,))
+    
+        g1 = eval_g1(x)
+        g2 = eval_g2(x)
+        gf = eval_gf(x)
+        gr = eval_gr(x)
+
+        assert_almost_equal(g1, g2)
+        assert_almost_equal(g2, gf)
+        assert_almost_equal(gf, gr)
+
+
+
 if __name__ == "__main__":
     run_module_suite()
