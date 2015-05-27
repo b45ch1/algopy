@@ -1208,6 +1208,9 @@ class Function(Ring):
     def transpose(self):
         return Function.pushforward(algopy.transpose, [self])
 
+    def conjugate(self):
+        return Function.pushforward(algopy.conjugate, [self])
+
     def tril(self):
         return Function.pushforward(algopy.tril, [self])
 

@@ -1591,7 +1591,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         return self.conjugate()
 
     def conjugate(self):
-        return UTPM(UTPM._conjugate(self.data))
+        return UTPM(numpy.conjugate(self.data))
 
     def get_owndata(self):
         return self.data.flags['OWNDATA']
@@ -2612,6 +2612,17 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         xbar, = out
         xbar = cls.transpose(ybar)
         return xbar
+
+    @classmethod
+    def pb_conjugate(cls, ybar, x, y, out = None):
+        if out is None:
+            raise NotImplementedError('should implement that')
+
+        xbar, = out
+        xbar += cls.conjugate(ybar)
+        return xbar
+
+
 
     @classmethod
     def qr(cls, A, out = None, work = None, epsilon = 1e-14):

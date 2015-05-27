@@ -2365,18 +2365,6 @@ class RawAlgorithmsMixIn:
         return numpy.transpose(a_data,axes=(0,1) + axes_ids)
 
     @classmethod
-    def _conjugate(cls, a_data):
-        """Conjugate UTPM data"""
-
-        a_data_real = numpy.real(a_data)
-        a_data_imag = numpy.imag(a_data)
-
-        Nshp = len(a_data.shape)
-        axes_ids = tuple(range(2,Nshp)[::-1])
-        return numpy.transpose(a_data_real,axes=(0,1) + axes_ids) - 1j*numpy.transpose(a_data_imag,axes=(0,1) + axes_ids)
-
-
-    @classmethod
     def _diag(cls, v_data, k = 0, out = None):
         """Extract a diagonal or construct  diagonal UTPM data"""
 
