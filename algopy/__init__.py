@@ -55,6 +55,7 @@ How to cite AlgoPy::
 import os
 __install_path__ = os.path.realpath(__file__)
 
+
 # check that dependencies are satisfied
 
 from ._npversion import NumpyVersion
@@ -65,6 +66,11 @@ _min_scipy_version = '0.11.0'
 
 try:
     import numpy
+
+    # ignore warnings "ComplexWarning: Casting complex values to real discards the imaginary part"
+    import warnings
+    warnings.simplefilter("ignore", numpy.ComplexWarning)
+
 except ImportError as e:
     raise ImportError(
             "NumPy import error (%s)\n"
