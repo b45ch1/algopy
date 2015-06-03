@@ -2,6 +2,7 @@ import math
 
 from numpy.testing import *
 import numpy
+numpy.random.seed(0)
 import scipy.special
 
 import algopy.nthderiv
@@ -1795,7 +1796,7 @@ class Test_QR_Decomposition(TestCase):
 
         # check that columns of Q2 span the nullspace of A
         Q2 = Q[:,N:]
-        assert_array_almost_equal(0, UTPM.dot(A.T, Q2).data, decimal=8)
+        assert_array_almost_equal(0, UTPM.dot(A.T, Q2).data, decimal=6)
 
     def test_singular_matrix3(self):
         D,P,M,N = 3,1,40,20

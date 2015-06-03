@@ -1,6 +1,7 @@
 from numpy.testing import *
 import numpy
 import numpy.random
+numpy.random.seed(0)
 
 from algopy.utpm import UTPM
 from algopy.utils import *

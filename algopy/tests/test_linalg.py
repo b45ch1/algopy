@@ -164,7 +164,7 @@ class Test_NumpyScipyLinalgFunctions(TestCase):
             E = ident[i].reshape(n, n)
             M[:, :, i] = expm_frechet(x, E, compute_expm=False)
 
-        assert_allclose(g1, M)
+        assert_allclose(g1, M, rtol=1e-6)
 
 
     @skipif(expm_frechet is None, msg='expm_frechet is not available')
@@ -181,7 +181,7 @@ class Test_NumpyScipyLinalgFunctions(TestCase):
         # compute the jacobian vector product directly using expm_frechet
         M = expm_frechet(x, E, compute_expm=False).flatten()
 
-        assert_allclose(g1, M)
+        assert_allclose(g1, M, rtol=1e-6)
 
 
 

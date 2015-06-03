@@ -13,6 +13,8 @@ import functools
 import warnings
 
 import numpy as np
+np.random.seed(0)
+
 import numpy.testing
 from numpy.testing import assert_allclose, assert_equal
 

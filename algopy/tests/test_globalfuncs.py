@@ -12,6 +12,7 @@ depending on the type of x.
 from numpy.testing import *
 from numpy.testing.decorators import *
 import numpy
+numpy.random.seed(0)
 
 from algopy import CGraph, Function
 from algopy.utpm import UTPM

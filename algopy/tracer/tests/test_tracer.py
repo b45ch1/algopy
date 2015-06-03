@@ -3,6 +3,7 @@ from .environment import Settings
 import os
 
 import numpy
+numpy.random.seed(0)
 
 import algopy
 from algopy.tracer.tracer import *
