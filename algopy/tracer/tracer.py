@@ -1337,14 +1337,20 @@ class Function(Ring):
     def extract_UTPM_jacobian(self):
         return Function.pushforward(algopy.extract_jacobian, [self])
 
+    def _get_val(self, x):
+        if isinstance(x, self.__class__):
+            return x.x
+        else:
+            return x
+
     def __lt__(self, other):
-        return self.x.__lt__(other.x)
+        return operator.lt(self.x, self._get_val(other))
 
     def __le__(self, other):
-        return self.x.__le__(other.x)
+        return operator.le(self.x, self._get_val(other))
 
     def __ge__(self, other):
-        return self.x.__ge__(other.x)
+        return operator.ge(self.x, self._get_val(other))
 
     def __gt__(self, other):
-        return self.x.__gt__(other.x)
+        return operator.gt(self.x, self._get_val(other))
