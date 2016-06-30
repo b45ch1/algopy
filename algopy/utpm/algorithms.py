@@ -1190,9 +1190,9 @@ class RawAlgorithmsMixIn:
         for d in range(D):
             for p in range(P):
                 for c in range(d+1):
-                    z_data[d,p,...] += numpy.dot(
-                            x_data[c,p,...],
-                            y_data[d-c,p,...])
+                    tmp = numpy.dot(x_data[c,p,...],
+                                    y_data[d-c,p,...])
+                    numpy.add(z_data[d,p,...], tmp, out=z_data[d,p, ...], casting='unsafe') 
 
         return out
 
