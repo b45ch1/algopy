@@ -193,6 +193,10 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         x_shp = numpy.shape(x)
         xr = numpy.ravel(x)
+
+        # print 'x=', x
+        # print 'xr=',xr
+        # print 'x.dtype', x.dtype
         D,P = xr[0].data.shape[:2]
         shp = xr[0].data.shape[2:]
 
@@ -1682,6 +1686,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         if no dtype is provided, the dtype is inferred from x
         """
 
+        # print 'called init_jacobian'
         x = numpy.asarray(x)
 
         if dtype is None:
@@ -1695,16 +1700,38 @@ class UTPM(Ring, RawAlgorithmsMixIn):
         shp = numpy.shape(x)
         data = numpy.zeros(numpy.hstack( (2, numpy.size(x)) +  shp), dtype=dtype)
         data[0] = x
-        data[1,:].flat = numpy.eye(numpy.size(x))
+
+        x0 = x.ravel()[0]
+        # print 'type(x0)=',type(x0)
+        if isinstance(x0, cls):
+            data[1] = data[0].copy()
+            data[1] *= 0
+            data[1] += numpy.eye(numpy.size(x))
+
+        else:
+            data[1,:].flat = numpy.eye(numpy.size(x))
 
         return cls(data)
+
+
 
     @classmethod
     def extract_jacobian(cls, x):
         """ extracts the Jacobian from a UTPM instance
         if x.ndim == 1 it is equivalent to the gradient
         """
-        return x.data[1,...].transpose([i for i in range(1,x.data[1,...].ndim)] + [0])
+        retval = x.data[1,...].transpose([i for i in range(1,x.data[1,...].ndim)] + [0])
+
+        # print 'x.data.dtype=',x.data.dtype
+        # print 'x.data=',x.data
+
+
+        x0 = retval.ravel()[0]
+        if isinstance(x0, cls):
+            # print 'call as_utpm'
+            retval = cls.as_utpm(retval)
+
+        return retval
 
     @classmethod
     def init_jac_vec(cls, x, v, dtype=None):
@@ -2018,6 +2045,9 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             assert A_shp[:2] == x_shp[:2]
             if A_shp[2] != x_shp[2]:
                 print(ValueError('A.data.shape = %s does not match x.data.shape = %s'%(str(A_shp), str(x_shp))))
+
+            if len(x_shp) == 3:
+                raise ValueError("require x.data.shape=(D,P,M,K) and A.data.shape=(D,P,M,N) but provided x.data.shape(D,P,M)=%s"%str(x.data.shape))
 
             D, P, M = A_shp[:3]
 
