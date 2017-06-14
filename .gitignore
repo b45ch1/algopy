@@ -33,7 +33,7 @@ SConstruct
 dist
 build
 report
-
+virtualenv/
 
 # exceptions
 !.gitignore

@@ -205,7 +205,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         y = UTPM(numpy.zeros((D,P) + x_shp + shp))
 
-        yr = UTPM( y.data.reshape((D,P) + (numpy.prod(x_shp),) + shp))
+        yr = UTPM( y.data.reshape((D,P) + (numpy.prod(x_shp, dtype=int),) + shp))
 
         # print yr.shape
         # print yr.data.shape
@@ -3194,7 +3194,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         if(isinstance(reps, int)):
             reps=[reps]
-        
+
         d = len(reps)
 
         assert Bbar.shape == B.shape
