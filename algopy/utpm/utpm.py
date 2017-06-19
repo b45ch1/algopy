@@ -1976,7 +1976,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             assert x_shp[:2] == y_shp[:2]
             assert len(y_shp[2:]) == 1
 
-            out_shp = x_shp + x_shp[-1:]
+            out_shp = x_shp + y_shp[-1:]
             out = cls(cls.__zeros__(out_shp, dtype = x.data.dtype))
             cls._outer( x.data, y.data, out = out.data)
 
