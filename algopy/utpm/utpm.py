@@ -128,13 +128,12 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             self.data = numpy.asarray(X)
             self.data = self.data
         else:
-            raise NotImplementedError
+            raise NotImplementedError()
 
     def __getitem__(self, sl):
-        if isinstance(sl, int) or sl == Ellipsis or isinstance(sl, slice):
+        if not isinstance(sl, tuple):
             sl = (sl,)
-
-        tmp = self.data.__getitem__((slice(None),slice(None)) + tuple(sl))
+        tmp = self.data.__getitem__((slice(None),slice(None)) + sl)
         return self.__class__(tmp)
 
     def __setitem__(self, sl, rhs):
@@ -322,7 +321,6 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         else:
             x_data, y_data = UTPM._broadcast_arrays(self.data, rhs.data)
-
             return UTPM(x_data + y_data)
 
     def __sub__(self,rhs):
@@ -354,7 +352,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
             return UTPM(z_data)
 
         else:
-            return UTPM(self.data - rhs.data)
+            x_data, y_data = UTPM._broadcast_arrays(self.data, rhs.data)
+            return UTPM(x_data - y_data)
 
     def __mul__(self,rhs):
         if numpy.isscalar(rhs):
@@ -1820,8 +1819,8 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         # generate directions
         N = x.size
-        M = (N*(N+1))/2
-        L = (N*(N-1))/2
+        M = (N*(N+1))//2
+        L = (N*(N-1))//2
         S = numpy.zeros((N,M), dtype=x.dtype)
 
         s = 0
