@@ -57,7 +57,7 @@ AUTHOR_EMAIL        = "sebastian.walter@gmail.com"
 PLATFORMS           = ["all"]
 MAJOR               = 0
 MINOR               = 5
-MICRO               = 5
+MICRO               = 7
 ISRELEASED          = False
 VERSION             = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
