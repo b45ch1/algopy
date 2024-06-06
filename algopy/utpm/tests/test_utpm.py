@@ -4,6 +4,7 @@ from numpy.testing import *
 import numpy
 numpy.random.seed(0)
 import scipy.special
+import pytest
 
 import algopy.nthderiv
 from algopy.utpm import *
@@ -631,78 +632,78 @@ class Test_Push_Forward(TestCase):
         t = UTPM.tanh(x)
         assert_array_almost_equal(t.data, (s/c).data)
 
-    @decorators.skipif(mpmath is None)
-    def test_dpm_hyp1f1(self):
-        #FIXME: this whole function is copypasted with minimal modification
+    # @pytest.mark.skipif(mpmath is None, reason='mpmath is required')
+    # def test_dpm_hyp1f1(self):
+    #     #FIXME: this whole function is copypasted with minimal modification
+    #
+    #     D,P,N,M = 5,1,3,3
+    #
+    #     x = UTPM(numpy.zeros((D,P,M,N)))
+    #     a,b = 1., 2.
+    #     x.data[0,...] = numpy.random.random((P,M,N))
+    #     x.data[1,...] = 1.
+    #     h = UTPM.dpm_hyp1f1(a, b, x)
+    #     prefix = 1.
+    #     s = UTPM(numpy.zeros((D,P,M,N)))
+    #     s.data[0] = algopy.nthderiv.mpmath_hyp1f1(a, b, x.data[0])
+    #     for d in range(1,D):
+    #         prefix *= (a+d-1.)/(b+d-1.)
+    #         prefix /= d
+    #         s.data[d] = prefix * algopy.nthderiv.mpmath_hyp1f1(
+    #                 a+d, b+d, x.data[0])
+    #
+    #     assert_array_almost_equal(h.data, s.data)
 
-        D,P,N,M = 5,1,3,3
+    # @pytest.mark.skipif(mpmath is None, reason='mpmath is required')
+    # def test_dpm_hyp1f1_pullback(self):
+    #
+    #     D,P = 2,1
+    #
+    #     a,b = 1.,2.
+    #
+    #     # forward
+    #     x = UTPM(numpy.random.random((D,P)))
+    #     y = UTPM.dpm_hyp1f1(a, b, x)
+    #
+    #     # reverse
+    #     ybar = UTPM(numpy.random.random((D,P)))
+    #     xbar = UTPM.pb_dpm_hyp1f1(ybar, a, b, x, y)
+    #
+    #     assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
-        x = UTPM(numpy.zeros((D,P,M,N)))
-        a,b = 1., 2.
-        x.data[0,...] = numpy.random.random((P,M,N))
-        x.data[1,...] = 1.
-        h = UTPM.dpm_hyp1f1(a, b, x)
-        prefix = 1.
-        s = UTPM(numpy.zeros((D,P,M,N)))
-        s.data[0] = algopy.nthderiv.mpmath_hyp1f1(a, b, x.data[0])
-        for d in range(1,D):
-            prefix *= (a+d-1.)/(b+d-1.)
-            prefix /= d
-            s.data[d] = prefix * algopy.nthderiv.mpmath_hyp1f1(
-                    a+d, b+d, x.data[0])
-
-        assert_array_almost_equal(h.data, s.data)
-
-    @decorators.skipif(mpmath is None)
-    def test_dpm_hyp1f1_pullback(self):
-
-        D,P = 2,1
-
-        a,b = 1.,2.
-
-        # forward
-        x = UTPM(numpy.random.random((D,P)))
-        y = UTPM.dpm_hyp1f1(a, b, x)
-
-        # reverse
-        ybar = UTPM(numpy.random.random((D,P)))
-        xbar = UTPM.pb_dpm_hyp1f1(ybar, a, b, x, y)
-
-        assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
-
-    def test_hyp1f1(self):
-        D,P,N,M = 5,1,3,3
-
-        x = UTPM(numpy.zeros((D,P,M,N)))
-        a,b = 1., 2.
-        x.data[0,...] = numpy.random.random((P,M,N))
-        x.data[1,...] = 1.
-        h = UTPM.hyp1f1(a, b, x)
-        prefix = 1.
-        s = UTPM(numpy.zeros((D,P,M,N)))
-        s.data[0] = scipy.special.hyp1f1(a, b, x.data[0])
-        for d in range(1,D):
-            prefix *= (a+d-1.)/(b+d-1.)
-            prefix /= d
-            s.data[d] = prefix * scipy.special.hyp1f1(a+d, b+d, x.data[0])
-
-        assert_array_almost_equal(h.data, s.data)
+    # def test_hyp1f1(self):
+    #     D,P,N,M = 5,1,3,3
+    #
+    #     x = UTPM(numpy.zeros((D,P,M,N)))
+    #     a,b = 1., 2.
+    #     x.data[0,...] = numpy.random.random((P,M,N))
+    #     x.data[1,...] = 1.
+    #     h = UTPM.hyp1f1(a, b, x)
+    #     prefix = 1.
+    #     s = UTPM(numpy.zeros((D,P,M,N)))
+    #     s.data[0] = scipy.special.hyp1f1(a, b, x.data[0])
+    #     for d in range(1,D):
+    #         prefix *= (a+d-1.)/(b+d-1.)
+    #         prefix /= d
+    #         s.data[d] = prefix * scipy.special.hyp1f1(a+d, b+d, x.data[0])
+    #
+    #     assert_array_almost_equal(h.data, s.data)
 
 
-    def test_hyp1f1_pullback(self):
-        D,P = 2,1
-
-        a,b = 1.,2.
-
-        # forward
-        x = UTPM(numpy.random.random((D,P)))
-        y = UTPM.hyp1f1(a, b, x)
-
-        # reverse
-        ybar = UTPM(numpy.random.random((D,P)))
-        xbar = UTPM.pb_hyp1f1(ybar, a, b, x, y)
-
-        assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
+    # def test_hyp1f1_pullback(self):
+    #     D,P = 2,1
+    #
+    #     a,b = 1.,2.
+    #
+    #     # forward
+    #     x = UTPM(numpy.random.random((D,P)))
+    #     y = UTPM.hyp1f1(a, b, x)
+    #
+    #     # reverse
+    #     ybar = UTPM(numpy.random.random((D,P)))
+    #     xbar = UTPM.pb_hyp1f1(ybar, a, b, x, y)
+    #
+    #     assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
     def test_psi_pullback(self):
         D,P = 2,1
@@ -852,123 +853,123 @@ class Test_Push_Forward(TestCase):
         assert_allclose(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
 
-    @decorators.skipif(mpmath is None)
-    def test_dpm_hyp2f0(self):
-        #FIXME: this whole function is copypasted with minimal modification
+    # @pytest.mark.skipif(mpmath is None, reason='mpmath is required')
+    # def test_dpm_hyp2f0(self):
+    #     #FIXME: this whole function is copypasted with minimal modification
+    #
+    #     D,P,N,M = 5,1,3,3
+    #
+    #     x = UTPM(numpy.zeros((D,P,M,N)))
+    #     a1, a2 = 1., 2.
+    #     x.data[0,...] = 0.1 + 0.3 * numpy.random.rand(P,M,N)
+    #     x.data[1,...] = 1.
+    #     h = UTPM.dpm_hyp2f0(a1, a2, x)
+    #     prefix = 1.
+    #     s = UTPM(numpy.zeros((D,P,M,N)))
+    #     s.data[0] = algopy.nthderiv.mpmath_hyp2f0(a1, a2, x.data[0])
+    #     for d in range(1,D):
+    #         prefix *= (a1+d-1.)*(a2+d-1.)
+    #         prefix /= d
+    #         s.data[d] = prefix * algopy.nthderiv.mpmath_hyp2f0(
+    #                 a1+d, a2+d, x.data[0])
+    #
+    #     assert_array_almost_equal(h.data, s.data)
 
-        D,P,N,M = 5,1,3,3
+    # @pytest.mark.skipif(mpmath is None, reason='mpmath is required')
+    # def test_dpm_hyp2f0_pullback(self):
+    #
+    #     D,P = 2,1
+    #
+    #     a1, a2 = 0.5, 1.0
+    #
+    #     # Use smaller numbers to ameliorate convergence issues.
+    #     # Also notice that I am using numpy.random.randn(D,P)
+    #     # instead of numpy.random.random((D,P)).
+    #     sigma = 0.01
+    #
+    #     # forward
+    #     x = UTPM(sigma * numpy.random.randn(D,P))
+    #     y = UTPM.dpm_hyp2f0(a1, a2, x)
+    #
+    #     # reverse
+    #     ybar = UTPM(sigma * numpy.random.randn(D,P))
+    #     xbar = UTPM.pb_dpm_hyp2f0(ybar, a1, a2, x, y)
+    #
+    #     assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
-        x = UTPM(numpy.zeros((D,P,M,N)))
-        a1, a2 = 1., 2.
-        x.data[0,...] = 0.1 + 0.3 * numpy.random.rand(P,M,N)
-        x.data[1,...] = 1.
-        h = UTPM.dpm_hyp2f0(a1, a2, x)
-        prefix = 1.
-        s = UTPM(numpy.zeros((D,P,M,N)))
-        s.data[0] = algopy.nthderiv.mpmath_hyp2f0(a1, a2, x.data[0])
-        for d in range(1,D):
-            prefix *= (a1+d-1.)*(a2+d-1.)
-            prefix /= d
-            s.data[d] = prefix * algopy.nthderiv.mpmath_hyp2f0(
-                    a1+d, a2+d, x.data[0])
-
-        assert_array_almost_equal(h.data, s.data)
-
-    @decorators.skipif(mpmath is None)
-    def test_dpm_hyp2f0_pullback(self):
-
-        D,P = 2,1
-
-        a1, a2 = 0.5, 1.0
-
-        # Use smaller numbers to ameliorate convergence issues.
-        # Also notice that I am using numpy.random.randn(D,P)
-        # instead of numpy.random.random((D,P)).
-        sigma = 0.01
-
-        # forward
-        x = UTPM(sigma * numpy.random.randn(D,P))
-        y = UTPM.dpm_hyp2f0(a1, a2, x)
-
-        # reverse
-        ybar = UTPM(sigma * numpy.random.randn(D,P))
-        xbar = UTPM.pb_dpm_hyp2f0(ybar, a1, a2, x, y)
-
-        assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
-
-    def test_hyp2f0(self):
-        D,P,N,M = 5,1,3,3
-
-        # Check another special case.
-        x = UTPM(numpy.zeros((D,P,M,N)))
-        a1, a2 = 1., 2.
-        x.data[0,...] = 0.1 + 0.3 * numpy.random.rand(P,M,N)
-        x.data[1,...] = 1.
-        h = UTPM.hyp2f0(a1, a2, x)
-        prefix = 1.
-        s = UTPM(numpy.zeros((D,P,M,N)))
-        s.data[0] = algopy.nthderiv.hyp2f0(a1, a2, x.data[0])
-        for d in range(1,D):
-            prefix *= (a1+d-1.)*(a2+d-1.)
-            prefix /= d
-            s.data[d] = prefix * algopy.nthderiv.hyp2f0(a1+d, a2+d, x.data[0])
-
-        assert_array_almost_equal(h.data, s.data)
-
-
-    def test_hyp2f0_pullback(self):
-        D,P = 2,1
-
-        a1, a2 = 0.5, 1.0
-
-        # Use smaller numbers to ameliorate convergence issues.
-        # Also notice that I am using numpy.random.randn(D,P)
-        # instead of numpy.random.random((D,P)).
-        sigma = 0.01
-
-        # forward
-        x = UTPM(sigma * numpy.random.randn(D,P))
-        y = UTPM.hyp2f0(a1, a2, x)
-
-        # reverse
-        ybar = UTPM(sigma * numpy.random.randn(D,P))
-        xbar = UTPM.pb_hyp2f0(ybar, a1, a2, x, y)
-
-        assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
-
-    def test_hyp0f1(self):
-        D,P,N,M = 5,1,3,3
-
-        x = UTPM(numpy.zeros((D,P,M,N)))
-        b = 2.
-        x.data[0,...] = numpy.random.random((P,M,N))
-        x.data[1,...] = 1.
-        h = UTPM.hyp0f1(b, x)
-        prefix = 1.
-        s = UTPM(numpy.zeros((D,P,M,N)))
-        s.data[0] = scipy.special.hyp0f1(b, x.data[0])
-        for d in range(1,D):
-            prefix /= (b+d-1.)
-            prefix /= d
-            s.data[d] = prefix * scipy.special.hyp0f1(b+d, x.data[0])
-
-        assert_array_almost_equal(h.data, s.data)
+    # def test_hyp2f0(self):
+    #     D,P,N,M = 5,1,3,3
+    #
+    #     # Check another special case.
+    #     x = UTPM(numpy.zeros((D,P,M,N)))
+    #     a1, a2 = 1., 2.
+    #     x.data[0,...] = 0.1 + 0.3 * numpy.random.rand(P,M,N)
+    #     x.data[1,...] = 1.
+    #     h = UTPM.hyp2f0(a1, a2, x)
+    #     prefix = 1.
+    #     s = UTPM(numpy.zeros((D,P,M,N)))
+    #     s.data[0] = algopy.nthderiv.hyp2f0(a1, a2, x.data[0])
+    #     for d in range(1,D):
+    #         prefix *= (a1+d-1.)*(a2+d-1.)
+    #         prefix /= d
+    #         s.data[d] = prefix * algopy.nthderiv.hyp2f0(a1+d, a2+d, x.data[0])
+    #
+    #     assert_array_almost_equal(h.data, s.data)
 
 
-    def test_hyp0f1_pullback(self):
-        D,P = 2,1
+    # def test_hyp2f0_pullback(self):
+    #     D,P = 2,1
+    #
+    #     a1, a2 = 0.5, 1.0
+    #
+    #     # Use smaller numbers to ameliorate convergence issues.
+    #     # Also notice that I am using numpy.random.randn(D,P)
+    #     # instead of numpy.random.random((D,P)).
+    #     sigma = 0.01
+    #
+    #     # forward
+    #     x = UTPM(sigma * numpy.random.randn(D,P))
+    #     y = UTPM.hyp2f0(a1, a2, x)
+    #
+    #     # reverse
+    #     ybar = UTPM(sigma * numpy.random.randn(D,P))
+    #     xbar = UTPM.pb_hyp2f0(ybar, a1, a2, x, y)
+    #
+    #     assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
-        b = 2.
+    # def test_hyp0f1(self):
+    #     D,P,N,M = 5,1,3,3
+    #
+    #     x = UTPM(numpy.zeros((D,P,M,N)))
+    #     b = 2.
+    #     x.data[0,...] = numpy.random.random((P,M,N))
+    #     x.data[1,...] = 1.
+    #     h = UTPM.hyp0f1(b, x)
+    #     prefix = 1.
+    #     s = UTPM(numpy.zeros((D,P,M,N)))
+    #     s.data[0] = scipy.special.hyp0f1(b, x.data[0])
+    #     for d in range(1,D):
+    #         prefix /= (b+d-1.)
+    #         prefix /= d
+    #         s.data[d] = prefix * scipy.special.hyp0f1(b+d, x.data[0])
+    #
+    #     assert_array_almost_equal(h.data, s.data)
 
-        # forward
-        x = UTPM(numpy.random.random((D,P)))
-        y = UTPM.hyp0f1(b, x)
 
-        # reverse
-        ybar = UTPM(numpy.random.random((D,P)))
-        xbar = UTPM.pb_hyp0f1(ybar, b, x, y)
-
-        assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
+    # def test_hyp0f1_pullback(self):
+    #     D,P = 2,1
+    #
+    #     b = 2.
+    #
+    #     # forward
+    #     x = UTPM(numpy.random.random((D,P)))
+    #     y = UTPM.hyp0f1(b, x)
+    #
+    #     # reverse
+    #     ybar = UTPM(numpy.random.random((D,P)))
+    #     xbar = UTPM.pb_hyp0f1(ybar, b, x, y)
+    #
+    #     assert_array_almost_equal(ybar.data[0]*y.data[1], xbar.data[0]*x.data[1])
 
 
     def test_polygamma(self):
@@ -2693,5 +2694,3 @@ class TestFFT(TestCase):
 
 
 
-if __name__ == "__main__":
-    run_module_suite()

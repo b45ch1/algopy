@@ -10,7 +10,6 @@ depending on the type of x.
 
 
 from numpy.testing import *
-from numpy.testing.decorators import *
 import numpy
 numpy.random.seed(0)
 
@@ -176,8 +175,6 @@ class Test_global_functions(TestCase):
 
 
 
-if __name__ == "__main__":
-    run_module_suite()
 
 
 

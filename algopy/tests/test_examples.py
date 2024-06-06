@@ -2,7 +2,6 @@
 More complicated test examples.
 """
 from numpy.testing import *
-from numpy.testing.decorators import *
 import numpy
 numpy.random.seed(0)
 
@@ -267,12 +266,12 @@ class Test_RemovableSingularities(TestCase):
         z = sin(x) // x
         assert_array_almost_equal(z.data, zdata)
 
-    def test_example_z_stable(self):
-        xdata = numpy.array([0., 1., 0., 0.]).reshape(4, 1)
-        zdata = numpy.array([1., 0., -1./6., 0]).reshape(4, 1)
-        x = UTPM(xdata)
-        z = hyp0f1(1.5, -(0.5 * x)**2)
-        assert_array_almost_equal(z.data, zdata)
+    # def test_example_z_stable(self):
+    #     xdata = numpy.array([0., 1., 0., 0.]).reshape(4, 1)
+    #     zdata = numpy.array([1., 0., -1./6., 0]).reshape(4, 1)
+    #     x = UTPM(xdata)
+    #     z = hyp0f1(1.5, -(0.5 * x)**2)
+    #     assert_array_almost_equal(z.data, zdata)
 
     def test_example_w(self):
         xdata = numpy.array([0., 1., 0., 0.]).reshape(4, 1)
@@ -281,12 +280,12 @@ class Test_RemovableSingularities(TestCase):
         w = (exp(x) - 1.) // x
         assert_array_almost_equal(w.data, wdata)
 
-    def test_example_w_stable(self):
-        xdata = numpy.array([0., 1., 0., 0.]).reshape(4, 1)
-        wdata = numpy.array([1., 0.5, 1./6., 1./24.]).reshape(4, 1)
-        x = UTPM(xdata)
-        w = hyp1f1(1., 2., x)
-        assert_array_almost_equal(w.data, wdata)
+    # def test_example_w_stable(self):
+    #     xdata = numpy.array([0., 1., 0., 0.]).reshape(4, 1)
+    #     wdata = numpy.array([1., 0.5, 1./6., 1./24.]).reshape(4, 1)
+    #     x = UTPM(xdata)
+    #     w = hyp1f1(1., 2., x)
+    #     assert_array_almost_equal(w.data, wdata)
 
 class Test_Broadcasting(TestCase):
 
@@ -357,6 +356,4 @@ class Test_Broadcasting(TestCase):
         assert_allclose(expected, actual)
 
 
-if __name__ == "__main__":
-    run_module_suite()
 

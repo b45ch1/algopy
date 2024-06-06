@@ -6,7 +6,6 @@ import functools
 
 import numpy
 from numpy.testing import *
-from numpy.testing.decorators import *
 import scipy
 import scipy.integrate
 import scipy.optimize

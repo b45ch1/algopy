@@ -11,6 +11,7 @@ do not work well when you are comparing to zero.
 
 import functools
 import warnings
+import pytest
 
 import numpy as np
 np.random.seed(0)
@@ -104,7 +105,7 @@ class TestAuto(numpy.testing.TestCase):
             # detect only gross errors
             assert_allclose_or_small(ya, yb, rtol=1e-2, zerotol=1e-2)
 
-    @numpy.testing.decorators.skipif(numdifftools is None)
+    @pytest.mark.skipif(numdifftools is None, reason='expm_frechet is not available')
     def test_numdifftools(self):
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', np.ComplexWarning)
@@ -214,7 +215,7 @@ class TestMisc(numpy.testing.TestCase):
         b = np.cos(x)
         assert_allclose(a, b)
 
-    @numpy.testing.decorators.skipif(mpmath is None)
+    @pytest.mark.skipif(mpmath is None, reason='requires mpmath')
     def test_tan(self):
         x = 0.123
         a = nthderiv.tan(x, n=0)
@@ -262,8 +263,3 @@ class TestMisc(numpy.testing.TestCase):
         a = nthderiv.arccosh(x, n=1)
         b = 1 / np.sqrt(x*x - 1)
         assert_allclose(a, b)
-
-
-
-if __name__ == '__main__':
-    numpy.testing.run_module_suite()

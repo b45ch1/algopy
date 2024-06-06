@@ -98,10 +98,6 @@ if NumpyVersion(scipy.version.version) < _min_scipy_version:
                 scipy.version.version, _min_scipy_version))
 
 
-# testing
-from numpy.testing import Tester
-test = Tester().test
-
 # import standard submodules and important classes/functions
 from . import tracer
 from .tracer import CGraph, Function

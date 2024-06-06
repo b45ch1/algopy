@@ -19,6 +19,7 @@ import math
 import numpy as np
 import numpy.testing
 from numpy.testing import assert_allclose
+import numpy.lib.scimath
 
 try:
     import scipy
@@ -49,11 +50,10 @@ __all__ = [
         'arcsin', 'arccos', 'arctan',
         'sinh', 'cosh',
         'arcsinh', 'arccosh', 'arctanh',
-        'hyp0f1', 'hyp1f1', 'hyp1f2', 'hyp2f0', 'hyp2f1', 'hyp3f0',
-
-        # this is a custom name
-        'hyp_pfq',
-
+        # hypergeometric functions have been removed from scipy -> commenting
+        # 'hyp0f1', 'hyp1f1', 'hyp2f0', 'hyp2f1', 'hyp3f0',
+        # # this is a custom name
+        # 'hyp_pfq',
         # this is a handy utility function which might become standard in numpy
         'np_filled_like',
         ]
@@ -62,7 +62,7 @@ __all__ = [
 if mpmath:
     __all__.extend([
             'tan', 'tanh',
-            'mpmath_hyp1f1', 'mpmath_hyp2f0',
+            # 'mpmath_hyp1f1', 'mpmath_hyp2f0',
             ])
 
 
@@ -220,51 +220,56 @@ def np_polygamma(m, x, out=None):
     return out
 
 def np_recip_sqrt(x, out=None):
-    return np.reciprocal(scipy.sqrt(x), out)
+    return np.reciprocal(numpy.lib.scimath.sqrt(x), out)
 
-def np_hyp0f1(b, x, out=None):
-    # work around multiple scipy.special.hyp0f1 failures in old versions
-    with np.errstate(invalid='ignore'):
-        y = scipy.special.hyp0f1(b, x + 0j)
-        return np_real(np.reshape(y, np.shape(x)), out)
+# hypergeometric functions have been removed from scipy -> commenting
+# def np_hyp0f1(b, x, out=None):
+#     # work around multiple scipy.special.hyp0f1 failures in old versions
+#     with np.errstate(invalid='ignore'):
+#         y = scipy.special.hyp0f1(b, x + 0j)
+#         return np_real(np.reshape(y, np.shape(x)), out)
 
-def np_hyp1f2(a1, b1, b2, x, out=None):
-    # ignore the error return value to give a more uniform interface
-    out_err = np.empty_like(x)
-    out, out_err = scipy.special.hyp1f2(a1, b1, b2, x, out, out_err)
-    return out
+# hypergeometric functions have been removed from scipy -> commenting
+# def np_hyp1f2(a1, b1, b2, x, out=None):
+#     # ignore the error return value to give a more uniform interface
+#     out_err = np.empty_like(x)
+#     out, out_err = scipy.special.hyp1f2(a1, b1, b2, x, out, out_err)
+#     return out
 
-def np_hyp2f0(a1, a2, x, out=None, out_err=None):
-    # ignore the error return value to give a more uniform interface
-    out_err = np.empty_like(x)
-    # pick a convergence type arbitrarily
-    convergence_type = 2
-    out, out_error = scipy.special.hyp2f0(
-            a1, a2, x, convergence_type,
-            out, out_err)
-    return out
+# hypergeometric functions have been removed from scipy -> commenting
+# def np_hyp2f0(a1, a2, x, out=None, out_err=None):
+#     # ignore the error return value to give a more uniform interface
+#     out_err = np.empty_like(x)
+#     # pick a convergence type arbitrarily
+#     convergence_type = 2
+#     out, out_error = scipy.special.hyp2f0(
+#             a1, a2, x, convergence_type,
+#             out, out_err)
+#     return out
 
-def np_hyp3f0(a1, a2, a3, x, out=None, out_err=None):
-    # ignore the error return value to give a more uniform interface
-    out, out_err = scipy.special.hyp3f0(a1, a2, a3, x, out, out_err)
-    return out
+# hypergeometric functions have been removed from scipy -> commenting
+# def np_hyp3f0(a1, a2, a3, x, out=None, out_err=None):
+#     # ignore the error return value to give a more uniform interface
+#     out, out_err = scipy.special.hyp3f0(a1, a2, a3, x, out, out_err)
+#     return out
 
-def np_hyp_pfq(A, B, x, out=None):
-    d = {
-            (0, 1) : np_hyp0f1,
-            (1, 1) : scipy.special.hyp1f1,
-            (1, 2) : np_hyp1f2,
-            (2, 0) : np_hyp2f0,
-            (2, 1) : scipy.special.hyp2f1,
-            (3, 0) : np_hyp3f0,
-            }
-    pq = len(A), len(B)
-    try:
-        fn = d[pq]
-    except KeyError:
-        raise ValueError('hyp%df%d is not supported' % pq)
-    args = A + B + [x] + [out]
-    return fn(*args)
+# hypergeometric functions have been removed from scipy -> commenting
+# def np_hyp_pfq(A, B, x, out=None):
+#     d = {
+#             (0, 1) : np_hyp0f1,
+#             (1, 1) : scipy.special.hyp1f1,
+#             (1, 2) : np_hyp1f2,
+#             (2, 0) : np_hyp2f0,
+#             (2, 1) : scipy.special.hyp2f1,
+#             (3, 0) : np_hyp3f0,
+#             }
+#     pq = len(A), len(B)
+#     try:
+#         fn = d[pq]
+#     except KeyError:
+#         raise ValueError('hyp%df%d is not supported' % pq)
+#     args = A + B + [x] + [out]
+#     return fn(*args)
 
 # FIXME: replace these with scipy.special.polylog when it is available
 if mpmath:
@@ -273,16 +278,19 @@ if mpmath:
     _mpmath_polylog_complex = np.vectorize(
             mpmath.fp.polylog, otypes=[np.complex128])
 
-# FIXME: these are also hacks that should go away eventually
-if mpmath:
-    _mpmath_hyp1f1 = np.vectorize(mpmath.fp.hyp1f1, otypes=[np.complex128])
-    _mpmath_hyp2f0 = np.vectorize(mpmath.fp.hyp2f0, otypes=[np.complex128])
+# hypergeometric functions have been removed from scipy -> commenting
+# # FIXME: these are also hacks that should go away eventually
+# if mpmath:
+#     _mpmath_hyp1f1 = np.vectorize(mpmath.fp.hyp1f1, otypes=[np.complex128])
+#     _mpmath_hyp2f0 = np.vectorize(mpmath.fp.hyp2f0, otypes=[np.complex128])
 
-def base_mpmath_hyp1f1(a, b, x, out=None):
-    return np_real(_mpmath_hyp1f1(a, b, x), out=out)
+# hypergeometric functions have been removed from scipy -> commenting
+# def base_mpmath_hyp1f1(a, b, x, out=None):
+#     return np_real(_mpmath_hyp1f1(a, b, x), out=out)
 
-def base_mpmath_hyp2f0(a1, a2, x, out=None):
-    return np_real(_mpmath_hyp2f0(a1, a2, x), out=out)
+# hypergeometric functions have been removed from scipy -> commenting
+# def base_mpmath_hyp2f0(a1, a2, x, out=None):
+#     return np_real(_mpmath_hyp2f0(a1, a2, x), out=out)
 
 
 ##############################################################################
@@ -466,7 +474,7 @@ def tan(x, out=None, n=0):
     # FIXME: use scipy.special.polylog when available
     #with warnings.catch_warnings():
         #warnings.filterwarnings('ignore', category=np.ComplexWarning)
-    a = _mpmath_polylog_complex(-n, -scipy.exp(-2j*x))
+    a = _mpmath_polylog_complex(-n, -numpy.exp(-2j*x))
     return np_real(a * pow(-2j, n+1), out)
 
 @basecase(np.arcsin, domain=DOM_ABS_LT_1)
@@ -528,58 +536,67 @@ def arctanh(x, out=None, n=0):
 ##############################################################################
 # Generalized hypergeometric functions of the pFq type.
 
-@basecase(np_hyp_pfq, domain=None, extras=None)
-def hyp_pfq(A, B, x, out=None, n=0):
-    """
-    This function is decorated weirdly because its extra params are lists.
-    """
-    out = np_hyp_pfq([a+n for a in A], [b+n for b in B], x, out)
-    with np.errstate(invalid='ignore'):
-        out *= np.prod([scipy.special.poch(a, n) for a in A])
-        out /= np.prod([scipy.special.poch(b, n) for b in B])
-    return out
 
-@basecase(np_hyp0f1, extras=1)
-def hyp0f1(b, x, out=None, n=0):
-    return hyp_pfq([], [b], x, out=out, n=n)
+# @basecase(np_hyp_pfq, domain=None, extras=None)
+# def hyp_pfq(A, B, x, out=None, n=0):
+#     """
+#     This function is decorated weirdly because its extra params are lists.
+#     """
+#     out = np_hyp_pfq([a+n for a in A], [b+n for b in B], x, out)
+#     with np.errstate(invalid='ignore'):
+#         out *= np.prod([scipy.special.poch(a, n) for a in A])
+#         out /= np.prod([scipy.special.poch(b, n) for b in B])
+#     return out
 
-@basecase(scipy.special.hyp1f1, extras=2)
-def hyp1f1(a, b, x, out=None, n=0):
-    return hyp_pfq([a], [b], x, out=out, n=n)
+# hypergeometric functions have been removed from scipy -> commenting
+# @basecase(np_hyp0f1, extras=1)
+# def hyp0f1(b, x, out=None, n=0):
+#     return hyp_pfq([], [b], x, out=out, n=n)
 
-@basecase(np_hyp1f2, extras=3)
-def hyp1f2(a, b1, b2, x, out=None, n=0):
-    return hyp_pfq([a], [b1, b2], x, out=out, n=n)
+# hypergeometric functions have been removed from scipy -> commenting
+# @basecase(scipy.special.hyp1f1, extras=2)
+# def hyp1f1(a, b, x, out=None, n=0):
+#     return hyp_pfq([a], [b], x, out=out, n=n)
 
-@basecase(np_hyp2f0, domain=DOM_NONE, extras=2)
-def hyp2f0(a1, a2, x, out=None, n=0):
-    return hyp_pfq([a1, a2], [], x, out=out, n=n)
+# hypergeometric functions have been removed from scipy -> commenting
+# @basecase(np_hyp1f2, extras=3)
+# def hyp1f2(a, b1, b2, x, out=None, n=0):
+#     return hyp_pfq([a], [b1, b2], x, out=out, n=n)
 
-@basecase(scipy.special.hyp2f1, extras=3)
-def hyp2f1(a1, a2, b1, x, out=None, n=0):
-    return hyp_pfq([a1, a2], [b1], x, out=out, n=n)
+# hyp2f0 has been removed from scipy
+# @basecase(np_hyp2f0, domain=DOM_NONE, extras=2)
+# def hyp2f0(a1, a2, x, out=None, n=0):
+#     return hyp_pfq([a1, a2], [], x, out=out, n=n)
 
-@basecase(np_hyp3f0, domain=DOM_NONE, extras=3)
-def hyp3f0(a1, a2, a3, x, out=None, n=0):
-    return hyp_pfq([a1, a2, a3], [], x, out=out, n=n)
+# hypergeometric functions have been removed from scipy -> commenting
+# @basecase(scipy.special.hyp2f1, extras=3)
+# def hyp2f1(a1, a2, b1, x, out=None, n=0):
+#     return hyp_pfq([a1, a2], [b1], x, out=out, n=n)
+
+# hypergeometric functions have been removed from scipy -> commenting
+# @basecase(np_hyp3f0, domain=DOM_NONE, extras=3)
+# def hyp3f0(a1, a2, a3, x, out=None, n=0):
+#     return hyp_pfq([a1, a2, a3], [], x, out=out, n=n)
 
 
 ##############################################################################
 # A couple of mpmath hypergeometric functions.
 
-@basecase(base_mpmath_hyp1f1, extras=2)
-def mpmath_hyp1f1(a, b, x, out=None, n=0):
-    out = base_mpmath_hyp1f1(a+n, b+n, x, out=out)
-    with np.errstate(invalid='ignore'):
-        out *= scipy.special.poch(a, n)
-        out /= scipy.special.poch(b, n)
-    return out
+# hypergeometric functions have been removed from scipy -> commenting
+# @basecase(base_mpmath_hyp1f1, extras=2)
+# def mpmath_hyp1f1(a, b, x, out=None, n=0):
+#     out = base_mpmath_hyp1f1(a+n, b+n, x, out=out)
+#     with np.errstate(invalid='ignore'):
+#         out *= scipy.special.poch(a, n)
+#         out /= scipy.special.poch(b, n)
+#     return out
 
-@basecase(base_mpmath_hyp2f0, domain=DOM_NONE, extras=2)
-def mpmath_hyp2f0(a1, a2, x, out=None, n=0):
-    out = base_mpmath_hyp2f0(a1+n, a2+n, x, out=out)
-    with np.errstate(invalid='ignore'):
-        out *= scipy.special.poch(a1, n)
-        out *= scipy.special.poch(a2, n)
-    return out
+# hypergeometric functions have been removed from scipy -> commenting
+# @basecase(base_mpmath_hyp2f0, domain=DOM_NONE, extras=2)
+# def mpmath_hyp2f0(a1, a2, x, out=None, n=0):
+#     out = base_mpmath_hyp2f0(a1+n, a2+n, x, out=out)
+#     with np.errstate(invalid='ignore'):
+#         out *= scipy.special.poch(a1, n)
+#         out *= scipy.special.poch(a2, n)
+#     return out
 

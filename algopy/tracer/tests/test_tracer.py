@@ -1,7 +1,7 @@
 from numpy.testing import *
 from .environment import Settings
 import os
-
+import pytest
 import numpy
 numpy.random.seed(0)
 
@@ -1395,71 +1395,71 @@ class Test_CGgraph_on_UTPM(TestCase):
         assert_array_almost_equal(const1.data[0,:], const2.data[0,:])
 
 
-    @decorators.skipif(mpmath is None)
-    def test_dpm_hyp1f1(self):
-        """
-        compute y = dpm_hyp1f1(1., 2., x**2 + 3.)
-        """
+    # @pytest.mark.skipif(mpmath is None, 'requires mpmath to run')
+    # def test_dpm_hyp1f1(self):
+    #     """
+    #     compute y = dpm_hyp1f1(1., 2., x**2 + 3.)
+    #     """
+    #
+    #     def f(x):
+    #         v1 = x**2 + 3.
+    #         y = algopy.special.dpm_hyp1f1(1., 2., v1)
+    #         return y
+    #
+    #     # use CGraph
+    #
+    #     cg = CGraph()
+    #     x = Function(numpy.array([1.]))
+    #     y = f(x)
+    #
+    #     cg.independentFunctionList = [x]
+    #     cg.dependentFunctionList = [y]
+    #
+    #     result1 = cg.jac_vec(numpy.array([2.]), numpy.array([1.]))
+    #     result2 = cg.jacobian(numpy.array([2.]))[0]
+    #
+    #     # use UTPM
+    #
+    #     x = UTPM.init_jacobian(numpy.array([2.]))
+    #     y = f(x)
+    #     result3 = UTPM.extract_jacobian(y)[0]
+    #
+    #     assert_array_almost_equal(result1, result2)
+    #     assert_array_almost_equal(result2, result3)
+    #     assert_array_almost_equal(result3, result1)
 
-        def f(x):
-            v1 = x**2 + 3.
-            y = algopy.special.dpm_hyp1f1(1., 2., v1)
-            return y
 
-        # use CGraph
-
-        cg = CGraph()
-        x = Function(numpy.array([1.]))
-        y = f(x)
-
-        cg.independentFunctionList = [x]
-        cg.dependentFunctionList = [y]
-
-        result1 = cg.jac_vec(numpy.array([2.]), numpy.array([1.]))
-        result2 = cg.jacobian(numpy.array([2.]))[0]
-
-        # use UTPM
-
-        x = UTPM.init_jacobian(numpy.array([2.]))
-        y = f(x)
-        result3 = UTPM.extract_jacobian(y)[0]
-
-        assert_array_almost_equal(result1, result2)
-        assert_array_almost_equal(result2, result3)
-        assert_array_almost_equal(result3, result1)
-
-
-    def test_hyp1f1(self):
-        """
-        compute y = hyp1f1(1., 2., x**2 + 3.)
-        """
-
-        def f(x):
-            v1 = x**2 + 3.
-            y = algopy.special.hyp1f1(1., 2., v1)
-            return y
-
-        # use CGraph
-
-        cg = CGraph()
-        x = Function(numpy.array([1.]))
-        y = f(x)
-
-        cg.independentFunctionList = [x]
-        cg.dependentFunctionList = [y]
-
-        result1 = cg.jac_vec(numpy.array([2.]), numpy.array([1.]))
-        result2 = cg.jacobian(numpy.array([2.]))[0]
-
-        # use UTPM
-
-        x = UTPM.init_jacobian(numpy.array([2.]))
-        y = f(x)
-        result3 = UTPM.extract_jacobian(y)[0]
-
-        assert_array_almost_equal(result1, result2)
-        assert_array_almost_equal(result2, result3)
-        assert_array_almost_equal(result3, result1)
+    # def test_hyp1f1(self):
+    #     """
+    #     compute y = hyp1f1(1., 2., x**2 + 3.)
+    #     """
+    #
+    #     def f(x):
+    #         v1 = x**2 + 3.
+    #         y = algopy.special.hyp1f1(1., 2., v1)
+    #         return y
+    #
+    #     # use CGraph
+    #
+    #     cg = CGraph()
+    #     x = Function(numpy.array([1.]))
+    #     y = f(x)
+    #
+    #     cg.independentFunctionList = [x]
+    #     cg.dependentFunctionList = [y]
+    #
+    #     result1 = cg.jac_vec(numpy.array([2.]), numpy.array([1.]))
+    #     result2 = cg.jacobian(numpy.array([2.]))[0]
+    #
+    #     # use UTPM
+    #
+    #     x = UTPM.init_jacobian(numpy.array([2.]))
+    #     y = f(x)
+    #     result3 = UTPM.extract_jacobian(y)[0]
+    #
+    #     assert_array_almost_equal(result1, result2)
+    #     assert_array_almost_equal(result2, result3)
+    #     assert_array_almost_equal(result3, result1)
 
 
     def test_hyperu(self):
@@ -1495,106 +1495,106 @@ class Test_CGgraph_on_UTPM(TestCase):
         assert_array_almost_equal(result3, result1)
 
 
-    @decorators.skipif(mpmath is None)
-    def test_dpm_hyp2f0(self):
-        """
-        compute y = dpm_hyp2f0(0.5, 1.0, 0.1 * x**2 + 0.03)
-        """
+    # @decorators.skipif(mpmath is None)
+    # def test_dpm_hyp2f0(self):
+    #     """
+    #     compute y = dpm_hyp2f0(0.5, 1.0, 0.1 * x**2 + 0.03)
+    #     """
+    #
+    #     def f(x):
+    #         # use smaller offset to ameliorate convergence issues
+    #         v1 = 0.1 * x**2 + 0.03
+    #         y = algopy.special.dpm_hyp2f0(0.5, 1.0, v1)
+    #         return y
+    #
+    #     # use CGraph
+    #
+    #     cg = CGraph()
+    #     x = Function(numpy.array([1.]))
+    #     y = f(x)
+    #
+    #     cg.independentFunctionList = [x]
+    #     cg.dependentFunctionList = [y]
+    #
+    #     result1 = cg.jac_vec(numpy.array([2.]), numpy.array([1.]))
+    #     result2 = cg.jacobian(numpy.array([2.]))[0]
+    #
+    #     # use UTPM
+    #
+    #     x = UTPM.init_jacobian(numpy.array([2.]))
+    #     y = f(x)
+    #     result3 = UTPM.extract_jacobian(y)[0]
+    #
+    #     assert_array_almost_equal(result1, result2)
+    #     assert_array_almost_equal(result2, result3)
+    #     assert_array_almost_equal(result3, result1)
 
-        def f(x):
-            # use smaller offset to ameliorate convergence issues
-            v1 = 0.1 * x**2 + 0.03
-            y = algopy.special.dpm_hyp2f0(0.5, 1.0, v1)
-            return y
-
-        # use CGraph
-
-        cg = CGraph()
-        x = Function(numpy.array([1.]))
-        y = f(x)
-
-        cg.independentFunctionList = [x]
-        cg.dependentFunctionList = [y]
-
-        result1 = cg.jac_vec(numpy.array([2.]), numpy.array([1.]))
-        result2 = cg.jacobian(numpy.array([2.]))[0]
-
-        # use UTPM
-
-        x = UTPM.init_jacobian(numpy.array([2.]))
-        y = f(x)
-        result3 = UTPM.extract_jacobian(y)[0]
-
-        assert_array_almost_equal(result1, result2)
-        assert_array_almost_equal(result2, result3)
-        assert_array_almost_equal(result3, result1)
-
-    def test_hyp2f0(self):
-        """
-        compute y = hyp2f0(0.5, 1.0, 0.1 * x**2 + 0.03)
-        """
-
-        def f(x):
-            # use smaller offset to ameliorate convergence issues
-            v1 = 0.1 * x**2 + 0.03
-            y = algopy.special.hyp2f0(0.5, 1.0, v1)
-            return y
-
-        # use CGraph
-
-        cg = CGraph()
-        x = Function(numpy.array([1.]))
-        y = f(x)
-
-        cg.independentFunctionList = [x]
-        cg.dependentFunctionList = [y]
-
-        result1 = cg.jac_vec(numpy.array([2.]), numpy.array([1.]))
-        result2 = cg.jacobian(numpy.array([2.]))[0]
-
-        # use UTPM
-
-        x = UTPM.init_jacobian(numpy.array([2.]))
-        y = f(x)
-        result3 = UTPM.extract_jacobian(y)[0]
-
-        assert_array_almost_equal(result1, result2)
-        assert_array_almost_equal(result2, result3)
-        assert_array_almost_equal(result3, result1)
-
-
-    def test_hyp0f1(self):
-        """
-        compute y = hyp0f1(2., x**2 + 3.)
-        """
-
-        def f(x):
-            v1 = x**2 + 3.
-            y = algopy.special.hyp0f1(2., v1)
-            return y
+    # def test_hyp2f0(self):
+    #     """
+    #     compute y = hyp2f0(0.5, 1.0, 0.1 * x**2 + 0.03)
+    #     """
+    #
+    #     def f(x):
+    #         # use smaller offset to ameliorate convergence issues
+    #         v1 = 0.1 * x**2 + 0.03
+    #         y = algopy.special.hyp2f0(0.5, 1.0, v1)
+    #         return y
+    #
+    #     # use CGraph
+    #
+    #     cg = CGraph()
+    #     x = Function(numpy.array([1.]))
+    #     y = f(x)
+    #
+    #     cg.independentFunctionList = [x]
+    #     cg.dependentFunctionList = [y]
+    #
+    #     result1 = cg.jac_vec(numpy.array([2.]), numpy.array([1.]))
+    #     result2 = cg.jacobian(numpy.array([2.]))[0]
+    #
+    #     # use UTPM
+    #
+    #     x = UTPM.init_jacobian(numpy.array([2.]))
+    #     y = f(x)
+    #     result3 = UTPM.extract_jacobian(y)[0]
+    #
+    #     assert_array_almost_equal(result1, result2)
+    #     assert_array_almost_equal(result2, result3)
+    #     assert_array_almost_equal(result3, result1)
 
 
-        # use CGraph
-
-        cg = CGraph()
-        x = Function(numpy.array([1.]))
-        y = f(x)
-
-        cg.independentFunctionList = [x]
-        cg.dependentFunctionList = [y]
-
-        result1 = cg.jac_vec(numpy.array([2.]), numpy.array([1.]))
-        result2 = cg.jacobian(numpy.array([2.]))[0]
-
-        # use UTPM
-
-        x = UTPM.init_jacobian(numpy.array([2.]))
-        y = f(x)
-        result3 = UTPM.extract_jacobian(y)[0]
-
-        assert_array_almost_equal(result1, result2)
-        assert_array_almost_equal(result2, result3)
-        assert_array_almost_equal(result3, result1)
+    # def test_hyp0f1(self):
+    #     """
+    #     compute y = hyp0f1(2., x**2 + 3.)
+    #     """
+    #
+    #     def f(x):
+    #         v1 = x**2 + 3.
+    #         y = algopy.special.hyp0f1(2., v1)
+    #         return y
+    #
+    #
+    #     # use CGraph
+    #
+    #     cg = CGraph()
+    #     x = Function(numpy.array([1.]))
+    #     y = f(x)
+    #
+    #     cg.independentFunctionList = [x]
+    #     cg.dependentFunctionList = [y]
+    #
+    #     result1 = cg.jac_vec(numpy.array([2.]), numpy.array([1.]))
+    #     result2 = cg.jacobian(numpy.array([2.]))[0]
+    #
+    #     # use UTPM
+    #
+    #     x = UTPM.init_jacobian(numpy.array([2.]))
+    #     y = f(x)
+    #     result3 = UTPM.extract_jacobian(y)[0]
+    #
+    #     assert_array_almost_equal(result1, result2)
+    #     assert_array_almost_equal(result2, result3)
+    #     assert_array_almost_equal(result3, result1)
 
 
     def test_polygamma(self):
@@ -2578,5 +2578,3 @@ class Test_CGraph_Plotting(TestCase):
 
 
 
-if __name__ == "__main__":
-    run_module_suite()

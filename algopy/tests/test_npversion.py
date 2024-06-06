@@ -1,4 +1,4 @@
-from numpy.testing import assert_, run_module_suite, assert_raises
+from numpy.testing import assert_, assert_raises
 from algopy._npversion import NumpyVersion
 
 def test_main_versions():
@@ -45,5 +45,3 @@ def test_raises():
         assert_raises(ValueError, NumpyVersion, ver)
 
 
-if __name__ == "__main__":
-    run_module_suite()

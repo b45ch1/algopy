@@ -401,5 +401,3 @@ class Test_aliasing(TestCase):
         assert_allclose(x, y)
 
 
-if __name__ == "__main__":
-    run_module_suite()

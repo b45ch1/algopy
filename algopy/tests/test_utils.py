@@ -35,5 +35,3 @@ class TestUtils ( TestCase ):
         piv = [2,2,3,4,4]
         assert_array_almost_equal(1, piv2det(piv))
 
-if __name__ == "__main__":
-    run_module_suite()

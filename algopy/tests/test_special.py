@@ -1,5 +1,6 @@
 from numpy.testing import *
 import numpy
+import pytest
 numpy.random.seed(0)
 
 from algopy import UTPM, Function
@@ -12,97 +13,97 @@ except ImportError:
 
 class Test_ScipySpecialFunctions(TestCase):
 
-    @decorators.skipif(mpmath is None)
-    def test_dpm_hyp1f1(self):
-        """
-        check that algopy.special.dpm_hyp1f1 can be called with
-        UTPM and Function instances as arguments
-        """
+    # @pytest.mark.skipif(mpmath is None)
+    # def test_dpm_hyp1f1(self):
+    #     """
+    #     check that algopy.special.dpm_hyp1f1 can be called with
+    #     UTPM and Function instances as arguments
+    #     """
+    #
+    #     a, b, x = 1., 2., 3.
+    #     y1 = dpm_hyp1f1(a, b, x)
+    #
+    #     a, b, x = 1., 2., UTPM(3.* numpy.ones((1,1)))
+    #     y2 = dpm_hyp1f1(a, b, x)
+    #     assert_almost_equal(y1, y2.data[0,0])
+    #
+    #     a, b, x = 1., 2., Function(3.)
+    #     y3 = dpm_hyp1f1(a, b, x)
+    #     assert_almost_equal(y1, y3.x)
 
-        a, b, x = 1., 2., 3.
-        y1 = dpm_hyp1f1(a, b, x)
+    # def test_hyp1f1(self):
+    #     """
+    #     check that algopy.special.hyp1f1 can be called with
+    #     UTPM and Function instances as arguments
+    #     """
+    #
+    #     a, b, x = 1., 2., 3.
+    #     y1 = hyp1f1(a, b, x)
+    #
+    #     a, b, x = 1., 2., UTPM(3.* numpy.ones((1,1)))
+    #     y2 = hyp1f1(a, b, x)
+    #     assert_almost_equal(y1, y2.data[0,0])
+    #
+    #     a, b, x = 1., 2., Function(3.)
+    #     y3 = hyp1f1(a, b, x)
+    #     assert_almost_equal(y1, y3.x)
 
-        a, b, x = 1., 2., UTPM(3.* numpy.ones((1,1)))
-        y2 = dpm_hyp1f1(a, b, x)
-        assert_almost_equal(y1, y2.data[0,0])
+    # @pytest.mark.skipif(mpmath is None)
+    # def test_dpm_hyp2f0(self):
+    #     """
+    #     check that algopy.special.dpm_hyp2f0 can be called with
+    #     UTPM and Function instances as arguments
+    #     """
+    #
+    #     # these give hyp2f0 a chance of outputting real numbers
+    #     a1, a2 = 1.5, 1.0
+    #
+    #     # use small x to ameliorate convergence issues
+    #     x = 0.03
+    #     y1 = dpm_hyp2f0(a1, a2, x)
+    #
+    #     x = UTPM(0.03* numpy.ones((1,1)))
+    #     y2 = dpm_hyp2f0(a1, a2, x)
+    #     assert_almost_equal(y1, y2.data[0,0])
+    #
+    #     x = Function(0.03)
+    #     y3 = dpm_hyp2f0(a1, a2, x)
+    #     assert_almost_equal(y1, y3.x)
 
-        a, b, x = 1., 2., Function(3.)
-        y3 = dpm_hyp1f1(a, b, x)
-        assert_almost_equal(y1, y3.x)
+    # def test_hyp2f0(self):
+    #     """
+    #     check that algopy.special.hyp2f0 can be called with
+    #     UTPM and Function instances as arguments
+    #     """
+    #
+    #     # use small x to ameliorate convergence issues
+    #     a1, a2, x = 1., 2., 0.03
+    #     y1 = hyp2f0(a1, a2, x)
+    #
+    #     a1, a2, x = 1., 2., UTPM(0.03* numpy.ones((1,1)))
+    #     y2 = hyp2f0(a1, a2, x)
+    #     assert_almost_equal(y1, y2.data[0,0])
+    #
+    #     a1, a2, x = 1., 2., Function(0.03)
+    #     y3 = hyp2f0(a1, a2, x)
+    #     assert_almost_equal(y1, y3.x)
 
-    def test_hyp1f1(self):
-        """
-        check that algopy.special.hyp1f1 can be called with
-        UTPM and Function instances as arguments
-        """
-
-        a, b, x = 1., 2., 3.
-        y1 = hyp1f1(a, b, x)
-
-        a, b, x = 1., 2., UTPM(3.* numpy.ones((1,1)))
-        y2 = hyp1f1(a, b, x)
-        assert_almost_equal(y1, y2.data[0,0])
-
-        a, b, x = 1., 2., Function(3.)
-        y3 = hyp1f1(a, b, x)
-        assert_almost_equal(y1, y3.x)
-
-    @decorators.skipif(mpmath is None)
-    def test_dpm_hyp2f0(self):
-        """
-        check that algopy.special.dpm_hyp2f0 can be called with
-        UTPM and Function instances as arguments
-        """
-
-        # these give hyp2f0 a chance of outputting real numbers
-        a1, a2 = 1.5, 1.0
-
-        # use small x to ameliorate convergence issues
-        x = 0.03
-        y1 = dpm_hyp2f0(a1, a2, x)
-
-        x = UTPM(0.03* numpy.ones((1,1)))
-        y2 = dpm_hyp2f0(a1, a2, x)
-        assert_almost_equal(y1, y2.data[0,0])
-
-        x = Function(0.03)
-        y3 = dpm_hyp2f0(a1, a2, x)
-        assert_almost_equal(y1, y3.x)
-
-    def test_hyp2f0(self):
-        """
-        check that algopy.special.hyp2f0 can be called with
-        UTPM and Function instances as arguments
-        """
-
-        # use small x to ameliorate convergence issues
-        a1, a2, x = 1., 2., 0.03
-        y1 = hyp2f0(a1, a2, x)
-
-        a1, a2, x = 1., 2., UTPM(0.03* numpy.ones((1,1)))
-        y2 = hyp2f0(a1, a2, x)
-        assert_almost_equal(y1, y2.data[0,0])
-
-        a1, a2, x = 1., 2., Function(0.03)
-        y3 = hyp2f0(a1, a2, x)
-        assert_almost_equal(y1, y3.x)
-
-    def test_hyp0f1(self):
-        """
-        check that algopy.special.hyp0f1 can be called with
-        UTPM and Function instances as arguments
-        """
-
-        b, x = 2., 3.
-        y1 = hyp0f1(b, x)
-
-        b, x = 2., UTPM(3.* numpy.ones((1,1)))
-        y2 = hyp0f1(b, x)
-        assert_almost_equal(y1, y2.data[0,0])
-
-        b, x = 2., Function(3.)
-        y3 = hyp0f1(b, x)
-        assert_almost_equal(y1, y3.x)
+    # def test_hyp0f1(self):
+    #     """
+    #     check that algopy.special.hyp0f1 can be called with
+    #     UTPM and Function instances as arguments
+    #     """
+    #
+    #     b, x = 2., 3.
+    #     y1 = hyp0f1(b, x)
+    #
+    #     b, x = 2., UTPM(3.* numpy.ones((1,1)))
+    #     y2 = hyp0f1(b, x)
+    #     assert_almost_equal(y1, y2.data[0,0])
+    #
+    #     b, x = 2., Function(3.)
+    #     y3 = hyp0f1(b, x)
+    #     assert_almost_equal(y1, y3.x)
 
     def test_polygamma(self):
         """
@@ -241,8 +242,6 @@ class Test_ScipySpecialFunctions(TestCase):
         assert_almost_equal(y1, y3.x)
 
 
-if __name__ == "__main__":
-    run_module_suite()
 
 
 

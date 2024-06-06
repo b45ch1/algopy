@@ -34,6 +34,7 @@ dist
 build
 report
 virtualenv/
+venv/
 
 # exceptions
 !.gitignore

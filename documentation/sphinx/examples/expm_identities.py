@@ -9,7 +9,6 @@ in more complicated ways.
 """
 
 from numpy.testing import *
-from numpy.testing.decorators import *
 import numpy
 
 from algopy import *
@@ -106,6 +105,4 @@ class Test_ExpmScaledSymmetric(TestCase):
         assert_allclose(hess_v1, hess_v3)
 
 
-if __name__ == "__main__":
-    run_module_suite()
 
