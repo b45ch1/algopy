@@ -1093,10 +1093,10 @@ class RawAlgorithmsMixIn:
         tmp = cls._hyperu(a+1., b+1., x_data) * (-a)
         cls._amul(ybar_data, tmp, out=out)
 
-    @classmethod
-    def _dpm_hyp2f0(cls, a1, a2, x_data, out=None):
-        f = functools.partial(nthderiv.mpmath_hyp2f0, a1, a2)
-        return _eval_slow_generic(f, x_data, out=out)
+    # @classmethod
+    # def _dpm_hyp2f0(cls, a1, a2, x_data, out=None):
+    #     f = functools.partial(nthderiv.mpmath_hyp2f0, a1, a2)
+    #     return _eval_slow_generic(f, x_data, out=out)
 
     @classmethod
     def _pb_dpm_hyp2f0(cls, ybar_data, a1, a2, x_data, y_data, out=None):
