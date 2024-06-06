@@ -13,8 +13,6 @@ class Test_NumpyOperators(TestCase):
     pass
 
 
-if __name__ == "__main__":
-    run_module_suite()
 
 
 

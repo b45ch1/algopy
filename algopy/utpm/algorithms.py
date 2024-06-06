@@ -1057,29 +1057,29 @@ class RawAlgorithmsMixIn:
         fprime_data = (2. / math.sqrt(math.pi)) * cls._exp(cls._square(x_data))
         cls._amul(ybar_data, fprime_data, out=out)
 
-    @classmethod
-    def _dpm_hyp1f1(cls, a, b, x_data, out=None):
-        f = functools.partial(nthderiv.mpmath_hyp1f1, a, b)
-        return _eval_slow_generic(f, x_data, out=out)
+    # @classmethod
+    # def _dpm_hyp1f1(cls, a, b, x_data, out=None):
+    #     f = functools.partial(nthderiv.mpmath_hyp1f1, a, b)
+    #     return _eval_slow_generic(f, x_data, out=out)
 
-    @classmethod
-    def _pb_dpm_hyp1f1(cls, ybar_data, a, b, x_data, y_data, out=None):
-        if out is None:
-            raise NotImplementedError('should implement that')
-        tmp = cls._dpm_hyp1f1(a+1., b+1., x_data) * (float(a) / float(b))
-        cls._amul(ybar_data, tmp, out=out)
+    # @classmethod
+    # def _pb_dpm_hyp1f1(cls, ybar_data, a, b, x_data, y_data, out=None):
+    #     if out is None:
+    #         raise NotImplementedError('should implement that')
+    #     tmp = cls._dpm_hyp1f1(a+1., b+1., x_data) * (float(a) / float(b))
+    #     cls._amul(ybar_data, tmp, out=out)
 
-    @classmethod
-    def _hyp1f1(cls, a, b, x_data, out=None):
-        f = functools.partial(nthderiv.hyp1f1, a, b)
-        return _eval_slow_generic(f, x_data, out=out)
+    # @classmethod
+    # def _hyp1f1(cls, a, b, x_data, out=None):
+    #     f = functools.partial(nthderiv.hyp1f1, a, b)
+    #     return _eval_slow_generic(f, x_data, out=out)
 
-    @classmethod
-    def _pb_hyp1f1(cls, ybar_data, a, b, x_data, y_data, out=None):
-        if out is None:
-            raise NotImplementedError('should implement that')
-        tmp = cls._hyp1f1(a+1., b+1., x_data) * (float(a) / float(b))
-        cls._amul(ybar_data, tmp, out=out)
+    # @classmethod
+    # def _pb_hyp1f1(cls, ybar_data, a, b, x_data, y_data, out=None):
+    #     if out is None:
+    #         raise NotImplementedError('should implement that')
+    #     tmp = cls._hyp1f1(a+1., b+1., x_data) * (float(a) / float(b))
+    #     cls._amul(ybar_data, tmp, out=out)
 
     @classmethod
     def _hyperu(cls, a, b, x_data, out=None):

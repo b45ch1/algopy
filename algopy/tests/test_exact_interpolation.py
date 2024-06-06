@@ -189,8 +189,3 @@ class TestForwardDrivers(TestCase):
     #     print 'run time=%0.6f seconds'%(end_time-start_time)
     #     assert True
 
-
-
-if __name__ == "__main__":
-    run_module_suite()
-

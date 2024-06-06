@@ -1,4 +1,6 @@
 from numpy.testing import *
+from unittest import TestCase
+
 import numpy
 numpy.random.seed(0)
 
@@ -44,9 +46,6 @@ class Test_NumpyScipyLinalgFunctions(TestCase):
         desired_logdet = UTPM.trace(x)
         assert_allclose(observed_logdet.data, desired_logdet.data)
 
-
-if __name__ == "__main__":
-    run_module_suite()
 
 
 

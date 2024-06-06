@@ -11,7 +11,8 @@ depending on the type of x.
 
 
 from numpy.testing import *
-from numpy.testing.decorators import skipif
+import pytest
+
 import numpy
 numpy.random.seed(0)
 
@@ -147,7 +148,7 @@ class Test_NumpyScipyLinalgFunctions(TestCase):
         assert_array_almost_equal(g1, g2)
 
 
-    @skipif(expm_frechet is None, msg='expm_frechet is not available')
+    @pytest.mark.skipif(expm_frechet is None, reason='expm_frechet is not available')
     def test_expm_jacobian(self):
         n = 4
         x = numpy.random.randn(n, n)
@@ -167,7 +168,7 @@ class Test_NumpyScipyLinalgFunctions(TestCase):
         assert_allclose(g1, M, rtol=1e-6)
 
 
-    @skipif(expm_frechet is None, msg='expm_frechet is not available')
+    @pytest.mark.skipif(expm_frechet is None, reason='expm_frechet is not available')
     def test_expm_jacobian_vector_product(self):
         n = 4
         x = numpy.random.randn(n, n)
@@ -185,8 +186,6 @@ class Test_NumpyScipyLinalgFunctions(TestCase):
 
 
 
-if __name__ == "__main__":
-    run_module_suite()
 
 
 

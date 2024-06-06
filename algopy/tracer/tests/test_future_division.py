@@ -25,5 +25,3 @@ class Test_future_division(TestCase):
         #print cg.jacobian(x)
 
 
-if __name__ == "__main__":
-    run_module_suite()

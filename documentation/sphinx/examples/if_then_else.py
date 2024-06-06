@@ -3,7 +3,6 @@ Test piecewise functions.
 """
 
 from numpy.testing import *
-from numpy.testing.decorators import *
 import numpy
 
 from algopy import *
@@ -213,6 +212,4 @@ class Test_Piecewise(TestCase):
         #assert_allclose(Y.data, V.data)
 
 
-if __name__ == "__main__":
-    run_module_suite()
 

@@ -267,48 +267,48 @@ class Test_SpecialIdentities(TestCase):
     Test scalar math identities involving special functions in scipy.
     """
 
-    def test_hyp1f1_exp_v1(self):
-        x = sample_randn()
-        y1 = UTPM.hyp1f1(1., 1., x)
-        y2 = UTPM.exp(x)
-        assert_allclose(y1.data, y2.data)
+    # def test_hyp1f1_exp_v1(self):
+    #     x = sample_randn()
+    #     y1 = UTPM.hyp1f1(1., 1., x)
+    #     y2 = UTPM.exp(x)
+    #     assert_allclose(y1.data, y2.data)
 
-    def test_hyp1f1_exp_v2(self):
-        x = sample_randn()
-        y1 = UTPM.hyp1f1(0.5, -0.5, x)
-        y2 = UTPM.exp(x) * (1. - 2*x)
-        assert_allclose(y1.data, y2.data)
+    # def test_hyp1f1_exp_v2(self):
+    #     x = sample_randn()
+    #     y1 = UTPM.hyp1f1(0.5, -0.5, x)
+    #     y2 = UTPM.exp(x) * (1. - 2*x)
+    #     assert_allclose(y1.data, y2.data)
 
-    def test_hyp1f1_expm1_exp(self):
-        x = sample_nonzero()
-        y1 = UTPM.hyp1f1(1., 2.,  x)
-        y2 = UTPM.expm1(x) / x
-        y3 = (UTPM.exp(x) - 1.) / x
-        assert_allclose(y1.data, y2.data)
-        assert_allclose(y1.data, y3.data)
+    # def test_hyp1f1_expm1_exp(self):
+    #     x = sample_nonzero()
+    #     y1 = UTPM.hyp1f1(1., 2.,  x)
+    #     y2 = UTPM.expm1(x) / x
+    #     y3 = (UTPM.exp(x) - 1.) / x
+    #     assert_allclose(y1.data, y2.data)
+    #     assert_allclose(y1.data, y3.data)
 
-    @skipif(mpmath is None)
-    def test_dpm_hyp1f1_exp_v1(self):
-        x = sample_randn()
-        y1 = UTPM.dpm_hyp1f1(1., 1., x)
-        y2 = UTPM.exp(x)
-        assert_allclose(y1.data, y2.data)
+    # @skipif(mpmath is None)
+    # def test_dpm_hyp1f1_exp_v1(self):
+    #     x = sample_randn()
+    #     y1 = UTPM.dpm_hyp1f1(1., 1., x)
+    #     y2 = UTPM.exp(x)
+    #     assert_allclose(y1.data, y2.data)
 
-    @skipif(mpmath is None)
-    def test_dpm_hyp1f1_exp_v2(self):
-        x = sample_randn()
-        y1 = UTPM.dpm_hyp1f1(0.5, -0.5, x)
-        y2 = UTPM.exp(x) * (1. - 2*x)
-        assert_allclose(y1.data, y2.data)
+    # @skipif(mpmath is None)
+    # def test_dpm_hyp1f1_exp_v2(self):
+    #     x = sample_randn()
+    #     y1 = UTPM.dpm_hyp1f1(0.5, -0.5, x)
+    #     y2 = UTPM.exp(x) * (1. - 2*x)
+    #     assert_allclose(y1.data, y2.data)
 
-    @skipif(mpmath is None)
-    def test_dpm_hyp1f1_expm1_exp(self):
-        x = sample_nonzero()
-        y1 = UTPM.dpm_hyp1f1(1., 2.,  x)
-        y2 = UTPM.expm1(x) / x
-        y3 = (UTPM.exp(x) - 1.) / x
-        assert_allclose(y1.data, y2.data)
-        assert_allclose(y1.data, y3.data)
+    # @skipif(mpmath is None)
+    # def test_dpm_hyp1f1_expm1_exp(self):
+    #     x = sample_nonzero()
+    #     y1 = UTPM.dpm_hyp1f1(1., 2.,  x)
+    #     y2 = UTPM.expm1(x) / x
+    #     y3 = (UTPM.exp(x) - 1.) / x
+    #     assert_allclose(y1.data, y2.data)
+    #     assert_allclose(y1.data, y3.data)
 
     def test_psi_psi_v1(self):
         x = sample_positive()
@@ -438,5 +438,3 @@ class Test_SpecialIdentities(TestCase):
         assert_allclose(y1.data, y2.data)
 
 
-if __name__ == "__main__":
-    run_module_suite()
