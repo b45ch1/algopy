@@ -404,6 +404,8 @@ Current Issues:
 
 Version Changelog
 -----------------
+
+
 * Version 0.2.2
     * fixed some broadcasting bugs with UTPM instances
     * fixed a bug in algopy.zeros
@@ -456,6 +458,12 @@ Version Changelog
 
     * add Python 3 compatibility
     * add Travis CI
+
+* Version 0.6.0
+
+   * Updated Algopy to support recent versions of numpy==1.26.4 and scipy==1.13.1
+   * Scipy has removed support for confluent hypergeometric functions. Thus, the support of these functions in Algopy has been also removed in this version.
+   * Numpy has removed support for nosetests. Thus, algopy now uses pytest to run tests via `pytest -v algopy`
 
 Unit Test
 ---------
