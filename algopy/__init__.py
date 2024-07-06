@@ -10,7 +10,7 @@ Description:
     reverse mode.
 
     The forward mode propagates univariate Taylor polynomials of arbitrary order.
-    Hence it is also possible to use AlgoPy to evaluate higher-order derivative tensors.
+    Hence, it is also possible to use AlgoPy to evaluate higher-order derivative tensors.
 
     Speciality of AlgoPy is the possibility to differentiate functions that contain
     matrix functions as +,-,*,/, dot, solve, qr, eigh, cholesky.
@@ -60,16 +60,16 @@ __install_path__ = os.path.realpath(__file__)
 
 from ._npversion import NumpyVersion
 
-_min_numpy_version = '1.5.0'
-_preferred_numpy_version = '1.6.2'
-_min_scipy_version = '0.11.0'
+_min_numpy_version = '1.26.0'
+_preferred_numpy_version = '1.26.4'
+_min_scipy_version = '1.14.0'
 
 try:
     import numpy
 
     # ignore warnings "ComplexWarning: Casting complex values to real discards the imaginary part"
     import warnings
-    warnings.simplefilter("ignore", numpy.ComplexWarning)
+    warnings.simplefilter("ignore", numpy.exceptions.ComplexWarning)
 
 except ImportError as e:
     raise ImportError(
@@ -82,6 +82,14 @@ if NumpyVersion(numpy.version.version) < _min_numpy_version:
             "NumPy version %s was detected.\n"
             "Please install NumPy >= %s" % (
                 numpy.version.version, _preferred_numpy_version))
+
+if NumpyVersion(numpy.version.version) >= '2.0.0':
+    raise ImportError(
+        "NumPy version %s was detected.\n"
+        "This numpy version is not (yet) supported.\n"
+        "Please install NumPy %s" % (
+            numpy.version.version, _preferred_numpy_version))
+
 
 try:
     import scipy
