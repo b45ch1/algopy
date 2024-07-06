@@ -69,7 +69,7 @@ else:
 
 
 class UTPM(Ring, RawAlgorithmsMixIn):
-    """
+    r"""
 
     UTPM == Univariate Taylor Polynomial of Matrices
     This class implements univariate Taylor arithmetic on matrices, i.e.
@@ -2829,7 +2829,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
                 for j in range(M):
                     F[:, j] += l.data[0,p,j]
-                    F[j, j] = numpy.infty
+                    F[j, j] = numpy.inf
 
                 F = 1./F
 
@@ -2857,7 +2857,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         for j in range(M):
             E[:, j] += l[j]
-            E[j, j] = numpy.infty
+            E[j, j] = numpy.inf
 
         F = 1./E
         Lbar = UTPM.diag(lbar)
@@ -2980,7 +2980,7 @@ class UTPM(Ring, RawAlgorithmsMixIn):
 
         for j in range(M):
             F[:, j] += s[j]**2
-            F[j, j] = numpy.infty
+            F[j, j] = numpy.inf
 
         F = 1./F
 

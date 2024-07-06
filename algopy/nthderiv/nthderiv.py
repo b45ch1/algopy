@@ -473,7 +473,7 @@ def cos(x, out=None, n=0):
 def tan(x, out=None, n=0):
     # FIXME: use scipy.special.polylog when available
     #with warnings.catch_warnings():
-        #warnings.filterwarnings('ignore', category=np.ComplexWarning)
+        #warnings.filterwarnings('ignore', category=np.exceptions.ComplexWarning)
     a = _mpmath_polylog_complex(-n, -numpy.exp(-2j*x))
     return np_real(a * pow(-2j, n+1), out)
 

@@ -60,8 +60,8 @@ __install_path__ = os.path.realpath(__file__)
 
 from ._npversion import NumpyVersion
 
-_min_numpy_version = '1.26.0'
-_preferred_numpy_version = '1.26.4'
+_min_numpy_version = '2.0.0'
+_preferred_numpy_version = '2.0.0'
 _min_scipy_version = '1.14.0'
 
 try:
@@ -82,13 +82,6 @@ if NumpyVersion(numpy.version.version) < _min_numpy_version:
             "NumPy version %s was detected.\n"
             "Please install NumPy >= %s" % (
                 numpy.version.version, _preferred_numpy_version))
-
-if NumpyVersion(numpy.version.version) >= '2.0.0':
-    raise ImportError(
-        "NumPy version %s was detected.\n"
-        "This numpy version is not (yet) supported.\n"
-        "Please install NumPy %s" % (
-            numpy.version.version, _preferred_numpy_version))
 
 
 try:

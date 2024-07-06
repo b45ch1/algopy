@@ -18,7 +18,8 @@ import math
 import functools
 
 import numpy
-from numpy.lib.stride_tricks import as_strided, broadcast_arrays
+from numpy.lib.stride_tricks import as_strided
+from numpy import broadcast_arrays
 
 try:
     import scipy.linalg
