@@ -1,0 +1,7 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "algopy"
+dynamic = ["version", "description", "license", "authors", "keywords", "readme"]
