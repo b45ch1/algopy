@@ -128,5 +128,10 @@ except ImportError:
     __version__ = 'nobuild'
 
 
+def test():
+    try:
+        import pytest
+    except:
+        print('Please install pytest.')
 
-
+    pytest.main(["-x", "algopy"])
