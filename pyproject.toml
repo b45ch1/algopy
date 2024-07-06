@@ -4,4 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "algopy"
-dynamic = ["version", "description", "license", "authors", "keywords", "readme"]
+dynamic = ["version", "description", "license", "authors", "keywords"]
+readme = "README.rst"
+dependencies = ["numpy>=2.0.0", "scipy>=1.14.0", "pytest>=8.2.2"]
+requires-python = ">= 3.6"
+maintainers = [
+    {name = "Sebastian F. Walter", email = "sebastian.walter@gmail.com"}
+]
+
+[project.urls]
+Homepage = "https://www.github.com/b45ch1/algopy"
+Documentation = "https://pythonhosted.org/algopy/"
+Repository = "https://www.github.com/b45ch1/algopy"

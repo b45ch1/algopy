@@ -14,7 +14,8 @@ Documentation with examples is available at http://packages.python.org/algopy/.
 
 #Upload to pypi::
 #
-#    python setup.py sdist --formats=gztar,zip upload
+#    python3 -m build --sdist
+#    twine upload sdist/*
 
 # upload sphinx documentation
 #    python setup.py build_sphinx
@@ -48,8 +49,8 @@ MAINTAINER_EMAIL    = "sebastian.walter@gmail.com"
 DESCRIPTION         = DOCLINES[0]
 LONG_DESCRIPTION    = "\n".join(DOCLINES[2:])
 KEYWORDS            = ['algorithmic differentiation', 'computational differentiation', 'automatic differentiation', 'forward mode', 'reverse mode', 'Taylor arithmetic']
-URL                 = "http://packages.python.org/algopy"
-DOWNLOAD_URL        = "http://www.github.com/b45ch1/algopy"
+URL                 = "https://packages.python.org/algopy"
+DOWNLOAD_URL        = "https://www.github.com/b45ch1/algopy"
 LICENSE             = 'BSD'
 CLASSIFIERS         = [_f for _f in CLASSIFIERS.split('\n') if _f]
 AUTHOR              = "Sebastian F. Walter"
@@ -57,8 +58,8 @@ AUTHOR_EMAIL        = "sebastian.walter@gmail.com"
 PLATFORMS           = ["all"]
 MAJOR               = 0
 MINOR               = 7
-MICRO               = 0
-ISRELEASED          = False
+MICRO               = 1
+ISRELEASED          = True
 VERSION             = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
 FULLVERSION = VERSION
@@ -116,7 +117,10 @@ def setup_package():
     if os.path.exists('algopy/version.py'): os.remove('algopy/version.py')
     write_version_py()
 
-    local_path = os.path.dirname(os.path.abspath(sys.argv[0]))
+    import pathlib
+    local_path = pathlib.Path(__file__).parent.resolve()
+
+    print('local_path', local_path)
     src_path = local_path
 
     # Run build
@@ -127,6 +131,7 @@ def setup_package():
     # find all files that should be included
     packages, data_files = [], []
     for dirpath, dirnames, filenames in os.walk('algopy'):
+        print(dirpath)
         # Ignore dirnames that start with '.'
         for i, dirname in enumerate(dirnames):
             if dirname.startswith('.'): del dirnames[i]
@@ -135,9 +140,10 @@ def setup_package():
         elif filenames:
             data_files.append([dirpath, [os.path.join(dirpath, f) for f in filenames]])
 
-    from distutils.core import setup
-    # from distutils.core import setup, Extension
-    # from setuptools import setup #uncomment for build_sphinx and upload_sphinx
+    from setuptools import setup #uncomment for build_sphinx and upload_sphinx
+
+
+    print('packages', packages)
 
     try:
         setup(name=NAME,

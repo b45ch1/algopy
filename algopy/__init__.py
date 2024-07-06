@@ -130,7 +130,11 @@ except ImportError:
 def test():
     try:
         import pytest
-    except:
-        print('Please install pytest.')
+        import pathlib
+        local_path = pathlib.Path(__file__).parent.resolve()
 
-    pytest.main(["-x", "algopy"])
+    except:
+            print('Please install pytest.')
+
+
+    pytest.main(["-x", local_path])
