@@ -15,7 +15,7 @@ Documentation with examples is available at http://packages.python.org/algopy/.
 #Upload to pypi::
 #
 #    python3 -m build --sdist
-#    twine upload sdist/*
+#    twine upload dist/*
 
 # upload sphinx documentation
 #    python setup.py build_sphinx
@@ -59,7 +59,7 @@ PLATFORMS           = ["all"]
 MAJOR               = 0
 MINOR               = 7
 MICRO               = 1
-ISRELEASED          = True
+ISRELEASED          = False
 VERSION             = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
 FULLVERSION = VERSION
