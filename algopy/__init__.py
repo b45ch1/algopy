@@ -80,9 +80,8 @@ except ImportError as e:
 if NumpyVersion(numpy.version.version) < _min_numpy_version:
     raise ImportError(
             "NumPy version %s was detected.\n"
-            "Please install NumPy >= %s" % (
+            "Please install NumPy >= %s or install an older version of AlgoPy." % (
                 numpy.version.version, _preferred_numpy_version))
-
 
 try:
     import scipy
@@ -95,7 +94,7 @@ except ImportError as e:
 if NumpyVersion(scipy.version.version) < _min_scipy_version:
     raise ImportError(
             "SciPy version %s was detected.\n"
-            "Please install SciPy >= %s" % (
+            "Please install SciPy >= %s or install an older version of AlgoPy." % (
                 scipy.version.version, _min_scipy_version))
 
 
