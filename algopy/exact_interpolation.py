@@ -30,7 +30,7 @@ def generate_multi_indices(N,deg):
     """ generate_multi_indices(N,deg)
 
     Create a 2D array of all possible multi-indices i with |i| = deg
-    and :math:`i \in \mathbb N_0^N`.
+    and :math:`i in N_0^N`.
 
     Parameters
     ----------
@@ -163,7 +163,7 @@ def convert_multi_indices_to_pos(in_I):
     return retval
 
 def increment(i,k):
-    """ this is a helper function for a summation of the type :math:`\sum_{0 \leq k \leq i}`,
+    """ this is a helper function for a summation of the type :math:`sum_{0 <= k <= i}`,
         where i and k are multi-indices.
 
         Parameters

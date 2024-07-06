@@ -1,10 +1,8 @@
-import math
-
-from numpy.testing import *
 import numpy
+from numpy.testing import *
+
 numpy.random.seed(0)
 import scipy.special
-import pytest
 
 import algopy.nthderiv
 from algopy.utpm import *

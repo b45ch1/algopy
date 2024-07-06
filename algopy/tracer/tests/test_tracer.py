@@ -1,14 +1,11 @@
-from numpy.testing import *
-from .environment import Settings
-import os
-import pytest
 import numpy
+from numpy.testing import *
+
 numpy.random.seed(0)
 
-import algopy
 from algopy.tracer.tracer import *
 from algopy.utpm import UTPM
-from algopy import dot, eigh, qr, trace, solve, inv
+from algopy import dot, qr, trace, solve, inv
 
 try:
     import mpmath
