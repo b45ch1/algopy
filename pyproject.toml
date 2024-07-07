@@ -11,9 +11,13 @@ requires-python = ">= 3.6"
 maintainers = [
     {name = "Sebastian F. Walter", email = "sebastian.walter@gmail.com"}
 ]
+authors = [
+    {name = "Sebastian Walter", email = "sebastian.walter@gmail.com"},
+    {name = "Alexander Griffing", email = "argriffi@ncsu.edu"},
+]
 
 [project.urls]
 Homepage = "https://www.github.com/b45ch1/algopy"
 Documentation = "https://pythonhosted.org/algopy/"
 Repository = "https://www.github.com/b45ch1/algopy"
-Changelog
+Changelog = "https://github.com/b45ch1/algopy/blob/master/CHANGELOG.rst"
