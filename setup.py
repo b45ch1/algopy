@@ -14,7 +14,7 @@ Documentation with examples is available at http://packages.python.org/algopy/.
 
 #Upload to pypi::
 #
-#    python3 -m build --sdist
+#    python -m build --sdist
 #    twine upload dist/*
 
 # upload sphinx documentation
@@ -58,8 +58,8 @@ AUTHOR_EMAIL        = "sebastian.walter@gmail.com"
 PLATFORMS           = ["all"]
 MAJOR               = 0
 MINOR               = 7
-MICRO               = 1
-ISRELEASED          = False
+MICRO               = 2
+ISRELEASED          = True
 VERSION             = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
 FULLVERSION = VERSION
