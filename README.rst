@@ -9,6 +9,8 @@ Description:
     The forward mode propagates univariate Taylor polynomials of arbitrary order.
     Hence it is also possible to use AlgoPy to evaluate higher-order derivative tensors.
 
+    The reverse mode is also known as backpropagation and can be found in similar form in tools like PyTorch.
+
     Speciality of AlgoPy is the possibility to differentiate functions that contain
     matrix functions as +,-,*,/, dot, solve, qr, eigh, cholesky.
 
@@ -82,7 +84,9 @@ Testing:
 
 Alternatives:
 
-    If you are looking for a robust tool for AD in Python you should try:
+    There are nowadays many alternatives like `PYTORCH`_ which provide a more efficient way for backpropagation on CPU/GPUs.
+
+    For AD in Python you can also have a look at
 
         * `PYADOLC`_ a Python wrapper for ADOL-C (C++)
         * `PYCPPAD`_ a Python wrapper for  CppAD (C++)
@@ -92,6 +96,7 @@ Alternatives:
 
     .. _PYADOLC: http://www.github.com/b45ch1/pyadolc
     .. _PYCPPAD: http://www.github.com/b45ch1/pycppad
+    .. _PYTORCH: https://pytorch.org/
 
 Email:
 
